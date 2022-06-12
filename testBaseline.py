@@ -23,6 +23,7 @@ from monai.inferers import sliding_window_inference
 from monai.data import CacheDataset,Dataset,PersistentDataset, list_data_collate, decollate_batch
 from monai.config import print_config
 from monai.apps import download_and_extract
+from pytorch_lightning.loggers import WandbLogger
 
 sns.set()
 plt.rcParams['figure.figsize'] = 12, 8
@@ -104,9 +105,8 @@ plt.rcParams['figure.figsize'] = 12, 8
 monai.utils.set_determinism()
 
 
-directory = os.environ.get("MONAI_DATA_DIRECTORY")
-root_dir = tempfile.mkdtemp() if directory is None else directory
-print(root_dir)
+#wandb_logger = WandbLogger(project="picai", name = "baseline")
+
 
 
 df = pd.read_csv('/home/sliceruser/labels/processedMetaData.csv')
@@ -178,8 +178,17 @@ val_transforms = Compose(
         Spacingd(keys=["t2w", "label"], pixdim=(
             1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
         tio.transforms.EnsureShapeMultiple((32 , 32, 32), include=["t2w", "label"]),
-    
         #CropForegroundd(keys=["image", "label"], source_key="image"),
+        # RandCropByPosNegLabeld(
+        #     keys=["t2w", "label"],
+        #     label_key="label",
+        #     spatial_size=(32, 32, 32),
+        #     pos=1,
+        #     neg=1,
+        #     num_samples=4,
+        #     image_key="t2w",
+        #     image_threshold=0,
+        # ),
         EnsureTyped(keys=["t2w", "label"]),
     ]
 )
@@ -272,8 +281,8 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.val_subjects = valid_set
         self.test_subjects = test_set
         self.train_ds =  Dataset(data=self.train_subjects, transform=train_transforms)
-        self.val_ds=     Dataset(data=self.val_subjects, transform=train_transforms)
-        self.test_ds=    Dataset(data=self.test_subjects, transform=train_transforms)    
+        self.val_ds=     Dataset(data=self.val_subjects, transform=val_transforms)
+        self.test_ds=    Dataset(data=self.test_subjects, transform=val_transforms)    
 
     def train_dataloader(self):
         return DataLoader(self.train_ds, self.batch_size, drop_last=self.drop_last)
@@ -347,11 +356,14 @@ early_stopping = pl.callbacks.early_stopping.EarlyStopping(
     monitor='val_loss',
 )
 trainer = pl.Trainer(
-    accelerator="cpu", #TODO(remove)
+    #accelerator="cpu", #TODO(remove)
     max_epochs=5,
     #gpus=1,
     #precision=16, #TODO(unhash)
     callbacks=[early_stopping],
+    #logger=wandb_logger,
+    accelerator='gpu',
+    devices=1
 )
 trainer.logger._default_hp_metric = False
 
