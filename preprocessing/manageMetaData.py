@@ -1,5 +1,8 @@
-import transformsForMain
 import pandas as pd
+import preprocessing.transformsForMain# as transformsForMain
+# from transformsForMain import get_train_transforms
+# from transformsForMain import get_val_transforms
+
 
 def getMonaiSubjectDataFromDataFrame(row):
         """
@@ -33,8 +36,8 @@ def load_df_only_full():
     df = df.loc[df['isAnythingInAnnotated']>0 ]
     deficientPatIDs=[]
     data_dicts = list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1])  , list(df.iterrows())))
-    train_transforms=transformsForMain.get_train_transforms()
-    val_transforms= transformsForMain.get_val_transforms()
+    train_transforms=preprocessing.transformsForMain.get_train_transforms()
+    val_transforms= preprocessing.transformsForMain.get_val_transforms()
 
     for dictt in data_dicts:    
         try:
