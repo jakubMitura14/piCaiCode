@@ -37,8 +37,8 @@ def get_train_transforms():
             LoadImaged(keys=["t2w", "label"]),
             EnsureChannelFirstd(keys=["t2w", "label"]),
             Orientationd(keys=["t2w", "label"], axcodes="RAS"),
-            # Spacingd(keys=["t2w", "label"], pixdim=(
-            #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
+            Spacingd(keys=["t2w", "label"], pixdim=(
+                1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
             tio.transforms.EnsureShapeMultiple((32 , 32, 32), include=["t2w", "label"]),
             #CropForegroundd(keys=["t2w", "label"], source_key="image"),
             RandCropByPosNegLabeld(
@@ -51,7 +51,7 @@ def get_train_transforms():
                 image_key="t2w",
                 image_threshold=0,
             ),
-            EnsureTyped(keys=["t2w", "label"],dtype=torch.float),
+            EnsureTyped(keys=["t2w", "label"]),
         ]
     )
     return train_transforms
@@ -61,8 +61,8 @@ def get_val_transforms():
             LoadImaged(keys=["t2w", "label"]),
             EnsureChannelFirstd(keys=["t2w", "label"]),
             Orientationd(keys=["t2w", "label"], axcodes="RAS"),
-            # Spacingd(keys=["t2w", "label"], pixdim=(
-            #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
+            Spacingd(keys=["t2w", "label"], pixdim=(
+                1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
             tio.transforms.EnsureShapeMultiple((32 , 32, 32), include=["t2w", "label"]),
             #CropForegroundd(keys=["t2w", "label"], source_key="image"),
             # RandCropByPosNegLabeld(
@@ -75,7 +75,7 @@ def get_val_transforms():
             #     image_key="t2w",
             #     image_threshold=0,
             # ),
-            EnsureTyped(keys=["t2w", "label"],dtype=torch.float),
+            EnsureTyped(keys=["t2w", "label"]),
         ]
     )
     return val_transforms
