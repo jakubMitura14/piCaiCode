@@ -27,7 +27,8 @@ from monai.transforms import (
     ScaleIntensityRanged,
     SelectItemsd,
     Invertd,
-    DivisiblePadd
+    DivisiblePadd,
+    SpatialPadd
 )
 import torch
 import torchio as tio
@@ -41,6 +42,7 @@ def get_train_transforms():
         [
             LoadImaged(keys=["t2w", "label"]),
             EnsureChannelFirstd(keys=["t2w", "label"]),
+            #AsChannelFirstd(keys=["t2w", "label"]),
             Orientationd(keys=["t2w", "label"], axcodes="RAS"),
             Spacingd(keys=["t2w", "label"], pixdim=(
                 1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
@@ -66,11 +68,11 @@ def get_val_transforms():
         [
             LoadImaged(keys=["t2w", "label"]),
             EnsureChannelFirstd(keys=["t2w", "label"]),
+            #AsChannelFirstd(keys=["t2w", "label"]),
             Orientationd(keys=["t2w", "label"], axcodes="RAS"),
             Spacingd(keys=["t2w", "label"], pixdim=(
                 1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
-            DivisiblePadd(keys=["t2w", "label"],k=32) ,
-
+            SpatialPadd(keys=["t2w", "label"],spatial_size=(1024,1024,45)) ,
             #CropForegroundd(keys=["t2w", "label"], source_key="image"),
 
             EnsureTyped(keys=["t2w", "label"]),
