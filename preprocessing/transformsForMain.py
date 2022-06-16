@@ -48,16 +48,16 @@ def get_train_transforms():
                 1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
             DivisiblePadd(keys=["t2w", "label"],k=32) ,
             #CropForegroundd(keys=["t2w", "label"], source_key="image"),
-            RandCropByPosNegLabeld(
-                keys=["t2w", "label"],
-                label_key="label",
-                spatial_size=(32, 32, 32),
-                pos=1,
-                neg=1,
-                num_samples=4,
-                image_key="t2w",
-                image_threshold=0,
-            ),
+            # RandCropByPosNegLabeld(
+            #     keys=["t2w", "label"],
+            #     label_key="label",
+            #     spatial_size=(32, 32, 32),
+            #     pos=1,
+            #     neg=1,
+            #     num_samples=4,
+            #     image_key="t2w",
+            #     image_threshold=0,
+            # ),
             EnsureTyped(keys=["t2w", "label"]),
             SelectItemsd(keys=["t2w", "label"])
         ]
