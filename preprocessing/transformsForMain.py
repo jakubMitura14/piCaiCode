@@ -72,7 +72,9 @@ def get_val_transforms():
             Orientationd(keys=["t2w", "label"], axcodes="RAS"),
             Spacingd(keys=["t2w", "label"], pixdim=(
                 1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
-            SpatialPadd(keys=["t2w", "label"],spatial_size=(1024,1024,45)) ,
+            #SpatialPadd(keys=["t2w", "label"],spatial_size=(1024,1024,64)) ,
+            DivisiblePadd(keys=["t2w", "label"],k=32) ,
+
             #CropForegroundd(keys=["t2w", "label"], source_key="image"),
 
             EnsureTyped(keys=["t2w", "label"]),
