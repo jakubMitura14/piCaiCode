@@ -297,6 +297,8 @@ df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData.csv')
 
 def removeOutliersAndWrite(path):
     image=removeOutliersBiasFieldCorrect(path)
+    #standardazing orientation
+    image = sitk.DICOMOrient(image, 'RAS')    
     writer = sitk.ImageFileWriter()
     writer.KeepOriginalImageUIDOn()
     writer.SetFileName(path)
@@ -352,6 +354,8 @@ def changeLabelToOnes(path):
         image.SetSpacing(image1.GetSpacing())
         image.SetOrigin(image1.GetOrigin())
         image.SetDirection(image1.GetDirection())
+        #standardazing orientation
+        image = sitk.DICOMOrient(image, 'RAS')
         writer = sitk.ImageFileWriter()
         writer.KeepOriginalImageUIDOn()
         writer.SetFileName(path)
