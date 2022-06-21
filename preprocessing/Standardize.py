@@ -68,7 +68,7 @@ def removeOutliersAndWrite(path):
 def standardizeFromPathAndOverwrite(path,nyul_normalizer): 
     print("standardizeFromPathAndOverwrite")
     image1=sitk.ReadImage(path)
-    data=nyul_normalizer(sitk.GetArrayFromImage(image))
+    data=nyul_normalizer(sitk.GetArrayFromImage(image1))
     #recreating image keeping relevant metadata
     image = sitk.GetImageFromArray(data)  
     image.SetSpacing(image1.GetSpacing())
