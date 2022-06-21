@@ -59,15 +59,14 @@ def removeOutliersBiasFieldCorrect(path,numberOfStandardDeviations = 4):
 def removeOutliersAndWrite(path):
     image=removeOutliersBiasFieldCorrect(path)
     #standardazing orientation
-    image = sitk.DICOMOrient(image, 'RAS')
-    data = sitk.GetArrayFromImage(image)
-    
+    image = sitk.DICOMOrient(image, 'RAS')  
     writer = sitk.ImageFileWriter()
     writer.KeepOriginalImageUIDOn()
     writer.SetFileName(path)
     writer.Execute(image)   
 
-def standardizeFromPathAndOverwrite(path,nyul_normalizer):    
+def standardizeFromPathAndOverwrite(path,nyul_normalizer): 
+    print("standardizeFromPathAndOverwrite")
     image1=sitk.ReadImage(path)
     data=nyul_normalizer(sitk.GetArrayFromImage(image))
     #recreating image keeping relevant metadata
@@ -105,19 +104,22 @@ def iterateAndStandardize(seriesString,numRows,df):
     train_patientsPaths=df[seriesString].dropna().astype('str').to_numpy()[0:numRows]
     train_patientsPaths=list(filter(lambda path: len(path)>2 ,train_patientsPaths))
     
-    with mp.Pool(processes = mp.cpu_count()) as pool:
-        pool.map(removeOutliersAndWrite,train_patientsPaths)
+    print(train_patientsPaths)
+    
+    #TODO(unhash)
+    # with mp.Pool(processes = mp.cpu_count()) as pool:
+    #     pool.map(removeOutliersAndWrite,train_patientsPaths)
     toUp=np.full(df.shape[0], False)#[0:3]=[True,True,True]
     toUp[0:numRows]=np.full(numRows, True)
     colName= 'stand_and_bias_'+seriesString
     df[colName]=toUp 
+    print("fitting normalizer")
     nyul_normalizer = NyulNormalize()
-    nyul_normalizer.fit(images)
     
-    images = [sitk.GetArrayFromImage(sitk.ReadImage(image_path)) for image_path in train_patientsPaths]
-    
-    nyul_normalizer = NyulNormalize()
+
+    images = [sitk.GetArrayFromImage(sitk.ReadImage(image_path)) for image_path in train_patientsPaths]  
     nyul_normalizer.fit(images)
+
     pathToSave = join(trainedModelsBasicPath,seriesString+".npy")
     nyul_normalizer.save_standard_histogram(pathToSave)
     #reloading from disk just for debugging
@@ -125,7 +127,7 @@ def iterateAndStandardize(seriesString,numRows,df):
     
 
     with mp.Pool(processes = mp.cpu_count()) as pool:
-        pool.map(partial(standardizeFromPathAndOverwrite,meanLandmarks=nyul_normalizer ),train_patientsPaths)
+        pool.map(partial(standardizeFromPathAndOverwrite,nyul_normalizer=nyul_normalizer ),train_patientsPaths)
 
 
     toUp=np.full(df.shape[0], False)#[0:3]=[True,True,True]
