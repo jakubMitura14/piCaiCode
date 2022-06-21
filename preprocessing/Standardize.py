@@ -13,6 +13,8 @@ import SimpleITK as sitk
 import numpy as np
 import collections
 import numpy as np
+import functools
+from functools import partial
 
 def removeOutliersBiasFieldCorrect(path,numberOfStandardDeviations = 4):
     """
@@ -331,7 +333,7 @@ def iterateAndStandardize(seriesString,numRows,df):
     meanLandmarks=trainStandarization(seriesString,train_patientsPaths)
 
     with mp.Pool(processes = mp.cpu_count()) as pool:
-        pool.map(standardizeFromPathAndOverwrite,train_patientsPaths,meanLandmarks)
+        pool.map(partial(standardizeFromPathAndOverwrite,meanLandmarks=meanLandmarks ),train_patientsPaths)
 
 
     toUp=np.full(df.shape[0], False)#[0:3]=[True,True,True]
