@@ -45,7 +45,7 @@ def removeOutliersBiasFieldCorrect(path,numberOfStandardDeviations = 4):
 #     image.SetOrigin(image1.GetOrigin())
 #     image.SetDirection(image1.GetDirection())
     #bias field normalization
-    maskImage = sitk.OtsuThreshold(image, 0, 1, 200)
+    # maskImage = sitk.OtsuThreshold(image, 0, 1, 200)
     inputImage = sitk.Cast(image, sitk.sitkFloat32)
     corrector = sitk.N4BiasFieldCorrectionImageFilter()
     # numberFittingLevels = 4
@@ -75,7 +75,7 @@ def removeOutliersAndWrite(path):
     writer.Execute(image)   
 
 def standardizeFromPathAndOverwrite(path,nyul_normalizer): 
-    print("standardizeFromPathAndOverwrite "+path)
+    #print("standardizeFromPathAndOverwrite "+path)
     image1=sitk.ReadImage(path)
     data=nyul_normalizer(sitk.GetArrayFromImage(image1))
     #recreating image keeping relevant metadata
@@ -95,11 +95,10 @@ def standardizeFromPathAndOverwrite(path,nyul_normalizer):
 df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData.csv')  
 trainedModelsBasicPath='/home/sliceruser/data/preprocess/standarizationModels'
     
-def iterateAndStandardize(seriesString,numRows,df):
+def iterateAndStandardize(seriesString,df):
     """
     iterates over files from train_patientsPaths representing seriesString type of the study
     and overwrites it with normalised biased corrected and standardised version
-    numRows - marks how many rows we want to process
     intensity_normalization_modality - what type of modality we are normalizing
         from https://github.com/jcreinhold/intensity-normalization/blob/03dbdc84bfbb35623ae1920b802d37f5c8056658/intensity_normalization/typing.py
         FLAIR: builtins.str = "flair"
@@ -109,16 +108,13 @@ def iterateAndStandardize(seriesString,numRows,df):
         T1: builtins.str = "t1"
         T2: builtins.str = "t2"
     """
-    train_patientsPaths=df[seriesString].dropna().astype('str').to_numpy()[0:numRows]
+    train_patientsPaths=df[seriesString].dropna().astype('str').to_numpy()
     train_patientsPaths=list(filter(lambda path: len(path)>2 ,train_patientsPaths))
     
     with mp.Pool(processes = mp.cpu_count()) as pool:
         pool.map(removeOutliersAndWrite,train_patientsPaths)
-    toUp=np.full(df.shape[0], False)#[0:3]=[True,True,True]
-    toUp[0:numRows]=np.full(numRows, True)
-    colName= 'stand_and_bias_'+seriesString
-    df[colName]=toUp 
-    print("fitting normalizer")
+    
+    print("fitting normalizer  " +seriesString)
     nyul_normalizer = NyulNormalize()
     
 
@@ -133,12 +129,8 @@ def iterateAndStandardize(seriesString,numRows,df):
 
     with mp.Pool(processes = mp.cpu_count()) as pool:
         pool.map(partial(standardizeFromPathAndOverwrite,nyul_normalizer=nyul_normalizer ),train_patientsPaths)
-
-
-    toUp=np.full(df.shape[0], False)#[0:3]=[True,True,True]
-    toUp[0:numRows]=np.full(numRows, True)
-    colName= 'Nyul_'+seriesString
-    df[colName]=toUp 
+    # colName= 'Nyul_'+seriesString
+    # df[colName]=toUp 
 
 #Important !!! set all labels that are non 0 to 1
 def changeLabelToOnes(path):
@@ -162,16 +154,16 @@ def changeLabelToOnes(path):
         writer.SetFileName(path)
         writer.Execute(image)   
     
-def iterateAndchangeLabelToOnes(numRows,df):
+def iterateAndchangeLabelToOnes(df):
     """
     iterates over files from train_patientsPaths representing seriesString type of the study
     and overwrites it with normalised biased corrected and standardised version
     """
     #paralelize https://medium.com/python-supply/map-reduce-and-multiprocessing-8d432343f3e7
-    train_patientsPaths=df['reSampledPath'].dropna().astype('str').to_numpy()[0:numRows]
+    train_patientsPaths=df['reSampledPath'].dropna().astype('str').to_numpy()
     train_patientsPaths=list(filter(lambda path: len(path)>2 ,train_patientsPaths))
     with mp.Pool(processes = mp.cpu_count()) as pool:
         pool.map(changeLabelToOnes,train_patientsPaths)
-    toUp=np.full(df.shape[0], False)#[0:3]=[True,True,True]
-    toUp[0:numRows]=np.full(numRows, True)
-    df['labels_to_one']=toUp    
+    # toUp=np.full(df.shape[0], False)#[0:3]=[True,True,True]
+    # toUp[0:numRows]=np.full(numRows, True)
+    #df['labels_to_one']=toUp    
