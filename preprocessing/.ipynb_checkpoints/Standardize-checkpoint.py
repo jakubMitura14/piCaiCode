@@ -28,7 +28,7 @@ def removeOutliersBiasFieldCorrect(path,numberOfStandardDeviations = 4):
     """
     
     image = sitk.ReadImage(path)
-    print("newwC")
+    print("newwD")
 #     data = sitk.GetArrayFromImage(image1)
 #     # shift the data up so that all intensity values turn positive
 #     stdd = np.std(data)*5
@@ -58,15 +58,24 @@ def removeOutliersBiasFieldCorrect(path,numberOfStandardDeviations = 4):
 
 def removeOutliersAndWrite(path):
     image=removeOutliersBiasFieldCorrect(path)
+    print("biasFieldCorrect "+path)
     #standardazing orientation
-    image = sitk.DICOMOrient(image, 'RAS')  
+    image = sitk.DICOMOrient(image, 'RAS')
+    additionalPath= path.replace(".mha","_bf_corr.mha")
+    
     writer = sitk.ImageFileWriter()
     writer.KeepOriginalImageUIDOn()
     writer.SetFileName(path)
     writer.Execute(image)   
+    #saving also a copy 
+    image = sitk.ReadImage(path)
+    writer = sitk.ImageFileWriter()
+    writer.KeepOriginalImageUIDOn()
+    writer.SetFileName(additionalPath)
+    writer.Execute(image)   
 
 def standardizeFromPathAndOverwrite(path,nyul_normalizer): 
-    print("standardizeFromPathAndOverwrite")
+    print("standardizeFromPathAndOverwrite "+path)
     image1=sitk.ReadImage(path)
     data=nyul_normalizer(sitk.GetArrayFromImage(image1))
     #recreating image keeping relevant metadata
@@ -100,15 +109,11 @@ def iterateAndStandardize(seriesString,numRows,df):
         T1: builtins.str = "t1"
         T2: builtins.str = "t2"
     """
-    #paralelize https://medium.com/python-supply/map-reduce-and-multiprocessing-8d432343f3e7
     train_patientsPaths=df[seriesString].dropna().astype('str').to_numpy()[0:numRows]
     train_patientsPaths=list(filter(lambda path: len(path)>2 ,train_patientsPaths))
     
-    print(train_patientsPaths)
-    
-    #TODO(unhash)
-    # with mp.Pool(processes = mp.cpu_count()) as pool:
-    #     pool.map(removeOutliersAndWrite,train_patientsPaths)
+    with mp.Pool(processes = mp.cpu_count()) as pool:
+        pool.map(removeOutliersAndWrite,train_patientsPaths)
     toUp=np.full(df.shape[0], False)#[0:3]=[True,True,True]
     toUp[0:numRows]=np.full(numRows, True)
     colName= 'stand_and_bias_'+seriesString
@@ -142,7 +147,7 @@ def changeLabelToOnes(path):
     """
     if(path!= " " and path!=""):
         image1 = sitk.ReadImage(path)
-        image1 = sitk.DICOMOrient(image, 'RAS')
+        image1 = sitk.DICOMOrient(image1, 'RAS')
         data = sitk.GetArrayFromImage(image1)
         data -= np.min(data)
         data[data>= 1] = 1
