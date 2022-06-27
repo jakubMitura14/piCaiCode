@@ -111,8 +111,8 @@ def iterateAndStandardize(seriesString,df):
     train_patientsPaths=df[seriesString].dropna().astype('str').to_numpy()
     train_patientsPaths=list(filter(lambda path: len(path)>2 ,train_patientsPaths))
     
-    with mp.Pool(processes = mp.cpu_count()) as pool:
-        pool.map(removeOutliersAndWrite,train_patientsPaths)
+    # with mp.Pool(processes = mp.cpu_count()) as pool:
+    #     pool.map(removeOutliersAndWrite,train_patientsPaths)
     
     print("fitting normalizer  " +seriesString)
     nyul_normalizer = NyulNormalize()
