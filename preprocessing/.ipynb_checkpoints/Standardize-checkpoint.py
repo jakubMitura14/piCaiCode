@@ -92,10 +92,8 @@ def standardizeFromPathAndOverwrite(path,nyul_normalizer):
     
 #######  
 
-df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData.csv')  
-trainedModelsBasicPath='/home/sliceruser/data/preprocess/standarizationModels'
     
-def iterateAndStandardize(seriesString,df):
+def iterateAndStandardize(seriesString,df,trainedModelsBasicPath):
     """
     iterates over files from train_patientsPaths representing seriesString type of the study
     and overwrites it with normalised biased corrected and standardised version
