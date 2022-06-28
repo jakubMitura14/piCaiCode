@@ -24,7 +24,7 @@ def copyDirAndOrigin(imageOrig,spacing,data):
 
 
 #pathT2w,pathHbv,pathADC,patht2wLabel
-def testResample(path, targetSpac):
+def resample_with_GAN(path, targetSpac):
     imageOrig = sitk.ReadImage(path)
     origSize= imageOrig.GetSize()
     orig_spacing=imageOrig.GetSpacing()
@@ -53,10 +53,10 @@ def testResample(path, targetSpac):
             if(axis==2):
                 data = np.moveaxis(data, 0, 2)
             #Call the SR interpolation tool from KevinSR
-            print(f"thicks_ori shape {data.shape} ")
+            #print(f"thicks_ori shape {data.shape} ")
 
             data = SOUP_GAN(data, Z_FAC,1)
-            print(f"thins_gen shape {data.shape} ")
+            #print(f"thins_gen shape {data.shape} ")
             if(axis==1):
                 data = np.moveaxis(data, 2, 1)
             if(axis==2):
