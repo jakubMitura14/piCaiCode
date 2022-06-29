@@ -28,7 +28,14 @@ from monai.transforms import (
     SelectItemsd,
     Invertd,
     DivisiblePadd,
-    SpatialPadd
+    SpatialPadd,
+    RandGaussianNoised,
+    RandAdjustContrastd,
+    RandGaussianSmoothd,
+    RandRicianNoised,
+    RandFlipd,
+    RandAffined
+    
 )
 import torch
 import torchio as tio
@@ -60,6 +67,15 @@ def get_train_transforms():
             # ),
             EnsureTyped(keys=["t2w", "label"]),
             SelectItemsd(keys=["t2w", "label"])
+            
+            # RandGaussianNoised(keys=["t2w", "label"]),
+            # RandAdjustContrastd(keys=["t2w", "label"]),
+            # RandGaussianSmoothd(keys=["t2w", "label"]),
+            # RandRicianNoised(keys=["t2w", "label"]),
+            # RandFlipd(keys=["t2w", "label"]),
+            # RandAffined(keys=["t2w", "label"])
+            
+            
         ]
     )
     return train_transforms
@@ -82,6 +98,7 @@ def get_val_transforms():
         ]
     )
     return val_transforms
+
 
 
 

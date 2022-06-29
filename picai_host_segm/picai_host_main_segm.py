@@ -38,31 +38,44 @@ class ProstateSegmentationAlgorithm(SegmentationAlgorithm):
     Wrapper to deploy trained prostate segmentation nnU-Net model from
     https://github.com/DIAGNijmegen/picai_baseline as a
     grand-challenge.org algorithm.
+    df - dataframe with paths ...
+    t2wColname - name of the column with paths to t2w images
+    adcColname - name of the column with paths to t2w images
+    hbvColname - name of the column with paths to t2w images
+    
+    
     """
 
-    def __init__(self):
-        super().__init__(
-            validators=dict(
-                input_image=(
-                    UniqueImagesValidator(),
-                    UniquePathIndicesValidator(),
-                )
-            ),
-        )
+    def __init__(self,df,t2wColname,adcColname,hbvColname ):
+        self.df = df
+        # super().__init__(
+        #     validators=dict(
+        #         input_image=(
+        #             UniqueImagesValidator(),
+        #             UniquePathIndicesValidator(),
+        #         )
+        #     ),
+        # )
 
         # input / output paths for algorithm
-        self.input_dirs = [
-            "/input/images/transverse-t2-prostate-mri",
-            "/input/images/transverse-adc-prostate-mri",
-            "/input/images/transverse-hbv-prostate-mri",
-        ]
+        # self.input_dirs = [
+        #     "/input/images/transverse-t2-prostate-mri",
+        #     "/input/images/transverse-adc-prostate-mri",
+        #     "/input/images/transverse-hbv-prostate-mri",
+        # ]
+        self.t2wColname=t2wColname
+        self.adcColname=adcColname
+        self.hbvColname=hbvColname
         self.scan_paths = []
-        self.prostate_segmentation_path = Path("/output/images/transverse-whole-prostate-mri/prostate_gland.mha")
+        self.prostate_segmentation_path = Path("/home/sliceruser/data/for_host_whole_gland_segm/nnunet/output/transverse-whole-prostate-mri/prostate_gland.mha")
 
         # input / output paths for nnUNet
-        self.nnunet_inp_dir = Path("/opt/algorithm/nnunet/input")
-        self.nnunet_out_dir = Path("/opt/algorithm/nnunet/output")
-        self.nnunet_results = Path("/opt/algorithm/results")
+        self.nnunet_inp_dir = Path("/home/sliceruser/data/for_host_whole_gland_segm/nnunet/input")
+        self.nnunet_out_dir = Path("/home/sliceruser/data/for_host_whole_gland_segm/nnunet/output")
+        self.nnunet_results = Path("/home/sliceruser/externalRepos/picaiHostSegmentation/results")
+
+        
+        # self.nnunet_results = Path("/home/sliceruser/data/for_host_whole_gland_segm/algorithm/results")
 
         # ensure required folders exist
         self.nnunet_inp_dir.mkdir(exist_ok=True, parents=True)
@@ -71,15 +84,27 @@ class ProstateSegmentationAlgorithm(SegmentationAlgorithm):
 
         # input validation for multiple inputs
         scan_glob_format = "*.mha"
-        for folder in self.input_dirs:
-            file_paths = list(Path(folder).glob(scan_glob_format))
-            if len(file_paths) == 0:
-                raise MissingSequenceError(name=folder.split("/")[-1], folder=folder)
-            elif len(file_paths) >= 2:
-                raise MultipleScansSameSequencesError(name=folder.split("/")[-1], folder=folder)
-            else:
-                # append scan path to algorithm input paths
-                self.scan_paths += [file_paths[0]]
+        
+        t2wPaths=df[self.t2wColname].dropna().astype('str').to_numpy()
+        t2wPaths=list(filter(lambda path: len(path)>2 ,t2wPaths))
+
+        adcPaths=df[self.adcColname].dropna().astype('str').to_numpy()
+        adcPaths=list(filter(lambda path: len(path)>2 ,adcPaths))        
+        
+        hbvPaths=df[self.hbvColname].dropna().astype('str').to_numpy()
+        hbvPaths=list(filter(lambda path: len(path)>2 ,hbvPaths)) 
+        
+        
+        self.scan_paths = t2wPaths+ adcPaths+hbvPaths
+        # for folder in self.input_dirs:
+        #     file_paths = list(Path(folder).glob(scan_glob_format))
+        #     if len(file_paths) == 0:
+        #         raise MissingSequenceError(name=folder.split("/")[-1], folder=folder)
+        #     elif len(file_paths) >= 2:
+        #         raise MultipleScansSameSequencesError(name=folder.split("/")[-1], folder=folder)
+        #     else:
+        #         # append scan path to algorithm input paths
+        #         self.scan_paths += [file_paths[0]]
 
     def preprocess_input(self):
         """Preprocess input images to nnUNet Raw Data Archive format"""
@@ -111,26 +136,26 @@ class ProstateSegmentationAlgorithm(SegmentationAlgorithm):
         # perform preprocessing
         self.preprocess_input()
 
-        # perform inference using nnUNet
-        self.predict(
-            task="Task2202_prostate_segmentation",
-            trainer="nnUNetTrainerV2_Loss_FL_and_CE_checkpoints",
-            checkpoint="model_final_checkpoint",
-        )
+#         # perform inference using nnUNet
+#         self.predict(
+#             task="Task2202_prostate_segmentation",
+#             trainer="nnUNetTrainerV2_Loss_FL_and_CE_checkpoints",
+#             checkpoint="model_final_checkpoint",
+#         )
 
-        # read binarized and postprocessed prediction
-        pred_path = str(self.nnunet_out_dir / "scan.nii.gz")
-        pred: sitk.Image = sitk.ReadImage(pred_path)
+#         # read binarized and postprocessed prediction
+#         pred_path = str(self.nnunet_out_dir / "scan.nii.gz")
+#         pred: sitk.Image = sitk.ReadImage(pred_path)
 
-        # transform prediction to original space
-        reference_scan = sitk.ReadImage(str(self.scan_paths[0]))
-        pred = resample_to_reference_scan(pred, reference_scan_original=reference_scan)
+#         # transform prediction to original space
+#         reference_scan = sitk.ReadImage(str(self.scan_paths[0]))
+#         pred = resample_to_reference_scan(pred, reference_scan_original=reference_scan)
 
-        # remove metadata to get rid of SimpleITK warning
-        strip_metadata(pred)
+#         # remove metadata to get rid of SimpleITK warning
+#         strip_metadata(pred)
 
-        # save prediction to output folder
-        atomic_image_write(pred, str(self.prostate_segmentation_path))
+#         # save prediction to output folder
+#         atomic_image_write(pred, str(self.prostate_segmentation_path))
 
     def predict(self, task, trainer="nnUNetTrainerV2", network="3d_fullres",
                 checkpoint="model_final_checkpoint", folds="0,1,2,3,4", store_probability_maps=True,
@@ -153,7 +178,7 @@ class ProstateSegmentationAlgorithm(SegmentationAlgorithm):
             '--num_threads_preprocessing', '2',
             '--num_threads_nifti_save', '1'
         ]
-
+        print(cmd)
         if folds:
             cmd.append('-f')
             cmd.extend(folds.split(','))
