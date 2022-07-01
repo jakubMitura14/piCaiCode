@@ -102,7 +102,7 @@ def findPathh(row,dirDictt,keyWord,targetDir):
 def iter_paths_apply(dff,keyword):
     resList=[]
     with mp.Pool(processes = mp.cpu_count()) as pool:
-        resList=pool.map(partial(findPathh,dirDictt=k,keyWord=keyword,targetDir=targetDir)  ,list(dff.iterrows()))
+        resList=pool.map(partial(findPathh,dirDictt=dirDict,keyWord=keyword,targetDir=targetDir)  ,list(dff.iterrows()))
     dff[keyword]=resList   
 
 iter_paths_apply(df,'t2w')
