@@ -17,6 +17,9 @@ import Resampling
 import utilsPreProcessing
 from utilsPreProcessing import write_to_modif_path 
 from registration.elastixRegister import reg_adc_hbv_to_t2w
+import os.path
+from os import path
+
 
 df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData.csv')
 #currently We want only imagfes with associated masks
@@ -27,9 +30,9 @@ for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:
     colName=keyWord+ "_spac_x"
     df = df.loc[df[colName]>0 ]
 #just for testing    
-df=df.sample(n = 4)#TODO remove
-
-df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
+#df=df.sample(n = 4)#TODO remove
+df= df.head(4)
+##df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
 
 ########## Standarization
 
@@ -85,23 +88,27 @@ for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:
         meanRounded = round((minn+maxx)/2,1)
         medianRounded = round(np.median(liist),1)
         spacingDict[colName]=(minn,maxx,meanRounded,medianRounded)
-targetSpacingg=(spacingDict['t2w_spac_x'][3],spacingDict['t2w_spac_y'][3],spacingDict['t2w_spac_z'][3])
-    
 
+targetSpacingg=(spacingDict['t2w_spac_x'][3],spacingDict['t2w_spac_y'][3],spacingDict['t2w_spac_z'][3])
+print("**************    target spacing    ***************")    
+print(targetSpacingg)
 
 """
 registered images were already resampled now time for t2w and labels
 """
 def resample_ToMedianSpac(row,colName,targetSpacing):
     path=row[colName]
-    newPath = path.replace(".mha","_medianSpac.mha" )   
-    try:
+    newPath = path.replace(".mha","_medianSpac.mha" )
+    if(not path.exists(newPath)):   
+        try:
+            resampled = Resampling.resample_with_GAN(path,targetSpacing)
+        except:
+            print("error resampling")
         resampled = Resampling.resample_with_GAN(path,targetSpacing)
-    except:
-        print("error resampling")
-    resampled = Resampling.resample_with_GAN(path,targetSpacing)
 
-    write_to_modif_path(resampled,path,".mha","_medianSpac.mha" )
+        write_to_modif_path(resampled,path,".mha","_medianSpac.mha" )
+    else:
+        print("already resampled")
     return newPath    
 
 
@@ -109,14 +116,18 @@ def resample_ToMedianSpac(row,colName,targetSpacing):
 
 def resample_labels(row,targetSpacing):
     path=row['reSampledPath']
-    newPath = path.replace(".mha","_medianSpac.mha" )   
-    try:
+    newPath = path.replace(".mha","_medianSpac.mha" )
+    if(not path.exists(newPath)):         
+        try:
+            resampled = Resampling.resample_label_with_GAN(path,targetSpacing)
+        except:
+            print("error resampling")
         resampled = Resampling.resample_label_with_GAN(path,targetSpacing)
-    except:
-        print("error resampling")
-    resampled = Resampling.resample_label_with_GAN(path,targetSpacing)
 
-    write_to_modif_path(resampled,path,".mha","_medianSpac.mha" )
+        write_to_modif_path(resampled,path,".mha","_medianSpac.mha" )
+    else:
+        print("already resampled")
+    
     return newPath        
     
 
@@ -131,11 +142,12 @@ df["label_med_spac"]=df.apply(lambda row : resample_labels(row,targetSpacingg)  
 #######Registration of adc and hb
 elacticPath='/home/sliceruser/Slicer/NA-MIC/Extensions-30822/SlicerElastix/lib/Slicer-5.0/elastix'
 reg_prop='/home/sliceruser/data/piCaiCode/preprocessing/registration/parameters.txt'      
-        
-for keyWord in ['adc_med_spac','hbv_med_spac']:    
+       
+for keyWord in ['adc_med_spac','hbv_med_spac']:
+    resList=[]     
     with mp.Pool(processes = mp.cpu_count()) as pool:
-        pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w_med_spac' )  ,list(df.iterrows()))    
- 
+       resList=pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w_med_spac' )  ,list(df.iterrows()))    
+    df['registered_'+keyWord]=resList  
 
 
 

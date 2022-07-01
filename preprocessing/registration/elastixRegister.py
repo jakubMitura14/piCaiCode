@@ -18,6 +18,12 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName ):
     row=row[1]
     patId=str(row['patient_id'])
     path=str(row[colName])
+    result=path.join(outPath,"result0.mha")
+    #returning faster if the result is already present
+    if(path.exists(result)):
+        print("registered already present")
+        return result     
+
     if(len(path)>1):
         outPath = path.replace(".mha","_for_"+colName)
         cmd='mkdir '+ outPath
@@ -30,4 +36,7 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName ):
         except:
             print("error in patId")
         p.wait()
+        return result
+    else:
+        return ""    
 
