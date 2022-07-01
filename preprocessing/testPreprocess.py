@@ -47,17 +47,16 @@ def resample_adc_hbv_to_t2w(row,secondCol ):
     pathT2w= row['t2w']
     pathh= row[secondCol] 
     newPath = pathh.replace(".mha","_resmaplA.mha" )
-    #we check weather resampling was already done if not we do the resampling
-    if(len(row[secondCol+'_resmaplA'] )<3):
-        imageT2W = sitk.ReadImage(pathT2w)
-        targetSpacing = imageT2W.GetSpacing()
-        try:
-            resampled = Resampling.resample_with_GAN(pathh,targetSpacing)
-        except:
-            print("error resampling")
-        resampled = Resampling.resample_with_GAN(pathh,targetSpacing)
 
-        write_to_modif_path(resampled,pathh,".mha","_resmaplA.mha" )
+    imageT2W = sitk.ReadImage(pathT2w)
+    targetSpacing = imageT2W.GetSpacing()
+    try:
+        resampled = Resampling.resample_with_GAN(pathh,targetSpacing)
+    except:
+        print("error resampling")
+    resampled = Resampling.resample_with_GAN(pathh,targetSpacing)
+
+    write_to_modif_path(resampled,pathh,".mha","_resmaplA.mha" )
     return newPath
 
 #needs to be on single thread as resampling GAN is acting on GPU
