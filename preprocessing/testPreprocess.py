@@ -18,7 +18,7 @@ import utilsPreProcessing
 from utilsPreProcessing import write_to_modif_path 
 from registration.elastixRegister import reg_adc_hbv_to_t2w
 import os.path
-from os import path
+from os import pathOs
 
 
 df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData.csv')
@@ -99,7 +99,7 @@ registered images were already resampled now time for t2w and labels
 def resample_ToMedianSpac(row,colName,targetSpacing):
     path=row[colName]
     newPath = path.replace(".mha","_medianSpac.mha" )
-    if(not path.exists(newPath)):   
+    if(not pathOs.exists(newPath)):   
         try:
             resampled = Resampling.resample_with_GAN(path,targetSpacing)
         except:
@@ -117,7 +117,7 @@ def resample_ToMedianSpac(row,colName,targetSpacing):
 def resample_labels(row,targetSpacing):
     path=row['reSampledPath']
     newPath = path.replace(".mha","_medianSpac.mha" )
-    if(not path.exists(newPath)):         
+    if(not pathOs.exists(newPath)):         
         try:
             resampled = Resampling.resample_label_with_GAN(path,targetSpacing)
         except:

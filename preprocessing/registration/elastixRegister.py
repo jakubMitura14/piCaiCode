@@ -7,6 +7,8 @@ import multiprocessing as mp
 import functools
 from functools import partial
 import sys
+import os.path
+from os import pathOs
 
 def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName ):
     """
@@ -20,7 +22,7 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName ):
     path=str(row[colName])
     result=path.join(outPath,"result0.mha")
     #returning faster if the result is already present
-    if(path.exists(result)):
+    if(pathOs.exists(result)):
         print("registered already present")
         return result     
 
