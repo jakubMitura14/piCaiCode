@@ -56,11 +56,11 @@ def unpackk(zipDir,targetDir):
 # unpackk( '/home/sliceruser/picai_public_images_fold3.zip', targetDir)      
 # unpackk( '/home/sliceruser/picai_public_images_fold4.zip', targetDir) 
 
-unpackk( '/home/sliceruser/data/orig/picai_public_images_fold0.zip', targetDir)      
-unpackk( '/home/sliceruser/data/orig/picai_public_images_fold1.zip', targetDir)      
-unpackk( '/home/sliceruser/data/orig/picai_public_images_fold2.zip', targetDir)      
-unpackk( '/home/sliceruser/data/orig/picai_public_images_fold3.zip', targetDir)      
-unpackk( '/home/sliceruser/data/orig/picai_public_images_fold4.zip', targetDir) 
+# unpackk( '/home/sliceruser/data/orig/picai_public_images_fold0.zip', targetDir)      
+# unpackk( '/home/sliceruser/data/orig/picai_public_images_fold1.zip', targetDir)      
+# unpackk( '/home/sliceruser/data/orig/picai_public_images_fold2.zip', targetDir)      
+# unpackk( '/home/sliceruser/data/orig/picai_public_images_fold3.zip', targetDir)      
+# unpackk( '/home/sliceruser/data/orig/picai_public_images_fold4.zip', targetDir) 
 
 
 
@@ -69,7 +69,7 @@ for subdir, dirs, files in os.walk(targetDir):
     for subdirin, dirsin, filesin in os.walk(subdir):
         lenn= len(filesin)
         if(lenn>0):
-            dirDict[subdirin.split("/")[5]]=filesin
+            dirDict[subdirin.split("/")[4]]=filesin
 
 labelsFiles=[]
 labelsRootDir = '/home/sliceruser/labels/csPCa_lesion_delineations/human_expert/resampled/'
@@ -79,7 +79,7 @@ for subdir, dirs, files in os.walk(labelsRootDir):
 #Constructing functions that when applied to each row will fill the necessary path data
 listOfDeficientStudyIds=[]
 
-
+print(dirDict)
 
 
 #create a dictionary of directories where key is the patient_id
