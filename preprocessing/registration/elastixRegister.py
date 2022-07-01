@@ -8,7 +8,7 @@ import functools
 from functools import partial
 import sys
 
-def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop ):
+def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName ):
     """
     registers adc and hbv images to t2w image
     first we need to create directories for the results
@@ -23,7 +23,7 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop ):
         cmd='mkdir '+ outPath
         p = Popen(cmd, shell=True)
         p.wait()
-        cmd=f"{elacticPath} -f {row['t2w']} -m {path} -out {outPath} -p {reg_prop}"
+        cmd=f"{elacticPath} -f {row[t2wColName]} -m {path} -out {outPath} -p {reg_prop}"
         print(cmd)
         try:
             p = Popen(cmd, shell=True)
