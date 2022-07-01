@@ -38,7 +38,7 @@ df= df.head(4)
 
 trainedModelsBasicPath='/home/sliceruser/data/preprocess/standarizationModels'
 for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:
-    df[keyWord+"_stand"]=Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath)   
+    df[keyWord+'_stand']=Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath)   
 Standardize.iterateAndchangeLabelToOnes(df)
 
 
@@ -105,9 +105,9 @@ def resample_labels(row,targetSpacing):
 
 #needs to be on single thread as resampling GAN is acting on GPU
 # we save the metadata to main pandas data frame 
-df["adc_med_spac"]=df.apply(lambda row : resample_ToMedianSpac(row, 'adc"_stand',targetSpacingg)   , axis = 1) 
-df["hbv_med_spac"]=df.apply(lambda row : resample_ToMedianSpac(row, 'hbv"_stand',targetSpacingg)   , axis = 1) 
-df["t2w_med_spac"]=df.apply(lambda row : resample_ToMedianSpac(row, 't2w"_stand',targetSpacingg)   , axis = 1) 
+df["adc_med_spac"]=df.apply(lambda row : resample_ToMedianSpac(row, 'adc_stand',targetSpacingg)   , axis = 1) 
+df["hbv_med_spac"]=df.apply(lambda row : resample_ToMedianSpac(row, 'hbv_stand',targetSpacingg)   , axis = 1) 
+df["t2w_med_spac"]=df.apply(lambda row : resample_ToMedianSpac(row, 't2w_stand',targetSpacingg)   , axis = 1) 
 df["label_med_spac"]=df.apply(lambda row : resample_labels(row,targetSpacingg)   , axis = 1) 
 
 
