@@ -8,7 +8,7 @@ import functools
 from functools import partial
 import sys
 import os.path
-from os import pathOs
+from os import path as pathOs
 
 def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName ):
     """

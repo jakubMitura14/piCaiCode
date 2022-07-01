@@ -18,8 +18,7 @@ import utilsPreProcessing
 from utilsPreProcessing import write_to_modif_path 
 from registration.elastixRegister import reg_adc_hbv_to_t2w
 import os.path
-from os import pathOs
-
+from os import path as pathOs
 
 df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData.csv')
 #currently We want only imagfes with associated masks
