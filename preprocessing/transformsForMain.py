@@ -66,15 +66,15 @@ def get_train_transforms():
             #     image_threshold=0,
             # ),
             EnsureTyped(keys=["t2w", "label"]),
-            SelectItemsd(keys=["t2w", "label"])
+            SelectItemsd(keys=["t2w", "label"]),
             
-            # RandGaussianNoised(keys=["t2w", "label"]),
-            # RandAdjustContrastd(keys=["t2w", "label"]),
-            # RandGaussianSmoothd(keys=["t2w", "label"]),
-            # RandRicianNoised(keys=["t2w", "label"]),
-            # RandFlipd(keys=["t2w", "label"]),
-            # RandAffined(keys=["t2w", "label"])
-            
+            RandGaussianNoised(keys=["t2w", "label"]),
+            RandAdjustContrastd(keys=["t2w", "label"]),
+            RandGaussianSmoothd(keys=["t2w", "label"]),
+            RandRicianNoised(keys=["t2w", "label"]),
+            RandFlipd(keys=["t2w", "label"]),
+            RandAffined(keys=["t2w", "label"]),
+            ConcatItemsd(keys=["t2w", "label"]
             
         ]
     )
