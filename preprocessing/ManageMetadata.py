@@ -56,3 +56,5 @@ def load_df_only_full():
     df = df.loc[ df['areTransformsNotDeficient']]
 
     return df
+
+
