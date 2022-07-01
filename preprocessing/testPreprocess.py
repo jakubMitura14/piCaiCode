@@ -1,217 +1,183 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "dc9d372b-c333-4247-94ac-27dace5a6039",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "import torch\n",
-    "import pandas as pd\n",
-    "import numpy as np\n",
-    "import torchio as tio\n",
-    "from torch.utils.data import DataLoader\n",
-    "import os\n",
-    "import SimpleITK as sitk\n",
-    "from zipfile import ZipFile\n",
-    "from zipfile import BadZipFile\n",
-    "import dask.dataframe as dd\n",
-    "import os\n",
-    "import multiprocessing as mp\n",
-    "import functools\n",
-    "from functools import partial\n",
-    "import Standardize\n",
-    "import Resampling\n",
-    "import utilsPreProcessing\n",
-    "from utilsPreProcessing import write_to_modif_path \n",
-    "from registration.elastixRegister import reg_adc_hbv_to_t2w\n",
-    "\n",
-    "df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData.csv')\n",
-    "#currently We want only imagfes with associated masks\n",
-    "df = df.loc[df['isAnyMissing'] ==False]\n",
-    "df = df.loc[df['isAnythingInAnnotated']>0 ]\n",
-    "# ignore all with deficient spacing\n",
-    "for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:    \n",
-    "    colName=keyWord+ \"_spac_x\"\n",
-    "    df = df.loc[df[colName]>0 ]\n",
-    "#just for testing    \n",
-    "df=df.sample(n = 4)#TODO remove\n",
-    "\n",
-    "df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') \n",
-    "\n",
-    "########## Standarization\n",
-    "\n",
-    "import Standardize\n",
-    "import pandas as pd\n",
-    "trainedModelsBasicPath='/home/sliceruser/data/preprocess/standarizationModels'\n",
-    "for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:\n",
-    "    Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath)   \n",
-    "Standardize.iterateAndchangeLabelToOnes(df)\n",
-    "\n",
-    "\n",
-    "#######Setting spacing of adc and HBV to t2w so then there would be less resampling needed during registration\n",
-    "\n",
-    "def resample_adc_hbv_to_t2w(row,secondCol ):\n",
-    "    pathT2w= row['t2w']\n",
-    "    pathh= row[secondCol] \n",
-    "    newPath = pathh.replace(\".mha\",\"_resmaplA.mha\" )\n",
-    "    #we check weather resampling was already done if not we do the resampling\n",
-    "    if(len(row[secondCol+'_resmaplA'] )<3):\n",
-    "        imageT2W = sitk.ReadImage(pathT2w)\n",
-    "        targetSpacing = imageT2W.GetSpacing()\n",
-    "        try:\n",
-    "            resampled = Resampling.resample_with_GAN(pathh,targetSpacing)\n",
-    "        except:\n",
-    "            print(\"error resampling\")\n",
-    "        resampled = Resampling.resample_with_GAN(pathh,targetSpacing)\n",
-    "\n",
-    "        write_to_modif_path(resampled,pathh,\".mha\",\"_resmaplA.mha\" )\n",
-    "    return newPath\n",
-    "\n",
-    "#needs to be on single thread as resampling GAN is acting on GPU\n",
-    "# we save the metadata to main pandas data frame \n",
-    "df[\"adc_resmaplA\"]=df.apply(lambda row : resample_adc_hbv_to_t2w(row, 'adc')   , axis = 1) \n",
-    "df[\"hbv_resmaplA\"]=df.apply(lambda row : resample_adc_hbv_to_t2w(row, 'hbv')   , axis = 1) \n",
-    "df.to_csv('/home/sliceruser/data/metadata/processedMetaData.csv') \n",
-    "        \n",
-    "\n",
-    "#######Registration of adc and hb\n",
-    "elacticPath='/home/sliceruser/Slicer/NA-MIC/Extensions-30822/SlicerElastix/lib/Slicer-5.0/elastix'\n",
-    "reg_prop='/home/sliceruser/data/piCaiCode/preprocessing/registration/parameters.txt'      \n",
-    "        \n",
-    "for keyWord in ['adc_resmaplA','hbv_resmaplA']:    \n",
-    "    with mp.Pool(processes = mp.cpu_count()) as pool:\n",
-    "        pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop )  ,list(df.iterrows()))    \n",
-    " \n",
-    "\n",
-    "################# get spacing\n",
-    "\n",
-    "\"\"\"\n",
-    "looking through all valid spacings (if it si invalid it goes below 0)\n",
-    "and displaying minimal maximal and rounded mean spacing and median\n",
-    "in my case median and mean values are close - and using the median values will lead to a bit less interpolations later\n",
-    "\"\"\"\n",
-    "spacingDict={}\n",
-    "for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]: \n",
-    "    for addedKey in ['_spac_x','_spac_y','_spac_z']:   \n",
-    "        colName = keyWord+addedKey\n",
-    "        liist = list(filter(lambda it: it>0 ,df[colName].to_numpy() ))\n",
-    "        minn=np.min(liist)                \n",
-    "        maxx=np.max(liist)\n",
-    "        meanRounded = round((minn+maxx)/2,1)\n",
-    "        medianRounded = round(np.median(liist),1)\n",
-    "        spacingDict[colName]=(minn,maxx,meanRounded,medianRounded)\n",
-    "targetSpacingg=(spacingDict['t2w_spac_x'][3],spacingDict['t2w_spac_y'][3],spacingDict['t2w_spac_z'][3])\n",
-    "    \n",
-    "    \n",
-    "def resample_registered_to_given(row,colname,targetSpacing):\n",
-    "    path=row[colname]\n",
-    "    outPath = path.replace(\".mha\",\"_for_\"+colName)\n",
-    "    registeredPath = outPath+\"/result.0.mha\"\n",
-    "    newPath = path.replace(\".mha\",\"_medianSpac.mha\" )   \n",
-    "    try:\n",
-    "        resampled = Resampling.resample_with_GAN(registeredPath,targetSpacing)\n",
-    "    except:\n",
-    "        print(\"error resampling\")\n",
-    "    resampled = Resampling.resample_with_GAN(registeredPath,targetSpacing)\n",
-    "\n",
-    "    write_to_modif_path(resampled,path,\".mha\",\"_medianSpac.mha\" )\n",
-    "    return newPath\n",
-    "\n",
-    "\"\"\"\n",
-    "registered images were already resampled now time for t2w and labels\n",
-    "\"\"\"\n",
-    "def resample_t2w(row,targetSpacing):\n",
-    "    path=row['t2w']\n",
-    "    newPath = path.replace(\".mha\",\"_medianSpac.mha\" )   \n",
-    "    try:\n",
-    "        resampled = Resampling.resample_with_GAN(registeredPath,targetSpacing)\n",
-    "    except:\n",
-    "        print(\"error resampling\")\n",
-    "    resampled = Resampling.resample_with_GAN(registeredPath,targetSpacing)\n",
-    "\n",
-    "    write_to_modif_path(resampled,path,\".mha\",\"_medianSpac.mha\" )\n",
-    "    return newPath    \n",
-    "\n",
-    "\n",
-    "\n",
-    "\n",
-    "def resample_labels(row,targetSpacing):\n",
-    "    path=row['reSampledPath']\n",
-    "    newPath = path.replace(\".mha\",\"_medianSpac.mha\" )   \n",
-    "    try:\n",
-    "        resampled = Resampling.resample_label_with_GAN(registeredPath,targetSpacing)\n",
-    "    except:\n",
-    "        print(\"error resampling\")\n",
-    "    resampled = Resampling.resample_label_with_GAN(registeredPath,targetSpacing)\n",
-    "\n",
-    "    write_to_modif_path(resampled,path,\".mha\",\"_medianSpac.mha\" )\n",
-    "    return newPath        \n",
-    "    \n",
-    "\n",
-    "#needs to be on single thread as resampling GAN is acting on GPU\n",
-    "# we save the metadata to main pandas data frame \n",
-    "df[\"adc_med_spac\"]=df.apply(lambda row : resample_registered_to_given(row, 'adc_resmaplA',targetSpacingg)   , axis = 1) \n",
-    "df[\"hbv_med_spac\"]=df.apply(lambda row : resample_registered_to_given(row, 'hbv_resmaplA',targetSpacingg)   , axis = 1) \n",
-    "df[\"t2w_med_spac\"]=df.apply(lambda row : resample_t2w(row,targetSpacingg)   , axis = 1) \n",
-    "df[\"label_med_spac\"]=df.apply(lambda row : resample_labels(row,targetSpacingg)   , axis = 1) \n",
-    "\n",
-    "\n",
-    "######Now we need to retrieve the maximum dimensions of resampled images\n",
-    "def get_spatial_meta(row,colName):\n",
-    "    row=row[1]\n",
-    "    patId=str(row['patient_id'])\n",
-    "    path=str(row[colName])\n",
-    "    if(len(path)>1):\n",
-    "        image = sitk.ReadImage(path)\n",
-    "        sizz= ifShortReturnMinus(image.GetSize(),patId,colName )\n",
-    "        spac= ifShortReturnMinus(image.GetSpacing(),patId,colName)\n",
-    "        orig= ifShortReturnMinus(image.GetOrigin(),patId,colName)\n",
-    "        return list(sizz)+list(spac)+list(orig)\n",
-    "    return [-1,-1,-1,-1,-1,-1,-1,-1,-1]\n",
-    "for keyWord in ['t2w_med_spac']:    \n",
-    "    resList=[]\n",
-    "    with mp.Pool(processes = mp.cpu_count()) as pool:\n",
-    "        resList=pool.map(partial(get_spatial_meta,colName=keyWord)  ,list(df.iterrows()))    \n",
-    "    print(type(resList))    \n",
-    "    df[keyWord+'_sizz_x']= list(map(lambda arr:arr[0], resList))    \n",
-    "    df[keyWord+'_sizz_y']= list(map(lambda arr:arr[1], resList))    \n",
-    "    df[keyWord+'_sizz_z']= list(map(lambda arr:arr[2], resList))\n",
-    "    \n",
-    "df.to_csv('/home/sliceruser/data/metadata/processedMetaData.csv') \n",
-    "\n",
-    "#getting maximum size - so one can pad to uniform size if needed (for example in validetion test set)\n",
-    "median_spac_max_size_x = np.max(list(filter(lambda it: it>0 ,df['t2w_med_spac_sizz_x'].to_numpy() )))\n",
-    "median_spac_max_size_y = np.max(list(filter(lambda it: it>0 ,df['t2w_med_spac_sizz_y'].to_numpy() )))\n",
-    "median_spac_max_size_z = np.max(list(filter(lambda it: it>0 ,df['t2w_med_spac_sizz_z'].to_numpy() )))\n",
-    "\n",
-    "\n",
-    "maxSize = (median_spac_max_size_x,median_spac_max_size_y,median_spac_max_size_z  )\n",
-    "print(maxSize)\n",
-    "print(\"fiiiniiished\")"
-   ]
-  }
- ],
- "metadata": {
-  "kernelspec": {
-   "display_name": "Python 3",
-   "language": "python",
-   "name": "python3"
-  },
-  "language_info": {
-   "codemirror_mode": {
-    "name": "ipython",
-    "version": 3
-   },
-   "file_extension": ".py",
-   "mimetype": "text/x-python",
-   "name": "python",
-   "nbconvert_exporter": "python",
-   "pygments_lexer": "ipython3",
-   "version": "3.9.10"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 5
-}
+import torch
+import pandas as pd
+import numpy as np
+import torchio as tio
+from torch.utils.data import DataLoader
+import os
+import SimpleITK as sitk
+from zipfile import ZipFile
+from zipfile import BadZipFile
+import dask.dataframe as dd
+import os
+import multiprocessing as mp
+import functools
+from functools import partial
+import Standardize
+import Resampling
+import utilsPreProcessing
+from utilsPreProcessing import write_to_modif_path 
+from registration.elastixRegister import reg_adc_hbv_to_t2w
+
+df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData.csv')
+#currently We want only imagfes with associated masks
+df = df.loc[df['isAnyMissing'] ==False]
+df = df.loc[df['isAnythingInAnnotated']>0 ]
+# ignore all with deficient spacing
+for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:    
+    colName=keyWord+ "_spac_x"
+    df = df.loc[df[colName]>0 ]
+#just for testing    
+df=df.sample(n = 4)#TODO remove
+
+df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
+
+########## Standarization
+
+import Standardize
+import pandas as pd
+trainedModelsBasicPath='/home/sliceruser/data/preprocess/standarizationModels'
+for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:
+    Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath)   
+Standardize.iterateAndchangeLabelToOnes(df)
+
+
+#######Setting spacing of adc and HBV to t2w so then there would be less resampling needed during registration
+
+def resample_adc_hbv_to_t2w(row,secondCol ):
+    pathT2w= row['t2w']
+    pathh= row[secondCol] 
+    newPath = pathh.replace(".mha","_resmaplA.mha" )
+    #we check weather resampling was already done if not we do the resampling
+    if(len(row[secondCol+'_resmaplA'] )<3):
+        imageT2W = sitk.ReadImage(pathT2w)
+        targetSpacing = imageT2W.GetSpacing()
+        try:
+            resampled = Resampling.resample_with_GAN(pathh,targetSpacing)
+        except:
+            print("error resampling")
+        resampled = Resampling.resample_with_GAN(pathh,targetSpacing)
+
+        write_to_modif_path(resampled,pathh,".mha","_resmaplA.mha" )
+    return newPath
+
+#needs to be on single thread as resampling GAN is acting on GPU
+# we save the metadata to main pandas data frame 
+df["adc_resmaplA"]=df.apply(lambda row : resample_adc_hbv_to_t2w(row, 'adc')   , axis = 1) 
+df["hbv_resmaplA"]=df.apply(lambda row : resample_adc_hbv_to_t2w(row, 'hbv')   , axis = 1) 
+df.to_csv('/home/sliceruser/data/metadata/processedMetaData.csv') 
+        
+
+#######Registration of adc and hb
+elacticPath='/home/sliceruser/Slicer/NA-MIC/Extensions-30822/SlicerElastix/lib/Slicer-5.0/elastix'
+reg_prop='/home/sliceruser/data/piCaiCode/preprocessing/registration/parameters.txt'      
+        
+for keyWord in ['adc_resmaplA','hbv_resmaplA']:    
+    with mp.Pool(processes = mp.cpu_count()) as pool:
+        pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop )  ,list(df.iterrows()))    
+ 
+
+################# get spacing
+
+"""
+looking through all valid spacings (if it si invalid it goes below 0)
+and displaying minimal maximal and rounded mean spacing and median
+in my case median and mean values are close - and using the median values will lead to a bit less interpolations later
+"""
+spacingDict={}
+for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]: 
+    for addedKey in ['_spac_x','_spac_y','_spac_z']:   
+        colName = keyWord+addedKey
+        liist = list(filter(lambda it: it>0 ,df[colName].to_numpy() ))
+        minn=np.min(liist)                
+        maxx=np.max(liist)
+        meanRounded = round((minn+maxx)/2,1)
+        medianRounded = round(np.median(liist),1)
+        spacingDict[colName]=(minn,maxx,meanRounded,medianRounded)
+targetSpacingg=(spacingDict['t2w_spac_x'][3],spacingDict['t2w_spac_y'][3],spacingDict['t2w_spac_z'][3])
+    
+    
+def resample_registered_to_given(row,colname,targetSpacing):
+    path=row[colname]
+    outPath = path.replace(".mha","_for_"+colName)
+    registeredPath = outPath+"/result.0.mha"
+    newPath = path.replace(".mha","_medianSpac.mha" )   
+    try:
+        resampled = Resampling.resample_with_GAN(registeredPath,targetSpacing)
+    except:
+        print("error resampling")
+    resampled = Resampling.resample_with_GAN(registeredPath,targetSpacing)
+
+    write_to_modif_path(resampled,path,".mha","_medianSpac.mha" )
+    return newPath
+
+"""
+registered images were already resampled now time for t2w and labels
+"""
+def resample_t2w(row,targetSpacing):
+    path=row['t2w']
+    newPath = path.replace(".mha","_medianSpac.mha" )   
+    try:
+        resampled = Resampling.resample_with_GAN(registeredPath,targetSpacing)
+    except:
+        print("error resampling")
+    resampled = Resampling.resample_with_GAN(registeredPath,targetSpacing)
+
+    write_to_modif_path(resampled,path,".mha","_medianSpac.mha" )
+    return newPath    
+
+
+
+
+def resample_labels(row,targetSpacing):
+    path=row['reSampledPath']
+    newPath = path.replace(".mha","_medianSpac.mha" )   
+    try:
+        resampled = Resampling.resample_label_with_GAN(registeredPath,targetSpacing)
+    except:
+        print("error resampling")
+    resampled = Resampling.resample_label_with_GAN(registeredPath,targetSpacing)
+
+    write_to_modif_path(resampled,path,".mha","_medianSpac.mha" )
+    return newPath        
+    
+
+#needs to be on single thread as resampling GAN is acting on GPU
+# we save the metadata to main pandas data frame 
+df["adc_med_spac"]=df.apply(lambda row : resample_registered_to_given(row, 'adc_resmaplA',targetSpacingg)   , axis = 1) 
+df["hbv_med_spac"]=df.apply(lambda row : resample_registered_to_given(row, 'hbv_resmaplA',targetSpacingg)   , axis = 1) 
+df["t2w_med_spac"]=df.apply(lambda row : resample_t2w(row,targetSpacingg)   , axis = 1) 
+df["label_med_spac"]=df.apply(lambda row : resample_labels(row,targetSpacingg)   , axis = 1) 
+
+
+######Now we need to retrieve the maximum dimensions of resampled images
+def get_spatial_meta(row,colName):
+    row=row[1]
+    patId=str(row['patient_id'])
+    path=str(row[colName])
+    if(len(path)>1):
+        image = sitk.ReadImage(path)
+        sizz= ifShortReturnMinus(image.GetSize(),patId,colName )
+        spac= ifShortReturnMinus(image.GetSpacing(),patId,colName)
+        orig= ifShortReturnMinus(image.GetOrigin(),patId,colName)
+        return list(sizz)+list(spac)+list(orig)
+    return [-1,-1,-1,-1,-1,-1,-1,-1,-1]
+for keyWord in ['t2w_med_spac']:    
+    resList=[]
+    with mp.Pool(processes = mp.cpu_count()) as pool:
+        resList=pool.map(partial(get_spatial_meta,colName=keyWord)  ,list(df.iterrows()))    
+    print(type(resList))    
+    df[keyWord+'_sizz_x']= list(map(lambda arr:arr[0], resList))    
+    df[keyWord+'_sizz_y']= list(map(lambda arr:arr[1], resList))    
+    df[keyWord+'_sizz_z']= list(map(lambda arr:arr[2], resList))
+    
+df.to_csv('/home/sliceruser/data/metadata/processedMetaData.csv') 
+
+#getting maximum size - so one can pad to uniform size if needed (for example in validetion test set)
+median_spac_max_size_x = np.max(list(filter(lambda it: it>0 ,df['t2w_med_spac_sizz_x'].to_numpy() )))
+median_spac_max_size_y = np.max(list(filter(lambda it: it>0 ,df['t2w_med_spac_sizz_y'].to_numpy() )))
+median_spac_max_size_z = np.max(list(filter(lambda it: it>0 ,df['t2w_med_spac_sizz_z'].to_numpy() )))
+
+
+maxSize = (median_spac_max_size_x,median_spac_max_size_y,median_spac_max_size_z  )
+print(maxSize)
+print("fiiiniiished")
