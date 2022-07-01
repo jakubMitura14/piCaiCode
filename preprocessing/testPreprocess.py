@@ -92,8 +92,8 @@ targetSpacingg=(spacingDict['t2w_spac_x'][3],spacingDict['t2w_spac_y'][3],spacin
 """
 registered images were already resampled now time for t2w and labels
 """
-def resample_ToMedianSpac(row,targetSpacing):
-    path=row['t2w']
+def resample_ToMedianSpac(row,colName,targetSpacing):
+    path=row[colName]
     newPath = path.replace(".mha","_medianSpac.mha" )   
     try:
         resampled = Resampling.resample_with_GAN(path,targetSpacing)
