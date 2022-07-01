@@ -69,7 +69,7 @@ for subdir, dirs, files in os.walk(targetDir):
     for subdirin, dirsin, filesin in os.walk(subdir):
         lenn= len(filesin)
         if(lenn>0):
-            dirDict[subdirin.split("/")[4]]=filesin
+            dirDict[subdirin.split("/")[5]]=filesin
 
 labelsFiles=[]
 labelsRootDir = '/home/sliceruser/labels/csPCa_lesion_delineations/human_expert/resampled/'
