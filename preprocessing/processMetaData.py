@@ -73,11 +73,11 @@ def unpackk(zipDir,targetDir):
 # unpackk( '/home/sliceruser/picai_public_images_fold3.zip', targetDir)      
 # unpackk( '/home/sliceruser/picai_public_images_fold4.zip', targetDir) 
 
-unpackk( '/home/sliceruser/data/picai_public_images_fold0.zip', targetDir)      
-unpackk( '/home/sliceruser/data/picai_public_images_fold1.zip', targetDir)      
-unpackk( '/home/sliceruser/data/picai_public_images_fold2.zip', targetDir)      
-unpackk( '/home/sliceruser/data/picai_public_images_fold3.zip', targetDir)      
-unpackk( '/home/sliceruser/data/picai_public_images_fold4.zip', targetDir) 
+unpackk( '/home/sliceruser/data/data/picai_public_images_fold0.zip', targetDir)      
+unpackk( '/home/sliceruser/data/data/picai_public_images_fold1.zip', targetDir)      
+unpackk( '/home/sliceruser/data/data/picai_public_images_fold2.zip', targetDir)      
+unpackk( '/home/sliceruser/data/data/picai_public_images_fold3.zip', targetDir)      
+unpackk( '/home/sliceruser/data/data/picai_public_images_fold4.zip', targetDir) 
 
 
 #create a dictionary of directories where key is the patient_id
