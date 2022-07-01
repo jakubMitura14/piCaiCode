@@ -69,6 +69,7 @@ for subdir, dirs, files in os.walk(targetDir):
     for subdirin, dirsin, filesin in os.walk(subdir):
         lenn= len(filesin)
         if(lenn>0):
+            print(subdir.split("/"))
             print(subdirin.split("/"))
             dirDict[subdirin.split("/")[5]]=filesin
 
