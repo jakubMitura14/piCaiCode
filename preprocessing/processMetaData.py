@@ -34,25 +34,8 @@ df["hbv_resmaplA"]=""
 #     colName= 'Nyul_'+keyWord
 #     df[colName]=False
 df['labels_to_one']=False 
+
 targetDir= '/home/sliceruser/data/orig'
-
-dirDict={}
-for subdir, dirs, files in os.walk(targetDir):
-    for subdirin, dirsin, filesin in os.walk(subdir):
-        lenn= len(filesin)
-        if(lenn>0):
-            dirDict[subdirin.split("/")[5]]=filesin
-
-labelsFiles=[]
-labelsRootDir = '/home/sliceruser/labels/csPCa_lesion_delineations/human_expert/resampled/'
-for subdir, dirs, files in os.walk(labelsRootDir):
-    labelsFiles=files
-    
-#Constructing functions that when applied to each row will fill the necessary path data
-listOfDeficientStudyIds=[]
-
-
-targetDir= '/home/sliceruser/data'
 def unpackk(zipDir,targetDir):
     with ZipFile(zipDir, "r") as zip_ref:
         for name in zip_ref.namelist():
@@ -73,11 +56,30 @@ def unpackk(zipDir,targetDir):
 # unpackk( '/home/sliceruser/picai_public_images_fold3.zip', targetDir)      
 # unpackk( '/home/sliceruser/picai_public_images_fold4.zip', targetDir) 
 
-unpackk( '/home/sliceruser/data/data/picai_public_images_fold0.zip', targetDir)      
-unpackk( '/home/sliceruser/data/data/picai_public_images_fold1.zip', targetDir)      
-unpackk( '/home/sliceruser/data/data/picai_public_images_fold2.zip', targetDir)      
-unpackk( '/home/sliceruser/data/data/picai_public_images_fold3.zip', targetDir)      
-unpackk( '/home/sliceruser/data/data/picai_public_images_fold4.zip', targetDir) 
+unpackk( '/home/sliceruser/data/orig/picai_public_images_fold0.zip', targetDir)      
+unpackk( '/home/sliceruser/data/orig/picai_public_images_fold1.zip', targetDir)      
+unpackk( '/home/sliceruser/data/orig/picai_public_images_fold2.zip', targetDir)      
+unpackk( '/home/sliceruser/data/orig/picai_public_images_fold3.zip', targetDir)      
+unpackk( '/home/sliceruser/data/orig/picai_public_images_fold4.zip', targetDir) 
+
+
+
+dirDict={}
+for subdir, dirs, files in os.walk(targetDir):
+    for subdirin, dirsin, filesin in os.walk(subdir):
+        lenn= len(filesin)
+        if(lenn>0):
+            dirDict[subdirin.split("/")[5]]=filesin
+
+labelsFiles=[]
+labelsRootDir = '/home/sliceruser/labels/csPCa_lesion_delineations/human_expert/resampled/'
+for subdir, dirs, files in os.walk(labelsRootDir):
+    labelsFiles=files
+    
+#Constructing functions that when applied to each row will fill the necessary path data
+listOfDeficientStudyIds=[]
+
+
 
 
 #create a dictionary of directories where key is the patient_id
