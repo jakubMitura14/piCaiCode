@@ -43,27 +43,27 @@ df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv')
 
 #######Setting spacing of adc and HBV to t2w so then there would be less resampling needed during registration
 
-def resample_adc_hbv_to_t2w(row,secondCol ):
-    pathT2w= row['t2w']
-    pathh= row[secondCol] 
-    newPath = pathh.replace(".mha","_resmaplA.mha" )
+# def resample_adc_hbv_to_t2w(row,secondCol ):
+#     pathT2w= row['t2w']
+#     pathh= row[secondCol] 
+#     newPath = pathh.replace(".mha","_resmaplA.mha" )
 
-    imageT2W = sitk.ReadImage(pathT2w)
-    targetSpacing = imageT2W.GetSpacing()
-    try:
-        resampled = Resampling.resample_with_GAN(pathh,targetSpacing)
-    except:
-        print("error resampling")
-    resampled = Resampling.resample_with_GAN(pathh,targetSpacing)
+#     imageT2W = sitk.ReadImage(pathT2w)
+#     targetSpacing = imageT2W.GetSpacing()
+#     try:
+#         resampled = Resampling.resample_with_GAN(pathh,targetSpacing)
+#     except:
+#         print("error resampling")
+#     resampled = Resampling.resample_with_GAN(pathh,targetSpacing)
 
-    write_to_modif_path(resampled,pathh,".mha","_resmaplA.mha" )
-    return newPath
+#     write_to_modif_path(resampled,pathh,".mha","_resmaplA.mha" )
+#     return newPath
 
-#needs to be on single thread as resampling GAN is acting on GPU
-# we save the metadata to main pandas data frame 
-df["adc_resmaplA"]=df.apply(lambda row : resample_adc_hbv_to_t2w(row, 'adc')   , axis = 1) 
-df["hbv_resmaplA"]=df.apply(lambda row : resample_adc_hbv_to_t2w(row, 'hbv')   , axis = 1) 
-df.to_csv('/home/sliceruser/data/metadata/processedMetaData.csv') 
+# #needs to be on single thread as resampling GAN is acting on GPU
+# # we save the metadata to main pandas data frame 
+# df["adc_resmaplA"]=df.apply(lambda row : resample_adc_hbv_to_t2w(row, 'adc')   , axis = 1) 
+# df["hbv_resmaplA"]=df.apply(lambda row : resample_adc_hbv_to_t2w(row, 'hbv')   , axis = 1) 
+# df.to_csv('/home/sliceruser/data/metadata/processedMetaData.csv') 
         
 
 #######Registration of adc and hb
