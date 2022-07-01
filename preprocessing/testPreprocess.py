@@ -33,12 +33,12 @@ df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv')
 
 ########## Standarization
 
-import Standardize
-import pandas as pd
-trainedModelsBasicPath='/home/sliceruser/data/preprocess/standarizationModels'
-for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:
-    Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath)   
-Standardize.iterateAndchangeLabelToOnes(df)
+# import Standardize
+# import pandas as pd
+# trainedModelsBasicPath='/home/sliceruser/data/preprocess/standarizationModels'
+# for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:
+#     Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath)   
+# Standardize.iterateAndchangeLabelToOnes(df)
 
 
 #######Setting spacing of adc and HBV to t2w so then there would be less resampling needed during registration
