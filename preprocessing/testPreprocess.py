@@ -35,38 +35,12 @@ df= df.head(4)
 
 ########## Standarization
 
-# import Standardize
-# import pandas as pd
-# trainedModelsBasicPath='/home/sliceruser/data/preprocess/standarizationModels'
-# for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:
-#     Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath)   
-# Standardize.iterateAndchangeLabelToOnes(df)
 
+trainedModelsBasicPath='/home/sliceruser/data/preprocess/standarizationModels'
+for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:
+    df[keyWord+"_stand"]=Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath)   
+Standardize.iterateAndchangeLabelToOnes(df)
 
-#######Setting spacing of adc and HBV to t2w so then there would be less resampling needed during registration
-
-# def resample_adc_hbv_to_t2w(row,secondCol ):
-#     pathT2w= row['t2w']
-#     pathh= row[secondCol] 
-#     newPath = pathh.replace(".mha","_resmaplA.mha" )
-
-#     imageT2W = sitk.ReadImage(pathT2w)
-#     targetSpacing = imageT2W.GetSpacing()
-#     try:
-#         resampled = Resampling.resample_with_GAN(pathh,targetSpacing)
-#     except:
-#         print("error resampling")
-#     resampled = Resampling.resample_with_GAN(pathh,targetSpacing)
-
-#     write_to_modif_path(resampled,pathh,".mha","_resmaplA.mha" )
-#     return newPath
-
-# #needs to be on single thread as resampling GAN is acting on GPU
-# # we save the metadata to main pandas data frame 
-# df["adc_resmaplA"]=df.apply(lambda row : resample_adc_hbv_to_t2w(row, 'adc')   , axis = 1) 
-# df["hbv_resmaplA"]=df.apply(lambda row : resample_adc_hbv_to_t2w(row, 'hbv')   , axis = 1) 
-# df.to_csv('/home/sliceruser/data/metadata/processedMetaData.csv') 
-        
 
 
 
@@ -128,13 +102,12 @@ def resample_labels(row,targetSpacing):
         print("already resampled")
     
     return newPath        
-    
 
 #needs to be on single thread as resampling GAN is acting on GPU
 # we save the metadata to main pandas data frame 
-df["adc_med_spac"]=df.apply(lambda row : resample_ToMedianSpac(row, 'adc',targetSpacingg)   , axis = 1) 
-df["hbv_med_spac"]=df.apply(lambda row : resample_ToMedianSpac(row, 'hbv',targetSpacingg)   , axis = 1) 
-df["t2w_med_spac"]=df.apply(lambda row : resample_ToMedianSpac(row, 't2w',targetSpacingg)   , axis = 1) 
+df["adc_med_spac"]=df.apply(lambda row : resample_ToMedianSpac(row, 'adc"_stand',targetSpacingg)   , axis = 1) 
+df["hbv_med_spac"]=df.apply(lambda row : resample_ToMedianSpac(row, 'hbv"_stand',targetSpacingg)   , axis = 1) 
+df["t2w_med_spac"]=df.apply(lambda row : resample_ToMedianSpac(row, 't2w"_stand',targetSpacingg)   , axis = 1) 
 df["label_med_spac"]=df.apply(lambda row : resample_labels(row,targetSpacingg)   , axis = 1) 
 
 
@@ -211,3 +184,30 @@ print("fiiiniiished")
 
 #     write_to_modif_path(resampled,path,".mha","_medianSpac.mha" )
 #     return newPath
+
+
+#######Setting spacing of adc and HBV to t2w so then there would be less resampling needed during registration
+
+# def resample_adc_hbv_to_t2w(row,secondCol ):
+#     pathT2w= row['t2w']
+#     pathh= row[secondCol] 
+#     newPath = pathh.replace(".mha","_resmaplA.mha" )
+
+#     imageT2W = sitk.ReadImage(pathT2w)
+#     targetSpacing = imageT2W.GetSpacing()
+#     try:
+#         resampled = Resampling.resample_with_GAN(pathh,targetSpacing)
+#     except:
+#         print("error resampling")
+#     resampled = Resampling.resample_with_GAN(pathh,targetSpacing)
+
+#     write_to_modif_path(resampled,pathh,".mha","_resmaplA.mha" )
+#     return newPath
+
+# #needs to be on single thread as resampling GAN is acting on GPU
+# # we save the metadata to main pandas data frame 
+# df["adc_resmaplA"]=df.apply(lambda row : resample_adc_hbv_to_t2w(row, 'adc')   , axis = 1) 
+# df["hbv_resmaplA"]=df.apply(lambda row : resample_adc_hbv_to_t2w(row, 'hbv')   , axis = 1) 
+# df.to_csv('/home/sliceruser/data/metadata/processedMetaData.csv') 
+        
+
