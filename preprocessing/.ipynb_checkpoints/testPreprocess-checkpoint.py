@@ -25,7 +25,7 @@ from comet_ml import Experiment
 
 experiment = Experiment(
     api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
-    workspace="picai", # Optional
+    #workspace="picai", # Optional
     project_name="picai_first_preprocessing", # Optional
     #experiment_name="baseline" # Optional
 )
@@ -40,12 +40,12 @@ for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:
     colName=keyWord+ "_spac_x"
     df = df.loc[df[colName]>0 ]
 # get only complete representaions and only those with labels
-df = df.loc[df['isAnyMissing'] ==False]
+#df = df.loc[df['isAnyMissing'] ==False]
 df = df.loc[df['isAnythingInAnnotated']>0 ]    
     
 #just for testing    
 #df=df.sample(n = 4)#TODO remove
-df= df.head(4)
+#df= df.head(4)
 ##df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
 
 ########## Standarization
@@ -108,8 +108,11 @@ def resample_ToMedianSpac(row,colName,targetSpacing):
 
 
 def resample_labels(row,targetSpacing):
-    path=row['reSampledPath']
+    path_t2w=row['t2w']
+    path= path_t2w.replace(".mha","_stand_label.mha")
+    
     study_id=str(row['study_id'])
+   
     
     newPath = path.replace(".mha","_medianSpac.mha" )
     if(not pathOs.exists(newPath)):         
@@ -142,8 +145,10 @@ reg_prop='/home/sliceruser/data/piCaiCode/preprocessing/registration/parameters.
        
 for keyWord in ['adc_med_spac','hbv_med_spac']:
     resList=[]     
+    # list(map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w_med_spac',experiment=experiment ),list(df.iterrows())))
+    
     with mp.Pool(processes = mp.cpu_count()) as pool:
-       resList=pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w_med_spac',experiment=experiment )  ,list(df.iterrows()))    
+       resList=pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w_med_spac'),list(df.iterrows()))    
     df['registered_'+keyWord]=resList  
 
 
@@ -233,6 +238,6 @@ print(df['study_id'])
 # # we save the metadata to main pandas data frame 
 # df["adc_resmaplA"]=df.apply(lambda row : resample_adc_hbv_to_t2w(row, 'adc')   , axis = 1) 
 # df["hbv_resmaplA"]=df.apply(lambda row : resample_adc_hbv_to_t2w(row, 'hbv')   , axis = 1) 
-# df.to_csv('/home/sliceruser/data/metadata/processedMetaData.csv') 
+df.to_csv('/home/sliceruser/data/metadata/processedMetaData.csv') 
         
 

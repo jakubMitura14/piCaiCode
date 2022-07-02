@@ -143,10 +143,13 @@ def iterateAndStandardize(seriesString,df,trainedModelsBasicPath,numberOfSamples
     return results
 
 #Important !!! set all labels that are non 0 to 1
-def changeLabelToOnes(path):
+def changeLabelToOnes(row):
     """
     as in the labels or meaningfull ones are greater then 0 so we need to process it and change any nymber grater to 0 to 1...
     """
+    row=row[1]
+    path=row['reSampledPath']
+    path_t2w=row['t2w']
     if(path!= " " and path!=""):
         image1 = sitk.ReadImage(path)
         image1 = sitk.DICOMOrient(image1, 'RAS')
@@ -161,7 +164,8 @@ def changeLabelToOnes(path):
         #standardazing orientation
         writer = sitk.ImageFileWriter()
         writer.KeepOriginalImageUIDOn()
-        writer.SetFileName(path)
+        newPath= path_t2w.replace(".mha","_stand_label.mha")
+        writer.SetFileName(newPath)
         writer.Execute(image)   
     
 def iterateAndchangeLabelToOnes(df):
@@ -170,10 +174,10 @@ def iterateAndchangeLabelToOnes(df):
     and overwrites it with normalised biased corrected and standardised version
     """
     #paralelize https://medium.com/python-supply/map-reduce-and-multiprocessing-8d432343f3e7
-    train_patientsPaths=df['reSampledPath'].dropna().astype('str').to_numpy()
-    train_patientsPaths=list(filter(lambda path: len(path)>2 ,train_patientsPaths))
+    # train_patientsPaths=df['reSampledPath'].dropna().astype('str').to_numpy()
+    # train_patientsPaths=list(filter(lambda path: len(path)>2 ,train_patientsPaths))
     with mp.Pool(processes = mp.cpu_count()) as pool:
-        pool.map(changeLabelToOnes,train_patientsPaths)
+        pool.map(changeLabelToOnes,list(df.iterrows()))
     # toUp=np.full(df.shape[0], False)#[0:3]=[True,True,True]
     # toUp[0:numRows]=np.full(numRows, True)
     #df['labels_to_one']=toUp    
