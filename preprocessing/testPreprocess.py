@@ -19,6 +19,17 @@ from utilsPreProcessing import write_to_modif_path
 from registration.elastixRegister import reg_adc_hbv_to_t2w
 import os.path
 from os import path as pathOs
+import comet_ml
+from comet_ml import Experiment
+
+
+experiment = Experiment(
+    api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
+    workspace="picai", # Optional
+    project_name="picai_first_preprocessing", # Optional
+    #experiment_name="baseline" # Optional
+)
+
 
 df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData.csv')
 #currently We want only imagfes with associated masks
@@ -28,6 +39,10 @@ df = df.loc[df['isAnythingInAnnotated']>0 ]
 for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:    
     colName=keyWord+ "_spac_x"
     df = df.loc[df[colName]>0 ]
+# get only complete representaions and only those with labels
+df = df.loc[df['isAnyMissing'] ==False]
+df = df.loc[df['isAnythingInAnnotated']>0 ]    
+    
 #just for testing    
 #df=df.sample(n = 4)#TODO remove
 df= df.head(4)
@@ -38,7 +53,7 @@ df= df.head(4)
 
 trainedModelsBasicPath='/home/sliceruser/data/preprocess/standarizationModels'
 for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:
-    df[keyWord+'_stand']=Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath)   
+    df[keyWord+'_stand']=Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,50)   
 Standardize.iterateAndchangeLabelToOnes(df)
 
 
@@ -71,8 +86,12 @@ registered images were already resampled now time for t2w and labels
 """
 def resample_ToMedianSpac(row,colName,targetSpacing):
     path=row[colName]
+    study_id=str(row['study_id'])
+    
     newPath = path.replace(".mha","_medianSpac.mha" )
     if(not pathOs.exists(newPath)):   
+        experiment.log_text(f" new resample {colName} {study_id}")
+
         try:
             resampled = Resampling.resample_with_GAN(path,targetSpacing)
         except:
@@ -81,6 +100,7 @@ def resample_ToMedianSpac(row,colName,targetSpacing):
 
         write_to_modif_path(resampled,path,".mha","_medianSpac.mha" )
     else:
+        experiment.log_text(f" old resample {colName} {study_id}")
         print("already resampled")
     return newPath    
 
@@ -89,9 +109,12 @@ def resample_ToMedianSpac(row,colName,targetSpacing):
 
 def resample_labels(row,targetSpacing):
     path=row['reSampledPath']
+    study_id=str(row['study_id'])
+    
     newPath = path.replace(".mha","_medianSpac.mha" )
     if(not pathOs.exists(newPath)):         
         try:
+            experiment.log_text(f" new resample label {study_id}")
             resampled = Resampling.resample_label_with_GAN(path,targetSpacing)
         except:
             print("error resampling")
@@ -100,6 +123,8 @@ def resample_labels(row,targetSpacing):
         write_to_modif_path(resampled,path,".mha","_medianSpac.mha" )
     else:
         print("already resampled")
+        experiment.log_text(f"already reSampled label {study_id}")
+        
     
     return newPath        
 
@@ -118,7 +143,7 @@ reg_prop='/home/sliceruser/data/piCaiCode/preprocessing/registration/parameters.
 for keyWord in ['adc_med_spac','hbv_med_spac']:
     resList=[]     
     with mp.Pool(processes = mp.cpu_count()) as pool:
-       resList=pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w_med_spac' )  ,list(df.iterrows()))    
+       resList=pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w_med_spac',experiment=experiment )  ,list(df.iterrows()))    
     df['registered_'+keyWord]=resList  
 
 
@@ -168,7 +193,7 @@ for keyWord in ['adc_med_spac','hbv_med_spac']:
 
 
 print("fiiiniiished")
-
+print(df['study_id'])
 
     
 # def resample_registered_to_given(row,colname,targetSpacing):

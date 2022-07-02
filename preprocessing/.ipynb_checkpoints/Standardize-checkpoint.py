@@ -17,6 +17,7 @@ import functools
 from functools import partial
 from intensity_normalization.normalize.nyul import NyulNormalize
 from intensity_normalization.typing import Modality
+from os import path as pathOs
 
 def removeOutliersBiasFieldCorrect(path,numberOfStandardDeviations = 4):
     """
@@ -76,6 +77,11 @@ def removeOutliersAndWrite(path):
 
 def standardizeFromPathAndOverwrite(path,nyul_normalizer): 
     #print("standardizeFromPathAndOverwrite "+path)
+    newPath = path.replace(".mha","_stand.mha" )
+    
+    if(pathOs.exists(newPath)):
+        return newPath
+    
     image1=sitk.ReadImage(path)
     data=nyul_normalizer(sitk.GetArrayFromImage(image1))
     #recreating image keeping relevant metadata
@@ -86,14 +92,14 @@ def standardizeFromPathAndOverwrite(path,nyul_normalizer):
     
     writer = sitk.ImageFileWriter()
     writer.KeepOriginalImageUIDOn()
-    writer.SetFileName(path)
+    writer.SetFileName(newPath)
     writer.Execute(image)    
-
+    return newPath
     
 #######  
 
     
-def iterateAndStandardize(seriesString,df,trainedModelsBasicPath):
+def iterateAndStandardize(seriesString,df,trainedModelsBasicPath,numberOfSamples):
     """
     iterates over files from train_patientsPaths representing seriesString type of the study
     and overwrites it with normalised biased corrected and standardised version
@@ -114,9 +120,14 @@ def iterateAndStandardize(seriesString,df,trainedModelsBasicPath):
     
     print("fitting normalizer  " +seriesString)
     nyul_normalizer = NyulNormalize()
+    #we need to avoid getting too much into normalizer becouse it will lead to memory errors
+    randomPart=[]
+    if(len(train_patientsPaths)<numberOfSamples):
+        randomPart=train_patientsPaths
+    else:
+        randomPart = np.random.choice(train_patientsPaths,numberOfSamples , p=[0.5, 0.1, 0.1, 0.3], replace=False)
     
-
-    images = [sitk.GetArrayFromImage(sitk.ReadImage(image_path)) for image_path in train_patientsPaths]  
+    images = [sitk.GetArrayFromImage(sitk.ReadImage(image_path)) for image_path in randomPart]  
     nyul_normalizer.fit(images)
 
     pathToSave = join(trainedModelsBasicPath,seriesString+".npy")
@@ -124,11 +135,12 @@ def iterateAndStandardize(seriesString,df,trainedModelsBasicPath):
     #reloading from disk just for debugging
     nyul_normalizer.load_standard_histogram(pathToSave)
     
-
+    results=[]
     with mp.Pool(processes = mp.cpu_count()) as pool:
-        pool.map(partial(standardizeFromPathAndOverwrite,nyul_normalizer=nyul_normalizer ),train_patientsPaths)
+        results=pool.map(partial(standardizeFromPathAndOverwrite,nyul_normalizer=nyul_normalizer ),train_patientsPaths)
     # colName= 'Nyul_'+seriesString
     # df[colName]=toUp 
+    return results
 
 #Important !!! set all labels that are non 0 to 1
 def changeLabelToOnes(path):

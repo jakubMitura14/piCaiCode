@@ -9,8 +9,10 @@ from functools import partial
 import sys
 import os.path
 from os import path as pathOs
+import comet_ml
+from comet_ml import Experiment
 
-def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName ):
+def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment):
     """
     registers adc and hbv images to t2w image
     first we need to create directories for the results
@@ -18,16 +20,21 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName ):
     we do it in multiple threads at once and we waiteach time the process finished
     """
     row=row[1]
+    study_id=str(row['study_id'])
+    
     patId=str(row['patient_id'])
     path=str(row[colName])
     outPath = path.replace(".mha","_for_"+colName)
     result=pathOs.join(outPath,"result0.mha")
     #returning faster if the result is already present
     if(pathOs.exists(result)):
+        experiment.log_text(f"already registered {colName} {study_id}")
+        
         print("registered already present")
         return result     
 
     if(len(path)>1):
+        experiment.log_text(f"new register {colName} {study_id}")
         
         cmd='mkdir '+ outPath
         p = Popen(cmd, shell=True)

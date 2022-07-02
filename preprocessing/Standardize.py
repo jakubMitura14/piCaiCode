@@ -99,7 +99,7 @@ def standardizeFromPathAndOverwrite(path,nyul_normalizer):
 #######  
 
     
-def iterateAndStandardize(seriesString,df,trainedModelsBasicPath):
+def iterateAndStandardize(seriesString,df,trainedModelsBasicPath,numberOfSamples):
     """
     iterates over files from train_patientsPaths representing seriesString type of the study
     and overwrites it with normalised biased corrected and standardised version
@@ -120,9 +120,14 @@ def iterateAndStandardize(seriesString,df,trainedModelsBasicPath):
     
     print("fitting normalizer  " +seriesString)
     nyul_normalizer = NyulNormalize()
+    #we need to avoid getting too much into normalizer becouse it will lead to memory errors
+    randomPart=[]
+    if(len(train_patientsPaths)<numberOfSamples):
+        randomPart=train_patientsPaths
+    else:
+        randomPart = np.random.choice(train_patientsPaths,numberOfSamples , p=[0.5, 0.1, 0.1, 0.3], replace=False)
     
-
-    images = [sitk.GetArrayFromImage(sitk.ReadImage(image_path)) for image_path in train_patientsPaths]  
+    images = [sitk.GetArrayFromImage(sitk.ReadImage(image_path)) for image_path in randomPart]  
     nyul_normalizer.fit(images)
 
     pathToSave = join(trainedModelsBasicPath,seriesString+".npy")
