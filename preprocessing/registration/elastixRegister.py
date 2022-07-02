@@ -21,7 +21,7 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName ):
     patId=str(row['patient_id'])
     path=str(row[colName])
     outPath = path.replace(".mha","_for_"+colName)
-    result=path.join(outPath,"result0.mha")
+    result=pathOs.join(outPath,"result0.mha")
     #returning faster if the result is already present
     if(pathOs.exists(result)):
         print("registered already present")
