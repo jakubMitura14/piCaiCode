@@ -19,12 +19,7 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
     then we suply hbv and adc as moving images and t2w as static one - and register in reference to it
     we do it in multiple threads at once and we waiteach time the process finished
     """
-    experiment = Experiment(
-    api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
-    #workspace="picai", # Optional
-    project_name="picai_first_preprocessing", # Optional
-    #experiment_name="baseline" # Optional
-)
+
     row=row[1]
     study_id=str(row['study_id'])
     
@@ -46,7 +41,7 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
     
     print(pathOs.exists(result))
     #returning faster if the result is already present
-    if(pathOs.exists(result)):
+    if(pathOs.exists(outPath)):
         if(experiment!=None):
             experiment.log_text(f"already registered {colName} {study_id}")
         

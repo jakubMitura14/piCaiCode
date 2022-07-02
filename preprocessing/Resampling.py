@@ -25,7 +25,7 @@ def copyDirAndOrigin(imageOrig,spacing,data):
 def useGan(data,post_slices,pre_slices):
     diffPrim = post_slices-pre_slices# always positive number if too big we will run out of memoory
     diffDone=0
-    stepSize=200 # how big diffrence in number of slices it can handle at one go
+    stepSize=100 # how big diffrence in number of slices it can handle at one go
     if(diffPrim<stepSize):
             return SOUP_GAN(data, post_slices/pre_slices,1)
     else:        

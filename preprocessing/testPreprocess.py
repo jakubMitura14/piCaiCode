@@ -45,7 +45,7 @@ df = df.loc[df['isAnythingInAnnotated']>0 ]
     
 #just for testing    
 #df=df.sample(n = 4)#TODO remove
-#df= df.head(4)
+df= df.head(4)
 ##df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
 
 ########## Standarization
@@ -148,8 +148,8 @@ for keyWord in ['adc_med_spac','hbv_med_spac']:
     # list(map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w_med_spac',experiment=experiment ),list(df.iterrows())))
     
     with mp.Pool(processes = mp.cpu_count()) as pool:
-       resList=pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w_med_spac'),list(df.iterrows()))    
-    df['registered_'+keyWord]=resList  
+        resList=pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w_med_spac'),list(df.iterrows()))    
+        df['registered_'+keyWord]=resList  
 
 
 
