@@ -125,7 +125,7 @@ def iterateAndStandardize(seriesString,df,trainedModelsBasicPath,numberOfSamples
     if(len(train_patientsPaths)<numberOfSamples):
         randomPart=train_patientsPaths
     else:
-        randomPart = np.random.choice(train_patientsPaths,numberOfSamples , p=[0.5, 0.1, 0.1, 0.3], replace=False)
+        randomPart = np.random.choice(train_patientsPaths,numberOfSamples , replace=False)
     
     images = [sitk.GetArrayFromImage(sitk.ReadImage(image_path)) for image_path in randomPart]  
     nyul_normalizer.fit(images)
