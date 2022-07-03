@@ -42,7 +42,7 @@ for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:
 # get only complete representaions and only those with labels
 #df = df.loc[df['isAnyMissing'] ==False]
 df = df.loc[df['isAnythingInAnnotated']>0 ]    
-    
+print(df)    
 #just for testing    
 #df=df.sample(n = 4)#TODO remove
 #df= df.head(4)
