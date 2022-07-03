@@ -45,7 +45,7 @@ df = df.loc[df['isAnythingInAnnotated']>0 ]
     
 #just for testing    
 #df=df.sample(n = 4)#TODO remove
-df= df.head(4)
+#df= df.head(4)
 ##df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
 
 ########## Standarization
