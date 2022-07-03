@@ -40,7 +40,7 @@ for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:
     colName=keyWord+ "_spac_x"
     df = df.loc[df[colName]>0 ]
 # get only complete representaions and only those with labels
-#df = df.loc[df['isAnyMissing'] ==False]
+df = df.loc[df['isAnyMissing'] ==False]
 df = df.loc[df['isAnythingInAnnotated']>0 ]    
 print(df)    
 #just for testing    
