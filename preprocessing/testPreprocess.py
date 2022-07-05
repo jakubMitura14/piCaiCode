@@ -238,3 +238,4 @@ print(df['study_id'])
 df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
         
 
+#/home/sliceruser/Slicer/bin/PythonSlicer /home/sliceruser/data/piCaiCode/preprocessing/testPreprocess.py

@@ -46,8 +46,8 @@
 // The optimizer AdaptiveStochasticGradientDescent (ASGD) works
 // quite ok in general. The Transform and Metric are important
 // and need to be chosen careful for each application. See manual.
-//(Transform "EulerTransform")
-(Transform "AffineTransform")
+(Transform "EulerTransform")
+//(Transform "AffineTransform")
 
 (Sampler "RandomCoordinate")
 (Optimizer "AdaptiveStochasticGradientDescent")
@@ -151,8 +151,8 @@
 (WriteResultImage "true")
 
 //***********MiscVisulaization
-(WriteTransformParametersEachIteration "false" "false" "false" "false")
-(WriteTransformParametersEachResolution "true" "true" "true" "true")
+//(WriteTransformParametersEachIteration "false" "false" "false" "false")
+//(WriteTransformParametersEachResolution "true" "true" "true" "true")
 
 // Define output format
 //(ResultImagePixelType "float") 
