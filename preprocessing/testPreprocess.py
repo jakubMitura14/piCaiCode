@@ -45,7 +45,7 @@ df = df.loc[df['isAnythingInAnnotated']>0 ]
 print(df)    
 #just for testing    
 #df=df.sample(n = 4)#TODO remove
-df= df.head(4)
+#df= df.head(4)
 ##df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
 
 ########## Standarization
@@ -151,7 +151,7 @@ for keyWord in ['adc_med_spac','hbv_med_spac']:
 ManageMetadata.addSizeMetaDataToDf("t2w_med_spac",df)
 
 
-partial(reg_adc_hbv_to_t2w,colName='adc_med_spac',elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w_med_spac')(row)
+# partial(reg_adc_hbv_to_t2w,colName='adc_med_spac',elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w_med_spac')(row)
 
 # def ifShortReturnMinus(tupl, patId,colName):
 #     if(len(tupl)!=3):

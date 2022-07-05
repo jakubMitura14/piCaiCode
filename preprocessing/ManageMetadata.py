@@ -35,12 +35,11 @@ def getMonaiSubjectDataFromDataFrame(row,t2w_name,adc_name,hbv_name,label_name):
         return subject
 
 
-def load_df_only_full():
-    df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData.csv')
+def load_df_only_full(df,t2w_name,adc_name,hbv_name,label_name):
     df = df.loc[df['isAnyMissing'] ==False]
     df = df.loc[df['isAnythingInAnnotated']>0 ]
     deficientPatIDs=[]
-    data_dicts = list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1])  , list(df.iterrows())))
+    data_dicts = list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1],t2w_name,adc_name,hbv_name,label_name)  , list(df.iterrows())))
     train_transforms=transformsForMain.get_train_transforms()
     val_transforms= transformsForMain.get_val_transforms()
 

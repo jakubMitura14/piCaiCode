@@ -49,15 +49,15 @@ def get_train_transforms():
     train_transforms = Compose(
         [
             LoadImaged(keys=["t2w","adc", "hbv","label"]),
-            EnsureChannelFirstd(keys=["t2w,adc,hbv,label"]),
-            #AsChannelFirstd(keys=["t2w,adc,hbv,label"]),
-            Orientationd(keys=["t2w,adc,hbv,label"], axcodes="RAS"),
-            Spacingd(keys=["t2w,adc,hbv,label"], pixdim=(
+            EnsureChannelFirstd(keys=["t2w","adc", "hbv","label"]),
+            #AsChannelFirstd(keys=["t2w","adc", "hbv","label"]),
+            Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
+            Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
                 1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
-            DivisiblePadd(keys=["t2w,adc,hbv,label"],k=32) ,
-            #CropForegroundd(keys=["t2w,adc,hbv,label"], source_key="image"),
+            DivisiblePadd(keys=["t2w","adc", "hbv","label"],k=32) ,
+            #CropForegroundd(keys=["t2w","adc", "hbv","label"], source_key="image"),
             # RandCropByPosNegLabeld(
-            #     keys=["t2w,adc,hbv,label"],
+            #     keys=["t2w","adc", "hbv","label"],
             #     label_key="label",
             #     spatial_size=(32, 32, 32),
             #     pos=1,
@@ -66,15 +66,15 @@ def get_train_transforms():
             #     image_key="t2w",
             #     image_threshold=0,
             # ),
-            EnsureTyped(keys=["t2w,adc,hbv,label"]),
-            SelectItemsd(keys=["t2w,adc,hbv,label"]),
+            EnsureTyped(keys=["t2w","adc", "hbv","label"]),
+            SelectItemsd(keys=["t2w","adc", "hbv","label"]),
             
-            RandGaussianNoised(keys=["t2w,adc,hbv,label"]),
-            RandAdjustContrastd(keys=["t2w,adc,hbv,label"]),
-            RandGaussianSmoothd(keys=["t2w,adc,hbv,label"]),
-            RandRicianNoised(keys=["t2w,adc,hbv,label"]),
-            RandFlipd(keys=["t2w,adc,hbv,label"]),
-            RandAffined(keys=["t2w,adc,hbv,label"]),
+            RandGaussianNoised(keys=["t2w","adc", "hbv","label"]),
+            RandAdjustContrastd(keys=["t2w","adc", "hbv","label"]),
+            RandGaussianSmoothd(keys=["t2w","adc", "hbv","label"]),
+            RandRicianNoised(keys=["t2w","adc", "hbv","label"]),
+            RandFlipd(keys=["t2w","adc", "hbv","label"]),
+            RandAffined(keys=["t2w","adc", "hbv","label"]),
             ConcatItemsd(keys=["t2w,adc,hbv"],name="common_3channels")
             
         ]
@@ -83,19 +83,19 @@ def get_train_transforms():
 def get_val_transforms(maxSize):
     val_transforms = Compose(
         [
-            LoadImaged(keys=["t2w,adc,hbv,label"]),
-            EnsureChannelFirstd(keys=["t2w,adc,hbv,label"]),
-            #AsChannelFirstd(keys=["t2w,adc,hbv,label"]),
-            Orientationd(keys=["t2w,adc,hbv,label"], axcodes="RAS"),
-            Spacingd(keys=["t2w,adc,hbv,label"], pixdim=(
+            LoadImaged(keys=["t2w","adc", "hbv","label"]),
+            EnsureChannelFirstd(keys=["t2w","adc", "hbv","label"]),
+            #AsChannelFirstd(keys=["t2w","adc", "hbv","label"]),
+            Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
+            Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
                 1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
-            SpatialPadd(keys=["t2w,adc,hbv,label"],spatial_size=maxSize) ,
-            #DivisiblePadd(keys=["t2w,adc,hbv,label"],k=32) ,
+            SpatialPadd(keys=["t2w","adc", "hbv","label"],spatial_size=maxSize) ,
+            #DivisiblePadd(keys=["t2w","adc", "hbv","label"],k=32) ,
 
-            #CropForegroundd(keys=["t2w,adc,hbv,label"], source_key="image"),
+            #CropForegroundd(keys=["t2w","adc", "hbv","label"], source_key="image"),
 
-            EnsureTyped(keys=["t2w,adc,hbv,label"]),
-            SelectItemsd(keys=["t2w,adc,hbv,label"]),
+            EnsureTyped(keys=["t2w","adc", "hbv","label"]),
+            SelectItemsd(keys=["t2w","adc", "hbv","label"]),
             ConcatItemsd(keys=["t2w,adc,hbv"],name="common_3channels")
         ]
     )
@@ -110,18 +110,18 @@ def get_val_transforms(maxSize):
 # def get_train_transforms():
 #     train_transforms = Compose(
 #         [
-#             LoadImaged(keys=["t2w,adc,hbv,label"]),
-#            Orientationd(keys=["t2w,adc,hbv,label"], axcodes="RAS"),
-#             tio.transforms.EnsureShapeMultiple((32 , 32, 32), include=["t2w,adc,hbv,label"]),           
-#            # AddChanneld(keys=["t2w,adc,hbv,label"]),
-#             EnsureChannelFirstd(keys=["t2w,adc,hbv,label"]),
-#             Spacingd(keys=["t2w,adc,hbv,label"], pixdim=(
+#             LoadImaged(keys=["t2w","adc", "hbv","label"]),
+#            Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
+#             tio.transforms.EnsureShapeMultiple((32 , 32, 32), include=["t2w","adc", "hbv","label"]),           
+#            # AddChanneld(keys=["t2w","adc", "hbv","label"]),
+#             EnsureChannelFirstd(keys=["t2w","adc", "hbv","label"]),
+#             Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
 #                 1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
 
 
-#             CropForegroundd(keys=["t2w,adc,hbv,label"], source_key="image"),
+#             CropForegroundd(keys=["t2w","adc", "hbv","label"], source_key="image"),
 #             RandCropByPosNegLabeld(
-#                 keys=["t2w,adc,hbv,label"],
+#                 keys=["t2w","adc", "hbv","label"],
 #                 label_key="label",
 #                 spatial_size=(32, 32, 32),
 #                 pos=1,
@@ -130,25 +130,25 @@ def get_val_transforms(maxSize):
 #                 image_key="t2w",
 #                 image_threshold=0,
 #             ),
-#             EnsureTyped(keys=["t2w,adc,hbv,label"]),
-#             SelectItemsd(keys=["t2w,adc,hbv,label"])#TODO remove
+#             EnsureTyped(keys=["t2w","adc", "hbv","label"]),
+#             SelectItemsd(keys=["t2w","adc", "hbv","label"])#TODO remove
 #         ]
 #     )
 #     return train_transforms
 # def get_val_transforms():
 #     val_transforms = Compose(
 #         [
-#             LoadImaged(keys=["t2w,adc,hbv,label"]),
-#             tio.transforms.EnsureShapeMultiple((32 , 32, 32), include=["t2w,adc,hbv,label"]),            
-#            Orientationd(keys=["t2w,adc,hbv,label"], axcodes="RAS"),            
-#            # AddChanneld(keys=["t2w,adc,hbv,label"]),            
-#             EnsureChannelFirstd(keys=["t2w,adc,hbv,label"]),
-#             Spacingd(keys=["t2w,adc,hbv,label"], pixdim=(
+#             LoadImaged(keys=["t2w","adc", "hbv","label"]),
+#             tio.transforms.EnsureShapeMultiple((32 , 32, 32), include=["t2w","adc", "hbv","label"]),            
+#            Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),            
+#            # AddChanneld(keys=["t2w","adc", "hbv","label"]),            
+#             EnsureChannelFirstd(keys=["t2w","adc", "hbv","label"]),
+#             Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
 #                 1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
 
-#             CropForegroundd(keys=["t2w,adc,hbv,label"], source_key="image"),
+#             CropForegroundd(keys=["t2w","adc", "hbv","label"], source_key="image"),
 #             RandCropByPosNegLabeld(
-#                 keys=["t2w,adc,hbv,label"],
+#                 keys=["t2w","adc", "hbv","label"],
 #                 label_key="label",
 #                 spatial_size=(32, 32, 32),
 #                 pos=1,
@@ -157,8 +157,8 @@ def get_val_transforms(maxSize):
 #                 image_key="t2w",
 #                 image_threshold=0,
 #             ),
-#             EnsureTyped(keys=["t2w,adc,hbv,label"]),
-#             SelectItemsd(keys=["t2w,adc,hbv,label"]) #TODO remove
+#             EnsureTyped(keys=["t2w","adc", "hbv","label"]),
+#             SelectItemsd(keys=["t2w","adc", "hbv","label"]) #TODO remove
 #         ]
 #     )
 #     return val_transforms
