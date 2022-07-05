@@ -1,5 +1,5 @@
-//Parameter file taken from https://github.com/SuperElastix/ElastixModelZoo/blob/master/models/Par0043/Par0043rigid.txt
-// more about parameters in https://elastix.lumc.nl/doxygen/parameter.html
+//Parameter file
+
 //**********ImageTypes**********
 
 // The internal pixel type, used for internal computations
@@ -28,8 +28,8 @@
 (Registration "MultiResolutionRegistration")
 
 //***Interpolator
-(Interpolator "BSplineInterpolator")
-//(Interpolator "LinearInterpolator")
+//(Interpolator "BSplineInterpolator")
+(Interpolator "LinearInterpolator")
 //***Resampler
 (Resampler "DefaultResampler")
 (ResampleInterpolator "FinalBSplineInterpolator")
@@ -47,8 +47,6 @@
 // quite ok in general. The Transform and Metric are important
 // and need to be chosen careful for each application. See manual.
 (Transform "EulerTransform")
-//(Transform "AffineTransform")
-
 (Sampler "RandomCoordinate")
 (Optimizer "AdaptiveStochasticGradientDescent")
 (Metric "AdvancedMattesMutualInformation")
@@ -114,16 +112,15 @@
 // With an AdaptiveStochasticGradientDescent optimizer,
 // in combination with the two options below, around 2000
 // samples may already suffice.
-(NumberOfSpatialSamples 90480)
+(NumberOfSpatialSamples 20480)
 
 // Refresh these spatial samples in every iteration, and select
 // them randomly. See the manual for information on other sampling
 // strategies.
 (NewSamplesEveryIteration "true")
-//(ImageSampler "RandomCoordinate")
-(ImageSampler "Full")
+(ImageSampler "RandomCoordinate")
 
-(FixedImageBSplineInterpolationOrder 3)
+(FixedImageBSplineInterpolationOrder 1)
 (UseRandomSampleRegion "true")
 //(SampleRegionSize 50 50 50)
 
@@ -152,9 +149,9 @@
 (WriteResultImage "true")
 
 //***********MiscVisulaization
-//(WriteTransformParametersEachIteration "false" "false" "false" "false")
-//(WriteTransformParametersEachResolution "true" "true" "true" "true")
+(WriteTransformParametersEachIteration "false" "false" "false" "false")
+(WriteTransformParametersEachResolution "true" "true" "true" "true")
 
 // Define output format
-//(ResultImagePixelType "float") 
+(ResultImagePixelType "float") 
 (ResultImageFormat "mha")

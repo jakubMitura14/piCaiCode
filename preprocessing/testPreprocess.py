@@ -151,6 +151,7 @@ for keyWord in ['adc_med_spac','hbv_med_spac']:
 ManageMetadata.addSizeMetaDataToDf("t2w_med_spac",df)
 
 
+partial(reg_adc_hbv_to_t2w,colName='adc_med_spac',elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w_med_spac')(row)
 
 # def ifShortReturnMinus(tupl, patId,colName):
 #     if(len(tupl)!=3):
@@ -239,3 +240,5 @@ df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv')
         
 #/home/sliceruser/Slicer/bin/PythonSlicer /home/sliceruser/data/piCaiCode/preprocessing/processMetaData.py
 #/home/sliceruser/Slicer/bin/PythonSlicer /home/sliceruser/data/piCaiCode/preprocessing/testPreprocess.py
+
+# reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w_med_spac'
