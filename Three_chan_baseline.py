@@ -97,8 +97,11 @@ norm= (Norm.INSTANCE, {}) #(Norm.INSTANCE, {"normalized_shape": (10, 10, 10)})#N
 dropout= 0.0
 
 ### lightning trainer mainly
-#precision=16
+precision=16# "bf16" 64
 max_epochs=30
+accumulate_grad_batches=1 # 3,5 ..
+gradient_clip_val=0.0# 0.5,2.0
+
 
 ## augmebtations mainly
 RandGaussianNoised_prob=0.1
@@ -108,7 +111,7 @@ RandRicianNoised_prob=0.1
 RandFlipd_prob=0.1
 RandAffined_prob=0.1
 RandCoarseDropoutd_prob=0.1
-is_whole_to_train =False
+is_whole_to_train =True
 
 
 
@@ -177,12 +180,18 @@ trainer = pl.Trainer(
     #accelerato="cpu", #TODO(remove)
     max_epochs=max_epochs,
     #gpus=1,
-    precision=16, #TODO(unhash)
-    callbacks=[early_stopping],#TODO(unhash)
+    precision=precision, 
+    callbacks=[early_stopping],
     logger=comet_logger,
     accelerator='auto',
     devices='auto',
     default_root_dir= "/home/sliceruser/lightning_logs",
+    auto_scale_batch_size="binsearch",
+    auto_lr_find=True,
+    stochastic_weight_avg=True,
+    accumulate_grad_batches=accumulate_grad_batches,
+    gradient_clip_val=gradient_clip_val# 0.5,2.0
+
 )
 trainer.logger._default_hp_metric = False
 
