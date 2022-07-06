@@ -149,8 +149,8 @@ unet_hyperparam = {
         self.kernel_size = kernel_size
         self.up_kernel_size = up_kernel_size
         self.num_res_units = num_res_units
-        self.act = act
-        self.norm = norm
+        self.act = act[0]
+        self.norm = norm[0]
         self.dropout = dropout
         self.bias = bias
         self.adn_ordering = adn_ordering
@@ -213,7 +213,7 @@ unet_hyperparam = {
         """
         mod: nn.Module
         if self.num_res_units[0] > 0:
-
+            print(f"actttt {self.act}  ")
             mod = ResidualUnit(
                 self.dimensions,
                 in_channels,
