@@ -126,7 +126,7 @@ class Model(pl.LightningModule):
         #     f"at epoch: {self.best_val_epoch}"
         # )
         self.log('val_mean_Dice_metr', mean_val_dice)
-        self.experiment.log_metric("val_mean_Dice_metr",mean_val_dice)
+        self.experiment.log_metric("loss",mean_val_dice)
 
         #return {"log": self.log}
 

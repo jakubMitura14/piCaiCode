@@ -94,6 +94,7 @@ LigtningModel =loadLib("LigtningModel", "/home/sliceruser/data/piCaiCode/model/L
 # label_name="label_med_spac"
 
 def mainTrain(experiment):
+    print("mmmmmmmmmmmmmmmmmm")
     #TODO(remove)
     comet_logger = CometLogger(
         api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
