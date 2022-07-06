@@ -102,7 +102,6 @@ unet_hyperparam = {
         the inputs must have spatial dimensions that are all multiples of 2^N.
         Usually, applying `resize`, `pad` or `crop` transforms can help adjust the spatial size of input data.
     """
-
     @deprecated_arg(
         name="dimensions", new_name="spatial_dims", since="0.6", msg_suffix="Please use `spatial_dims` instead."
     )
@@ -128,10 +127,6 @@ unet_hyperparam = {
 
         if len(channels) < 2:
             raise ValueError("the length of `channels` should be no less than 2.")
-        print(f"len channels {len(channels)}")
-        print(f"len strides {len(strides)} {strides}")
-
-        print()
         delta = len(strides) - (len(channels) - 1)
         if delta < 0:
             raise ValueError("the length of `strides` should equal to `len(channels) - 1`.")
@@ -173,8 +168,6 @@ unet_hyperparam = {
                 strides: convolution stride.
                 is_top: True if this is the top block.
             """
-            print(f"cccreate block input channels {inc} output {outc} is_top {is_top}")
-
             c = channels[0]
             s = strides[0]
 
@@ -219,7 +212,7 @@ unet_hyperparam = {
             is_top: True if this is the top block.
         """
         mod: nn.Module
-        if self.num_res_units > 0:
+        if self.num_res_units[0] > 0:
 
             mod = ResidualUnit(
                 self.dimensions,
@@ -227,7 +220,7 @@ unet_hyperparam = {
                 out_channels,
                 strides=strides,
                 kernel_size=self.kernel_size,
-                subunits=self.num_res_units,
+                subunits=self.num_res_units[0],
                 act=self.act,
                 norm=self.norm,
                 dropout=self.dropout,
@@ -280,12 +273,12 @@ unet_hyperparam = {
             norm=self.norm,
             dropout=self.dropout,
             bias=self.bias,
-            conv_only=is_top and self.num_res_units == 0,
+            conv_only=is_top and self.num_res_units[0] == 0,
             is_transposed=True,
             adn_ordering=self.adn_ordering,
         )
 
-        if self.num_res_units > 0:
+        if self.num_res_units[0] > 0:
             ru = ResidualUnit(
                 self.dimensions,
                 out_channels,
@@ -305,7 +298,6 @@ unet_hyperparam = {
         return conv
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        #print(f"in foorward {x.size()}")
         x = self.model(x)
         return x
 

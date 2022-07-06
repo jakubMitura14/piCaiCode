@@ -21,46 +21,27 @@ from monai.networks.nets import UNet
 from monai.networks.layers import Norm
 from monai.metrics import DiceMetric
 from monai.losses import DiceLoss
-from monai.inferers import sliding_window_inference
 from monai.data import CacheDataset,Dataset,PersistentDataset, list_data_collate, decollate_batch
-from monai.config import print_config
-from monai.apps import download_and_extract
-
-sns.set()
-plt.rcParams['figure.figsize'] = 12, 8
-monai.utils.set_determinism()
-
 from datetime import datetime
 import os
 import tempfile
 from glob import glob
-
 from monai.handlers.utils import from_engine
-from monai.networks.nets import UNet
-from monai.networks.layers import Norm
-from monai.metrics import DiceMetric
-from monai.losses import DiceLoss
 from monai.inferers import sliding_window_inference
-from monai.config import print_config
-from monai.apps import download_and_extract
 import torch
 import matplotlib.pyplot as plt
 import tempfile
 import shutil
 import os
 import glob
-
+from monai.networks.layers.factories import Act, Norm
 import torch.nn as nn
 import torch.nn.functional as F
-
 import multiprocessing
+from comet_ml import Optimizer
 
-sns.set()
-plt.rcParams['figure.figsize'] = 12, 8
 monai.utils.set_determinism()
-# import preprocessing.transformsForMain as transformsForMain
-# import preprocessing.ManageMetadata as manageMetaData
-# import dataManag.utils.dataUtils as dataUtils
+
 import importlib.util
 import sys
 
@@ -78,16 +59,6 @@ dataUtils =loadLib("dataUtils", "/home/sliceruser/data/piCaiCode/dataManag/utils
 unets =loadLib("unets", "/home/sliceruser/data/piCaiCode/model/unets.py")
 DataModule =loadLib("DataModule", "/home/sliceruser/data/piCaiCode/model/DataModule.py")
 LigtningModel =loadLib("LigtningModel", "/home/sliceruser/data/piCaiCode/model/LigtningModel.py")
-
-
-
-#hyperparameters
-loss=monai.losses.FocalLoss(include_background=False, to_onehot_y=True)
-#loss=monai.losses.metrics.DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
-strides=[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
-channels=[32, 64, 128, 256, 512, 1024]
-optimizer_class=torch.optim.AdamW
-
 comet_logger = CometLogger(
     api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
     #workspace="OPI", # Optional
@@ -95,22 +66,61 @@ comet_logger = CometLogger(
     #experiment_name="baseline" # Optional
 )
 
+#####hyperparameters
+# based on https://www.comet.com/docs/python-sdk/introduction-optimizer/
+# We only need to specify the algorithm and hyperparameters to use:
+config = {
+    # We pick the Bayes algorithm:
+    "algorithm": "bayes",
+
+    # Declare your hyperparameters in the Vizier-inspired format:
+    "parameters": {
+        "x": {"type": "integer", "min": 1, "max": 5},
+    },
+
+    # Declare what we will be optimizing, and how:
+    "spec": {
+    "metric": "loss",
+        "objective": "minimize",
+    },
+}
+
+loss=monai.losses.FocalLoss(include_background=False, to_onehot_y=True)
+#loss=monai.losses.metrics.DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
+strides=[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
+channels=[32, 64, 128, 256, 512, 1024]
+optimizer_class=torch.optim.AdamW
+num_res_units= 2,
+# act = Act.PRELU,
+# norm= Norm.INSTANCE,
+dropout= 0.0
+#precision=16
+max_epochs=30
+#diffrent definitions depending on preprocessing
+cache_dir="/home/sliceruser/preprocess/monai_persistent_Dataset"
+t2w_name= "t2w_med_spac"
+adc_name="registered_adc_med_spac"
+hbv_name="registered_hbv_med_spac"
+label_name="label_med_spac"
+
+
+####loading meta data 
 df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv')
-maxSize=manageMetaData.getMaxSize("t2w_med_spac",df)
-df= manageMetaData.load_df_only_full(df,"t2w_med_spac","registered_adc_med_spac","registered_hbv_med_spac", "label_med_spac",maxSize )
+maxSize=manageMetaData.getMaxSize(t2w_name,df)
+df= manageMetaData.load_df_only_full(df,t2w_name,adc_name,hbv_name, label_name,maxSize )
 
 
 data = DataModule.PiCaiDataModule(
     df= df,
-    batch_size=1,#TODO(batc size determined by lightning)
+    batch_size=2,#TODO(batc size determined by lightning)
     trainSizePercent=0.5,# change to 0.7
     num_workers=os.cpu_count(),
     drop_last=False,#True,
-    cache_dir="/home/sliceruser/preprocess/monai_persistent_Dataset",
-    t2w_name="t2w_med_spac",
-    adc_name="registered_adc_med_spac",
-    hbv_name="registered_hbv_med_spac",
-    label_name="label_med_spac",
+    cache_dir=cache_dir,
+    t2w_name=t2w_name,
+    adc_name=adc_name,
+    hbv_name=hbv_name,
+    label_name=label_name,
     maxSize=maxSize
 )
 data.prepare_data()
@@ -123,8 +133,13 @@ unet= unets.UNet(
     in_channels=3,
     out_channels=2,
     strides=strides,
-    channels=channels
+    channels=channels,
+    num_res_units= num_res_units,
+    # act = act,
+    # norm= norm,
+    dropout= dropout
 )
+
 
 
 model = LigtningModel.Model(
@@ -138,7 +153,7 @@ early_stopping = pl.callbacks.early_stopping.EarlyStopping(
 )
 trainer = pl.Trainer(
     #accelerato="cpu", #TODO(remove)
-    max_epochs=30,
+    max_epochs=max_epochs,
     #gpus=1,
     precision=16, #TODO(unhash)
     callbacks=[early_stopping],#TODO(unhash)
@@ -153,6 +168,7 @@ trainer.logger._default_hp_metric = False
 start = datetime.now()
 print('Training started at', start)
 trainer.fit(model=model, datamodule=data)
-
 print('Training duration:', datetime.now() - start)
+
+
 #experiment.end()
