@@ -42,16 +42,13 @@ import torch
 import torchio as tio
 
 
-
-
-
 def get_train_transforms(maxSize):
     train_transforms = Compose(
         [
             LoadImaged(keys=["t2w","adc", "hbv","label"]),
             EnsureChannelFirstd(keys=["t2w","adc", "hbv","label"]),
             #AsChannelFirstd(keys=["t2w","adc", "hbv","label"]),
-            Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
+            #Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
             #Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
             #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
             
@@ -62,12 +59,12 @@ def get_train_transforms(maxSize):
             DivisiblePadd(keys=["t2w","adc", "hbv","label"],k=32) ,
 
             #SpatialPadd(keys=["t2w","adc", "hbv","label"],spatial_size=maxSize) ,            
-            RandGaussianNoised(keys=["t2w","adc", "hbv","label"]),
-            RandAdjustContrastd(keys=["t2w","adc", "hbv","label"]),
-            RandGaussianSmoothd(keys=["t2w","adc", "hbv","label"]),
-            RandRicianNoised(keys=["t2w","adc", "hbv","label"]),
-            RandFlipd(keys=["t2w","adc", "hbv","label"]),
-            RandAffined(keys=["t2w","adc", "hbv","label"]),
+            RandGaussianNoised(keys=["t2w","adc", "hbv","label"], prob=0.1),
+            RandAdjustContrastd(keys=["t2w","adc", "hbv","label"], prob=0.1),
+            RandGaussianSmoothd(keys=["t2w","adc", "hbv","label"], prob=0.1),
+            RandRicianNoised(keys=["t2w","adc", "hbv","label"], prob=0.1),
+            RandFlipd(keys=["t2w","adc", "hbv","label"], prob=0.1),
+            RandAffined(keys=["t2w","adc", "hbv","label"], prob=0.1),
             ConcatItemsd(keys=["t2w","adc","hbv"],name="common_3channels"),
             RandCropByPosNegLabeld(
                 keys=["common_3channels","label"],
@@ -89,7 +86,7 @@ def get_val_transforms(maxSize):
             LoadImaged(keys=["t2w","adc", "hbv","label"]),
             EnsureChannelFirstd(keys=["t2w","adc", "hbv","label"]),
             #AsChannelFirstd(keys=["t2w","adc", "hbv","label"]),
-            Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
+            #Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
             # Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
             #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
             #SpatialPadd(keys=["t2w","adc", "hbv","label"],spatial_size=maxSize) ,
