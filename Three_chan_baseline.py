@@ -100,6 +100,12 @@ spec.loader.exec_module(LigtningModel)
 
 
 
+#hyperparameters
+loss=monai.losses.FocalLoss(include_background=False, to_onehot_y=True)
+#loss=monai.losses.metrics.DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
+strides=[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
+channels=[32, 64, 128, 256, 512, 1024]
+
 
 comet_logger = CometLogger(
     api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
@@ -115,8 +121,8 @@ df= manageMetaData.load_df_only_full(df,"t2w_med_spac","registered_adc_med_spac"
 
 data = DataModule.PiCaiDataModule(
     df= df,
-    batch_size=3,#TODO(batc size determined by lightning)
-    trainSizePercent=0.7,
+    batch_size=1,#TODO(batc size determined by lightning)
+    trainSizePercent=0.5,# change to 0.7
     num_workers=os.cpu_count(),
     drop_last=False,#True,
     cache_dir="/home/sliceruser/preprocess/monai_persistent_Dataset",
@@ -135,14 +141,14 @@ unet= unets.UNet(
     spatial_dims=3,
     in_channels=3,
     out_channels=2,
-    strides=[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)],
-    channels=[32, 64, 128, 256, 512, 1024]
+    strides=strides,
+    channels=channels
 )
 
 
 model = LigtningModel.Model(
     net=unet,
-    criterion=monai.losses.DiceCELoss(softmax=True,onehot_y=True), # Our seg labels are single channel images indicating class index, rather than one-hot
+    criterion=loss, # Our seg labels are single channel images indicating class index, rather than one-hot
     learning_rate=1e-2,
     optimizer_class=torch.optim.AdamW,
 )
@@ -166,5 +172,6 @@ trainer.logger._default_hp_metric = False
 start = datetime.now()
 print('Training started at', start)
 trainer.fit(model=model, datamodule=data)
+
 print('Training duration:', datetime.now() - start)
 #experiment.end()

@@ -134,7 +134,7 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.train_subjects = train_set
         self.val_subjects = valid_set
         self.test_subjects = test_set
-        train_transforms=transformsForMain.get_train_transforms()
+        train_transforms=transformsForMain.get_train_transforms(self.maxSize)
         val_transforms= transformsForMain.get_val_transforms(self.maxSize)
         #todo - unhash
         #         self.train_ds =  PersistentDataset(data=self.train_subjects, transform=train_transforms,cache_dir=self.cache_dir)
@@ -147,10 +147,10 @@ class PiCaiDataModule(pl.LightningDataModule):
         
     def train_dataloader(self):
         return DataLoader(self.train_ds, batch_size=self.batch_size, drop_last=self.drop_last
-                          , shuffle=True,num_workers=self.num_workers)#,collate_fn=list_data_collate
+                          , shuffle=True,num_workers=self.num_workers,collate_fn=list_data_collate)#,collate_fn=list_data_collate
 
     def val_dataloader(self):
         return DataLoader(self.val_ds, batch_size=1, drop_last=False,num_workers=self.num_workers)
 
     def test_dataloader(self):
-        return DataLoader(self.test_ds, batch_size= 1, drop_last=False,num_workers=self.num_workers)#num_workers=self.num_workers,
+        return DataLoader(self.test_ds, batch_size= 1, drop_last=False,num_workers=self.num_workers,collate_fn=list_data_collate)#num_workers=self.num_workers,

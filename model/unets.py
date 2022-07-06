@@ -128,6 +128,10 @@ unet_hyperparam = {
 
         if len(channels) < 2:
             raise ValueError("the length of `channels` should be no less than 2.")
+        print(f"len channels {len(channels)}")
+        print(f"len strides {len(strides)} {strides}")
+
+        print()
         delta = len(strides) - (len(channels) - 1)
         if delta < 0:
             raise ValueError("the length of `strides` should equal to `len(channels) - 1`.")
@@ -169,6 +173,8 @@ unet_hyperparam = {
                 strides: convolution stride.
                 is_top: True if this is the top block.
             """
+            print(f"cccreate block input channels {inc} output {outc} is_top {is_top}")
+
             c = channels[0]
             s = strides[0]
 
@@ -299,6 +305,7 @@ unet_hyperparam = {
         return conv
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        #print(f"in foorward {x.size()}")
         x = self.model(x)
         return x
 

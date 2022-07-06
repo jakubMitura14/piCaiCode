@@ -40,7 +40,7 @@ def load_df_only_full(df,t2w_name,adc_name,hbv_name,label_name,maxSize):
     df = df.loc[df['isAnythingInAnnotated']>0 ]
     deficientPatIDs=[]
     data_dicts = list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1],t2w_name,adc_name,hbv_name,label_name)  , list(df.iterrows())))
-    train_transforms=transformsForMain.get_train_transforms()
+    train_transforms=transformsForMain.get_train_transforms(maxSize)
     val_transforms= transformsForMain.get_val_transforms(maxSize)
 
     for dictt in data_dicts:    

@@ -55,7 +55,19 @@ import glob
 import torch.nn as nn
 import torch.nn.functional as F
 
-
+from monai.transforms import (
+    AsDiscrete,
+    AddChanneld,
+    Compose,
+    CropForegroundd,
+    LoadImaged,
+    Orientationd,
+    RandCropByPosNegLabeld,
+    ScaleIntensityRanged,
+    Spacingd,
+    EnsureTyped,
+    EnsureType,
+)
 
 class Model(pl.LightningModule):
     def __init__(self, net, criterion, learning_rate, optimizer_class):
@@ -64,6 +76,8 @@ class Model(pl.LightningModule):
         self.net = net
         self.criterion = criterion
         self.optimizer_class = optimizer_class
+        self.post_label = Compose([EnsureType("tensor", device="cpu"), AsDiscrete(to_onehot=2)])
+        self.post_pred = Compose([EnsureType("tensor", device="cpu"), AsDiscrete(argmax=True, to_onehot=2)])
     
     def configure_optimizers(self):
         optimizer = self.optimizer_class(self.parameters(), lr=self.lr)
@@ -78,16 +92,27 @@ class Model(pl.LightningModule):
         return y_hat, y
 
     def training_step(self, batch, batch_idx):
-        y_hat, y = self.infer_batch(batch)
+        print(f"batch len in training {len(batch)}")
+
+        y_hat, y = self.infer_batch(batch[0])
         loss = self.criterion(y_hat, y)
         self.log('train_loss', loss, prog_bar=True)
         return loss
-    
+
     def validation_step(self, batch, batch_idx):
-        y_hat, y = self.infer_batch(batch)
-        loss = self.criterion(y_hat, y)
+        images, labels = batch['common_3channels'], batch["label"]
+        y_hat = sliding_window_inference(
+        images, (32,32,32), 1, self.net)
+        loss = self.criterion(y_hat, labels)
         self.log('val_loss', loss)
         return loss
+
+
+    # def validation_step(self, batch, batch_idx):
+    #     y_hat, y = self.infer_batch(batch)
+    #     loss = self.criterion(y_hat, y)
+    #     self.log('val_loss', loss)
+    #     return loss
 
 # class Model(pl.LightningModule):
 #     def __init__(self, net, criterion, learning_rate, optimizer_class):
@@ -135,24 +160,39 @@ class Model(pl.LightningModule):
 #         self.log('train_loss', loss, prog_bar=True)
 #         return loss
     
-# #     def validation_step(self, batch, batch_idx):        
-# #         print(f"in val {len(batch)}")      
-# #         print(f"in val image {(batch['t2w'].size() )}") 
-# #         print(f"in val label {(batch['label'].size() )}") 
+    # def validation_step(self, batch, batch_idx):        
+    #     print(f"in val {len(batch)}")      
+    #     print(f"in val image {(batch['common_3channels'].size() )}") 
+    #     print(f"in val label {(batch['label'].size() )}") 
         
-# #         images, labels = batch["t2w"], batch["label"]
-# #         output = self.net(images)
-# #         loss = self.criterion(output, labels)
+    #     images, labels = batch['common_3channels'], batch["label"]
+    #     outputs = sliding_window_inference(
+    #         images, (32,32,32), 1, self.net)
+    #     # print(f"in val sliding outputs {outputs.size()}") 
+    #     # outputs = [self.post_pred(i) for i in decollate_batch(outputs)]
+    #     # print(f"in val sliding outputs post pred {type(outputs)}") 
+
+
+    #     # print("beeefore model ")
+    #     # output = self.net(images)
+    #     # print(f"in val output {output.size()}") 
+
+
+    #     # outputs = [self.post_pred(i) for i in decollate_batch(outputs)]
+    #     # labels = [self.post_label(i) for i in decollate_batch(labels)]
+    #     # print(f"in val sliding outputs post pred {type(np.array(outputs))}") 
+    #     # print(f"in val sliding labels post pred {type(np.array(labels))}") 
+
+    #     print(f"in val sliding outputs post pred {(outputs.size())}") 
+    #     print(f"in val sliding labels post pred {(labels.size())}") 
+
+
+    #     loss = self.criterion(outputs,labels)
+
+    #     #loss = self.criterion(output, labels)
         
-# #         # x, y = batch['t2w'], batch['label']
-# #         # y_hat = self.net(x)
-# #         # loss = self.criterion(y_hat, y)
-# #         # self.log('val_loss', loss)
-        
-# #         # images, labels = batch["t2w"], batch["label"]
-# #         # output = self.net(images)
-# #         # loss = self.criterion(output, labels)       
-        
+    #     return loss
+
         
         
 # #         return loss
