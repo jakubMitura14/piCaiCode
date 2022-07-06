@@ -35,21 +35,22 @@ def getMonaiSubjectDataFromDataFrame(row,t2w_name,adc_name,hbv_name,label_name):
         return subject
 
 
-def load_df_only_full(df,t2w_name,adc_name,hbv_name,label_name):
+def load_df_only_full(df,t2w_name,adc_name,hbv_name,label_name,maxSize):
     df = df.loc[df['isAnyMissing'] ==False]
     df = df.loc[df['isAnythingInAnnotated']>0 ]
     deficientPatIDs=[]
     data_dicts = list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1],t2w_name,adc_name,hbv_name,label_name)  , list(df.iterrows())))
     train_transforms=transformsForMain.get_train_transforms()
-    val_transforms= transformsForMain.get_val_transforms()
+    val_transforms= transformsForMain.get_val_transforms(maxSize)
 
     for dictt in data_dicts:    
         try:
             dat = train_transforms(dictt)
             dat = val_transforms(dictt)
         except:
-            deficientPatIDs.append(dictt['patient_id'])
-            print(dictt['patient_id'])
+            pass
+            #deficientPatIDs.append(dictt['patient_id'])
+            #print(dictt['patient_id'])
 
 
     def isInDeficienList(row):
@@ -69,10 +70,12 @@ def get_size_meta(row,colName):
     path=str(row[colName])
     if(len(path)>1):
         image = sitk.ReadImage(path)
-        sizz= (image.GetSize(),patId,colName)
+        sizz= image.GetSize()
         return list(sizz)
     return [-1,-1,-1]
+
 resList=[]
+
 
 def addSizeMetaDataToDf(keyWord,df):
     resList=[]

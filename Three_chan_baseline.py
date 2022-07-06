@@ -109,8 +109,8 @@ comet_logger = CometLogger(
 )
 
 df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv')
-
-df= manageMetaData.load_df_only_full(df,"t2w_med_spac","registered_adc_med_spac","registered_hbv_med_spac", "label_med_spac" )
+maxSize=manageMetaData.getMaxSize("t2w_med_spac",df)
+df= manageMetaData.load_df_only_full(df,"t2w_med_spac","registered_adc_med_spac","registered_hbv_med_spac", "label_med_spac",maxSize )
 
 
 data = DataModule.PiCaiDataModule(
@@ -124,17 +124,25 @@ data = DataModule.PiCaiDataModule(
     adc_name="registered_adc_med_spac",
     hbv_name="registered_hbv_med_spac",
     label_name="label_med_spac",
-    maxSize=manageMetaData.getMaxSize("t2w_med_spac",df)
+    maxSize=maxSize
 )
 data.prepare_data()
 data.setup()
 
 # definition described in model folder
-unet =unets.UNet()
+# from https://github.com/DIAGNijmegen/picai_baseline/blob/main/src/picai_baseline/unet/training_setup/neural_networks/unets.py
+unet= unets.UNet(
+    spatial_dims=3,
+    in_channels=3,
+    out_channels=2,
+    strides=[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)],
+    channels=[32, 64, 128, 256, 512, 1024]
+)
+
 
 model = LigtningModel.Model(
     net=unet,
-    criterion=monai.losses.DiceCELoss(softmax=True,onehot_y=True, ), # Our seg labels are single channel images indicating class index, rather than one-hot
+    criterion=monai.losses.DiceCELoss(softmax=True,onehot_y=True), # Our seg labels are single channel images indicating class index, rather than one-hot
     learning_rate=1e-2,
     optimizer_class=torch.optim.AdamW,
 )

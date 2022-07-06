@@ -52,8 +52,8 @@ def get_train_transforms():
             EnsureChannelFirstd(keys=["t2w","adc", "hbv","label"]),
             #AsChannelFirstd(keys=["t2w","adc", "hbv","label"]),
             Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
-            Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
-                1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
+            # Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
+            #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
             DivisiblePadd(keys=["t2w","adc", "hbv","label"],k=32) ,
             #CropForegroundd(keys=["t2w","adc", "hbv","label"], source_key="image"),
             # RandCropByPosNegLabeld(
@@ -87,8 +87,8 @@ def get_val_transforms(maxSize):
             EnsureChannelFirstd(keys=["t2w","adc", "hbv","label"]),
             #AsChannelFirstd(keys=["t2w","adc", "hbv","label"]),
             Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
-            Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
-                1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
+            # Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
+            #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
             SpatialPadd(keys=["t2w","adc", "hbv","label"],spatial_size=maxSize) ,
             #DivisiblePadd(keys=["t2w","adc", "hbv","label"],k=32) ,
 

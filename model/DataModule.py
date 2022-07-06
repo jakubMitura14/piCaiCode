@@ -129,7 +129,7 @@ class PiCaiDataModule(pl.LightningDataModule):
 
     def setup(self, stage=None):
         set_determinism(seed=0)
-        self.subjects = list(map(lambda row: manageMetaData.getMonaiSubjectDataFromDataFrame(row[1],self.t2w_name,self.adc_name,self.hbv_name,self.label_name)   , list(df.iterrows())))
+        self.subjects = list(map(lambda row: manageMetaData.getMonaiSubjectDataFromDataFrame(row[1],self.t2w_name,self.adc_name,self.hbv_name,self.label_name)   , list(self.df.iterrows())))
         train_set, valid_set,test_set = self.splitDataSet(self.subjects , self.trainSizePercent)
         self.train_subjects = train_set
         self.val_subjects = valid_set

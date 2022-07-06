@@ -76,6 +76,14 @@ class UNet(nn.Module):
             strides=(2, 2),
             num_res_units=2
         )
+example hyperparam
+unet_hyperparam = {
+    'batch_size': 8,
+    'model_strides': [(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)],
+    'model_features': [32, 64, 128, 256, 512, 1024]
+}
+
+
         # 5 layer network with simple convolution/normalization/dropout/activation blocks defining the layers
         net=UNet(
             spatial_dims=2,
