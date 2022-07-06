@@ -157,7 +157,7 @@ early_stopping = pl.callbacks.early_stopping.EarlyStopping(
 )
 trainer = pl.Trainer(
     #accelerato="cpu", #TODO(remove)
-    max_epochs=3,
+    max_epochs=30,
     #gpus=1,
     precision=16, #TODO(unhash)
     callbacks=[early_stopping],#TODO(unhash)

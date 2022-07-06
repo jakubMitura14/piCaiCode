@@ -78,7 +78,11 @@ class Model(pl.LightningModule):
         self.optimizer_class = optimizer_class
         self.post_label = Compose([EnsureType("tensor", device="cpu"), AsDiscrete(to_onehot=2)])
         self.post_pred = Compose([EnsureType("tensor", device="cpu"), AsDiscrete(argmax=True, to_onehot=2)])
-    
+        self.best_val_dice = 0
+        self.best_val_epoch = 0
+        self.dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
+
+
     def configure_optimizers(self):
         optimizer = self.optimizer_class(self.parameters(), lr=self.lr)
         return optimizer
@@ -92,8 +96,6 @@ class Model(pl.LightningModule):
         return y_hat, y
 
     def training_step(self, batch, batch_idx):
-        #print(f"batch len in training {len(batch)}")
-
         y_hat, y = self.infer_batch(batch)
         loss = self.criterion(y_hat, y)
         self.log('train_loss', loss, prog_bar=True)
@@ -101,12 +103,31 @@ class Model(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         images, labels = batch['common_3channels'], batch["label"]
-        y_hat = sliding_window_inference(
-        images, (32,32,32), 1, self.net)
+        y_hat = sliding_window_inference(images, (32,32,32), 1, self.net)
         loss = self.criterion(y_hat, labels)
+        self.dice_metric(y_pred=y_hat, y=labels)
+
         self.log('val_loss', loss)
         return loss
 
+    def validation_epoch_end(self, outputs):
+        """
+        just in order to log the dice metric on validation data 
+        """
+        mean_val_dice = self.dice_metric.aggregate().item()
+        self.dice_metric.reset()
+        if mean_val_dice > self.best_val_dice:
+            self.best_val_dice = mean_val_dice
+            self.best_val_epoch = self.current_epoch
+        # print(
+        #     f"current epoch: {self.current_epoch} "
+        #     f"current mean dice: {mean_val_dice:.4f}"
+        #     f"\nbest mean dice: {self.best_val_dice:.4f} "
+        #     f"at epoch: {self.best_val_epoch}"
+        # )
+        self.log('val_mean_Dice_metr', mean_val_dice)
+
+        #return {"log": self.log}
 
     # def validation_step(self, batch, batch_idx):
     #     y_hat, y = self.infer_batch(batch)
@@ -114,98 +135,3 @@ class Model(pl.LightningModule):
     #     self.log('val_loss', loss)
     #     return loss
 
-# class Model(pl.LightningModule):
-#     def __init__(self, net, criterion, learning_rate, optimizer_class):
-#         super().__init__()
-#         self.lr = learning_rate
-#         self.net = net
-#         self.criterion = criterion
-#         self.optimizer_class = optimizer_class
-    
-#     def configure_optimizers(self):
-#         optimizer = self.optimizer_class(self.parameters(), lr=self.lr)
-#         return optimizer
-    
-#     def prepare_batch(self, batch):
-#         return batch['t2w'], batch['label']
-    
-#     def infer_batch(self, batch):
-#         x, y = self.prepare_batch(batch)
-#         y_hat = self.net(x)
-#         return y_hat, y
-
-#     # def training_step(self, batch, batch_idx):
-#     #     y_hat, y = self.infer_batch(batch)
-#     #     loss = self.criterion(y_hat, y)
-#     #     self.log('train_loss', loss, prog_bar=True)
-#     #     return loss
-    
-#     def validation_step(self, batch, batch_idx):
-#         y_hat, y = self.infer_batch(batch)
-#         loss = self.criterion(y_hat, y)
-#         self.log('val_loss', loss)
-#         return loss
-    
-    
-#     def training_step(self, batch, batch_idx):
-
-#         #print(f"in training {len(batch)}")
-        
-#         images, labels = batch["t2w"], batch["label"]
-#         output = self.net(images)
-#         loss = self.criterion(output, labels)
-        
-#         # y_hat, y = self.infer_batch(batch)
-#         # loss = self.criterion(y_hat, y)
-#         self.log('train_loss', loss, prog_bar=True)
-#         return loss
-    
-    # def validation_step(self, batch, batch_idx):        
-    #     print(f"in val {len(batch)}")      
-    #     print(f"in val image {(batch['common_3channels'].size() )}") 
-    #     print(f"in val label {(batch['label'].size() )}") 
-        
-    #     images, labels = batch['common_3channels'], batch["label"]
-    #     outputs = sliding_window_inference(
-    #         images, (32,32,32), 1, self.net)
-    #     # print(f"in val sliding outputs {outputs.size()}") 
-    #     # outputs = [self.post_pred(i) for i in decollate_batch(outputs)]
-    #     # print(f"in val sliding outputs post pred {type(outputs)}") 
-
-
-    #     # print("beeefore model ")
-    #     # output = self.net(images)
-    #     # print(f"in val output {output.size()}") 
-
-
-    #     # outputs = [self.post_pred(i) for i in decollate_batch(outputs)]
-    #     # labels = [self.post_label(i) for i in decollate_batch(labels)]
-    #     # print(f"in val sliding outputs post pred {type(np.array(outputs))}") 
-    #     # print(f"in val sliding labels post pred {type(np.array(labels))}") 
-
-    #     print(f"in val sliding outputs post pred {(outputs.size())}") 
-    #     print(f"in val sliding labels post pred {(labels.size())}") 
-
-
-    #     loss = self.criterion(outputs,labels)
-
-    #     #loss = self.criterion(output, labels)
-        
-    #     return loss
-
-        
-        
-# #         return loss
-
-
-# unet = monai.networks.nets.UNet(
-#     spatial_dims=3,
-#     in_channels=1,
-#     out_channels=1,
-#     channels=(16, 32, 64, 128, 256),
-#     #channels=(16, 16, 16, 16, 16),
-#     #strides=(1, 1, 1, 1),
-#     strides=(2, 2, 2, 2),
-
-#     num_res_units=1,
-# )
