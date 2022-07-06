@@ -92,9 +92,9 @@ class Model(pl.LightningModule):
         return y_hat, y
 
     def training_step(self, batch, batch_idx):
-        print(f"batch len in training {len(batch)}")
+        #print(f"batch len in training {len(batch)}")
 
-        y_hat, y = self.infer_batch(batch[0])
+        y_hat, y = self.infer_batch(batch)
         loss = self.criterion(y_hat, y)
         self.log('train_loss', loss, prog_bar=True)
         return loss
