@@ -59,146 +59,132 @@ dataUtils =loadLib("dataUtils", "/home/sliceruser/data/piCaiCode/dataManag/utils
 unets =loadLib("unets", "/home/sliceruser/data/piCaiCode/model/unets.py")
 DataModule =loadLib("DataModule", "/home/sliceruser/data/piCaiCode/model/DataModule.py")
 LigtningModel =loadLib("LigtningModel", "/home/sliceruser/data/piCaiCode/model/LigtningModel.py")
-comet_logger = CometLogger(
-    api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
-    #workspace="OPI", # Optional
-    project_name="picai_base_3Channels", # Optional
-    #experiment_name="baseline" # Optional
-)
 
-#####hyperparameters
-# based on https://www.comet.com/docs/python-sdk/introduction-optimizer/
-# We only need to specify the algorithm and hyperparameters to use:
-config = {
-    # We pick the Bayes algorithm:
-    "algorithm": "bayes",
 
-    # Declare your hyperparameters in the Vizier-inspired format:
-    "parameters": {
-        "x": {"type": "integer", "min": 1, "max": 5},
-    },
-
-    # Declare what we will be optimizing, and how:
-    "spec": {
-    "metric": "loss",
-        "objective": "minimize",
-    },
-}
-
+#comet_logger
 ### pytorch model mainly
-loss=monai.losses.FocalLoss(include_background=False, to_onehot_y=True)
-#loss=monai.losses.metrics.DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
-strides=[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
-channels=[32, 64, 128, 256, 512, 1024]
-optimizer_class=torch.optim.AdamW
-num_res_units= 0
-act = (Act.PRELU, {"init": 0.2}) #LeakyReLU(negative_slope=0.1, inplace=True)
-norm= (Norm.INSTANCE, {}) #(Norm.INSTANCE, {"normalized_shape": (10, 10, 10)})#Norm.INSTANCE, #GroupNorm(1, 1, eps=1e-05, affine=False), LayerNorm((10, 10, 10), eps=1e-05, elementwise_affine=True)
-dropout= 0.0
+# loss=monai.losses.FocalLoss(include_background=False, to_onehot_y=True)
+# #loss=monai.losses.metrics.DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
+# strides=[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
+# channels=[32, 64, 128, 256, 512, 1024]
+# optimizer_class=torch.optim.AdamW
+# num_res_units= 0
+# act = (Act.PRELU, {"init": 0.2}) #LeakyReLU(negative_slope=0.1, inplace=True)
+# norm= (Norm.INSTANCE, {}) #(Norm.INSTANCE, {"normalized_shape": (10, 10, 10)})#Norm.INSTANCE, #GroupNorm(1, 1, eps=1e-05, affine=False), LayerNorm((10, 10, 10), eps=1e-05, elementwise_affine=True)
+# dropout= 0.0 #0.2
+# ### lightning trainer mainly
+# precision=16# "bf16" 64
+# max_epochs=30
+# accumulate_grad_batches=1 # 3,5 ..
+# gradient_clip_val=0.0# 0.5,2.0
+# ## augmebtations mainly
+# RandGaussianNoised_prob=0.1
+# RandAdjustContrastd_prob=0.1
+# RandGaussianSmoothd_prob=0.1
+# RandRicianNoised_prob=0.1
+# RandFlipd_prob=0.1
+# RandAffined_prob=0.1
+# RandCoarseDropoutd_prob=0.1
+# is_whole_to_train =True
+# ##diffrent definitions depending on preprocessing
+# cache_dir="/home/sliceruser/preprocess/monai_persistent_Dataset"
+# t2w_name= "t2w_med_spac"
+# adc_name="registered_adc_med_spac"
+# hbv_name="registered_hbv_med_spac"
+# label_name="label_med_spac"
 
-### lightning trainer mainly
-precision=16# "bf16" 64
-max_epochs=30
-accumulate_grad_batches=1 # 3,5 ..
-gradient_clip_val=0.0# 0.5,2.0
+def mainTrain(experiment):
+    #TODO(remove)
+    comet_logger = CometLogger(
+        api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
+        #workspace="OPI", # Optional
+        project_name="picai_base_3Channels", # Optional
+        #experiment_name="baseline" # Optional
+    )
+
+    #############loading meta data 
+    df = pd.read_csv(experiment.get_parameter("dirs")["metDataDir"])
+    maxSize=manageMetaData.getMaxSize(experiment.get_parameter("dirs")["t2w_name"],df)
+    df= manageMetaData.load_df_only_full(
+        df,experiment.get_parameter("dirs")["t2w_name"]
+        ,experiment.get_parameter("dirs")["adc_name"]
+        ,experiment.get_parameter("dirs")["hbv_name"]
+        ,experiment.get_parameter("dirs")["label_name"]
+        ,maxSize
+        ,experiment.get_parameter("is_whole_to_train") )
 
 
-## augmebtations mainly
-RandGaussianNoised_prob=0.1
-RandAdjustContrastd_prob=0.1
-RandGaussianSmoothd_prob=0.1
-RandRicianNoised_prob=0.1
-RandFlipd_prob=0.1
-RandAffined_prob=0.1
-RandCoarseDropoutd_prob=0.1
-is_whole_to_train =True
+    data = DataModule.PiCaiDataModule(
+        df= df,
+        batch_size=2,#TODO(batc size determined by lightning)
+        trainSizePercent=0.5,# change to 0.7
+        num_workers=os.cpu_count(),
+        drop_last=False,#True,
+        cache_dir=experiment.get_parameter("dirs")["cache_dir"],
+        t2w_name=experiment.get_parameter("dirs")["t2w_name"],
+        adc_name=experiment.get_parameter("dirs")["adc_name"],
+        hbv_name=experiment.get_parameter("dirs")["hbv_name"],
+        label_name=experiment.get_parameter("dirs")["label_name"],
+        maxSize=maxSize
+        ,RandGaussianNoised_prob=experiment.get_parameter("RandGaussianNoised_prob")
+        ,RandAdjustContrastd_prob=experiment.get_parameter("RandAdjustContrastd_prob")
+        ,RandGaussianSmoothd_prob=experiment.get_parameter("RandGaussianSmoothd_prob")
+        ,RandRicianNoised_prob=experiment.get_parameter("RandRicianNoised_prob")
+        ,RandFlipd_prob=experiment.get_parameter("RandFlipd_prob")
+        ,RandAffined_prob=experiment.get_parameter("RandAffined_prob")
+        ,RandCoarseDropoutd_prob=experiment.get_parameter("RandCoarseDropoutd_prob")
+        ,is_whole_to_train=experiment.get_parameter("is_whole_to_train ")
+    )
+    data.prepare_data()
+    data.setup()
 
+    # definition described in model folder
+    # from https://github.com/DIAGNijmegen/picai_baseline/blob/main/src/picai_baseline/unet/training_setup/neural_networks/unets.py
+    unet= unets.UNet(
+        spatial_dims=3,
+        in_channels=3,
+        out_channels=2,
+        strides=experiment.get_parameter("stridesAndChannels")["strides"],
+        channels=experiment.get_parameter("stridesAndChannels")["channels"],
+        num_res_units= experiment.get_parameter("num_res_units"),
+        act = experiment.get_parameter("act"),
+        norm= experiment.get_parameter("norm"),
+        dropout= experiment.get_parameter("dropout")
+    )
 
+    model = LigtningModel.Model(
+        net=unet,
+        criterion=experiment.get_parameter("loss"), # Our seg labels are single channel images indicating class index, rather than one-hot
+        learning_rate=1e-2,
+        optimizer_class=experiment.get_parameter("optimizer_class"),
+        experiment=experiment
+    )
+    early_stopping = pl.callbacks.early_stopping.EarlyStopping(
+        monitor='val_loss',
+    )
+    trainer = pl.Trainer(
+        #accelerato="cpu", #TODO(remove)
+        max_epochs=experiment.get_parameter("max_epochs"),
+        #gpus=1,
+        precision=experiment.get_parameter("precision"), 
+        callbacks=[early_stopping],
+        logger=comet_logger,
+        accelerator='auto',
+        devices='auto',
+        default_root_dir= "/home/sliceruser/lightning_logs",
+        auto_scale_batch_size="binsearch",
+        auto_lr_find=True,
+        stochastic_weight_avg=True,
+        accumulate_grad_batches=experiment.get_parameter("accumulate_grad_batches"),
+        gradient_clip_val=experiment.get_parameter("gradient_clip_val")# 0.5,2.0
 
-##diffrent definitions depending on preprocessing
-cache_dir="/home/sliceruser/preprocess/monai_persistent_Dataset"
-t2w_name= "t2w_med_spac"
-adc_name="registered_adc_med_spac"
-hbv_name="registered_hbv_med_spac"
-label_name="label_med_spac"
+    )
+    trainer.logger._default_hp_metric = False
 
-
-####loading meta data 
-df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv')
-maxSize=manageMetaData.getMaxSize(t2w_name,df)
-df= manageMetaData.load_df_only_full(df,t2w_name,adc_name,hbv_name, label_name,maxSize,is_whole_to_train )
-
-
-data = DataModule.PiCaiDataModule(
-    df= df,
-    batch_size=2,#TODO(batc size determined by lightning)
-    trainSizePercent=0.5,# change to 0.7
-    num_workers=os.cpu_count(),
-    drop_last=False,#True,
-    cache_dir=cache_dir,
-    t2w_name=t2w_name,
-    adc_name=adc_name,
-    hbv_name=hbv_name,
-    label_name=label_name,
-    maxSize=maxSize
-    ,RandGaussianNoised_prob=RandGaussianNoised_prob
-    ,RandAdjustContrastd_prob=RandAdjustContrastd_prob
-    ,RandGaussianSmoothd_prob=RandGaussianSmoothd_prob
-    ,RandRicianNoised_prob=RandRicianNoised_prob
-    ,RandFlipd_prob=RandFlipd_prob
-    ,RandAffined_prob=RandAffined_prob
-    ,RandCoarseDropoutd_prob=RandCoarseDropoutd_prob
-    ,is_whole_to_train=is_whole_to_train 
-)
-data.prepare_data()
-data.setup()
-
-# definition described in model folder
-# from https://github.com/DIAGNijmegen/picai_baseline/blob/main/src/picai_baseline/unet/training_setup/neural_networks/unets.py
-unet= unets.UNet(
-    spatial_dims=3,
-    in_channels=3,
-    out_channels=2,
-    strides=strides,
-    channels=channels,
-    num_res_units= num_res_units,
-    act = act,
-    norm= norm,
-    dropout= dropout
-)
-
-model = LigtningModel.Model(
-    net=unet,
-    criterion=loss, # Our seg labels are single channel images indicating class index, rather than one-hot
-    learning_rate=1e-2,
-    optimizer_class=optimizer_class,
-)
-early_stopping = pl.callbacks.early_stopping.EarlyStopping(
-    monitor='val_loss',
-)
-trainer = pl.Trainer(
-    #accelerato="cpu", #TODO(remove)
-    max_epochs=max_epochs,
-    #gpus=1,
-    precision=precision, 
-    callbacks=[early_stopping],
-    logger=comet_logger,
-    accelerator='auto',
-    devices='auto',
-    default_root_dir= "/home/sliceruser/lightning_logs",
-    auto_scale_batch_size="binsearch",
-    auto_lr_find=True,
-    stochastic_weight_avg=True,
-    accumulate_grad_batches=accumulate_grad_batches,
-    gradient_clip_val=gradient_clip_val# 0.5,2.0
-
-)
-trainer.logger._default_hp_metric = False
-
-start = datetime.now()
-print('Training started at', start)
-trainer.fit(model=model, datamodule=data)
-print('Training duration:', datetime.now() - start)
+    start = datetime.now()
+    print('Training started at', start)
+    trainer.fit(model=model, datamodule=data)
+    print('Training duration:', datetime.now() - start)
 
 
 #experiment.end()

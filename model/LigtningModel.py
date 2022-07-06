@@ -70,7 +70,7 @@ from monai.transforms import (
 )
 
 class Model(pl.LightningModule):
-    def __init__(self, net, criterion, learning_rate, optimizer_class):
+    def __init__(self, net, criterion, learning_rate, optimizer_class,experiment):
         super().__init__()
         self.lr = learning_rate
         self.net = net
@@ -81,7 +81,7 @@ class Model(pl.LightningModule):
         self.best_val_dice = 0
         self.best_val_epoch = 0
         self.dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
-
+        self.experiment=experiment
 
     def configure_optimizers(self):
         optimizer = self.optimizer_class(self.parameters(), lr=self.lr)
@@ -126,6 +126,7 @@ class Model(pl.LightningModule):
         #     f"at epoch: {self.best_val_epoch}"
         # )
         self.log('val_mean_Dice_metr', mean_val_dice)
+        self.experiment.log_metric("val_mean_Dice_metr",mean_val_dice)
 
         #return {"log": self.log}
 
