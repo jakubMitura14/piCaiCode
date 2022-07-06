@@ -90,8 +90,8 @@ loss=monai.losses.FocalLoss(include_background=False, to_onehot_y=True)
 strides=[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
 channels=[32, 64, 128, 256, 512, 1024]
 optimizer_class=torch.optim.AdamW
-num_res_units= 0,
-act = (Act.PRELU, {"init": 0.2}) , #LeakyReLU(negative_slope=0.1, inplace=True)
+num_res_units= 0
+act = (Act.PRELU, {"init": 0.2}) #LeakyReLU(negative_slope=0.1, inplace=True)
 norm= (Norm.INSTANCE, {}) #(Norm.INSTANCE, {"normalized_shape": (10, 10, 10)})#Norm.INSTANCE, #GroupNorm(1, 1, eps=1e-05, affine=False), LayerNorm((10, 10, 10), eps=1e-05, elementwise_affine=True)
 dropout= 0.0
 #precision=16
@@ -135,8 +135,8 @@ unet= unets.UNet(
     strides=strides,
     channels=channels,
     num_res_units= num_res_units,
-    #act = act,
-    #norm= norm,
+    act = act,
+    norm= norm,
     dropout= dropout
 )
 

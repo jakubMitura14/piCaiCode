@@ -50,10 +50,8 @@ def get_train_transforms(maxSize):
             #AsChannelFirstd(keys=["t2w","adc", "hbv","label"]),
             #Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
             #Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
-            #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
-            
+            #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),            
             #CropForegroundd(keys=["t2w","adc", "hbv","label"], source_key="image"),
-
             EnsureTyped(keys=["t2w","adc", "hbv","label"]),
             SelectItemsd(keys=["t2w","adc", "hbv","label"]),
             DivisiblePadd(keys=["t2w","adc", "hbv","label"],k=32) ,

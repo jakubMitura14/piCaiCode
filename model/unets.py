@@ -149,8 +149,8 @@ unet_hyperparam = {
         self.kernel_size = kernel_size
         self.up_kernel_size = up_kernel_size
         self.num_res_units = num_res_units
-        self.act = act#[0]
-        self.norm = norm#[0]
+        self.act = act
+        self.norm = norm
         self.dropout = dropout
         self.bias = bias
         self.adn_ordering = adn_ordering
@@ -212,7 +212,7 @@ unet_hyperparam = {
             is_top: True if this is the top block.
         """
         mod: nn.Module
-        if self.num_res_units[0] > 0:
+        if self.num_res_units > 0:
             print(f"actttt {self.act}  ")
             mod = ResidualUnit(
                 self.dimensions,
@@ -220,7 +220,7 @@ unet_hyperparam = {
                 out_channels,
                 strides=strides,
                 kernel_size=self.kernel_size,
-                subunits=self.num_res_units[0],
+                subunits=self.num_res_units,
                 act=self.act,
                 norm=self.norm,
                 dropout=self.dropout,
@@ -273,12 +273,12 @@ unet_hyperparam = {
             norm=self.norm,
             dropout=self.dropout,
             bias=self.bias,
-            conv_only=is_top and self.num_res_units[0] == 0,
+            conv_only=is_top and self.num_res_units == 0,
             is_transposed=True,
             adn_ordering=self.adn_ordering,
         )
 
-        if self.num_res_units[0] > 0:
+        if self.num_res_units > 0:
             ru = ResidualUnit(
                 self.dimensions,
                 out_channels,
