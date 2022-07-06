@@ -85,6 +85,7 @@ config = {
     },
 }
 
+### pytorch model mainly
 loss=monai.losses.FocalLoss(include_background=False, to_onehot_y=True)
 #loss=monai.losses.metrics.DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
 strides=[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
@@ -94,9 +95,24 @@ num_res_units= 0
 act = (Act.PRELU, {"init": 0.2}) #LeakyReLU(negative_slope=0.1, inplace=True)
 norm= (Norm.INSTANCE, {}) #(Norm.INSTANCE, {"normalized_shape": (10, 10, 10)})#Norm.INSTANCE, #GroupNorm(1, 1, eps=1e-05, affine=False), LayerNorm((10, 10, 10), eps=1e-05, elementwise_affine=True)
 dropout= 0.0
+
+### lightning trainer mainly
 #precision=16
 max_epochs=30
-#diffrent definitions depending on preprocessing
+
+## augmebtations mainly
+RandGaussianNoised_prob=0.1
+RandAdjustContrastd_prob=0.1
+RandGaussianSmoothd_prob=0.1
+RandRicianNoised_prob=0.1
+RandFlipd_prob=0.1
+RandAffined_prob=0.1
+RandCoarseDropoutd_prob=0.1
+is_whole_to_train =False
+
+
+
+##diffrent definitions depending on preprocessing
 cache_dir="/home/sliceruser/preprocess/monai_persistent_Dataset"
 t2w_name= "t2w_med_spac"
 adc_name="registered_adc_med_spac"
@@ -107,7 +123,7 @@ label_name="label_med_spac"
 ####loading meta data 
 df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv')
 maxSize=manageMetaData.getMaxSize(t2w_name,df)
-df= manageMetaData.load_df_only_full(df,t2w_name,adc_name,hbv_name, label_name,maxSize )
+df= manageMetaData.load_df_only_full(df,t2w_name,adc_name,hbv_name, label_name,maxSize,is_whole_to_train )
 
 
 data = DataModule.PiCaiDataModule(
@@ -122,6 +138,14 @@ data = DataModule.PiCaiDataModule(
     hbv_name=hbv_name,
     label_name=label_name,
     maxSize=maxSize
+    ,RandGaussianNoised_prob=RandGaussianNoised_prob
+    ,RandAdjustContrastd_prob=RandAdjustContrastd_prob
+    ,RandGaussianSmoothd_prob=RandGaussianSmoothd_prob
+    ,RandRicianNoised_prob=RandRicianNoised_prob
+    ,RandFlipd_prob=RandFlipd_prob
+    ,RandAffined_prob=RandAffined_prob
+    ,RandCoarseDropoutd_prob=RandCoarseDropoutd_prob
+    ,is_whole_to_train=is_whole_to_train 
 )
 data.prepare_data()
 data.setup()

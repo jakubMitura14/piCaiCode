@@ -84,7 +84,17 @@ spec.loader.exec_module(dataUtils)
 
 
 class PiCaiDataModule(pl.LightningDataModule):
-    def __init__(self,trainSizePercent,batch_size,num_workers,drop_last,df,cache_dir,t2w_name,adc_name,hbv_name,label_name,maxSize):
+    def __init__(self,trainSizePercent,batch_size,num_workers
+    ,drop_last,df,cache_dir,t2w_name,adc_name,hbv_name
+    ,label_name,maxSize,
+    RandGaussianNoised_prob
+    ,RandAdjustContrastd_prob
+    ,RandGaussianSmoothd_prob
+    ,RandRicianNoised_prob
+    ,RandFlipd_prob
+    ,RandAffined_prob
+    ,RandCoarseDropoutd_prob
+    ,is_whole_to_train ):
         super().__init__()
         self.cache_dir=cache_dir
         self.batch_size = batch_size
@@ -107,6 +117,17 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.hbv_name=hbv_name
         self.label_name=label_name
         self.maxSize=maxSize
+        self.RandGaussianNoised_prob=RandGaussianNoised_prob
+        self.RandAdjustContrastd_prob=RandAdjustContrastd_prob
+        self.RandGaussianSmoothd_prob=RandGaussianSmoothd_prob
+        self.RandRicianNoised_prob=RandRicianNoised_prob
+        self.RandFlipd_prob=RandFlipd_prob
+        self.RandAffined_prob=RandAffined_prob
+        self.RandCoarseDropoutd_prob=RandCoarseDropoutd_prob
+        self.is_whole_to_train=is_whole_to_train 
+
+
+
         self.dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
 
     def splitDataSet(self,patList, trainSizePercent):
@@ -134,7 +155,15 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.train_subjects = train_set
         self.val_subjects = valid_set
         self.test_subjects = test_set
-        train_transforms=transformsForMain.get_train_transforms(self.maxSize)
+        train_transforms=transformsForMain.get_train_transforms(self.maxSize
+            ,self.RandGaussianNoised_prob
+            ,self.RandAdjustContrastd_prob
+            ,self.RandGaussianSmoothd_prob
+            ,self.RandRicianNoised_prob
+            ,self.RandFlipd_prob
+            ,self.RandAffined_prob
+            ,self.RandCoarseDropoutd_prob
+            ,self.is_whole_to_train )
         val_transforms= transformsForMain.get_val_transforms(self.maxSize)
         #todo - unhash
         #         self.train_ds =  PersistentDataset(data=self.train_subjects, transform=train_transforms,cache_dir=self.cache_dir)

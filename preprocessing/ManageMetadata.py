@@ -35,12 +35,20 @@ def getMonaiSubjectDataFromDataFrame(row,t2w_name,adc_name,hbv_name,label_name):
         return subject
 
 
-def load_df_only_full(df,t2w_name,adc_name,hbv_name,label_name,maxSize):
+def load_df_only_full(df,t2w_name,adc_name,hbv_name,label_name,maxSize,is_whole_to_train):
     df = df.loc[df['isAnyMissing'] ==False]
     df = df.loc[df['isAnythingInAnnotated']>0 ]
     deficientPatIDs=[]
     data_dicts = list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1],t2w_name,adc_name,hbv_name,label_name)  , list(df.iterrows())))
-    train_transforms=transformsForMain.get_train_transforms(maxSize)
+    train_transforms=transformsForMain.get_train_transforms(maxSize
+                                                            ,0.1#RandGaussianNoised_prob
+                                                            ,0.1#RandAdjustContrastd_prob
+                                                            ,0.1#RandGaussianSmoothd_prob
+                                                            ,0.1#RandRicianNoised_prob
+                                                            ,0.1#RandFlipd_prob
+                                                            ,0.1#RandAffined_prob
+                                                            ,0.1#RandCoarseDropoutd_prob
+                                                            ,is_whole_to_train )
     val_transforms= transformsForMain.get_val_transforms(maxSize)
 
     for dictt in data_dicts:    
