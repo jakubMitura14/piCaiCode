@@ -64,39 +64,20 @@ monai.utils.set_determinism()
 import importlib.util
 import sys
 
-spec = importlib.util.spec_from_file_location("transformsForMain", "/home/sliceruser/data/piCaiCode/preprocessing/transformsForMain.py")
-transformsForMain = importlib.util.module_from_spec(spec)
-sys.modules["transformsForMain"] = transformsForMain
-spec.loader.exec_module(transformsForMain)
+def loadLib(name,path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    res = importlib.util.module_from_spec(spec)
+    sys.modules[name] = res
+    spec.loader.exec_module(res)
+    return res
 
-spec = importlib.util.spec_from_file_location("ManageMetadata", "/home/sliceruser/data/piCaiCode/preprocessing/ManageMetadata.py")
-manageMetaData = importlib.util.module_from_spec(spec)
-sys.modules["ManageMetadata"] = manageMetaData
-spec.loader.exec_module(manageMetaData)
+transformsForMain =loadLib("transformsForMain", "/home/sliceruser/data/piCaiCode/preprocessing/transformsForMain.py")
+manageMetaData =loadLib("ManageMetadata", "/home/sliceruser/data/piCaiCode/preprocessing/ManageMetadata.py")
+dataUtils =loadLib("dataUtils", "/home/sliceruser/data/piCaiCode/dataManag/utils/dataUtils.py")
 
-
-spec = importlib.util.spec_from_file_location("dataUtils", "/home/sliceruser/data/piCaiCode/dataManag/utils/dataUtils.py")
-dataUtils = importlib.util.module_from_spec(spec)
-sys.modules["dataUtils"] = dataUtils
-spec.loader.exec_module(dataUtils)
-
-
-spec = importlib.util.spec_from_file_location("unets", "/home/sliceruser/data/piCaiCode/model/unets.py")
-unets = importlib.util.module_from_spec(spec)
-sys.modules["unets"] = unets
-spec.loader.exec_module(unets)
-
-
-spec = importlib.util.spec_from_file_location("DataModule", "/home/sliceruser/data/piCaiCode/model/DataModule.py")
-DataModule = importlib.util.module_from_spec(spec)
-sys.modules["DataModule"] = DataModule
-spec.loader.exec_module(DataModule)
-
-spec = importlib.util.spec_from_file_location("LigtningModel", "/home/sliceruser/data/piCaiCode/model/LigtningModel.py")
-LigtningModel = importlib.util.module_from_spec(spec)
-sys.modules["LigtningModel"] = LigtningModel
-spec.loader.exec_module(LigtningModel)
-
+unets =loadLib("unets", "/home/sliceruser/data/piCaiCode/model/unets.py")
+DataModule =loadLib("DataModule", "/home/sliceruser/data/piCaiCode/model/DataModule.py")
+LigtningModel =loadLib("LigtningModel", "/home/sliceruser/data/piCaiCode/model/LigtningModel.py")
 
 
 
@@ -105,7 +86,7 @@ loss=monai.losses.FocalLoss(include_background=False, to_onehot_y=True)
 #loss=monai.losses.metrics.DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
 strides=[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
 channels=[32, 64, 128, 256, 512, 1024]
-
+optimizer_class=torch.optim.AdamW
 
 comet_logger = CometLogger(
     api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
@@ -150,7 +131,7 @@ model = LigtningModel.Model(
     net=unet,
     criterion=loss, # Our seg labels are single channel images indicating class index, rather than one-hot
     learning_rate=1e-2,
-    optimizer_class=torch.optim.AdamW,
+    optimizer_class=optimizer_class,
 )
 early_stopping = pl.callbacks.early_stopping.EarlyStopping(
     monitor='val_loss',
