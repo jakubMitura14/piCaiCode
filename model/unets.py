@@ -76,6 +76,14 @@ class UNet(nn.Module):
             strides=(2, 2),
             num_res_units=2
         )
+example hyperparam
+unet_hyperparam = {
+    'batch_size': 8,
+    'model_strides': [(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)],
+    'model_features': [32, 64, 128, 256, 512, 1024]
+}
+
+
         # 5 layer network with simple convolution/normalization/dropout/activation blocks defining the layers
         net=UNet(
             spatial_dims=2,
@@ -94,7 +102,6 @@ class UNet(nn.Module):
         the inputs must have spatial dimensions that are all multiples of 2^N.
         Usually, applying `resize`, `pad` or `crop` transforms can help adjust the spatial size of input data.
     """
-
     @deprecated_arg(
         name="dimensions", new_name="spatial_dims", since="0.6", msg_suffix="Please use `spatial_dims` instead."
     )
@@ -206,7 +213,7 @@ class UNet(nn.Module):
         """
         mod: nn.Module
         if self.num_res_units > 0:
-
+            print(f"actttt {self.act}  ")
             mod = ResidualUnit(
                 self.dimensions,
                 in_channels,

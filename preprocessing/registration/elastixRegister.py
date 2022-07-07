@@ -41,7 +41,7 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
     
     print(pathOs.exists(result))
     #returning faster if the result is already present
-    if(pathOs.exists(outPath)):
+    if(pathOs.exists(result)):
         if(experiment!=None):
             experiment.log_text(f"already registered {colName} {study_id}")
         

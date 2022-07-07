@@ -21,7 +21,7 @@ import os.path
 from os import path as pathOs
 import comet_ml
 from comet_ml import Experiment
-
+import ManageMetadata
 
 experiment = Experiment(
     api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
@@ -56,11 +56,7 @@ for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:
     df[keyWord+'_stand']=Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,50)   
 Standardize.iterateAndchangeLabelToOnes(df)
 
-
-
-
 ################# get spacing
-
 """
 looking through all valid spacings (if it si invalid it goes below 0)
 and displaying minimal maximal and rounded mean spacing and median
@@ -152,8 +148,10 @@ for keyWord in ['adc_med_spac','hbv_med_spac']:
         df['registered_'+keyWord]=resList  
 
 
+ManageMetadata.addSizeMetaDataToDf("t2w_med_spac",df)
 
 
+# partial(reg_adc_hbv_to_t2w,colName='adc_med_spac',elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w_med_spac')(row)
 
 # def ifShortReturnMinus(tupl, patId,colName):
 #     if(len(tupl)!=3):
@@ -238,6 +236,9 @@ print(df['study_id'])
 # # we save the metadata to main pandas data frame 
 # df["adc_resmaplA"]=df.apply(lambda row : resample_adc_hbv_to_t2w(row, 'adc')   , axis = 1) 
 # df["hbv_resmaplA"]=df.apply(lambda row : resample_adc_hbv_to_t2w(row, 'hbv')   , axis = 1) 
-df.to_csv('/home/sliceruser/data/metadata/processedMetaData.csv') 
+df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
         
+#/home/sliceruser/Slicer/bin/PythonSlicer /home/sliceruser/data/piCaiCode/preprocessing/processMetaData.py
+#/home/sliceruser/Slicer/bin/PythonSlicer /home/sliceruser/data/piCaiCode/preprocessing/testPreprocess.py
 
+# reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w_med_spac'
