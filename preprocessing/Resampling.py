@@ -22,10 +22,11 @@ def copyDirAndOrigin(imageOrig,spacing,data):
 
 
 
-def useGan(data,post_slices,pre_slices):
+def useGan(data,post_slices,pre_slices,stepSize):
     diffPrim = post_slices-pre_slices# always positive number if too big we will run out of memoory
     diffDone=0
-    stepSize=100 # how big diffrence in number of slices it can handle at one go
+    print(f"sstep size {stepSize}")
+    #stepSize=100 # how big diffrence in number of slices it can handle at one go
     if(diffPrim<stepSize):
             return SOUP_GAN(data, post_slices/pre_slices,1)
     else:        
@@ -72,7 +73,21 @@ def resample_with_GAN(path, targetSpac):
                 data = np.moveaxis(data, 0, 2)
             #Call the SR interpolation tool from KevinSR
             #print(f"thicks_ori shape {data.shape} ")
-            data =useGan(data,post_slices,pre_slices)
+            try:
+                data =useGan(data,post_slices,pre_slices,200)
+            except Exception as e:
+                print(e)
+                try:
+                   data =useGan(data,post_slices,pre_slices,100) 
+                except Exception as e:
+                    print(e)    
+                    try: 
+                        data =useGan(data,post_slices,pre_slices,50) 
+                    except Exception as e:
+                        print(e)        
+                        data =useGan(data,post_slices,pre_slices,25) 
+
+
             #data = SOUP_GAN(data, Z_FAC,1)
             #print(f"thins_gen shape {data.shape} ")
             if(axis==1):
