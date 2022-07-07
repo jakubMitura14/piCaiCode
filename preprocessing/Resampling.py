@@ -152,7 +152,7 @@ def resample_label_with_GAN(path, targetSpac):
             #Call the SR interpolation tool from KevinSR
             #print(f"thicks_ori shape {data.shape} ")
 
-            data = mask_interpolation(data, Z_FAC,1)
+            data = mask_interpolation(data, Z_FAC)
             #print(f"thins_gen shape {data.shape} ")
             if(axis==1):
                 data = np.moveaxis(data, 2, 1)
