@@ -73,19 +73,21 @@ def resample_with_GAN(path, targetSpac):
                 data = np.moveaxis(data, 0, 2)
             #Call the SR interpolation tool from KevinSR
             #print(f"thicks_ori shape {data.shape} ")
-            try:
-                data =useGan(data,post_slices,pre_slices,200)
-            except Exception as e:
-                print(e)
-                try:
-                   data =useGan(data,post_slices,pre_slices,100) 
-                except Exception as e:
-                    print(e)    
-                    try: 
-                        data =useGan(data,post_slices,pre_slices,50) 
-                    except Exception as e:
-                        print(e)        
-                        data =useGan(data,post_slices,pre_slices,25) 
+            data =useGan(data,post_slices,pre_slices,50)
+
+            # try:
+            #     data =useGan(data,post_slices,pre_slices,200)
+            # except Exception as e:
+            #     print(e)
+            #     try:
+            #        data =useGan(data,post_slices,pre_slices,100) 
+            #     except Exception as e:
+            #         print(e)    
+            #         try: 
+            #             data =useGan(data,post_slices,pre_slices,50) 
+            #         except Exception as e:
+            #             print(e)        
+            #             data =useGan(data,post_slices,pre_slices,25) 
 
 
             #data = SOUP_GAN(data, Z_FAC,1)
