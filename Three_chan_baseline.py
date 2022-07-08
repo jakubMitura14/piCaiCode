@@ -133,7 +133,7 @@ def mainTrain(experiment,options):
     data = DataModule.PiCaiDataModule(
         df= df,
         batch_size=2,#
-        trainSizePercent=0.5,# TODO(change to 0.7 or 0.8
+        trainSizePercent=0.8,# TODO(change to 0.7 or 0.8
         num_workers=os.cpu_count(),
         drop_last=False,#True,
         cache_dir=getParam(experiment,options,"dirs")["cache_dir"],

@@ -21,7 +21,6 @@ import seaborn as sns
 import numpy as np
 from sklearn.model_selection import train_test_split
 from monai.networks.nets import UNet
-from monai.networks.layers import Norm
 from monai.metrics import DiceMetric
 from monai.losses import DiceLoss
 from monai.data import CacheDataset,Dataset,PersistentDataset, list_data_collate, decollate_batch
@@ -66,14 +65,21 @@ Three_chan_baseline =loadLib("Three_chan_baseline", "/home/sliceruser/data/piCai
 
 ##options
 options={
-"lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=True)],
+"lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=True)
+        ,monai.losses.DiceLoss(include_background=False, to_onehot_y=True)
+        ,monai.losses.DiceFocalLoss(include_background=False, to_onehot_y=True)
+],
 "stridesAndChannels":  [ {
                                                             "strides":[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
                                                             ,"channels":[32, 64, 128, 256, 512, 1024]
+                                                            },
+                                                            {
+                                                            "strides":[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)]
+                                                            ,"channels":[32, 64, 128, 256, 512]
                                                             }  ],
-"optimizer_class": [torch.optim.AdamW] ,
-"act":[(Act.PRELU, {"init": 0.2})],                                         
-"norm":[(Norm.INSTANCE, {})],
+"optimizer_class": [torch.optim.AdamW, torch.optim.NAdam] ,
+"act":[(Act.PRELU, {"init": 0.2}),(Act.LEAKYRELU, {})],                                         
+"norm":[(Norm.INSTANCE, {}),(Norm.BATCH, {}) ],
 "dirs":[
                                                 {
                                                 "cache_dir":"/home/sliceruser/preprocess/monai_persistent_Dataset"
@@ -99,22 +105,22 @@ config = {
         "lossF": {"type": "discrete", "values": list(range(0,len(options["lossF"])))},
         "stridesAndChannels": {"type": "discrete", "values":  list(range(0,len(options["stridesAndChannels"])))  },
         "optimizer_class": {"type": "discrete", "values":list(range(0,len(options["optimizer_class"])))  },
-        "num_res_units": {"type": "discrete", "values": [0]},
+        "num_res_units": {"type": "discrete", "values": [0,1,2]},
         "act": {"type": "discrete", "values":list(range(0,len(options["act"])))  },#,(Act.LeakyReLU,{"negative_slope":0.1, "inplace":True} )
         "norm": {"type": "discrete", "values": list(range(0,len(options["norm"])))},
-        "dropout": {"type": "discrete", "values": [0.0]},
+        "dropout": {"type": "discrete", "values": [0.0,0.1]},
         "precision": {"type": "discrete", "values": [16]},
-        "max_epochs": {"type": "discrete", "values": [20]},
+        "max_epochs": {"type": "discrete", "values": [10]},#900
 
-        "accumulate_grad_batches": {"type": "discrete", "values": [1]},
-        "gradient_clip_val": {"type": "discrete", "values": [0.0]},
-        "RandGaussianNoised_prob": {"type": "discrete", "values": [0.1]},
-        "RandAdjustContrastd_prob": {"type": "discrete", "values": [0.1]},
-        "RandGaussianSmoothd_prob": {"type": "discrete", "values": [0.1]},
-        "RandRicianNoised_prob": {"type": "discrete", "values": [0.1]},
-        "RandFlipd_prob": {"type": "discrete", "values": [0.1]},
-        "RandAffined_prob": {"type": "discrete", "values": [0.1]},
-        "RandCoarseDropoutd_prob": {"type": "discrete", "values": [0.1]},
+        "accumulate_grad_batches": {"type": "discrete", "values": [1,3]},
+        "gradient_clip_val": {"type": "discrete", "values": [0.0,0.5,2.0]},
+        "RandGaussianNoised_prob": {"type": "discrete", "values": [0.0,0.1,0.2]},
+        "RandAdjustContrastd_prob": {"type": "discrete", "values": [0.0,0.1,0.2]},
+        "RandGaussianSmoothd_prob": {"type": "discrete", "values": [0.0,0.1,0.2]},
+        "RandRicianNoised_prob": {"type": "discrete", "values": [0.0,0.1,0.2]},
+        "RandFlipd_prob": {"type": "discrete", "values": [0.0,0.1,0.2]},
+        "RandAffined_prob": {"type": "discrete", "values": [0.0,0.1,0.2]},
+        "RandCoarseDropoutd_prob": {"type": "discrete", "values": [0.0,0.1,0.2]},
         "is_whole_to_train": {"type": "discrete", "values": [True,False]},
         "dirs": {"type": "discrete", "values": list(range(0,len(options["dirs"])))},
     },
@@ -144,7 +150,7 @@ opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
 
 
 for experiment in opt.get_experiments(
-        project_name="picai-hyperparam-search-01"):
+        project_name="picai-hyperparam-search-03"):
     print("******* new experiment *****")    
     Three_chan_baseline.mainTrain(experiment,options)
 
