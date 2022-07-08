@@ -123,7 +123,7 @@ config = {
         "RandAffined_prob": {"type": "float", "min": 0.0, "max": 0.4},
         "RandCoarseDropoutd_prob":{"type": "float", "min": 0.0, "max": 0.4},
 
-        "is_whole_to_train": {"type": "discrete", "values": [True]},#True,False
+        "is_whole_to_train": {"type": "discrete", "values": [True,False]},#True,False
         "dirs": {"type": "discrete", "values": list(range(0,len(options["dirs"])))},
     },
 

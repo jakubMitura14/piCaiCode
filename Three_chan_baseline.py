@@ -47,6 +47,8 @@ monai.utils.set_determinism()
 import importlib.util
 import sys
 
+percentSplit=0.5
+
 def loadLib(name,path):
     spec = importlib.util.spec_from_file_location(name, path)
     res = importlib.util.module_from_spec(spec)
@@ -134,7 +136,7 @@ def mainTrain(experiment,options):
     data = DataModule.PiCaiDataModule(
         df= df,
         batch_size=2,#
-        trainSizePercent=0.8,# TODO(change to 0.7 or 0.8
+        trainSizePercent=percentSplit,# TODO(change to 0.7 or 0.8
         num_workers=os.cpu_count(),
         drop_last=False,#True,
         #we need to use diffrent cache folders depending on weather we are dividing data or not

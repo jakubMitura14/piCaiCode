@@ -24,7 +24,7 @@ from monai.networks.layers import Norm
 from monai.metrics import DiceMetric
 from monai.losses import DiceLoss
 from monai.inferers import sliding_window_inference
-from monai.data import CacheDataset,Dataset,PersistentDataset, list_data_collate, decollate_batch
+from monai.data import CacheDataset,Dataset,PersistentDataset, pad_list_data_collate, decollate_batch,list_data_collate
 from monai.config import print_config
 from monai.apps import download_and_extract
 
@@ -183,7 +183,7 @@ class PiCaiDataModule(pl.LightningDataModule):
                           , shuffle=True,num_workers=self.num_workers,collate_fn=list_data_collate)#,collate_fn=list_data_collate
 
     def val_dataloader(self):
-        return DataLoader(self.val_ds, batch_size=1, drop_last=False,num_workers=self.num_workers)
+        return DataLoader(self.val_ds, batch_size=1, drop_last=self.drop_last,num_workers=self.num_workers)#,collate_fn=pad_list_data_collate
 
     # def test_dataloader(self):
     #     return DataLoader(self.test_ds, batch_size= 1, drop_last=False,num_workers=self.num_workers,collate_fn=list_data_collate)#num_workers=self.num_workers,
