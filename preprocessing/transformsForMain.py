@@ -49,9 +49,9 @@ def decide_if_whole_image_train(is_whole_to_train,maxSize):
     randomly cropped parts
     """
     if(is_whole_to_train):
-        return [SpatialPadd(keys=["t2w","adc", "hbv","label"],spatial_size=maxSize)]
+        return [SpatialPadd(keys=["common_3channels"],spatial_size=maxSize)]
     else:
-        return [DivisiblePadd(keys=["t2w","adc", "hbv","label"],k=32)
+        return [DivisiblePadd(keys=["common_3channels"],k=32)
             ,RandCropByPosNegLabeld(
                 keys=["common_3channels","label"],
                 label_key="label",
@@ -87,7 +87,7 @@ def get_train_transforms(maxSize
             #CropForegroundd(keys=["t2w","adc", "hbv","label"], source_key="image"),
             EnsureTyped(keys=["t2w","adc", "hbv","label"]),
             SelectItemsd(keys=["t2w","adc", "hbv","label"]),
-            DivisiblePadd(keys=["t2w","adc", "hbv","label"],k=32) ,
+            #DivisiblePadd(keys=["t2w","adc", "hbv","label"],k=32) ,
 
             #SpatialPadd(keys=["t2w","adc", "hbv","label"],spatial_size=maxSize) ,            
             RandGaussianNoised(keys=["t2w","adc", "hbv","label"], prob=RandGaussianNoised_prob),
@@ -112,7 +112,7 @@ def get_val_transforms(maxSize):
             #Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
             # Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
             #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
-            #SpatialPadd(keys=["t2w","adc", "hbv","label"],spatial_size=maxSize) ,
+            SpatialPadd(keys=["t2w","adc", "hbv","label"],spatial_size=maxSize) ,
             #DivisiblePadd(keys=["t2w","adc", "hbv","label"],k=32) ,
             DivisiblePadd(keys=["t2w","adc", "hbv","label"],k=32) ,
 
