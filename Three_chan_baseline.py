@@ -121,6 +121,7 @@ def mainTrain(experiment,options):
     #############loading meta data 
     df = pd.read_csv(getParam(experiment,options,"dirs")["metDataDir"])
     maxSize=manageMetaData.getMaxSize(getParam(experiment,options,"dirs")["t2w_name"],df)
+    print(f"************    maxSize {maxSize}   ***************")
     df= manageMetaData.load_df_only_full(
         df
         ,getParam(experiment,options,"dirs")["t2w_name"]
