@@ -97,7 +97,7 @@ LigtningModel =loadLib("LigtningModel", "/home/sliceruser/data/piCaiCode/model/L
 # hbv_name="registered_hbv_med_spac"
 # label_name="label_med_spac"
 
-def getParam(experiment,options,key):
+def getParam(experiment,options,key,df):
     """
     given integer returned from experiment 
     it will look into options dictionary and return required object
@@ -110,7 +110,7 @@ def getParam(experiment,options,key):
 
 
 
-def mainTrain(experiment,options):
+def mainTrain(experiment,options,df):
     finalLoss=[100]
     print("mmmmmmmmmmmmmmmmmm")
     #TODO(remove)
@@ -121,17 +121,11 @@ def mainTrain(experiment,options):
     #     #experiment_name="baseline" # Optional
     # )
     #############loading meta data 
-    df = pd.read_csv(getParam(experiment,options,"dirs")["metDataDir"])
+
+
+
     maxSize=manageMetaData.getMaxSize(getParam(experiment,options,"dirs")["t2w_name"],df)
     print(f"************    maxSize {maxSize}   ***************")
-    df= manageMetaData.load_df_only_full(
-        df
-        ,getParam(experiment,options,"dirs")["t2w_name"]
-        ,getParam(experiment,options,"dirs")["adc_name"]
-        ,getParam(experiment,options,"dirs")["hbv_name"]
-        ,getParam(experiment,options,"dirs")["label_name"]
-        ,maxSize
-        ,experiment.get_parameter("is_whole_to_train") )
 
     data = DataModule.PiCaiDataModule(
         df= df,

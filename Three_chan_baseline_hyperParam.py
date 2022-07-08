@@ -134,7 +134,26 @@ config = {
     },
 }
 
+df = pd.read_csv("/home/sliceruser/data/metadata/processedMetaData_current.csv")
+maxSize=manageMetaData.getMaxSize("t2w_med_spac",df)
 
+
+df= manageMetaData.load_df_only_full(
+    df
+    ,options["dirs"][0]["t2w_name"]
+    ,options["dirs"][0]["dirs"]["adc_name"]
+    ,options["dirs"][0]["dirs"]["hbv_name"]
+    ,options["dirs"][0]["dirs"]["label_name"]
+    ,maxSize
+    ,True )
+df= manageMetaData.load_df_only_full(
+    df
+    ,options["dirs"][0]["dirs"]["t2w_name"]
+    ,options["dirs"][0]["dirs"]["adc_name"]
+    ,options["dirs"][0]["dirs"]["hbv_name"]
+    ,options["dirs"][0]["dirs"]["label_name"]
+    ,maxSize
+    ,False )
 
 
 # Next, create an optimizer, passing in the config:

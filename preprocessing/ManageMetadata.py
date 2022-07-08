@@ -68,6 +68,7 @@ def load_df_only_full(df,t2w_name,adc_name,hbv_name,label_name,maxSize,is_whole_
             dat = train_transforms(dictt)
             dat = val_transforms(dictt)
         except:
+            print("error loading image")
             pass
             #deficientPatIDs.append(dictt['patient_id'])
             #print(dictt['patient_id'])

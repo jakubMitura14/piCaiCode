@@ -60,29 +60,23 @@ def removeOutliersBiasFieldCorrect(path,numberOfStandardDeviations = 4):
 def removeOutliersAndWrite(path):
     image=removeOutliersBiasFieldCorrect(path)
     print("biasFieldCorrect "+path)
-    #standardazing orientation
-    image = sitk.DICOMOrient(image, 'RAS')
-    additionalPath= path.replace(".mha","_bf_corr.mha")
-    
+    #standardazing orientation 
     writer = sitk.ImageFileWriter()
     writer.KeepOriginalImageUIDOn()
     writer.SetFileName(path)
     writer.Execute(image)   
-    #saving also a copy 
-    image = sitk.ReadImage(path)
-    writer = sitk.ImageFileWriter()
-    writer.KeepOriginalImageUIDOn()
-    writer.SetFileName(additionalPath)
-    writer.Execute(image)   
+ 
 
 def standardizeFromPathAndOverwrite(path,nyul_normalizer): 
     #print("standardizeFromPathAndOverwrite "+path)
-    newPath = path.replace(".mha","_stand.mha" )
+    newPath = path#.replace(".mha","_stand.mha" )
     
     if(pathOs.exists(newPath)):
         return newPath
     
     image1=sitk.ReadImage(path)
+    image1 = sitk.DICOMOrient(image1, 'RAS')
+    image1 = sitk.Cast(image1, sitk.sitkFloat32)
     data=nyul_normalizer(sitk.GetArrayFromImage(image1))
     #recreating image keeping relevant metadata
     image = sitk.GetImageFromArray(data)  
@@ -95,10 +89,36 @@ def standardizeFromPathAndOverwrite(path,nyul_normalizer):
     writer.SetFileName(newPath)
     writer.Execute(image)    
     return newPath
-    
-#######  
 
-    
+
+def denoise(path):
+    image1=sitk.ReadImage(path)
+    imgSmooth = sitk.CurvatureFlow(image1=image1,
+                                        timeStep=0.125,
+                                        numberOfIterations=5)
+    #standardazing orientation
+
+    writer = sitk.ImageFileWriter()
+    writer.KeepOriginalImageUIDOn()
+    writer.SetFileName(path)
+    writer.Execute(imgSmooth)   
+
+#######  
+def iterateAndBiasCorrect(seriesString,df):
+    train_patientsPaths=df[seriesString].dropna().astype('str').to_numpy()
+    train_patientsPaths=list(filter(lambda path: len(path)>2 ,train_patientsPaths))   
+    with mp.Pool(processes = mp.cpu_count()) as pool:
+        pool.map(removeOutliersAndWrite,train_patientsPaths)
+
+
+
+def iterateAndDenoise(seriesString,df):
+    train_patientsPaths=df[seriesString].dropna().astype('str').to_numpy()
+    train_patientsPaths=list(filter(lambda path: len(path)>2 ,train_patientsPaths))   
+    with mp.Pool(processes = mp.cpu_count()) as pool:
+        pool.map(denoise,train_patientsPaths)
+
+
 def iterateAndStandardize(seriesString,df,trainedModelsBasicPath,numberOfSamples):
     """
     iterates over files from train_patientsPaths representing seriesString type of the study
@@ -114,10 +134,7 @@ def iterateAndStandardize(seriesString,df,trainedModelsBasicPath,numberOfSamples
     """
     train_patientsPaths=df[seriesString].dropna().astype('str').to_numpy()
     train_patientsPaths=list(filter(lambda path: len(path)>2 ,train_patientsPaths))
-    
-    # with mp.Pool(processes = mp.cpu_count()) as pool:
-    #     pool.map(removeOutliersAndWrite,train_patientsPaths)
-    
+        
     print("fitting normalizer  " +seriesString)
     nyul_normalizer = NyulNormalize()
     #we need to avoid getting too much into normalizer becouse it will lead to memory errors
@@ -153,6 +170,7 @@ def changeLabelToOnes(row):
     if(path!= " " and path!=""):
         image1 = sitk.ReadImage(path)
         image1 = sitk.DICOMOrient(image1, 'RAS')
+        image1 = sitk.Cast(image1, sitk.sitkFloat32)
         data = sitk.GetArrayFromImage(image1)
         data -= np.min(data)
         data[data>= 1] = 1
