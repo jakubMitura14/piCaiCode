@@ -1,66 +1,66 @@
 from comet_ml import Optimizer
 
-# from comet_ml import Experiment
-# from pytorch_lightning.loggers import CometLogger
-# import time
-# from pathlib import Path
-# from datetime import datetime
-# import SimpleITK as sitk
-# from monai.utils import set_determinism
-# import math
-# import torch
-# from torch.utils.data import random_split, DataLoader
-# import monai
-# import gdown
-# import pandas as pd
-# import torchio as tio
-# import pytorch_lightning as pl
-# import matplotlib.pyplot as plt
-# import seaborn as sns
-# import numpy as np
-# from sklearn.model_selection import train_test_split
-# from monai.networks.nets import UNet
-# from monai.networks.layers import Norm
-# from monai.metrics import DiceMetric
-# from monai.losses import DiceLoss
-# from monai.data import CacheDataset,Dataset,PersistentDataset, list_data_collate, decollate_batch
-# from datetime import datetime
-# import os
-# import tempfile
-# from glob import glob
-# from monai.handlers.utils import from_engine
-# from monai.inferers import sliding_window_inference
-# import torch
-# import matplotlib.pyplot as plt
-# import tempfile
-# import shutil
-# import os
-# import glob
-# from monai.networks.layers.factories import Act, Norm
-# import torch.nn as nn
-# import torch.nn.functional as F
-# import multiprocessing
+from comet_ml import Experiment
+from pytorch_lightning.loggers import CometLogger
+import time
+from pathlib import Path
+from datetime import datetime
+import SimpleITK as sitk
+from monai.utils import set_determinism
+import math
+import torch
+from torch.utils.data import random_split, DataLoader
+import monai
+import gdown
+import pandas as pd
+import torchio as tio
+import pytorch_lightning as pl
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+from sklearn.model_selection import train_test_split
+from monai.networks.nets import UNet
+from monai.networks.layers import Norm
+from monai.metrics import DiceMetric
+from monai.losses import DiceLoss
+from monai.data import CacheDataset,Dataset,PersistentDataset, list_data_collate, decollate_batch
+from datetime import datetime
+import os
+import tempfile
+from glob import glob
+from monai.handlers.utils import from_engine
+from monai.inferers import sliding_window_inference
+import torch
+import matplotlib.pyplot as plt
+import tempfile
+import shutil
+import os
+import glob
+from monai.networks.layers.factories import Act, Norm
+import torch.nn as nn
+import torch.nn.functional as F
+import multiprocessing
 
-# monai.utils.set_determinism()
+monai.utils.set_determinism()
 
-# import importlib.util
-# import sys
+import importlib.util
+import sys
 
-# def loadLib(name,path):
-#     spec = importlib.util.spec_from_file_location(name, path)
-#     res = importlib.util.module_from_spec(spec)
-#     sys.modules[name] = res
-#     spec.loader.exec_module(res)
-#     return res
+def loadLib(name,path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    res = importlib.util.module_from_spec(spec)
+    sys.modules[name] = res
+    spec.loader.exec_module(res)
+    return res
 
-# transformsForMain =loadLib("transformsForMain", "/home/sliceruser/data/piCaiCode/preprocessing/transformsForMain.py")
-# manageMetaData =loadLib("ManageMetadata", "/home/sliceruser/data/piCaiCode/preprocessing/ManageMetadata.py")
-# dataUtils =loadLib("dataUtils", "/home/sliceruser/data/piCaiCode/dataManag/utils/dataUtils.py")
+transformsForMain =loadLib("transformsForMain", "/home/sliceruser/data/piCaiCode/preprocessing/transformsForMain.py")
+manageMetaData =loadLib("ManageMetadata", "/home/sliceruser/data/piCaiCode/preprocessing/ManageMetadata.py")
+dataUtils =loadLib("dataUtils", "/home/sliceruser/data/piCaiCode/dataManag/utils/dataUtils.py")
 
-# unets =loadLib("unets", "/home/sliceruser/data/piCaiCode/model/unets.py")
-# DataModule =loadLib("DataModule", "/home/sliceruser/data/piCaiCode/model/DataModule.py")
-# LigtningModel =loadLib("LigtningModel", "/home/sliceruser/data/piCaiCode/model/LigtningModel.py")
-# Three_chan_baseline =loadLib("Three_chan_baseline", "/home/sliceruser/data/piCaiCode/Three_chan_baseline.py")
+unets =loadLib("unets", "/home/sliceruser/data/piCaiCode/model/unets.py")
+DataModule =loadLib("DataModule", "/home/sliceruser/data/piCaiCode/model/DataModule.py")
+LigtningModel =loadLib("LigtningModel", "/home/sliceruser/data/piCaiCode/model/LigtningModel.py")
+Three_chan_baseline =loadLib("Three_chan_baseline", "/home/sliceruser/data/piCaiCode/Three_chan_baseline.py")
 
 
 #####hyperparameters
@@ -122,7 +122,7 @@ config = {
 
     # Declare your hyperparameters in the Vizier-inspired format:
     "parameters": {
-        "x": {"type": "integer", "min": 1, "max": 5},
+        "x": {"type": "discrete","values": [True,False]},
     },
 
     # Declare what we will be optimizing, and how:

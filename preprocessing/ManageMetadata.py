@@ -1,13 +1,25 @@
 import pandas as pd
 import SimpleITK as sitk
 import numpy as np
-import transformsForMain# as transformsForMain
+#import transformsForMain# as transformsForMain
 # from transformsForMain import get_train_transforms
 # from transformsForMain import get_val_transforms
 import os
 import multiprocessing as mp
 import functools
 from functools import partial
+import importlib.util
+import sys
+
+def loadLib(name,path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    res = importlib.util.module_from_spec(spec)
+    sys.modules[name] = res
+    spec.loader.exec_module(res)
+    return res
+    
+transformsForMain =loadLib("transformsForMain", "/home/sliceruser/data/piCaiCode/preprocessing/transformsForMain.py")
+
 
 def getMonaiSubjectDataFromDataFrame(row,t2w_name,adc_name,hbv_name,label_name):
         """
