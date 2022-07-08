@@ -121,7 +121,7 @@ def get_val_transforms(maxSize):
             #CropForegroundd(keys=["t2w","adc", "hbv","label"], source_key="image"),
 
             EnsureTyped(keys=["t2w","adc", "hbv","label"]),
-            ConcatItemsd(keys=["t2w","adc","hbv"],name="common_3channels")
+            ConcatItemsd(keys=["t2w","adc","hbv"],name="common_3channels"),
             SelectItemsd(keys=["common_3channels","label"])
 
         ]
