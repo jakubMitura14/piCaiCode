@@ -110,7 +110,7 @@ config = {
         "norm": {"type": "discrete", "values": list(range(0,len(options["norm"])))},
         "dropout": {"type": "discrete", "values": [0.0,0.1]},
         "precision": {"type": "discrete", "values": [16]},
-        "max_epochs": {"type": "discrete", "values": [900]},#900
+        "max_epochs": {"type": "discrete", "values": [300]},#900
 
         "accumulate_grad_batches": {"type": "discrete", "values": [1,3]},
         "gradient_clip_val": {"type": "discrete", "values": [0.0,0.5,2.0]},
@@ -123,7 +123,7 @@ config = {
         "RandAffined_prob": {"type": "float", "min": 0.0, "max": 0.4},
         "RandCoarseDropoutd_prob":{"type": "float", "min": 0.0, "max": 0.4},
 
-        "is_whole_to_train": {"type": "discrete", "values": [True,False]},
+        "is_whole_to_train": {"type": "discrete", "values": [False]},#True,False
         "dirs": {"type": "discrete", "values": list(range(0,len(options["dirs"])))},
     },
 
