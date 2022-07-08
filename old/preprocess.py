@@ -153,3 +153,17 @@ def Resample_3D(image,New_Spacing,New_Size=None,OutputPixelType='Uint16',mask=No
                     image_B = DicomRead(Input_path)
 
                 image_B_S= transform(image_B,meanLandmarks=meanLandmarks)
+
+
+
+
+
+
+
+
+
+
+
+
+
+                

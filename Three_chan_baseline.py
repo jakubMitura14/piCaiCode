@@ -186,6 +186,15 @@ def mainTrain(experiment):
     print('Training started at', start)
     trainer.fit(model=model, datamodule=data)
     print('Training duration:', datetime.now() - start)
+    # #evaluating on test dataset
+    # with torch.no_grad():
+    
+    #     for batch in data.test_dataloader():
+    #         inputs = batch['image'][tio.DATA].to(device)
+    #         labels = model.net(inputs).argmax(dim=1, keepdim=True).cpu()
+    #         for i in range(len(inputs)):
+    #             break
+    #         break   
 
 
 #experiment.end()

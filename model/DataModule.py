@@ -130,7 +130,7 @@ class PiCaiDataModule(pl.LightningDataModule):
 
         self.dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
 
-    def splitDataSet(self,patList, trainSizePercent):
+    def splitDataSet(self,patList, trainSizePercent,noTestSet):
         """
         test train validation split
         TODO(balance sets)
@@ -146,12 +146,16 @@ class PiCaiDataModule(pl.LightningDataModule):
         print('Train data set:', numTrain)
         print('Test data set:',numTest)
         print('Valid data set:', numVal)
-        return torch.utils.data.random_split(patList, [numTrain,numVal,numTest])
+        if(noTestSet):
+            return torch.utils.data.random_split(patList, [numTrain,numTestAndVal])
+        else:    
+            return torch.utils.data.random_split(patList, [numTrain,numVal,numTest])
 
     def setup(self, stage=None):
         set_determinism(seed=0)
         self.subjects = list(map(lambda row: manageMetaData.getMonaiSubjectDataFromDataFrame(row[1],self.t2w_name,self.adc_name,self.hbv_name,self.label_name)   , list(self.df.iterrows())))
         train_set, valid_set,test_set = self.splitDataSet(self.subjects , self.trainSizePercent)
+        
         self.train_subjects = train_set
         self.val_subjects = valid_set
         self.test_subjects = test_set
@@ -172,7 +176,7 @@ class PiCaiDataModule(pl.LightningDataModule):
        
         self.train_ds =  Dataset(data=self.train_subjects, transform=train_transforms)
         self.val_ds=     Dataset(data=self.val_subjects, transform=val_transforms)
-        self.test_ds=    Dataset(data=self.test_subjects, transform=val_transforms)
+        #self.test_ds=    Dataset(data=self.test_subjects, transform=val_transforms)
         
     def train_dataloader(self):
         return DataLoader(self.train_ds, batch_size=self.batch_size, drop_last=self.drop_last
@@ -181,5 +185,5 @@ class PiCaiDataModule(pl.LightningDataModule):
     def val_dataloader(self):
         return DataLoader(self.val_ds, batch_size=1, drop_last=False,num_workers=self.num_workers)
 
-    def test_dataloader(self):
-        return DataLoader(self.test_ds, batch_size= 1, drop_last=False,num_workers=self.num_workers,collate_fn=list_data_collate)#num_workers=self.num_workers,
+    # def test_dataloader(self):
+    #     return DataLoader(self.test_ds, batch_size= 1, drop_last=False,num_workers=self.num_workers,collate_fn=list_data_collate)#num_workers=self.num_workers,
