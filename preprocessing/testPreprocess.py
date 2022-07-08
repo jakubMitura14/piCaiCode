@@ -85,8 +85,7 @@ def resample_ToMedianSpac(row,colName,targetSpacing):
     study_id=str(row['study_id'])
     
     newPath = path.replace(".mha","_medianSpac.mha" )
-    #if(not pathOs.exists(newPath)):   TODO(unhash)
-    if(True):   
+    if(not pathOs.exists(newPath)):      
         experiment.log_text(f" new resample {colName} {study_id}")
 
         try:

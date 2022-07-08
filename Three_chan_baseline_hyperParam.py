@@ -1,7 +1,8 @@
-from comet_ml import Optimizer
 
 from comet_ml import Experiment
 from pytorch_lightning.loggers import CometLogger
+from comet_ml import Optimizer
+
 import time
 from pathlib import Path
 from datetime import datetime
@@ -120,7 +121,7 @@ config = {
 
     # Declare what we will be optimizing, and how:
     "spec": {
-    "metric": "loss",
+    "metric": "last_val_loss",
         "objective": "minimize",
     },
 }

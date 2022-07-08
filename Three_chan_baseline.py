@@ -1,5 +1,7 @@
+
 from comet_ml import Experiment
 from pytorch_lightning.loggers import CometLogger
+
 import time
 from pathlib import Path
 from datetime import datetime
@@ -107,15 +109,15 @@ def getParam(experiment,options,key):
 
 
 def mainTrain(experiment,options):
+    finalLoss=[100]
     print("mmmmmmmmmmmmmmmmmm")
     #TODO(remove)
-    comet_logger = CometLogger(
-        api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
-        #workspace="OPI", # Optional
-        project_name="picai_base_3Channels", # Optional
-        #experiment_name="baseline" # Optional
-    )
-
+    # comet_logger = CometLogger(
+    #     api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
+    #     #workspace="OPI", # Optional
+    #     project_name="picai_base_3Channels", # Optional
+    #     #experiment_name="baseline" # Optional
+    # )
     #############loading meta data 
     df = pd.read_csv(getParam(experiment,options,"dirs")["metDataDir"])
     maxSize=manageMetaData.getMaxSize(getParam(experiment,options,"dirs")["t2w_name"],df)
@@ -130,8 +132,8 @@ def mainTrain(experiment,options):
 
     data = DataModule.PiCaiDataModule(
         df= df,
-        batch_size=2,#TODO(batc size determined by lightning)
-        trainSizePercent=0.8,# change to 0.7
+        batch_size=2,#
+        trainSizePercent=0.5,# TODO(change to 0.7 or 0.8
         num_workers=os.cpu_count(),
         drop_last=False,#True,
         cache_dir=getParam(experiment,options,"dirs")["cache_dir"],
@@ -171,7 +173,9 @@ def mainTrain(experiment,options):
         criterion=  getParam(experiment,options,"lossF"),# Our seg labels are single channel images indicating class index, rather than one-hot
         learning_rate=1e-2,
         optimizer_class= getParam(experiment,options,"optimizer_class") ,
-        experiment=experiment
+        experiment=experiment,
+        finalLoss=finalLoss
+
     )
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
         monitor='val_loss',
@@ -184,7 +188,7 @@ def mainTrain(experiment,options):
         #gpus=1,
         precision=experiment.get_parameter("precision"), 
         callbacks=[ early_stopping ],
-        logger=comet_logger,
+        #logger=comet_logger,
         accelerator='auto',
         devices='auto',
         default_root_dir= "/home/sliceruser/lightning_logs",
@@ -200,15 +204,20 @@ def mainTrain(experiment,options):
     print('Training started at', start)
     trainer.fit(model=model, datamodule=data)
     print('Training duration:', datetime.now() - start)
+    experiment.log_metric("last_val_loss",finalLoss[0])
+
+    #experiment.log_parameters(parameters)
+    
+    experiment.end()
     # #evaluating on test dataset
     # with torch.no_grad():
     
-    #     for batch in data.test_dataloader():
-    #         inputs = batch['image'][tio.DATA].to(device)
-    #         labels = model.net(inputs).argmax(dim=1, keepdim=True).cpu()
-    #         for i in range(len(inputs)):
-    #             break
-    #         break   
+    # for batch in data.test_dataloader():
+    #     inputs = batch['image'][tio.DATA].to(device)
+    #     labels = model.net(inputs).argmax(dim=1, keepdim=True).cpu()
+    #     for i in range(len(inputs)):
+    #         break
+    #     break   
 
 
 #experiment.end()
