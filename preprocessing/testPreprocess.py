@@ -48,7 +48,7 @@ for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:
 df = df.loc[df['isAnyMissing'] ==False]
 df = df.loc[df['isAnythingInAnnotated']>0 ]    
 #just for testing    
-df= df.head(8)
+#df= df.head(8)
 ##df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
 print(df)    
 
@@ -202,15 +202,15 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 ## some preprocessing common for all
 ## bias field correction
 
-# Standardize.iterateAndBiasCorrect('t2w',df)
-# ## Standarization
-# for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:
-#     ## denoising
-#     Standardize.iterateAndDenoise(keyWord,df)
-#     ## standarization
-#     Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,50)   
-# #standardize labels
-# Standardize.iterateAndchangeLabelToOnes(df)
+Standardize.iterateAndBiasCorrect('t2w',df)
+## Standarization
+for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:
+    ## denoising
+    Standardize.iterateAndDenoise(keyWord,df)
+    ## standarization
+    Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,50)   
+#standardize labels
+Standardize.iterateAndchangeLabelToOnes(df)
 
 
 #####
@@ -227,3 +227,5 @@ print(df['study_id'])
 df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
 
     
+# orig/10012/10012_1000012_adc_med_spac_for_adc_med_spac/result.0.mha
+# orig/10012/10012_1000012_hbv_med_spac_for_hbv_med_spac/result.0.mha

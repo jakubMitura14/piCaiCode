@@ -64,7 +64,8 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
             except:
                 print("error in patId")
             p.wait()
-            return result
+            return 
+            
         else:
             return ""    
     return ""
