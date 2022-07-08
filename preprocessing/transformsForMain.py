@@ -86,7 +86,7 @@ def get_train_transforms(maxSize
             #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),            
             #CropForegroundd(keys=["t2w","adc", "hbv","label"], source_key="image"),
             EnsureTyped(keys=["t2w","adc", "hbv","label"]),
-            SelectItemsd(keys=["t2w","adc", "hbv","label"]),
+            # SelectItemsd(keys=["t2w","adc", "hbv","label"]),
             #DivisiblePadd(keys=["t2w","adc", "hbv","label"],k=32) ,
 
             #SpatialPadd(keys=["t2w","adc", "hbv","label"],spatial_size=maxSize) ,            
@@ -99,6 +99,8 @@ def get_train_transforms(maxSize
             RandCoarseDropoutd(keys=["t2w","adc", "hbv","label"], prob=RandCoarseDropoutd_prob,holes=6, spatial_size=5),
             ConcatItemsd(keys=["t2w","adc","hbv"],name="common_3channels"),
             *decide_if_whole_image_train(is_whole_to_train,maxSize),
+            SelectItemsd(keys=["common_3channels","label"])
+
             
         ]
     )
@@ -119,8 +121,9 @@ def get_val_transforms(maxSize):
             #CropForegroundd(keys=["t2w","adc", "hbv","label"], source_key="image"),
 
             EnsureTyped(keys=["t2w","adc", "hbv","label"]),
-            SelectItemsd(keys=["t2w","adc", "hbv","label"]),
             ConcatItemsd(keys=["t2w","adc","hbv"],name="common_3channels")
+            SelectItemsd(keys=["common_3channels","label"])
+
         ]
     )
     return val_transforms

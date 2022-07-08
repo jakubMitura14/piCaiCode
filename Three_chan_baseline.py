@@ -138,7 +138,7 @@ def mainTrain(experiment,options):
         num_workers=os.cpu_count(),
         drop_last=False,#True,
         #we need to use diffrent cache folders depending on weather we are dividing data or not
-        cache_dir=getParam(experiment,options,"dirs")["cache_dir"]+experiment.get_parameter("is_whole_to_train"),
+        cache_dir=getParam(experiment,options,"dirs")["cache_dir"]+str(experiment.get_parameter("is_whole_to_train")),
         t2w_name=getParam(experiment,options,"dirs")["t2w_name"],
         adc_name=getParam(experiment,options,"dirs")["adc_name"],
         hbv_name=getParam(experiment,options,"dirs")["hbv_name"],

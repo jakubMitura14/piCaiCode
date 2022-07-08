@@ -114,13 +114,15 @@ config = {
 
         "accumulate_grad_batches": {"type": "discrete", "values": [1,3]},
         "gradient_clip_val": {"type": "discrete", "values": [0.0,0.5,2.0]},
-        "RandGaussianNoised_prob": {"type": "discrete", "values": [0.0,0.1,0.2]},
-        "RandAdjustContrastd_prob": {"type": "discrete", "values": [0.0,0.1,0.2]},
-        "RandGaussianSmoothd_prob": {"type": "discrete", "values": [0.0,0.1,0.2]},
-        "RandRicianNoised_prob": {"type": "discrete", "values": [0.0,0.1,0.2]},
-        "RandFlipd_prob": {"type": "discrete", "values": [0.0,0.1,0.2]},
-        "RandAffined_prob": {"type": "discrete", "values": [0.0,0.1,0.2]},
-        "RandCoarseDropoutd_prob": {"type": "discrete", "values": [0.0,0.1,0.2]},
+
+        "RandGaussianNoised_prob": {"type": "float", "min": 0.0, "max": 0.4},
+        "RandAdjustContrastd_prob": {"type": "float", "min": 0.0, "max": 0.4},
+        "RandGaussianSmoothd_prob": {"type": "float", "min": 0.0, "max": 0.4},
+        "RandRicianNoised_prob": {"type": "float", "min": 0.0, "max": 0.4},
+        "RandFlipd_prob": {"type": "float", "min": 0.0, "max": 0.4},
+        "RandAffined_prob": {"type": "float", "min": 0.0, "max": 0.4},
+        "RandCoarseDropoutd_prob":{"type": "float", "min": 0.0, "max": 0.4},
+
         "is_whole_to_train": {"type": "discrete", "values": [True,False]},
         "dirs": {"type": "discrete", "values": list(range(0,len(options["dirs"])))},
     },
