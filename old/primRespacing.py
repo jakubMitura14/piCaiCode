@@ -43,7 +43,7 @@ def resample_adc_hbv_to_t2w(row,secondCol ):
 
 #needs to be on single thread as resampling GAN is acting on GPU
 # we save the metadata to main pandas data frame 
-df["adc_resmaplA"]=df.apply(lambda row : resample_adc_hbv_to_t2w(row, 'adc')   , axis = 1) 
-df["hbv_resmaplA"]=df.apply(lambda row : resample_adc_hbv_to_t2w(row, 'hbv')   , axis = 1) 
-df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
+# df["adc_resmaplA"]=df.apply(lambda row : resample_adc_hbv_to_t2w(row, 'adc')   , axis = 1) 
+# df["hbv_resmaplA"]=df.apply(lambda row : resample_adc_hbv_to_t2w(row, 'hbv')   , axis = 1) 
+# df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
         

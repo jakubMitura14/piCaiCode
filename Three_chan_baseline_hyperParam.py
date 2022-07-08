@@ -126,7 +126,6 @@ config = {
 }
 
 
-print("uuuuuuuuuuuuu 3")
 
 
 # Next, create an optimizer, passing in the config:
@@ -145,7 +144,7 @@ opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
 
 for experiment in opt.get_experiments(
         project_name="picai-hyperparam-search-01"):
-    print("eeeee")    
+    print("******* new experiment *****")    
     Three_chan_baseline.mainTrain(experiment,options)
 
 
