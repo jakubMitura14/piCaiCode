@@ -63,66 +63,59 @@ LigtningModel =loadLib("LigtningModel", "/home/sliceruser/data/piCaiCode/model/L
 Three_chan_baseline =loadLib("Three_chan_baseline", "/home/sliceruser/data/piCaiCode/Three_chan_baseline.py")
 
 
+##options
+options={
+"lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=True)],
+"stridesAndChannels":  [ {
+                                                            "strides":[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
+                                                            ,"channels":[32, 64, 128, 256, 512, 1024]
+                                                            }  ],
+"optimizer_class": [torch.optim.AdamW] ,
+"act":[(Act.PRELU, {"init": 0.2})],                                         
+"norm":[(Norm.INSTANCE, {})],
+"dirs":[
+                                                {
+                                                "cache_dir":"/home/sliceruser/preprocess/monai_persistent_Dataset"
+                                                ,"t2w_name":"t2w_med_spac"
+                                                ,"adc_name":"registered_adc_med_spac"
+                                                ,"hbv_name":"registered_hbv_med_spac"
+                                                ,"label_name":"label_med_spac" 
+                                                ,"metDataDir":"/home/sliceruser/data/metadata/processedMetaData_current.csv"
+                                                }
+                                                    ]
+}
+
+
 #####hyperparameters
 # based on https://www.comet.com/docs/python-sdk/introduction-optimizer/
-# We only need to specify the algorithm and hyperparameters to use:
-print("uuuuuuuuuuuuu")
-# config = {
-#     # We pick the Bayes algorithm:
-#     "algorithm": "bayes",
-
-#     # Declare  hyperparameters in 
-#     "parameters": {
-#         "loss": {"type": "discrete", "values": [monai.losses.FocalLoss(include_background=False, to_onehot_y=True)]},
-#         "stridesAndChannels": {"type": "discrete", "values": [{
-#                                                             "strides":[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
-#                                                             ,"channels":[32, 64, 128, 256, 512, 1024]
-#                                                             }]},
-#         "optimizer_class": {"type": "discrete", "values": [torch.optim.AdamW]},
-#         "num_res_units": {"type": "discrete", "values": [0]},
-#         "act": {"type": "discrete", "values": [(Act.PRELU, {"init": 0.2})]},#,(Act.LeakyReLU,{"negative_slope":0.1, "inplace":True} )
-#         "norm": {"type": "discrete", "values": [(Norm.INSTANCE, {})]},
-#         "dropout": {"type": "discrete", "values": [0.0]},
-#         "precision": {"type": "discrete", "values": [16]},
-#         "accumulate_grad_batches": {"type": "discrete", "values": [1]},
-#         "gradient_clip_val": {"type": "discrete", "values": [0.0]},
-#         "RandGaussianNoised_prob": {"type": "discrete", "values": [0.1]},
-#         "RandAdjustContrastd_prob": {"type": "discrete", "values": [0.1]},
-#         "RandGaussianSmoothd_prob": {"type": "discrete", "values": [0.1]},
-#         "RandRicianNoised_prob": {"type": "discrete", "values": [0.1]},
-#         "RandFlipd_prob": {"type": "discrete", "values": [0.1]},
-#         "RandAffined_prob": {"type": "discrete", "values": [0.1]},
-#         "RandCoarseDropoutd_prob": {"type": "discrete", "values": [0.1]},
-#         "is_whole_to_train": {"type": "discrete", "values": [True,False]},
-#         "dirs": {"type": "discrete", "values": [
-#                                                 {
-#                                                 "cache_dir":"/home/sliceruser/preprocess/monai_persistent_Dataset"
-#                                                 ,"t2w_name":"t2w_med_spac"
-#                                                 ,"adc_name":"registered_adc_med_spac"
-#                                                 ,"hbv_name":"registered_hbv_med_spac"
-#                                                 ,"label_name":"label_med_spac" 
-#                                                 ,"metDataDir":"/home/sliceruser/data/metadata/processedMetaData_current.csv"
-#                                                 }
-#                                                     ]},
-#     },
-
-#     # Declare what we will be optimizing, and how:
-#     "spec": {
-#     "metric": "loss",
-#         "objective": "minimize",
-#     },
-# }
-
-
-
 # We only need to specify the algorithm and hyperparameters to use:
 config = {
     # We pick the Bayes algorithm:
     "algorithm": "bayes",
 
-    # Declare your hyperparameters in the Vizier-inspired format:
+    # Declare  hyperparameters in 
     "parameters": {
-        "x": {"type": "discrete","values": [True,False]},
+        "lossF": {"type": "discrete", "values": list(range(0,len(options["lossF"])))},
+        "stridesAndChannels": {"type": "discrete", "values":  list(range(0,len(options["stridesAndChannels"])))  },
+        "optimizer_class": {"type": "discrete", "values":list(range(0,len(options["optimizer_class"])))  },
+        "num_res_units": {"type": "discrete", "values": [0]},
+        "act": {"type": "discrete", "values":list(range(0,len(options["act"])))  },#,(Act.LeakyReLU,{"negative_slope":0.1, "inplace":True} )
+        "norm": {"type": "discrete", "values": list(range(0,len(options["norm"])))},
+        "dropout": {"type": "discrete", "values": [0.0]},
+        "precision": {"type": "discrete", "values": [16]},
+        "max_epochs": {"type": "discrete", "values": [20]},
+
+        "accumulate_grad_batches": {"type": "discrete", "values": [1]},
+        "gradient_clip_val": {"type": "discrete", "values": [0.0]},
+        "RandGaussianNoised_prob": {"type": "discrete", "values": [0.1]},
+        "RandAdjustContrastd_prob": {"type": "discrete", "values": [0.1]},
+        "RandGaussianSmoothd_prob": {"type": "discrete", "values": [0.1]},
+        "RandRicianNoised_prob": {"type": "discrete", "values": [0.1]},
+        "RandFlipd_prob": {"type": "discrete", "values": [0.1]},
+        "RandAffined_prob": {"type": "discrete", "values": [0.1]},
+        "RandCoarseDropoutd_prob": {"type": "discrete", "values": [0.1]},
+        "is_whole_to_train": {"type": "discrete", "values": [True,False]},
+        "dirs": {"type": "discrete", "values": list(range(0,len(options["dirs"])))},
     },
 
     # Declare what we will be optimizing, and how:
@@ -132,25 +125,28 @@ config = {
     },
 }
 
+
+print("uuuuuuuuuuuuu 3")
+
+
 # Next, create an optimizer, passing in the config:
 # (You can leave out API_KEY if you already set it)
-opt = Optimizer(config)
+#opt = Optimizer(config)
 
 
-#opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
+opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
 
 
 # print("zzzzzzzzz")
-# print(opt.get_experiments(
-#         api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
-#         project_name="picai-hyperparam-search-01"))
+#  print(opt.get_experiments(
+#          api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
+#          project_name="picai-hyperparam-search-01"))
 
 
-# for experiment in opt.get_experiments(
-#         api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
-#         project_name="picai-hyperparam-search-01"):
-#     print("eeeee")    
-#     Three_chan_baseline.mainTrain(experiment)
+for experiment in opt.get_experiments(
+        project_name="picai-hyperparam-search-01"):
+    print("eeeee")    
+    Three_chan_baseline.mainTrain(experiment,options)
 
 
 

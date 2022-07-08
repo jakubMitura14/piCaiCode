@@ -147,14 +147,14 @@ class PiCaiDataModule(pl.LightningDataModule):
         print('Test data set:',numTest)
         print('Valid data set:', numVal)
         if(noTestSet):
-            return torch.utils.data.random_split(patList, [numTrain,numTestAndVal])
+            return torch.utils.data.random_split(patList, [numTrain,numTestAndVal,0])
         else:    
             return torch.utils.data.random_split(patList, [numTrain,numVal,numTest])
 
     def setup(self, stage=None):
         set_determinism(seed=0)
         self.subjects = list(map(lambda row: manageMetaData.getMonaiSubjectDataFromDataFrame(row[1],self.t2w_name,self.adc_name,self.hbv_name,self.label_name)   , list(self.df.iterrows())))
-        train_set, valid_set,test_set = self.splitDataSet(self.subjects , self.trainSizePercent)
+        train_set, valid_set,test_set = self.splitDataSet(self.subjects , self.trainSizePercent,True)
         
         self.train_subjects = train_set
         self.val_subjects = valid_set

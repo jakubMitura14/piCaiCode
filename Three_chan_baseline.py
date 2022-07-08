@@ -93,7 +93,20 @@ LigtningModel =loadLib("LigtningModel", "/home/sliceruser/data/piCaiCode/model/L
 # hbv_name="registered_hbv_med_spac"
 # label_name="label_med_spac"
 
-def mainTrain(experiment):
+def getParam(experiment,options,key):
+    """
+    given integer returned from experiment 
+    it will look into options dictionary and return required object
+    """
+    integerr=experiment.get_parameter(key)
+    # print("keyy {key} ")
+    # print(options[key])
+    return options[key][integerr]
+
+
+
+
+def mainTrain(experiment,options):
     print("mmmmmmmmmmmmmmmmmm")
     #TODO(remove)
     comet_logger = CometLogger(
@@ -104,28 +117,28 @@ def mainTrain(experiment):
     )
 
     #############loading meta data 
-    df = pd.read_csv(experiment.get_parameter("dirs")["metDataDir"])
-    maxSize=manageMetaData.getMaxSize(experiment.get_parameter("dirs")["t2w_name"],df)
+    df = pd.read_csv(getParam(experiment,options,"dirs")["metDataDir"])
+    maxSize=manageMetaData.getMaxSize(getParam(experiment,options,"dirs")["t2w_name"],df)
     df= manageMetaData.load_df_only_full(
-        df,experiment.get_parameter("dirs")["t2w_name"]
-        ,experiment.get_parameter("dirs")["adc_name"]
-        ,experiment.get_parameter("dirs")["hbv_name"]
-        ,experiment.get_parameter("dirs")["label_name"]
+        df
+        ,getParam(experiment,options,"dirs")["t2w_name"]
+        ,getParam(experiment,options,"dirs")["adc_name"]
+        ,getParam(experiment,options,"dirs")["hbv_name"]
+        ,getParam(experiment,options,"dirs")["label_name"]
         ,maxSize
         ,experiment.get_parameter("is_whole_to_train") )
-
 
     data = DataModule.PiCaiDataModule(
         df= df,
         batch_size=2,#TODO(batc size determined by lightning)
-        trainSizePercent=0.5,# change to 0.7
+        trainSizePercent=0.8,# change to 0.7
         num_workers=os.cpu_count(),
         drop_last=False,#True,
-        cache_dir=experiment.get_parameter("dirs")["cache_dir"],
-        t2w_name=experiment.get_parameter("dirs")["t2w_name"],
-        adc_name=experiment.get_parameter("dirs")["adc_name"],
-        hbv_name=experiment.get_parameter("dirs")["hbv_name"],
-        label_name=experiment.get_parameter("dirs")["label_name"],
+        cache_dir=getParam(experiment,options,"dirs")["cache_dir"],
+        t2w_name=getParam(experiment,options,"dirs")["t2w_name"],
+        adc_name=getParam(experiment,options,"dirs")["adc_name"],
+        hbv_name=getParam(experiment,options,"dirs")["hbv_name"],
+        label_name=getParam(experiment,options,"dirs")["label_name"],
         maxSize=maxSize
         ,RandGaussianNoised_prob=experiment.get_parameter("RandGaussianNoised_prob")
         ,RandAdjustContrastd_prob=experiment.get_parameter("RandAdjustContrastd_prob")
@@ -134,7 +147,7 @@ def mainTrain(experiment):
         ,RandFlipd_prob=experiment.get_parameter("RandFlipd_prob")
         ,RandAffined_prob=experiment.get_parameter("RandAffined_prob")
         ,RandCoarseDropoutd_prob=experiment.get_parameter("RandCoarseDropoutd_prob")
-        ,is_whole_to_train=experiment.get_parameter("is_whole_to_train ")
+        ,is_whole_to_train=experiment.get_parameter("is_whole_to_train")
     )
     data.prepare_data()
     data.setup()
@@ -145,37 +158,41 @@ def mainTrain(experiment):
         spatial_dims=3,
         in_channels=3,
         out_channels=2,
-        strides=experiment.get_parameter("stridesAndChannels")["strides"],
-        channels=experiment.get_parameter("stridesAndChannels")["channels"],
+        strides=getParam(experiment,options,"stridesAndChannels")["strides"],
+        channels=getParam(experiment,options,"stridesAndChannels")["channels"],
         num_res_units= experiment.get_parameter("num_res_units"),
-        act = experiment.get_parameter("act"),
-        norm= experiment.get_parameter("norm"),
+        act = getParam(experiment,options,"act"),
+        norm= getParam(experiment,options,"norm"),
         dropout= experiment.get_parameter("dropout")
     )
 
     model = LigtningModel.Model(
         net=unet,
-        criterion=experiment.get_parameter("loss"), # Our seg labels are single channel images indicating class index, rather than one-hot
+        criterion=  getParam(experiment,options,"lossF"),# Our seg labels are single channel images indicating class index, rather than one-hot
         learning_rate=1e-2,
-        optimizer_class=experiment.get_parameter("optimizer_class"),
+        optimizer_class= getParam(experiment,options,"optimizer_class") ,
         experiment=experiment
     )
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
         monitor='val_loss',
     )
+    #stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging()
+
     trainer = pl.Trainer(
         #accelerato="cpu", #TODO(remove)
         max_epochs=experiment.get_parameter("max_epochs"),
         #gpus=1,
         precision=experiment.get_parameter("precision"), 
-        callbacks=[early_stopping],
+        callbacks=[
+            early_stopping
+            #,stochasticAveraging
+            ],
         logger=comet_logger,
         accelerator='auto',
         devices='auto',
         default_root_dir= "/home/sliceruser/lightning_logs",
         auto_scale_batch_size="binsearch",
         auto_lr_find=True,
-        stochastic_weight_avg=True,
         accumulate_grad_batches=experiment.get_parameter("accumulate_grad_batches"),
         gradient_clip_val=experiment.get_parameter("gradient_clip_val")# 0.5,2.0
 
