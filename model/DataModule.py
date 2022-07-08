@@ -170,12 +170,12 @@ class PiCaiDataModule(pl.LightningDataModule):
             ,self.is_whole_to_train )
         val_transforms= transformsForMain.get_val_transforms(self.maxSize)
         #todo - unhash
-        self.train_ds =  PersistentDataset(data=self.train_subjects, transform=train_transforms,cache_dir=self.cache_dir)
-        self.val_ds=     PersistentDataset(data=self.val_subjects, transform=val_transforms,cache_dir=self.cache_dir)
+        # self.train_ds =  PersistentDataset(data=self.train_subjects, transform=train_transforms,cache_dir=self.cache_dir)
+        # self.val_ds=     PersistentDataset(data=self.val_subjects, transform=val_transforms,cache_dir=self.cache_dir)
         # self.test_ds=    PersistentDataset(data=self.test_subjects, transform=val_transforms,cache_dir=self.cache_dir)    
 
-        # self.train_ds =  Dataset(data=self.train_subjects, transform=train_transforms)
-        # self.val_ds=     Dataset(data=self.val_subjects, transform=val_transforms)
+        self.train_ds =  Dataset(data=self.train_subjects, transform=train_transforms)
+        self.val_ds=     Dataset(data=self.val_subjects, transform=val_transforms)
         #self.test_ds=    Dataset(data=self.test_subjects, transform=val_transforms)
         
     def train_dataloader(self):

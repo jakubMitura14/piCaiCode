@@ -55,3 +55,5 @@ preprocessing/registration/.ipynb_checkpoints/parametersRigid-checkpoint.txt
 preprocessing/registration/__pycache__/elastixRegister.cpython-39.pyc
 preprocessing/Thick-to-thin/saved_model.pb
 preprocessing/.ipynb_checkpoints/MainPreprocessing-checkpoint.ipynb
+__pycache__/
+model/__pycache__/
