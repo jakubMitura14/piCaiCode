@@ -213,7 +213,6 @@ unet_hyperparam = {
         """
         mod: nn.Module
         if self.num_res_units > 0:
-            print(f"actttt {self.act}  ")
             mod = ResidualUnit(
                 self.dimensions,
                 in_channels,
