@@ -183,10 +183,7 @@ def mainTrain(experiment,options):
         max_epochs=experiment.get_parameter("max_epochs"),
         #gpus=1,
         precision=experiment.get_parameter("precision"), 
-        callbacks=[
-            early_stopping
-            #,stochasticAveraging
-            ],
+        callbacks=[ early_stopping ],
         logger=comet_logger,
         accelerator='auto',
         devices='auto',
