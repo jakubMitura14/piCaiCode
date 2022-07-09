@@ -64,7 +64,7 @@ def euler_sitk(fixed_image, moving_image):
     registration_method = sitk.ImageRegistrationMethod()
     registration_method.SetMetricAsMattesMutualInformation(numberOfHistogramBins=50)
     registration_method.SetMetricSamplingStrategy(registration_method.RANDOM)
-    registration_method.SetMetricSamplingPercentage(0.3)
+    registration_method.SetMetricSamplingPercentage(0.2)
     registration_method.SetInterpolator(sitk.sitkBSpline)
 
     # Setup for the multi-resolution framework.            
@@ -78,7 +78,7 @@ def euler_sitk(fixed_image, moving_image):
     # angle_x = 0
     # angle_y = -pi, 0, pi
     # angle_z = -pi, 0, pi
-    registration_method.SetOptimizerAsOnePlusOneEvolutionary(numberOfIterations=300)
+    registration_method.SetOptimizerAsOnePlusOneEvolutionary(numberOfIterations=250)
     # registration_method.SetOptimizerAsExhaustive(numberOfSteps=[0,1,1,0,0,0], stepLength = np.pi, numberOfIterations=1000)
     # registration_method.SetOptimizerScales([1,1,1,1,1,1])
 
