@@ -1,3 +1,5 @@
+//Parameter file taken from https://github.com/SuperElastix/ElastixModelZoo/blob/master/models/Par0043/Par0043rigid.txt
+// more about parameters in https://elastix.lumc.nl/doxygen/parameter.html
 //Parameter file
 
 //**********ImageTypes**********
@@ -96,7 +98,7 @@
 // Maximum number of iterations in each resolution level:
 // 200-500 works usually fine for rigid registration.
 // For more robustness, you may increase this to 1000-2000.
-(MaximumNumberOfIterations 10000 10000 15000 15000)
+(MaximumNumberOfIterations 4000 4000 6000 6000)
 
 // The step size of the optimizer, in mm. By default the voxel size is used.
 // which usually works well. In case of unusual high-resolution images
@@ -112,7 +114,7 @@
 // With an AdaptiveStochasticGradientDescent optimizer,
 // in combination with the two options below, around 2000
 // samples may already suffice.
-(NumberOfSpatialSamples 20480)
+(NumberOfSpatialSamples 10000)
 
 // Refresh these spatial samples in every iteration, and select
 // them randomly. See the manual for information on other sampling
@@ -120,8 +122,8 @@
 (NewSamplesEveryIteration "true")
 (ImageSampler "RandomCoordinate")
 
-(FixedImageBSplineInterpolationOrder 1)
-(UseRandomSampleRegion "true")
+(FixedImageBSplineInterpolationOrder 3)
+(UseRandomSampleRegion "false")
 //(SampleRegionSize 50 50 50)
 
 // ************* Interpolation and Resampling ****************

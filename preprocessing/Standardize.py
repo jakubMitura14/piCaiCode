@@ -97,6 +97,7 @@ def denoise(path):
                                         timeStep=0.125,
                                         numberOfIterations=5)
     #standardazing orientation
+    image1 = sitk.Cast(image1, sitk.sitkFloat32)
 
     writer = sitk.ImageFileWriter()
     writer.KeepOriginalImageUIDOn()

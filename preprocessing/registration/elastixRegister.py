@@ -11,8 +11,11 @@ import os.path
 from os import path as pathOs
 import comet_ml
 from comet_ml import Experiment
+import numpy as np
 
-def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=None):
+
+
+def reg_adc_hbv_to_t2w_sitk(row,colName,t2wColName,outPathh=""):
     """
     registers adc and hbv images to t2w image
     first we need to create directories for the results
@@ -20,52 +23,130 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
     we do it in multiple threads at once and we waiteach time the process finished
     """
 
-    row=row[1]
-    study_id=str(row['study_id'])
+    study_id=str(row[1]['study_id'])
     
-    patId=str(row['patient_id'])
-    path=str(row[colName])
+    patId=str(row[1]['patient_id'])
+    print(patId)
+    path=str(row[1][colName])
+    outPath=outPathh
+    if(outPath==""):
+        outPath = path.replace(".mha","_reg.mha")
+    #returning faster if the result is already present
+    if(pathOs.exists(outPath)):
+        return outPath     
+    else:
+        if(len(path)>2):
+            #creating the folder if none is present
+            fixed_image = sitk.ReadImage(row[1][t2wColName])
+            moving_image = sitk.ReadImage(path)
+            fixed_image=sitk.Cast(fixed_image, sitk.sitkFloat32)
+            moving_image=sitk.Cast(moving_image, sitk.sitkFloat32)
+
+            #sitk euler    
+            reg_image=euler_sitk(fixed_image, moving_image)
+
+            #save
+            writer = sitk.ImageFileWriter()
+            writer.KeepOriginalImageUIDOn()
+            writer.SetFileName(outPath)
+            writer.Execute(reg_image)   
+            #we will repeat operation multiple max 9 times if the result would not be written
+            return outPath            
+        else:
+            return ""    
+    return ""
+
+def euler_sitk(fixed_image, moving_image):
+    initial_transform = sitk.CenteredTransformInitializer(fixed_image, 
+                                                      moving_image, 
+                                                      sitk.Euler3DTransform(), 
+                                                      sitk.CenteredTransformInitializerFilter.MOMENTS)
+    registration_method = sitk.ImageRegistrationMethod()
+    registration_method.SetMetricAsMattesMutualInformation(numberOfHistogramBins=50)
+    registration_method.SetMetricSamplingStrategy(registration_method.RANDOM)
+    registration_method.SetMetricSamplingPercentage(0.3)
+    registration_method.SetInterpolator(sitk.sitkBSpline)
+
+    # Setup for the multi-resolution framework.            
+    registration_method.SetShrinkFactorsPerLevel(shrinkFactors = [4,2,1])
+    registration_method.SetSmoothingSigmasPerLevel(smoothingSigmas=[2,1,0])
+    registration_method.SmoothingSigmasAreSpecifiedInPhysicalUnitsOn()
+
+    # The order of parameters for the Euler3DTransform is [angle_x, angle_y, angle_z, t_x, t_y, t_z]. The parameter 
+    # sampling grid is centered on the initial_transform parameter values, that are all zero for the rotations. Given
+    # the number of steps, their length and optimizer scales we have:
+    # angle_x = 0
+    # angle_y = -pi, 0, pi
+    # angle_z = -pi, 0, pi
+    registration_method.SetOptimizerAsOnePlusOneEvolutionary(numberOfIterations=300)
+    # registration_method.SetOptimizerAsExhaustive(numberOfSteps=[0,1,1,0,0,0], stepLength = np.pi, numberOfIterations=1000)
+    # registration_method.SetOptimizerScales([1,1,1,1,1,1])
+
+    #Perform the registration in-place so that the initial_transform is modified.
+    outTx=registration_method.SetInitialTransform(initial_transform, inPlace=True) 
+    
+    outTx=registration_method.Execute(fixed_image, moving_image)
+    
+    resampler = sitk.ResampleImageFilter()
+    resampler.SetReferenceImage(fixed_image)
+    resampler.SetInterpolator(sitk.sitkBSpline)
+    resampler.SetDefaultPixelValue(1)
+    resampler.SetTransform(outTx)
+
+    out = resampler.Execute(moving_image)    
+    
+    return out
+
+
+
+def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=None,reIndex=0):
+    """
+    registers adc and hbv images to t2w image
+    first we need to create directories for the results
+    then we suply hbv and adc as moving images and t2w as static one - and register in reference to it
+    we do it in multiple threads at once and we waiteach time the process finished
+    """
+
+    study_id=str(row[1]['study_id'])
+    
+    patId=str(row[1]['patient_id'])
+    path=str(row[1][colName])
     outPath = path.replace(".mha","_for_"+colName)
     result=pathOs.join(outPath,"result.0.mha")
     print("**********  ***********  ****************")
     print(result)
-
-    
-    
-#     /home/sliceruser/data/orig/10005/10005_1000005_adc_stand_medianSpac_for_adc_med_spac/result.0.mha
-    
-    
-    #     /home/sliceruser/data/orig/10005/10005_1000005_adc_stand_medianSpac_for_adc_med_spac/result.0.mha
-#     /home/sliceruser/data/orig/10005/10005_1000005_adc_stand_medianSpac_for_adc_med_spac
-#     /home/sliceruser/data/orig/10005/10005_1000005_hbv_stand_medianSpac_for_hbv_med_spac/result.0.mha
-    
     print(pathOs.exists(result))
     #returning faster if the result is already present
     #if(pathOs.exists(outPath)):
     if(pathOs.exists(result)):
         if(experiment!=None):
-            experiment.log_text(f"already registered {colName} {study_id}")
-        
+            experiment.log_text(f"already registered {colName} {study_id}")    
         print("registered already present")
         return result     
     else:
         if(len(path)>1):
-            if(experiment!=None):  
-                print(f"new register {colName} {study_id}")
-                experiment.log_text(f"new register {colName} {study_id}")
+            #creating the folder if none is present
+            if(not pathOs.exists(outPath)):
+                cmd='mkdir '+ outPath
+                p = Popen(cmd, shell=True)
+                p.wait()
 
-            cmd='mkdir '+ outPath
-            p = Popen(cmd, shell=True)
-            p.wait()
-            cmd=f"{elacticPath} -f {row[t2wColName]} -m {path} -out {outPath} -p {reg_prop}"
+            cmd=f"{elacticPath} -f {row[1][t2wColName]} -m {path} -out {outPath} -p {reg_prop} -threads 1"
             print(cmd)
             try:
                 p = Popen(cmd, shell=True)
             except:
                 print("error in patId")
             p.wait()
-            return 
+            #we will repeat operation multiple max 2 times if the result would not be written
+            if((not pathOs.exists(result)) and reIndex<3):
+                reIndexNew=reIndex+1
+                reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment,reIndexNew)
+            #in case it will not work via elastix we will use simple itk    
+            if(not pathOs.exists(result)):
+                reg_adc_hbv_to_t2w_sitk(row,colName,t2wColName,result)
             
+            return result            
         else:
             return ""    
-    return ""
+    return ""    
