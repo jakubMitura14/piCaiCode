@@ -139,8 +139,8 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
             except:
                 print("error in patId")
             p.wait()
-            #we will repeat operation multiple max 4 times if the result would not be written
-            if((not pathOs.exists(result)) and reIndex<5):
+            #we will repeat operation multiple max 9 times if the result would not be written
+            if((not pathOs.exists(result)) and reIndex<10):
                 reIndexNew=reIndex+1
                 reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment,reIndexNew)
             #in case it will not work via elastix we will use simple itk    
@@ -148,6 +148,7 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
                 try:
                     reg_adc_hbv_to_t2w_sitk(row,colName,t2wColName,result)
                 except:
+                    #maybe it can not be done ?
                     return ""
             return result            
         else:

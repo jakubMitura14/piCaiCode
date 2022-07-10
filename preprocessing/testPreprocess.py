@@ -142,16 +142,16 @@ def join_and_save_3Channel(row,colNameT2w,colNameAdc,colNameHbv):
     join 3 images into 1 3 channel image
     """
     row=row[1]
-    print("debug")
-    print(row)
+    # print(row)
     print(str(row[colNameT2w]))
     print(str(row[colNameAdc]))
     print(str(row[colNameHbv]))
+    
     outPath = str(row[colNameT2w]).replace('.mha', '_3Chan.mha')
     if(str(row[colNameT2w])!= " " and str(row[colNameT2w])!="" 
         and str(row[colNameAdc])!= " " and str(row[colNameAdc])!="" 
         and str(row[colNameHbv])!= " " and str(row[colNameHbv])!=""):
-        #patId=str(row['patient_id'])
+        patId=str(row['patient_id'])
 
         imgT2w=sitk.ReadImage(str(row[colNameT2w]))
         imgAdc=sitk.ReadImage(str(row[colNameAdc]))
@@ -160,6 +160,10 @@ def join_and_save_3Channel(row,colNameT2w,colNameAdc,colNameHbv):
         imgT2w=sitk.Cast(imgT2w, sitk.sitkFloat32)
         imgAdc=sitk.Cast(imgAdc, sitk.sitkFloat32)
         imgHbv=sitk.Cast(imgHbv, sitk.sitkFloat32)
+        print(f"patient id  {patId} ")
+        print(f"t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
+        print(f"adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
+        print(f"hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
 
         join = sitk.JoinSeriesImageFilter()
         joined_image = join.Execute(imgT2w, imgAdc,imgHbv)
@@ -186,10 +190,6 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 
     for keyWord in ['adc'+spacing_keyword,'hbv'+spacing_keyword]:
         resList=[]     
-        # list(map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w_med_spac',experiment=experiment ),list(df.iterrows())))  
-        # resList=list(map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'),list(df.iterrows())) )   
-        # df['registered_'+keyWord]=resList  
-        
         with mp.Pool(processes = mp.cpu_count()) as pool:
             resList=pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'),list(df.iterrows()))    
         df['registered_'+keyWord]=resList  
