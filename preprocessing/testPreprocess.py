@@ -137,7 +137,7 @@ def resample_labels(row,targetSpacing,spacing_keyword):
     return " "    
 
 
-def join_and_save_3Channel(row,colNameT2w,colNameAdc,colNameHbv,outPath):
+def join_and_save_3Channel(row,colNameT2w,colNameAdc,colNameHbv):
     """
     join 3 images into 1 3 channel image
     """
@@ -147,6 +147,7 @@ def join_and_save_3Channel(row,colNameT2w,colNameAdc,colNameHbv,outPath):
     print(str(row[colNameT2w]))
     print(str(row[colNameAdc]))
     print(str(row[colNameHbv]))
+    outPath = str(row[colNameT2w]).replace('.mha', '_3Chan.mha')
     if(str(row[colNameT2w])!= " " and str(row[colNameT2w])!="" 
         and str(row[colNameAdc])!= " " and str(row[colNameAdc])!="" 
         and str(row[colNameHbv])!= " " and str(row[colNameHbv])!=""):
@@ -203,7 +204,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     print(f" max sizee {maxSize}")
     ###now we join it into 3 channel image
     resList=[]
-    outPath = t2wKeyWord.replace('.mha', '_3Chan.mha')
+    
 
 
 
@@ -211,7 +212,6 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
                                 ,colNameT2w=t2wKeyWord
                                 ,colNameAdc='registered_'+'adc'+spacing_keyword
                                 ,colNameHbv='registered_'+'hbv'+spacing_keyword
-                                ,outPath=outPath
                                 )  ,list(df.iterrows())))
 
     # with mp.Pool(processes = mp.cpu_count()) as pool:
