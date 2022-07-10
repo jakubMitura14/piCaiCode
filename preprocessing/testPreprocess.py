@@ -48,7 +48,7 @@ for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:
 df = df.loc[df['isAnyMissing'] ==False]
 df = df.loc[df['isAnythingInAnnotated']>0 ]    
 #just for testing    
-#df= df.head(12)
+df= df.head(30)
 ##df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
 print(df)    
 
@@ -178,12 +178,20 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     t2wKeyWord ="t2w"+spacing_keyword    
     #needs to be on single thread as resampling GAN is acting on GPU
     # we save the metadata to main pandas data frame 
-    df["adc"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_'+'adc',targetSpacingg,spacing_keyword)   , axis = 1) 
-    df["hbv"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_'+'hbv',targetSpacingg,spacing_keyword)   , axis = 1) 
+    df["adc"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'adc',targetSpacingg,spacing_keyword)   , axis = 1) 
+    df["hbv"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'hbv',targetSpacingg,spacing_keyword)   , axis = 1) 
     df["t2w"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 't2w',targetSpacingg,spacing_keyword)   , axis = 1) 
     df["label"+spacing_keyword]=df.apply(lambda row : resample_labels(row,targetSpacingg,spacing_keyword)   , axis = 1) 
 
-
+    for keyWord in ['adc'+spacing_keyword,'hbv'+spacing_keyword]:
+        resList=[]     
+        # list(map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w_med_spac',experiment=experiment ),list(df.iterrows())))  
+        # resList=list(map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'),list(df.iterrows())) )   
+        # df['registered_'+keyWord]=resList  
+        
+        with mp.Pool(processes = mp.cpu_count()) as pool:
+            resList=pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'),list(df.iterrows()))    
+        df['registered_'+keyWord]=resList  
 
     ManageMetadata.addSizeMetaDataToDf(t2wKeyWord,df)
 
@@ -201,8 +209,8 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 
     resList=list(map(partial(join_and_save_3Channel
                                 ,colNameT2w=t2wKeyWord
-                                ,colNameAdc='adc'+spacing_keyword
-                                ,colNameHbv='hbv'+spacing_keyword
+                                ,colNameAdc='registered_'+'adc'+spacing_keyword
+                                ,colNameHbv='registered_'+'hbv'+spacing_keyword
                                 ,outPath=outPath
                                 )  ,list(df.iterrows())))
 
@@ -219,43 +227,43 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 # some preprocessing common for all
 # bias field correction
 
-Standardize.iterateAndBiasCorrect('t2w',df)
-#Standarization
-for keyWord in ['t2w','adc', 'hbv'  ]: #'cor',,'sag'
-    ## denoising
-    #Standardize.iterateAndDenoise(keyWord,df)
-    ## standarization
-    Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,50)   
-#standardize labels
-Standardize.iterateAndchangeLabelToOnes(df)
+# Standardize.iterateAndBiasCorrect('t2w',df)
+# #Standarization
+# for keyWord in ['t2w','adc', 'hbv'  ]: #'cor',,'sag'
+#     ## denoising
+#     #Standardize.iterateAndDenoise(keyWord,df)
+#     ## standarization
+#     Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,50)   
+# #standardize labels
+# Standardize.iterateAndchangeLabelToOnes(df)
 
 
 
-# #######Registration of adc and hb         
+#######Registration of adc and hb         
 # for keyWord in ['adc','hbv']:
 #     resList=[]     
 #     # list(map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w_med_spac',experiment=experiment ),list(df.iterrows())))  
 #     # resList=list(map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'),list(df.iterrows())) )   
 #     # df['registered_'+keyWord]=resList  
     
-#     # with mp.Pool(processes = mp.cpu_count()) as pool:
-#     #     resList=pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'),list(df.iterrows()))    
-#     # df['registered_'+keyWord]=resList  
 #     with mp.Pool(processes = mp.cpu_count()) as pool:
-#         resList=pool.map(partial(reg_adc_hbv_to_t2w_sitk
-#                 ,colName=keyWord
-#                 ,t2wColName='t2w'),list(df.iterrows()))    
+#         resList=pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'),list(df.iterrows()))    
 #     df['registered_'+keyWord]=resList  
+    # with mp.Pool(processes = mp.cpu_count()) as pool:
+    #     resList=pool.map(partial(reg_adc_hbv_to_t2w_sitk
+    #             ,colName=keyWord
+    #             ,t2wColName='t2w'),list(df.iterrows()))    
+    # df['registered_'+keyWord]=resList  
 
 
 # #reg_adc_hbv_to_t2w_sitk(row,colName,t2wColName)
 # #####
  
-# targetSpacinggg=(spacingDict['t2w_spac_x'][3],spacingDict['t2w_spac_y'][3],spacingDict['t2w_spac_z'][3])
-# preprocess_diffrent_spacings(df,targetSpacinggg,"_med_spac")
-# preprocess_diffrent_spacings(df,(1.0,1.0,1.0),"_one_spac")
-# preprocess_diffrent_spacings(df,(1.5,1.5,1.5),"_one_and_half_spac")
-# preprocess_diffrent_spacings(df,(2.0,2.0,2.0),"_two_spac")
+targetSpacinggg=(spacingDict['t2w_spac_x'][3],spacingDict['t2w_spac_y'][3],spacingDict['t2w_spac_z'][3])
+preprocess_diffrent_spacings(df,targetSpacinggg,"_med_spac")
+preprocess_diffrent_spacings(df,(1.0,1.0,1.0),"_one_spac")
+preprocess_diffrent_spacings(df,(1.5,1.5,1.5),"_one_and_half_spac")
+preprocess_diffrent_spacings(df,(2.0,2.0,2.0),"_two_spac")
 
 
 print("fiiiniiished")

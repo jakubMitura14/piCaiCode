@@ -33,7 +33,8 @@ def reg_adc_hbv_to_t2w_sitk(row,colName,t2wColName,outPathh=""):
         outPath = path.replace(".mha","_reg.mha")
     #returning faster if the result is already present
     if(pathOs.exists(outPath)):
-        return outPath     
+        return outPath #TODO unhash
+        #pass     
     else:
         if(len(path)>2):
             #creating the folder if none is present
@@ -64,7 +65,7 @@ def euler_sitk(fixed_image, moving_image):
     registration_method = sitk.ImageRegistrationMethod()
     registration_method.SetMetricAsMattesMutualInformation(numberOfHistogramBins=50)
     registration_method.SetMetricSamplingStrategy(registration_method.RANDOM)
-    registration_method.SetMetricSamplingPercentage(0.2)
+    registration_method.SetMetricSamplingPercentage(0.8)
     registration_method.SetInterpolator(sitk.sitkBSpline)
 
     # Setup for the multi-resolution framework.            
@@ -78,7 +79,7 @@ def euler_sitk(fixed_image, moving_image):
     # angle_x = 0
     # angle_y = -pi, 0, pi
     # angle_z = -pi, 0, pi
-    registration_method.SetOptimizerAsOnePlusOneEvolutionary(numberOfIterations=250)
+    registration_method.SetOptimizerAsGradientDescentLineSearch(learningRate=0.1,numberOfIterations=850, estimateLearningRate = registration_method.EachIteration)
     # registration_method.SetOptimizerAsExhaustive(numberOfSteps=[0,1,1,0,0,0], stepLength = np.pi, numberOfIterations=1000)
     # registration_method.SetOptimizerScales([1,1,1,1,1,1])
 
@@ -138,14 +139,16 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
             except:
                 print("error in patId")
             p.wait()
-            #we will repeat operation multiple max 2 times if the result would not be written
-            if((not pathOs.exists(result)) and reIndex<3):
+            #we will repeat operation multiple max 4 times if the result would not be written
+            if((not pathOs.exists(result)) and reIndex<5):
                 reIndexNew=reIndex+1
                 reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment,reIndexNew)
             #in case it will not work via elastix we will use simple itk    
             if(not pathOs.exists(result)):
-                reg_adc_hbv_to_t2w_sitk(row,colName,t2wColName,result)
-            
+                try:
+                    reg_adc_hbv_to_t2w_sitk(row,colName,t2wColName,result)
+                except:
+                    return ""
             return result            
         else:
             return ""    

@@ -123,7 +123,7 @@
 (ImageSampler "RandomCoordinate")
 
 (FixedImageBSplineInterpolationOrder 3)
-(UseRandomSampleRegion "false")
+(UseRandomSampleRegion "true")
 //(SampleRegionSize 50 50 50)
 
 // ************* Interpolation and Resampling ****************
