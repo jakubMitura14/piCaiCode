@@ -87,19 +87,46 @@ def resample_ToMedianSpac(row,colName,targetSpacing,spacing_keyword):
         newPath = path.replace(".mha",spacing_keyword+".mha" )
         if(not pathOs.exists(newPath)):      
             experiment.log_text(f" new resample {colName} {study_id}")
-
+            resampled=None
             try:
+                print(f"resampling colname {colName} {study_id}")
                 resampled = Resampling.resample_with_GAN(path,targetSpacing)
             except:
                 print("error resampling")
-            resampled = Resampling.resample_with_GAN(path,targetSpacing)
-
+                resampled = Resampling.resample_with_GAN(path,targetSpacing)
+            print(f" resempled Res colname {colName}  {study_id} size {resampled.GetSize() } spacing {resampled.GetSpacing()}  ")
             write_to_modif_path(resampled,path,".mha",spacing_keyword+".mha" )
         else:
             experiment.log_text(f" old resample {colName} {study_id}")
-            print("already resampled")
+            print(f"already resampled {study_id} colname {colName} ")
         return newPath    
     return " "
+
+
+def resample_To_t2w(row,colName,spacing_keyword,t2wColName):
+    path=row[colName]
+    if(path!= " " and path!=""):
+        study_id=str(row['study_id'])
+        t2wImage=sitk.ReadImage(str(row[t2wColName]))
+        targetSpacing=t2wImage.GetSpacing()
+        newPath = path.replace(".mha",spacing_keyword+".mha" )
+        if(not pathOs.exists(newPath)):      
+            experiment.log_text(f" new resample {colName} {study_id}")
+            resampled=None
+            try:
+                print(f"resampling colname {colName} {study_id}")
+                resampled = Resampling.resample_with_GAN(path,targetSpacing)
+            except:
+                print("error resampling")
+                resampled = Resampling.resample_with_GAN(path,targetSpacing)
+            print(f" resempled Res colname {colName}  {study_id} size {resampled.GetSize() } spacing {resampled.GetSpacing()}  ")
+            write_to_modif_path(resampled,path,".mha",spacing_keyword+".mha" )
+        else:
+            experiment.log_text(f" old resample {colName} {study_id}")
+            print(f"already resampled {study_id} colname {colName} ")
+        return newPath    
+    return " "
+
 
 
 
@@ -113,21 +140,23 @@ def resample_labels(row,targetSpacing,spacing_keyword):
     if(path!= " " and path!=""):
         path_t2w=row['t2w']
 
-        outPath= path_t2w.replace(".mha","_stand_label.mha")
+        outPath= path_t2w.replace(".mha","_label.mha")
         
         study_id=str(row['study_id'])
     
         
-        newPath = path.replace(".mha",spacing_keyword+".mha" )
+        newPath = outPath.replace(".mha",spacing_keyword+".nii.gz" )
         if(not pathOs.exists(newPath)):         
             try:
                 experiment.log_text(f" new resample label {study_id}")
                 resampled = Resampling.resample_label_with_GAN(path,targetSpacing)
             except:
                 print("error resampling")
-                resampled = Resampling.resample_label_with_GAN(path,targetSpacing)
+                #recursively apply resampling
+                resample_labels(row,targetSpacing,spacing_keyword)
+                #resampled = Resampling.resample_label_with_GAN(path,targetSpacing)
 
-            write_to_modif_path(resampled,outPath,".mha",spacing_keyword+".mha" )
+            write_to_modif_path(resampled,outPath,".mha",spacing_keyword+".nii.gz" )
         else:
             print("already resampled")
             experiment.log_text(f"already reSampled label {study_id}")
@@ -146,35 +175,34 @@ def join_and_save_3Channel(row,colNameT2w,colNameAdc,colNameHbv):
     print(str(row[colNameT2w]))
     print(str(row[colNameAdc]))
     print(str(row[colNameHbv]))
-    
     outPath = str(row[colNameT2w]).replace('.mha', '_3Chan.mha')
     if(str(row[colNameT2w])!= " " and str(row[colNameT2w])!="" 
         and str(row[colNameAdc])!= " " and str(row[colNameAdc])!="" 
-        and str(row[colNameHbv])!= " " and str(row[colNameHbv])!=""):
-        patId=str(row['patient_id'])
+        and str(row[colNameHbv])!= " " and str(row[colNameHbv])!=""
+        ):
+        if(not pathOs.exists(outPath)):
+            patId=str(row['patient_id'])
 
-        imgT2w=sitk.ReadImage(str(row[colNameT2w]))
-        imgAdc=sitk.ReadImage(str(row[colNameAdc]))
-        imgHbv=sitk.ReadImage(str(row[colNameHbv]))
+            imgT2w=sitk.ReadImage(str(row[colNameT2w]))
+            imgAdc=sitk.ReadImage(str(row[colNameAdc]))
+            imgHbv=sitk.ReadImage(str(row[colNameHbv]))
 
-        imgT2w=sitk.Cast(imgT2w, sitk.sitkFloat32)
-        imgAdc=sitk.Cast(imgAdc, sitk.sitkFloat32)
-        imgHbv=sitk.Cast(imgHbv, sitk.sitkFloat32)
-        print(f"patient id  {patId} ")
-        print(f"t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
-        print(f"adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
-        print(f"hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
+            imgT2w=sitk.Cast(imgT2w, sitk.sitkFloat32)
+            imgAdc=sitk.Cast(imgAdc, sitk.sitkFloat32)
+            imgHbv=sitk.Cast(imgHbv, sitk.sitkFloat32)
+            print(f"patient id  {patId} ")
+            print(f"t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
+            print(f"adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
+            print(f"hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
 
-        join = sitk.JoinSeriesImageFilter()
-        joined_image = join.Execute(imgT2w, imgAdc,imgHbv)
-        writer = sitk.ImageFileWriter()
-        writer.KeepOriginalImageUIDOn()
-        writer.SetFileName(outPath)
-        writer.Execute(joined_image)
+            join = sitk.JoinSeriesImageFilter()
+            joined_image = join.Execute(imgT2w, imgAdc,imgHbv)
+            writer = sitk.ImageFileWriter()
+            writer.KeepOriginalImageUIDOn()
+            writer.SetFileName(outPath)
+            writer.Execute(joined_image)
         return outPath      
     return " "
-
-#### 
 
 
 
@@ -183,16 +211,12 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     t2wKeyWord ="t2w"+spacing_keyword    
     #needs to be on single thread as resampling GAN is acting on GPU
     # we save the metadata to main pandas data frame 
-    df["adc"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'adc',targetSpacingg,spacing_keyword)   , axis = 1) 
-    df["hbv"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'hbv',targetSpacingg,spacing_keyword)   , axis = 1) 
+    df["adc"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_'+'adc_tw_',targetSpacingg,spacing_keyword)   , axis = 1) 
+    df["hbv"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_'+'hbv_tw_',targetSpacingg,spacing_keyword)   , axis = 1) 
     df["t2w"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 't2w',targetSpacingg,spacing_keyword)   , axis = 1) 
     df["label"+spacing_keyword]=df.apply(lambda row : resample_labels(row,targetSpacingg,spacing_keyword)   , axis = 1) 
 
-    for keyWord in ['adc'+spacing_keyword,'hbv'+spacing_keyword]:
-        resList=[]     
-        with mp.Pool(processes = mp.cpu_count()) as pool:
-            resList=pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'),list(df.iterrows()))    
-        df['registered_'+keyWord]=resList  
+
 
     ManageMetadata.addSizeMetaDataToDf(t2wKeyWord,df)
 
@@ -208,35 +232,48 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 
 
 
-    resList=list(map(partial(join_and_save_3Channel
-                                ,colNameT2w=t2wKeyWord
-                                ,colNameAdc='registered_'+'adc'+spacing_keyword
-                                ,colNameHbv='registered_'+'hbv'+spacing_keyword
-                                )  ,list(df.iterrows())))
-
-    # with mp.Pool(processes = mp.cpu_count()) as pool:
-    #     resList=pool.map(partial(join_and_save_3Channel
+    # resList=list(map(partial(join_and_save_3Channel
     #                             ,colNameT2w=t2wKeyWord
-    #                             ,colNameAdc='registered_'+'adc'+spacing_keyword
-    #                             ,colNameHbv='registered_'+'hbv'+spacing_keyword
-    #                             ,outPath=outPath
-    #                             )  ,list(df.iterrows())) 
+    #                             ,colNameAdc='adc'+spacing_keyword
+    #                             ,colNameHbv='hbv'+spacing_keyword
+    #                             )  ,list(df.iterrows())))
+
+    with mp.Pool(processes = mp.cpu_count()) as pool:
+        resList=pool.map(partial(join_and_save_3Channel
+                                ,colNameT2w=t2wKeyWord
+                                ,colNameAdc='adc'+spacing_keyword
+                                ,colNameHbv='hbv'+spacing_keyword
+                                )  ,list(df.iterrows())) 
     df[t2wKeyWord+"_3Chan"]=resList
 
 
 # some preprocessing common for all
+
+
+#### 
+#first get adc and tbv to t2w spacing
+spacing_keyword='_tw_'
+df["adc"+spacing_keyword]=df.apply(lambda row : resample_To_t2w(row,'adc','tw','t2w')   , axis = 1) 
+df["hbv"+spacing_keyword]=df.apply(lambda row : resample_To_t2w(row,'adc','tw','t2w')   , axis = 1) 
+
+
+#now registration of adc and hbv to t2w
+for keyWord in ['adc_tw_','hbv_tw_']:
+    resList=[]     
+    with mp.Pool(processes = mp.cpu_count()) as pool:
+        resList=pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'),list(df.iterrows()))    
+    df['registered_'+keyWord]=resList  
+
 # bias field correction
-
-# Standardize.iterateAndBiasCorrect('t2w',df)
-# #Standarization
-# for keyWord in ['t2w','adc', 'hbv'  ]: #'cor',,'sag'
-#     ## denoising
-#     #Standardize.iterateAndDenoise(keyWord,df)
-#     ## standarization
-#     Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,50)   
-# #standardize labels
-# Standardize.iterateAndchangeLabelToOnes(df)
-
+Standardize.iterateAndBiasCorrect('t2w',df)
+#Standarization
+for keyWord in ['t2w','adc', 'hbv'  ]: #'cor',,'sag'
+    ## denoising
+    #Standardize.iterateAndDenoise(keyWord,df)
+    ## standarization
+    Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,50)   
+#standardize labels
+Standardize.iterateAndchangeLabelToOnes(df)
 
 
 #######Registration of adc and hb         

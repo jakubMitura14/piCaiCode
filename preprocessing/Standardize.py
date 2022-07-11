@@ -104,6 +104,14 @@ def denoise(path):
     writer.SetFileName(path)
     writer.Execute(imgSmooth)   
 
+
+def padToSize():
+    pass
+
+def padTo():
+    pass
+
+
 #######  
 def iterateAndBiasCorrect(seriesString,df):
     train_patientsPaths=df[seriesString].dropna().astype('str').to_numpy()

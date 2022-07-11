@@ -16,7 +16,6 @@
 (FixedImageDimension 3)
 (MovingImageDimension 3)
 
-
 // Specify whether you want to take into account the so-called
 // direction cosines of the images. Recommended: true.
 // In some cases, the direction cosines of the image are corrupt,
@@ -68,7 +67,7 @@
 // In generally, Compose is the best option in most cases.
 // It does not influence the results very much.
 (HowToCombineTransforms "Compose")
-//(AutomaticTransformInitializationMethod "CenterOfGravity")
+(AutomaticTransformInitializationMethod "CenterOfGravity")
 
 
 //************Similarity Measure************

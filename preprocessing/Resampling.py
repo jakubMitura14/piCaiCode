@@ -52,7 +52,7 @@ def resample_with_GAN(path, targetSpac):
     new_size = tuple([int(origSize[0]*(orig_spacing[0]/targetSpac[0])),
                     int(origSize[1]*(orig_spacing[1]/targetSpac[1])),
                     int(origSize[2]*(orig_spacing[2]/targetSpac[2]) )  ]  )
-    print(f"new_size {new_size}")
+    print(f"new_size {new_size}  target spacing {targetSpac}")
     anySuperSampled = False
     data=sitk.GetArrayFromImage(imageOrig)
     #supersampling if needed
@@ -113,8 +113,9 @@ def resample_with_GAN(path, targetSpac):
     resample.SetDefaultPixelValue(image.GetPixelIDValue())
     resample.SetInterpolator(sitk.sitkBSpline)
     resample.SetSize(new_size)
-    return resample.Execute(image)
+    res= resample.Execute(image)
     
+    return res
     
 #pathT2w,pathHbv,pathADC,patht2wLabel
 def resample_label_with_GAN(path, targetSpac):
@@ -135,29 +136,29 @@ def resample_label_with_GAN(path, targetSpac):
     data=sitk.GetArrayFromImage(imageOrig)
     #supersampling if needed
     
-    for axis in [0,1,2]:   
-        if(new_size[axis]>origSize[axis]):
-            anySuperSampled=True
-            #in some cases the GPU memory is not cleared enough
-            device = cuda.get_current_device()
-            device.reset()
-            currentSpacing[axis]=targetSpac[axis]
-            pre_slices = origSize[axis]
-            post_slices = new_size[axis]
-            Z_FAC = post_slices/pre_slices # Sampling factor in Z direction
-            if(axis==1):
-                data = np.moveaxis(data, 1, 2)
-            if(axis==2):
-                data = np.moveaxis(data, 0, 2)
-            #Call the SR interpolation tool from KevinSR
-            #print(f"thicks_ori shape {data.shape} ")
+    # for axis in [0,1,2]:   
+    #     if(new_size[axis]>origSize[axis]):
+    #         anySuperSampled=True
+    #         #in some cases the GPU memory is not cleared enough
+    #         device = cuda.get_current_device()
+    #         device.reset()
+    #         currentSpacing[axis]=targetSpac[axis]
+    #         pre_slices = origSize[axis]
+    #         post_slices = new_size[axis]
+    #         Z_FAC = post_slices/pre_slices # Sampling factor in Z direction
+    #         if(axis==1):
+    #             data = np.moveaxis(data, 1, 2)
+    #         if(axis==2):
+    #             data = np.moveaxis(data, 0, 2)
+    #         #Call the SR interpolation tool from KevinSR
+    #         #print(f"thicks_ori shape {data.shape} ")
 
-            data = mask_interpolation(data, Z_FAC)
-            #print(f"thins_gen shape {data.shape} ")
-            if(axis==1):
-                data = np.moveaxis(data, 2, 1)
-            if(axis==2):
-                data = np.moveaxis(data, 2, 0)            
+    #         data = mask_interpolation(data, Z_FAC)
+    #         #print(f"thins_gen shape {data.shape} ")
+    #         if(axis==1):
+    #             data = np.moveaxis(data, 2, 1)
+    #         if(axis==2):
+    #             data = np.moveaxis(data, 2, 0)            
             
 
     #we need to recreate itk image object only if some supersampling was performed
