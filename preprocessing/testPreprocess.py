@@ -250,6 +250,19 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 # some preprocessing common for all
 
 
+
+# # bias field correction
+# Standardize.iterateAndBiasCorrect('t2w',df)
+# #Standarization
+# for keyWord in ['t2w','adc', 'hbv'  ]: #'cor',,'sag'
+#     ## denoising
+#     #Standardize.iterateAndDenoise(keyWord,df)
+#     ## standarization
+#     Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,50)   
+# #standardize labels
+# Standardize.iterateAndchangeLabelToOnes(df)
+
+
 #### 
 #first get adc and tbv to t2w spacing
 spacing_keyword='_tw_'
@@ -264,38 +277,8 @@ for keyWord in ['adc_tw_','hbv_tw_']:
         resList=pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'),list(df.iterrows()))    
     df['registered_'+keyWord]=resList  
 
-# bias field correction
-Standardize.iterateAndBiasCorrect('t2w',df)
-#Standarization
-for keyWord in ['t2w','adc', 'hbv'  ]: #'cor',,'sag'
-    ## denoising
-    #Standardize.iterateAndDenoise(keyWord,df)
-    ## standarization
-    Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,50)   
-#standardize labels
-Standardize.iterateAndchangeLabelToOnes(df)
-
-
 #######Registration of adc and hb         
-# for keyWord in ['adc','hbv']:
-#     resList=[]     
-#     # list(map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w_med_spac',experiment=experiment ),list(df.iterrows())))  
-#     # resList=list(map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'),list(df.iterrows())) )   
-#     # df['registered_'+keyWord]=resList  
-    
-#     with mp.Pool(processes = mp.cpu_count()) as pool:
-#         resList=pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'),list(df.iterrows()))    
-#     df['registered_'+keyWord]=resList  
-    # with mp.Pool(processes = mp.cpu_count()) as pool:
-    #     resList=pool.map(partial(reg_adc_hbv_to_t2w_sitk
-    #             ,colName=keyWord
-    #             ,t2wColName='t2w'),list(df.iterrows()))    
-    # df['registered_'+keyWord]=resList  
 
-
-# #reg_adc_hbv_to_t2w_sitk(row,colName,t2wColName)
-# #####
- 
 targetSpacinggg=(spacingDict['t2w_spac_x'][3],spacingDict['t2w_spac_y'][3],spacingDict['t2w_spac_z'][3])
 preprocess_diffrent_spacings(df,targetSpacinggg,"_med_spac")
 preprocess_diffrent_spacings(df,(1.0,1.0,1.0),"_one_spac")
