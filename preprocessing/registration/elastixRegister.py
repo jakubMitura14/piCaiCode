@@ -98,6 +98,18 @@ def euler_sitk(fixed_image, moving_image):
     
     return out
 
+def getRegistrationScore(logPath):
+    """
+    given log path will extract the registration metric
+    """
+    #logPath= '/home/sliceruser/data/orig/10021/10021_1000021_adctw_for_adcb_tw_/elastix.log'
+    fp= open(logPath, 'r')
+    content=   fp.read()
+    len(content)
+    lineWithRes= list(filter(lambda line: "Final metric value " in line ,content.split("\n")))
+    trimmed= lineWithRes[0].split("=")[1][1:-1]
+    return float(trimmed)
+
 
 
 def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=None,reIndex=0):
@@ -114,6 +126,7 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
     path=str(row[1][colName])
     outPath = path.replace(".mha","_for_"+colName)
     result=pathOs.join(outPath,"result.0.mha")
+    logPath=pathOs.join(outPath,"elastix.log")
     # print(result)
     # print(pathOs.exists(result))
     #returning faster if the result is already present
@@ -143,12 +156,12 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
                 reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment,reIndexNew)
             #in case it will not work via elastix we will use simple itk    
             if(not pathOs.exists(result)):
-                try:
-                    reg_adc_hbv_to_t2w_sitk(row,colName,t2wColName,result)
-                except:
-                    #maybe it can not be done ?
-                    return ""
-            return result            
+                # try:
+                #     reg_adc_hbv_to_t2w_sitk(row,colName,t2wColName,result)
+                # except:
+                #     #maybe it can not be done ?
+                return ("",0.0)
+            return (result,getRegistrationScore(logPath) )            
         else:
             return ""    
     return ""    

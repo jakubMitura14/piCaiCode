@@ -8,7 +8,7 @@ import pandas as pd
 from os.path import isdir,join,exists,split,dirname,basename
 import numpy as np
 import multiprocessing as mp
-
+import math
 import SimpleITK as sitk
 import numpy as np
 import collections
@@ -105,14 +105,79 @@ def denoise(path):
     writer.Execute(imgSmooth)   
 
 
-def padToSize():
-    pass
 
-def padTo():
-    pass
+def getMedianCorner(image1):
+    """
+    get median from 4 corners as value for background
+    """
+    sizz=image1.GetSize()
+    sizzMinus=(sizz[0]-1,sizz[1]-1,sizz[2]-1)
+    corners=[(0,0,0),(0,0,sizzMinus[2]), (0,sizzMinus[1],0),(sizzMinus[0],0,0) 
+            ,(0,sizzMinus[1],sizzMinus[2]),(sizzMinus[0],0,sizzMinus[2]),(sizzMinus[0],sizzMinus[1],0)
+            ,(sizzMinus[0],sizzMinus[1],sizzMinus[2])  ]
+
+    cornerValues=list(map(lambda coords: image1.GetPixel(coords)  ,corners ))
+    return np.median(cornerValues)
+
+
+def padToSize(image1,targetSize, paddValue):
+    """
+    padd with given value symmetrically to get the predifined target size and return padded image
+    """
+    currentSize=image1.GetSize()
+    sizediffs=(targetSize[0]-currentSize[1]  , targetSize[1]-currentSize[1]  ,targetSize[2]-currentSize[2])
+    halfDiffSize=(math.floor(sizediffs[0]/2) , math.floor(sizediffs[1]/2), math.floor(sizediffs[2]/2))
+    rest=(sizediffs[0]-halfDiffSize[0]  ,sizediffs[1]-halfDiffSize[1]  ,sizediffs[2]-halfDiffSize[2]  )
+    print(f" currentSize {currentSize} targetSize {targetSize} halfDiffSize {halfDiffSize}  rest {rest} paddValue {paddValue} sizediffs {type(sizediffs)}")
+    
+    halfDiffSize=np.array(halfDiffSize, dtype='int').tolist() 
+    rest=np.array(rest, dtype='int').tolist() 
+    return sitk.ConstantPad(image1, halfDiffSize, rest, paddValue)
+    #return sitk.ConstantPad(image1, (1,1,1), (1,1,1), paddValue)
+
+
+def padToDivisibleBy32(image1,paddValue):
+    """
+    padds so all dimensions will be divisible by 32
+    """
+    sizz=image1.GetSize()
+    targetSize=(math.ceil(sizz[0]/32)*32, math.ceil(sizz[1]/32)*32,math.ceil(sizz[2]/32)*32  )
+    return padToSize(image1,targetSize, paddValue)
+    
+
+def padToAndSaveLabel(row,colname,targetSize, paddValue,keyword,isTobeDiv):
+    row=row[1]
+    writer = sitk.ImageFileWriter()
+    path = str(row[colname])
+    outPath = path.replace('.nii.gz',keyword+ '.nii.gz')
+    image=sitk.ReadImage(str(path))
+    if(isTobeDiv):
+        image=padToDivisibleBy32(image,paddValue)
+        writer.KeepOriginalImageUIDOn()
+        writer.SetFileName(outPath)
+        writer.Execute(image) 
+    else:
+        image=padToSize(image,targetSize,paddValue)
+        writer.KeepOriginalImageUIDOn()
+        writer.SetFileName(outPath)
+        writer.Execute(image)
+    return outPath                 
+            
 
 
 #######  
+
+
+def iterateAndpadLabels(df,colname,targetSize, paddValue,keyword,isTobeDiv):
+    reslist=[]
+    # with mp.Pool(processes = mp.cpu_count()) as pool:
+    #     reslist=pool.map(partial(padToAndSaveLabel,colname=colname,targetSize=targetSize,paddValue=paddValue,keyword=keyword,isTobeDiv=isTobeDiv ),list(df.iterrows()))
+    reslist=list(map(partial(padToAndSaveLabel,colname=colname,targetSize=targetSize,paddValue=paddValue,keyword=keyword,isTobeDiv=isTobeDiv ),list(df.iterrows())))
+
+
+    df["label"+keyword]=reslist
+
+
 def iterateAndBiasCorrect(seriesString,df):
     train_patientsPaths=df[seriesString].dropna().astype('str').to_numpy()
     train_patientsPaths=list(filter(lambda path: len(path)>2 ,train_patientsPaths))   
