@@ -86,7 +86,7 @@ spec.loader.exec_module(dataUtils)
 class PiCaiDataModule(pl.LightningDataModule):
     def __init__(self,trainSizePercent,batch_size,num_workers
     ,drop_last,df,cache_dir,chan3_col_name
-    ,label_name,maxSize,
+    ,label_name,
     RandGaussianNoised_prob
     ,RandAdjustContrastd_prob
     ,RandGaussianSmoothd_prob
@@ -114,7 +114,6 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.subjects= None
         self.chan3_col_name=chan3_col_name
         self.label_name=label_name
-        self.maxSize=maxSize
         self.RandGaussianNoised_prob=RandGaussianNoised_prob
         self.RandAdjustContrastd_prob=RandAdjustContrastd_prob
         self.RandGaussianSmoothd_prob=RandGaussianSmoothd_prob
@@ -158,8 +157,8 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.train_subjects = train_set
         self.val_subjects = valid_set
         self.test_subjects = test_set
-        train_transforms=transformsForMain.get_train_transforms(self.maxSize
-            ,self.RandGaussianNoised_prob
+        train_transforms=transformsForMain.get_train_transforms(
+            self.RandGaussianNoised_prob
             ,self.RandAdjustContrastd_prob
             ,self.RandGaussianSmoothd_prob
             ,self.RandRicianNoised_prob
@@ -167,7 +166,7 @@ class PiCaiDataModule(pl.LightningDataModule):
             ,self.RandAffined_prob
             ,self.RandCoarseDropoutd_prob
             ,self.is_whole_to_train )
-        val_transforms= transformsForMain.get_val_transforms(self.maxSize)
+        val_transforms= transformsForMain.get_val_transforms()
         #todo - unhash
         # self.train_ds =  PersistentDataset(data=self.train_subjects, transform=train_transforms,cache_dir=self.cache_dir)
         # self.val_ds=     PersistentDataset(data=self.val_subjects, transform=val_transforms,cache_dir=self.cache_dir)

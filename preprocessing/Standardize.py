@@ -93,18 +93,13 @@ def standardizeFromPathAndOverwrite(path,nyul_normalizer):
 
 def denoise(path):
     image1=sitk.ReadImage(path)
-    imgSmooth = sitk.CurvatureFlow(image1=image1,
-                                        timeStep=0.125,
-                                        numberOfIterations=5)
+    imgSmooth = sitk.CurvatureFlow(image1=image1, timeStep=0.125,numberOfIterations=5)
     #standardazing orientation
     image1 = sitk.Cast(image1, sitk.sitkFloat32)
-
     writer = sitk.ImageFileWriter()
     writer.KeepOriginalImageUIDOn()
     writer.SetFileName(path)
     writer.Execute(imgSmooth)   
-
-
 
 def getMedianCorner(image1):
     """
@@ -170,9 +165,9 @@ def padToAndSaveLabel(row,colname,targetSize, paddValue,keyword,isTobeDiv):
 
 def iterateAndpadLabels(df,colname,targetSize, paddValue,keyword,isTobeDiv):
     reslist=[]
-    # with mp.Pool(processes = mp.cpu_count()) as pool:
-    #     reslist=pool.map(partial(padToAndSaveLabel,colname=colname,targetSize=targetSize,paddValue=paddValue,keyword=keyword,isTobeDiv=isTobeDiv ),list(df.iterrows()))
-    reslist=list(map(partial(padToAndSaveLabel,colname=colname,targetSize=targetSize,paddValue=paddValue,keyword=keyword,isTobeDiv=isTobeDiv ),list(df.iterrows())))
+    with mp.Pool(processes = mp.cpu_count()) as pool:
+        reslist=pool.map(partial(padToAndSaveLabel,colname=colname,targetSize=targetSize,paddValue=paddValue,keyword=keyword,isTobeDiv=isTobeDiv ),list(df.iterrows()))
+    #reslist=list(map(partial(padToAndSaveLabel,colname=colname,targetSize=targetSize,paddValue=paddValue,keyword=keyword,isTobeDiv=isTobeDiv ),list(df.iterrows())))
 
 
     df["label"+keyword]=reslist

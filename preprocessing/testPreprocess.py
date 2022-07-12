@@ -81,6 +81,7 @@ registered images were already resampled now time for t2w and labels
 """
 def resample_ToMedianSpac(row,colName,targetSpacing,spacing_keyword):
     path=row[colName]
+    print(f" pathhhh {path} ")
     if(path!= " " and path!=""):
         study_id=str(row['study_id'])
         
@@ -98,7 +99,7 @@ def resample_ToMedianSpac(row,colName,targetSpacing,spacing_keyword):
             write_to_modif_path(resampled,path,".mha",spacing_keyword+".mha" )
         else:
             experiment.log_text(f" old resample {colName} {study_id}")
-            print(f"already resampled {study_id} colname {colName} ")
+            print(f"already resampled {study_id} colname {colName} newPath {newPath}")
         return newPath    
     return " "
 
@@ -119,11 +120,11 @@ def resample_To_t2w(row,colName,spacing_keyword,t2wColName):
             except:
                 print("error resampling")
                 resampled = Resampling.resample_with_GAN(path,targetSpacing)
-            print(f" resempled Res colname {colName}  {study_id} size {resampled.GetSize() } spacing {resampled.GetSpacing()}  ")
+            print(f" resempled Res colname {colName}  {study_id} size {resampled.GetSize() } spacing {resampled.GetSpacing()} newPath {newPath}  ")
             write_to_modif_path(resampled,path,".mha",spacing_keyword+".mha" )
         else:
             experiment.log_text(f" old resample {colName} {study_id}")
-            print(f"already resampled {study_id} colname {colName} ")
+            print(f"already resampled {study_id} colname {colName} newPath {newPath}")
         return newPath    
     return " "
 
@@ -140,7 +141,7 @@ def resample_labels(row,targetSpacing,spacing_keyword):
     if(path!= " " and path!=""):
         path_t2w=row['t2w']
 
-        outPath= path_t2w.replace(".mha","_label.mha")
+        outPath= path_t2w.replace(".mha","__label.mha")
         
         study_id=str(row['study_id'])
     
@@ -215,18 +216,19 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
     and targetSize will be ignored if will be false
     size will be padded to targetSize
     """
-    row=row[1]
-    outPath = str(row[colNameT2w]).replace('.mha',sizeWord+ '_34Chan.mha')
-    if(str(row[colNameT2w])!= " " and str(row[colNameT2w])!="" 
-        and str(row[colNameAdc])!= " " and str(row[colNameAdc])!="" 
-        and str(row[colNameHbv])!= " " and str(row[colNameHbv])!=""
+    #row=row[1]
+    print(f"resize_and_join colNameT2w {colNameT2w} row[1] str(row[colNameT2w]) {str(row[1][colNameT2w])}  ")
+    outPath = str(row[1][colNameT2w]).replace('.mha',sizeWord+ '_34Chan.mha')
+    if(str(row[1][colNameT2w])!= " " and str(row[1][colNameT2w])!="" 
+        and str(row[1][colNameAdc])!= " " and str(row[1][colNameAdc])!="" 
+        and str(row[1][colNameHbv])!= " " and str(row[1][colNameHbv])!=""
         ):
         if(not pathOs.exists(outPath)):
-            patId=str(row['patient_id'])
-
-            imgT2w=sitk.ReadImage(str(row[colNameT2w]))
-            imgAdc=sitk.ReadImage(str(row[colNameAdc]))
-            imgHbv=sitk.ReadImage(str(row[colNameHbv]))
+            patId=str(row[1]['patient_id'])
+            print(f" str(row[1][colNameAdc])  {str(row[1][colNameAdc])}  str(row[1][colNameHbv]) {str(row[1][colNameHbv])}"    )
+            imgT2w=sitk.ReadImage(str(row[1][colNameT2w]))
+            imgAdc=sitk.ReadImage(str(row[1][colNameAdc]))
+            imgHbv=sitk.ReadImage(str(row[1][colNameHbv]))
 
             imgT2w=sitk.Cast(imgT2w, sitk.sitkFloat32)
             imgAdc=sitk.Cast(imgAdc, sitk.sitkFloat32)
@@ -293,18 +295,28 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 
     sizeWord="_div32_"
     resList=[]
+    # list(map(partial(resize_and_join
+    #                             ,colNameT2w=t2wKeyWord
+    #                             ,colNameAdc="adc"+spacing_keyword
+    #                             ,colNameHbv="hbv"+spacing_keyword
+    #                             ,sizeWord=sizeWord
+    #                             ,targetSize=maxSize
+    #                             ,ToBedivisibleBy32=True
+    #                             )  ,list(df.iterrows())))
+
+
     with mp.Pool(processes = mp.cpu_count()) as pool:
         resList=pool.map(partial(resize_and_join
                                 ,colNameT2w=t2wKeyWord
-                                ,colNameAdc='adc'+spacing_keyword
-                                ,colNameHbv='hbv'+spacing_keyword
+                                ,colNameAdc="adc"+spacing_keyword
+                                ,colNameHbv="hbv"+spacing_keyword
                                 ,sizeWord=sizeWord
                                 ,targetSize=maxSize
                                 ,ToBedivisibleBy32=True
                                 )  ,list(df.iterrows())) 
     df[t2wKeyWord+"_3Chan"+sizeWord]=resList
     #setting padding to labels
-    Standardize.iterateAndpadLabels(df,"label"+spacing_keyword+sizeWord,maxSize, 0.0,spacing_keyword+sizeWord,True)
+    Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,maxSize, 0.0,spacing_keyword+sizeWord,True)
 
 
     sizeWord="_maxSize_"
@@ -312,8 +324,8 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     with mp.Pool(processes = mp.cpu_count()) as pool:
         resList=pool.map(partial(resize_and_join
                                 ,colNameT2w=t2wKeyWord
-                                ,colNameAdc='adc'+spacing_keyword
-                                ,colNameHbv='hbv'+spacing_keyword
+                                ,colNameAdc="adc"+spacing_keyword
+                                ,colNameHbv="hbv"+spacing_keyword
                                 ,sizeWord=sizeWord
                                 ,targetSize=maxSize
                                 ,ToBedivisibleBy32=False
@@ -329,7 +341,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     #                             ,ToBedivisibleBy32=False
     #                             )  ,list(df.iterrows()))  )
     df[t2wKeyWord+"_3Chan"+sizeWord]=resList
-    Standardize.iterateAndpadLabels(df,"label"+spacing_keyword+sizeWord,maxSize, 0.0,spacing_keyword+sizeWord,False)
+    Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,maxSize, 0.0,spacing_keyword+sizeWord,False)
 
 
 
@@ -365,7 +377,7 @@ for keyWord in ['adcb_tw_','hbvb_tw_']:
     
     pathss = list(map(lambda tupl :tupl[0],resList   ))
     reg_values = list(map(lambda tupl :tupl[1],resList   ))
-    df['registered_'+keyWord]=resList  
+    df['registered_'+keyWord]=pathss  
     df['registered_'+keyWord+"score"]=reg_values  
 #checking registration by reading from logs the metrics so we will get idea how well it went
 

@@ -128,11 +128,12 @@ def mainTrain(experiment,options,df):
     # print(f"************    maxSize {maxSize}   ***************")
 
     spacing_keyword=experiment.get_parameter("spacing_keyword")
-    sizeWord= experiment.get_parameter("spacing_keyword")
-    chan3_col_name="t2w{spacing_keyword}_3Chan{sizeWord}" 
-    label_name="label{spacing_keyword}{sizeWord}" 
+    sizeWord= experiment.get_parameter("sizeWord")
+    chan3_col_name=f"t2w{spacing_keyword}_3Chan{sizeWord}" 
 
-    cacheDir =  "/home/sliceruser/preprocess/monai_persistent_Dataset/{spacing_keyword}/{sizeWord}"
+    label_name=f"label{spacing_keyword}{sizeWord}" 
+
+    cacheDir =  f"/home/sliceruser/preprocess/monai_persistent_Dataset/{spacing_keyword}/{sizeWord}"
 
 
     data = DataModule.PiCaiDataModule(
@@ -153,7 +154,7 @@ def mainTrain(experiment,options,df):
         ,RandFlipd_prob=experiment.get_parameter("RandFlipd_prob")
         ,RandAffined_prob=experiment.get_parameter("RandAffined_prob")
         ,RandCoarseDropoutd_prob=experiment.get_parameter("RandCoarseDropoutd_prob")
-        ,is_whole_to_train=experiment.get_parameter("is_whole_to_train")
+        ,is_whole_to_train= (sizeWord=="_maxSize_")
     )
     data.prepare_data()
     data.setup()
@@ -164,19 +165,19 @@ def mainTrain(experiment,options,df):
         spatial_dims=3,
         in_channels=3,
         out_channels=2,
-        strides=getParam(experiment,options,"stridesAndChannels")["strides"],
-        channels=getParam(experiment,options,"stridesAndChannels")["channels"],
+        strides=getParam(experiment,options,"stridesAndChannels",df)["strides"],
+        channels=getParam(experiment,options,"stridesAndChannels",df)["channels"],
         num_res_units= experiment.get_parameter("num_res_units"),
-        act = getParam(experiment,options,"act"),
-        norm= getParam(experiment,options,"norm"),
+        act = getParam(experiment,options,"act",df),
+        norm= getParam(experiment,options,"norm",df),
         dropout= experiment.get_parameter("dropout")
     )
 
     model = LigtningModel.Model(
         net=unet,
-        criterion=  getParam(experiment,options,"lossF"),# Our seg labels are single channel images indicating class index, rather than one-hot
+        criterion=  getParam(experiment,options,"lossF",df),# Our seg labels are single channel images indicating class index, rather than one-hot
         learning_rate=1e-2,
-        optimizer_class= getParam(experiment,options,"optimizer_class") ,
+        optimizer_class= getParam(experiment,options,"optimizer_class",df) ,
         experiment=experiment,
         finalLoss=finalLoss
 
@@ -187,14 +188,15 @@ def mainTrain(experiment,options,df):
     #stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging()
 
     trainer = pl.Trainer(
-        #accelerato="cpu", #TODO(remove)
+        accelerator="cpu", #TODO(remove)
         max_epochs=experiment.get_parameter("max_epochs"),
         #gpus=1,
         precision=experiment.get_parameter("precision"), 
         callbacks=[ early_stopping ],
         #logger=comet_logger,
-        accelerator='auto',
-        devices='auto',
+        #accelerator='auto',
+        #devices='auto',
+        
         default_root_dir= "/home/sliceruser/lightning_logs",
         auto_scale_batch_size="binsearch",
         auto_lr_find=True,

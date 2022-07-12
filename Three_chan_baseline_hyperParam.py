@@ -82,10 +82,11 @@ for spacing_keyword in ["_med_spac", "_one_spac","_one_and_half_spac", "_two_spa
 
 
 ##options
+to_onehot_y_loss= True
 options={
-"lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=True)
-        ,monai.losses.DiceLoss(include_background=False, to_onehot_y=True)
-        ,monai.losses.DiceFocalLoss(include_background=False, to_onehot_y=True)
+"lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
+        ,monai.losses.DiceLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
+        ,monai.losses.DiceFocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
 ],
 "stridesAndChannels":  [ {
                                                             "strides":[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)]

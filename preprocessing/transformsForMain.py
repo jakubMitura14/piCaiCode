@@ -36,9 +36,11 @@ from monai.transforms import (
     RandFlipd,
     RandAffined,
     ConcatItemsd,
-    RandCoarseDropoutd
+    RandCoarseDropoutd,
+    AsDiscreted
     
 )
+import torchio
 
 
 def decide_if_whole_image_train(is_whole_to_train):
@@ -76,13 +78,15 @@ def get_train_transforms(RandGaussianNoised_prob
         [
             LoadImaged(keys=["chan3_col_name","label"]),
             EnsureChannelFirstd(keys=["chan3_col_name","label"]),
+            torchio.transforms.OneHot(num_classes=2,include=["label"] ),
+            #AsDiscreted(keys=["label"],to_onehot=1),
             #AsChannelFirstd(keys=["t2w","adc", "hbv","label"]),
             #Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
             #Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
             #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),            
             #CropForegroundd(keys=["t2w","adc", "hbv","label"], source_key="image"),
             EnsureTyped(keys=["chan3_col_name","label"]),
-            SelectItemsd(keys=["chan3_col_name","label"]),
+            # SelectItemsd(keys=["chan3_col_name","label"]),
             *decide_if_whole_image_train(is_whole_to_train),
 
             #SpatialPadd(keys=["chan3_col_name","label"]],spatial_size=maxSize) ,            
@@ -102,18 +106,20 @@ def get_val_transforms():
         [
             LoadImaged(keys=["chan3_col_name","label"]),
             EnsureChannelFirstd(keys=["chan3_col_name","label"]),
+            torchio.transforms.OneHot(num_classes=2,include=["label"] ),
+            #AsDiscreted(keys=["label"],to_onehot=1),
             #AsChannelFirstd(keys=["chan3_col_name","label"]]),
             #Orientationd(keys=["chan3_col_name","label"]], axcodes="RAS"),
             # Spacingd(keys=["chan3_col_name","label"]], pixdim=(
             #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
             #SpatialPadd(keys=["chan3_col_name","label"],spatial_size=maxSize) ,
-            #DivisiblePadd(keys=["chan3_col_name","label"]],k=32) ,
+            DivisiblePadd(keys=["chan3_col_name","label"],k=32) ,
             #DivisiblePadd(keys=["chan3_col_name","label"],k=32) ,
 
             #CropForegroundd(keys=["chan3_col_name","label"]], source_key="image"),
 
             EnsureTyped(keys=["chan3_col_name","label"]),
-            SelectItemsd(keys=["chan3_col_name","label"]),
+            #SelectItemsd(keys=["chan3_col_name","label"]),
             # ConcatItemsd(keys=["t2w","adc","hbv"],name="chan3_col_name")
         ]
     )
