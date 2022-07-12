@@ -48,7 +48,7 @@ for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:
 df = df.loc[df['isAnyMissing'] ==False]
 df = df.loc[df['isAnythingInAnnotated']>0 ]    
 #just for testing    
-df= df.head(4)
+#df= df.head(4)
 ##df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
 print(df)    
 

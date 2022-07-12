@@ -188,14 +188,14 @@ def mainTrain(experiment,options,df):
     #stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging()
 
     trainer = pl.Trainer(
-        accelerator="cpu", #TODO(remove)
+        #accelerator="cpu", #TODO(remove)
         max_epochs=experiment.get_parameter("max_epochs"),
         #gpus=1,
         precision=experiment.get_parameter("precision"), 
         callbacks=[ early_stopping ],
         #logger=comet_logger,
-        #accelerator='auto',
-        #devices='auto',
+        accelerator='auto',
+        devices='auto',
         
         default_root_dir= "/home/sliceruser/lightning_logs",
         auto_scale_batch_size="binsearch",
