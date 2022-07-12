@@ -21,15 +21,15 @@ def loadLib(name,path):
 transformsForMain =loadLib("transformsForMain", "/home/sliceruser/data/piCaiCode/preprocessing/transformsForMain.py")
 
 
-def getMonaiSubjectDataFromDataFrame(row,t2w_name,adc_name,hbv_name,label_name):
+def getMonaiSubjectDataFromDataFrame(row,chan3_col_name,label_name):
         """
         given row from data frame prepares Subject object from it
         """
-        subject= {"adc": str(row[adc_name])        
+        subject= {"chan3_col_name": str(row[chan3_col_name])        
         #, "cor":str(row['cor'])
-        , "hbv":str(row[hbv_name])
+        #, "hbv":str(row[hbv_name])
         #, "sag":str(row['sag'])
-        , "t2w":str(row[t2w_name])
+        #, "t2w":str(row[t2w_name])
         # , "isAnythingInAnnotated":row['isAnythingInAnnotated']
         # , "patient_id":row['patient_id']
         # , "study_id":row['study_id']
@@ -47,13 +47,12 @@ def getMonaiSubjectDataFromDataFrame(row,t2w_name,adc_name,hbv_name,label_name):
         return subject
 
 
-def load_df_only_full(df,t2w_name,adc_name,hbv_name,label_name,maxSize,is_whole_to_train):
+def load_df_only_full(df,chan3_col_name,label_name,is_whole_to_train):
     df = df.loc[df['isAnyMissing'] ==False]
     df = df.loc[df['isAnythingInAnnotated']>0 ]
     deficientPatIDs=[]
-    data_dicts = list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1],t2w_name,adc_name,hbv_name,label_name)  , list(df.iterrows())))
-    train_transforms=transformsForMain.get_train_transforms(maxSize
-                                                            ,0.1#RandGaussianNoised_prob
+    data_dicts = list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1],chan3_col_name,label_name)  , list(df.iterrows())))
+    train_transforms=transformsForMain.get_train_transforms(0.1#RandGaussianNoised_prob
                                                             ,0.1#RandAdjustContrastd_prob
                                                             ,0.1#RandGaussianSmoothd_prob
                                                             ,0.1#RandRicianNoised_prob
@@ -61,7 +60,7 @@ def load_df_only_full(df,t2w_name,adc_name,hbv_name,label_name,maxSize,is_whole_
                                                             ,0.1#RandAffined_prob
                                                             ,0.1#RandCoarseDropoutd_prob
                                                             ,is_whole_to_train )
-    val_transforms= transformsForMain.get_val_transforms(maxSize)
+    val_transforms= transformsForMain.get_val_transforms()
 
     for dictt in data_dicts:    
         try:
@@ -69,6 +68,8 @@ def load_df_only_full(df,t2w_name,adc_name,hbv_name,label_name,maxSize,is_whole_
             dat = val_transforms(dictt)
         except:
             print("error loading image")
+            dat = train_transforms(dictt)# TODO remove
+            dat = val_transforms(dictt)# TODO remove            
             pass
             #deficientPatIDs.append(dictt['patient_id'])
             #print(dictt['patient_id'])

@@ -41,31 +41,29 @@ from monai.transforms import (
 )
 
 
-def decide_if_whole_image_train(is_whole_to_train,maxSize):
+def decide_if_whole_image_train(is_whole_to_train):
     """
     if true we will trian on whole images otherwise just on 32x32x32
     randomly cropped parts
     """
-    if(is_whole_to_train):
-        return [SpatialPadd(keys=["t2w","adc", "hbv","label"],spatial_size=maxSize)]
-    else:
-        return [DivisiblePadd(keys=["t2w","adc", "hbv","label"],k=32)
+    if(not is_whole_to_train):
+        return [DivisiblePadd(keys=["chan3_col_name"],k=32)
             ,RandCropByPosNegLabeld(
-                keys=["t2w","adc", "hbv","label"],
+                keys=["chan3_col_name"],
                 label_key="label",
                 spatial_size=(32, 32, 32),
                 pos=1,
                 neg=1,
                 num_samples=4,
-                image_key="t2w",
+                image_key="chan3_col_name",
                 image_threshold=0,
             )
              ]
+    return []         
 
 
 
-def get_train_transforms(maxSize
-    ,RandGaussianNoised_prob
+def get_train_transforms(RandGaussianNoised_prob
     ,RandAdjustContrastd_prob
     ,RandGaussianSmoothd_prob
     ,RandRicianNoised_prob
@@ -76,48 +74,47 @@ def get_train_transforms(maxSize
     
     train_transforms = Compose(
         [
-            LoadImaged(keys=["t2w","adc", "hbv","label"]),
-            EnsureChannelFirstd(keys=["t2w","adc", "hbv","label"]),
+            LoadImaged(keys=["chan3_col_name","label"]),
+            EnsureChannelFirstd(keys=["chan3_col_name","label"]),
             #AsChannelFirstd(keys=["t2w","adc", "hbv","label"]),
             #Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
             #Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
             #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),            
             #CropForegroundd(keys=["t2w","adc", "hbv","label"], source_key="image"),
-            EnsureTyped(keys=["t2w","adc", "hbv","label"]),
-            SelectItemsd(keys=["t2w","adc", "hbv","label"]),
-            *decide_if_whole_image_train(is_whole_to_train,maxSize),
+            EnsureTyped(keys=["chan3_col_name","label"]),
+            SelectItemsd(keys=["chan3_col_name","label"]),
+            *decide_if_whole_image_train(is_whole_to_train),
 
-            #SpatialPadd(keys=["t2w","adc", "hbv","label"],spatial_size=maxSize) ,            
-            RandGaussianNoised(keys=["t2w","adc", "hbv"], prob=RandGaussianNoised_prob),
-            RandAdjustContrastd(keys=["t2w","adc", "hbv"], prob=RandAdjustContrastd_prob),
-            RandGaussianSmoothd(keys=["t2w","adc", "hbv"], prob=RandGaussianSmoothd_prob),
-            RandRicianNoised(keys=["t2w","adc", "hbv",], prob=RandRicianNoised_prob),
-            RandFlipd(keys=["t2w","adc", "hbv","label"], prob=RandFlipd_prob),
-            RandAffined(keys=["t2w","adc", "hbv","label"], prob=RandAffined_prob),
-            RandCoarseDropoutd(keys=["t2w","adc", "hbv"], prob=RandCoarseDropoutd_prob,holes=6, spatial_size=5),
-            ConcatItemsd(keys=["t2w","adc","hbv"],name="common_3channels"),
+            #SpatialPadd(keys=["chan3_col_name","label"]],spatial_size=maxSize) ,            
+            RandGaussianNoised(keys=["chan3_col_name"], prob=RandGaussianNoised_prob),
+            RandAdjustContrastd(keys=["chan3_col_name"], prob=RandAdjustContrastd_prob),
+            RandGaussianSmoothd(keys=["chan3_col_name"], prob=RandGaussianSmoothd_prob),
+            RandRicianNoised(keys=["chan3_col_name",], prob=RandRicianNoised_prob),
+            RandFlipd(keys=["chan3_col_name","label"], prob=RandFlipd_prob),
+            RandAffined(keys=["chan3_col_name","label"], prob=RandAffined_prob),
+            RandCoarseDropoutd(keys=["chan3_col_name"], prob=RandCoarseDropoutd_prob,holes=6, spatial_size=5),
             
         ]
     )
     return train_transforms
-def get_val_transforms(maxSize):
+def get_val_transforms():
     val_transforms = Compose(
         [
-            LoadImaged(keys=["t2w","adc", "hbv","label"]),
-            EnsureChannelFirstd(keys=["t2w","adc", "hbv","label"]),
-            #AsChannelFirstd(keys=["t2w","adc", "hbv","label"]),
-            #Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
-            # Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
+            LoadImaged(keys=["chan3_col_name","label"]),
+            EnsureChannelFirstd(keys=["chan3_col_name","label"]),
+            #AsChannelFirstd(keys=["chan3_col_name","label"]]),
+            #Orientationd(keys=["chan3_col_name","label"]], axcodes="RAS"),
+            # Spacingd(keys=["chan3_col_name","label"]], pixdim=(
             #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
-            SpatialPadd(keys=["t2w","adc", "hbv","label"],spatial_size=maxSize) ,
-            #DivisiblePadd(keys=["t2w","adc", "hbv","label"],k=32) ,
-            DivisiblePadd(keys=["t2w","adc", "hbv","label"],k=32) ,
+            #SpatialPadd(keys=["chan3_col_name","label"],spatial_size=maxSize) ,
+            #DivisiblePadd(keys=["chan3_col_name","label"]],k=32) ,
+            #DivisiblePadd(keys=["chan3_col_name","label"],k=32) ,
 
-            #CropForegroundd(keys=["t2w","adc", "hbv","label"], source_key="image"),
+            #CropForegroundd(keys=["chan3_col_name","label"]], source_key="image"),
 
-            EnsureTyped(keys=["t2w","adc", "hbv","label"]),
-            SelectItemsd(keys=["t2w","adc", "hbv","label"]),
-            ConcatItemsd(keys=["t2w","adc","hbv"],name="common_3channels")
+            EnsureTyped(keys=["chan3_col_name","label"]),
+            SelectItemsd(keys=["chan3_col_name","label"]),
+            # ConcatItemsd(keys=["t2w","adc","hbv"],name="chan3_col_name")
         ]
     )
     return val_transforms
@@ -136,17 +133,17 @@ def get_val_transforms(maxSize):
 #     randomly cropped parts
 #     """
 #     if(is_whole_to_train):
-#         return [SpatialPadd(keys=["common_3channels","label"],spatial_size=maxSize)]
+#         return [SpatialPadd(keys=["chan3_col_name","label"],spatial_size=maxSize)]
 #     else:
-#         return [DivisiblePadd(keys=["common_3channels","label"],k=32)
+#         return [DivisiblePadd(keys=["chan3_col_name","label"],k=32)
 #             ,RandCropByPosNegLabeld(
-#                 keys=["common_3channels","label"],
+#                 keys=["chan3_col_name","label"],
 #                 label_key="label",
 #                 spatial_size=(32, 32, 32),
 #                 pos=1,
 #                 neg=1,
 #                 num_samples=4,
-#                 image_key="common_3channels",
+#                 image_key="chan3_col_name",
 #                 image_threshold=0,
 #             )
 #              ]
@@ -174,18 +171,18 @@ def get_val_transforms(maxSize):
 #             #CropForegroundd(keys=["t2w","adc", "hbv","label"], source_key="image"),
 #             EnsureTyped(keys=["t2w","adc", "hbv","label"]),
 #             SelectItemsd(keys=["t2w","adc", "hbv","label"]),
-#             ConcatItemsd(keys=["t2w","adc","hbv"],name="common_3channels"),
+#             ConcatItemsd(keys=["t2w","adc","hbv"],name="chan3_col_name"),
 #             *decide_if_whole_image_train(is_whole_to_train,maxSize),
-#             #SelectItemsd(keys=["common_3channels","adc","hbv","label"]),
+#             #SelectItemsd(keys=["chan3_col_name","adc","hbv","label"]),
 
 
-#         #     #RandGaussianNoised(keys=["common_3channels"], prob=RandGaussianNoised_prob),
-#         #     RandAdjustContrastd(keys=["common_3channels"], prob=RandAdjustContrastd_prob),
-#         #     RandGaussianSmoothd(keys=["common_3channels"], prob=RandGaussianSmoothd_prob),
-#         #     RandRicianNoised(keys=["common_3channels"], prob=RandRicianNoised_prob),
-#         #     RandFlipd(keys=["common_3channels"], prob=RandFlipd_prob),
-#         #     #RandAffined(keys=["common_3channels","label"], prob=RandAffined_prob),
-#         #     RandCoarseDropoutd(keys=["common_3channels"], prob=RandCoarseDropoutd_prob,holes=6, spatial_size=5),
+#         #     #RandGaussianNoised(keys=["chan3_col_name"], prob=RandGaussianNoised_prob),
+#         #     RandAdjustContrastd(keys=["chan3_col_name"], prob=RandAdjustContrastd_prob),
+#         #     RandGaussianSmoothd(keys=["chan3_col_name"], prob=RandGaussianSmoothd_prob),
+#         #     RandRicianNoised(keys=["chan3_col_name"], prob=RandRicianNoised_prob),
+#         #     RandFlipd(keys=["chan3_col_name"], prob=RandFlipd_prob),
+#         #     #RandAffined(keys=["chan3_col_name","label"], prob=RandAffined_prob),
+#         #     RandCoarseDropoutd(keys=["chan3_col_name"], prob=RandCoarseDropoutd_prob,holes=6, spatial_size=5),
             
 
 
@@ -200,15 +197,15 @@ def get_val_transforms(maxSize):
 #             EnsureChannelFirstd(keys=["t2w","adc", "hbv","label"]),
 #             EnsureTyped(keys=["t2w","adc", "hbv","label"]),
 #             SelectItemsd(keys=["t2w","adc", "hbv","label"]),
-#             ConcatItemsd(keys=["t2w","adc","hbv"],name="common_3channels"),
-#             SelectItemsd(keys=["common_3channels","label"]),
+#             ConcatItemsd(keys=["t2w","adc","hbv"],name="chan3_col_name"),
+#             SelectItemsd(keys=["chan3_col_name","label"]),
 #             #AsChannelFirstd(keys=["t2w","adc", "hbv","label"]),
 #             #Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
 #             # Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
 #             #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
-#             SpatialPadd(keys=["common_3channels","label"],spatial_size=maxSize) ,
-#             # DivisiblePadd(keys=["common_3channels","label"],k=32) ,
-#             # SelectItemsd(keys=["common_3channels","adc","hbv","label"]),
+#             SpatialPadd(keys=["chan3_col_name","label"],spatial_size=maxSize) ,
+#             # DivisiblePadd(keys=["chan3_col_name","label"],k=32) ,
+#             # SelectItemsd(keys=["chan3_col_name","adc","hbv","label"]),
             
 #             #DivisiblePadd(keys=["t2w","adc", "hbv","label"],k=32) ,
 
@@ -232,17 +229,17 @@ def get_val_transforms(maxSize):
 #     randomly cropped parts
 #     """
 #     if(is_whole_to_train):
-#         return [SpatialPadd(keys=["common_3channels"],spatial_size=maxSize)]
+#         return [SpatialPadd(keys=["chan3_col_name"],spatial_size=maxSize)]
 #     else:
-#         return [DivisiblePadd(keys=["common_3channels"],k=32)
+#         return [DivisiblePadd(keys=["chan3_col_name"],k=32)
 #             ,RandCropByPosNegLabeld(
-#                 keys=["common_3channels","label"],
+#                 keys=["chan3_col_name","label"],
 #                 label_key="label",
 #                 spatial_size=(32, 32, 32),
 #                 pos=1,
 #                 neg=1,
 #                 num_samples=4,
-#                 image_key="common_3channels",
+#                 image_key="chan3_col_name",
 #                 image_threshold=0,
 #             )
 #              ]
@@ -278,9 +275,9 @@ def get_val_transforms(maxSize):
 #             RandFlipd(keys=["t2w","adc", "hbv","label"], prob=RandFlipd_prob),
 #             RandAffined(keys=["t2w","adc", "hbv","label"], prob=RandAffined_prob),
 #             RandCoarseDropoutd(keys=["t2w","adc", "hbv","label"], prob=RandCoarseDropoutd_prob,holes=6, spatial_size=5),
-#             ConcatItemsd(keys=["t2w","adc","hbv"],name="common_3channels"),
+#             ConcatItemsd(keys=["t2w","adc","hbv"],name="chan3_col_name"),
 #             *decide_if_whole_image_train(is_whole_to_train,maxSize),
-#             #SelectItemsd(keys=["common_3channels","label"])
+#             #SelectItemsd(keys=["chan3_col_name","label"])
 
             
 #         ]
@@ -303,8 +300,8 @@ def get_val_transforms(maxSize):
 #             #CropForegroundd(keys=["t2w","adc", "hbv","label"], source_key="image"),
 
 #             EnsureTyped(keys=["t2w","adc", "hbv","label"]),
-#             ConcatItemsd(keys=["t2w","adc","hbv"],name="common_3channels"),
-#             #SelectItemsd(keys=["common_3channels","label"])
+#             ConcatItemsd(keys=["t2w","adc","hbv"],name="chan3_col_name"),
+#             #SelectItemsd(keys=["chan3_col_name","label"])
 
 #         ]
 #     )

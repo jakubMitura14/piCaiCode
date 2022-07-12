@@ -88,7 +88,7 @@ class Model(pl.LightningModule):
         return optimizer
     
     def prepare_batch(self, batch):
-        return batch['common_3channels'], batch['label']
+        return batch['chan3_col_name'], batch['label']
     
     def infer_batch(self, batch):
         x, y = self.prepare_batch(batch)
@@ -102,7 +102,7 @@ class Model(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        images, labels = batch['common_3channels'], batch["label"]
+        images, labels = batch['chan3_col_name'], batch["label"]
         y_hat = sliding_window_inference(images, (32,32,32), 1, self.net)
         loss = self.criterion(y_hat, labels)
         self.dice_metric(y_pred=y_hat, y=labels)

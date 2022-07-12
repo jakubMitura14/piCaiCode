@@ -124,8 +124,16 @@ def mainTrain(experiment,options,df):
 
 
 
-    maxSize=manageMetaData.getMaxSize(getParam(experiment,options,"dirs")["t2w_name"],df)
-    print(f"************    maxSize {maxSize}   ***************")
+    #maxSize=manageMetaData.getMaxSize(getParam(experiment,options,"dirs")["chan3_col_name"],df)
+    # print(f"************    maxSize {maxSize}   ***************")
+
+    spacing_keyword=experiment.get_parameter("spacing_keyword")
+    sizeWord= experiment.get_parameter("spacing_keyword")
+    chan3_col_name="t2w{spacing_keyword}_3Chan{sizeWord}" 
+    label_name="label{spacing_keyword}{sizeWord}" 
+
+    cacheDir =  "/home/sliceruser/preprocess/monai_persistent_Dataset/{spacing_keyword}/{sizeWord}"
+
 
     data = DataModule.PiCaiDataModule(
         df= df,
@@ -134,12 +142,10 @@ def mainTrain(experiment,options,df):
         num_workers=os.cpu_count(),
         drop_last=False,#True,
         #we need to use diffrent cache folders depending on weather we are dividing data or not
-        cache_dir=getParam(experiment,options,"dirs")["cache_dir"]+str(experiment.get_parameter("is_whole_to_train")),
-        t2w_name=getParam(experiment,options,"dirs")["t2w_name"],
-        adc_name=getParam(experiment,options,"dirs")["adc_name"],
-        hbv_name=getParam(experiment,options,"dirs")["hbv_name"],
-        label_name=getParam(experiment,options,"dirs")["label_name"],
-        maxSize=maxSize
+        cache_dir=cacheDir,
+        chan3_col_name =chan3_col_name,
+        label_name=label_name
+        #maxSize=maxSize
         ,RandGaussianNoised_prob=experiment.get_parameter("RandGaussianNoised_prob")
         ,RandAdjustContrastd_prob=experiment.get_parameter("RandAdjustContrastd_prob")
         ,RandGaussianSmoothd_prob=experiment.get_parameter("RandGaussianSmoothd_prob")

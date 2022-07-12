@@ -63,20 +63,20 @@ LigtningModel =loadLib("LigtningModel", "/home/sliceruser/data/piCaiCode/model/L
 Three_chan_baseline =loadLib("Three_chan_baseline", "/home/sliceruser/data/piCaiCode/Three_chan_baseline.py")
 
 
-dirs=[]
+#dirs=[]
 #def getPossibleColNames(spacing_keyword,sizeWord ):
-for spacing_keyword in []:     
+for spacing_keyword in ["_med_spac", "_one_spac","_one_and_half_spac", "_two_spac" ]:     
     for sizeWord in ["_maxSize_","_div32_" ]: 
         cacheDir =  "/home/sliceruser/preprocess/monai_persistent_Dataset/{spacing_keyword}/{sizeWord}"
         #creating directory if not yet present
         os.makedirs(cacheDir, exist_ok = True)
-        dirs.append(
-        {f"cache_dir":cacheDir ,
-        "3Chan_col_name": f"t2w{spacing_keyword}_3Chan{sizeWord}" 
-        ,"label_name":"label{spacing_keyword}{sizeWord}" 
-        ,"metDataDir":"/home/sliceruser/data/metadata/processedMetaData_current.csv"
-        }
-        )
+        # dirs.append(
+        # {f"cache_dir":cacheDir ,
+        # "chan3_col_name": f"t2w{spacing_keyword}_3Chan{sizeWord}" 
+        # ,"label_name":"label{spacing_keyword}{sizeWord}" 
+        # ,"metDataDir":"/home/sliceruser/data/metadata/processedMetaData_current.csv"
+        # }
+        #)
 
 
 
@@ -98,7 +98,6 @@ options={
 "optimizer_class": [torch.optim.AdamW, torch.optim.NAdam] ,
 "act":[(Act.PRELU, {"init": 0.2}),(Act.LEAKYRELU, {})],                                         
 "norm":[(Norm.INSTANCE, {}),(Norm.BATCH, {}) ],
-"dirs":dirs
 }
 
 
@@ -131,9 +130,10 @@ config = {
         "RandFlipd_prob": {"type": "float", "min": 0.0, "max": 0.4},
         "RandAffined_prob": {"type": "float", "min": 0.0, "max": 0.4},
         "RandCoarseDropoutd_prob":{"type": "float", "min": 0.0, "max": 0.4},
-
-        "is_whole_to_train": {"type": "discrete", "values": [True,False]},#True,False
-        "dirs": {"type": "discrete", "values": list(range(0,len(options["dirs"])))},
+  
+        "spacing_keyword": {"type": "categorical", "values": ["_med_spac", "_one_spac","_one_and_half_spac", "_two_spac" ]},#True,False
+        "sizeWord": {"type": "categorical", "values": ["_maxSize_","_div32_" ]},#True,False
+        #"dirs": {"type": "discrete", "values": list(range(0,len(options["dirs"])))},
     },
 
     # Declare what we will be optimizing, and how:
@@ -147,21 +147,17 @@ df = pd.read_csv("/home/sliceruser/data/metadata/processedMetaData_current.csv")
 maxSize=manageMetaData.getMaxSize("t2w_med_spac",df)
 
 
+exampleSpacing="_med_spac"
+
 df= manageMetaData.load_df_only_full(
     df
-    ,options["dirs"][0]["t2w_name"]
-    ,options["dirs"][0]["dirs"]["adc_name"]
-    ,options["dirs"][0]["dirs"]["hbv_name"]
-    ,options["dirs"][0]["dirs"]["label_name"]
-    ,maxSize
+    ,f"t2w{exampleSpacing}_3Chan_maxSize_"
+    ,f"label{exampleSpacing}_maxSize_"
     ,True )
 df= manageMetaData.load_df_only_full(
     df
-    ,options["dirs"][0]["dirs"]["t2w_name"]
-    ,options["dirs"][0]["dirs"]["adc_name"]
-    ,options["dirs"][0]["dirs"]["hbv_name"]
-    ,options["dirs"][0]["dirs"]["label_name"]
-    ,maxSize
+    ,f"t2w{exampleSpacing}_3Chan_div32_"
+    ,f"label{exampleSpacing}_div32_"
     ,False )
 
 
@@ -182,7 +178,7 @@ opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
 for experiment in opt.get_experiments(
         project_name="picai-hyperparam-search-03"):
     print("******* new experiment *****")    
-    Three_chan_baseline.mainTrain(experiment,options)
+    Three_chan_baseline.mainTrain(experiment,options,df)
 
 
 
