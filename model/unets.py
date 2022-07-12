@@ -297,6 +297,7 @@ unet_hyperparam = {
         return conv
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        #print(f" in training { x.size() }  ")
         x = self.model(x)
         return x
 

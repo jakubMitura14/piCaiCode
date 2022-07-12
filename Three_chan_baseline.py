@@ -134,7 +134,8 @@ def mainTrain(experiment,options,df):
     label_name=f"label{spacing_keyword}{sizeWord}" 
 
     cacheDir =  f"/home/sliceruser/preprocess/monai_persistent_Dataset/{spacing_keyword}/{sizeWord}"
-
+    maxSize=sizeWord=="_maxSize_"
+    #print(f" fffffffffffff sizeWord {maxSize}")
 
     data = DataModule.PiCaiDataModule(
         df= df,
@@ -164,7 +165,7 @@ def mainTrain(experiment,options,df):
     unet= unets.UNet(
         spatial_dims=3,
         in_channels=3,
-        out_channels=2,
+        out_channels=1,
         strides=getParam(experiment,options,"stridesAndChannels",df)["strides"],
         channels=getParam(experiment,options,"stridesAndChannels",df)["channels"],
         num_res_units= experiment.get_parameter("num_res_units"),
@@ -197,7 +198,7 @@ def mainTrain(experiment,options,df):
         accelerator='auto',
         devices='auto',
         
-        default_root_dir= "/home/sliceruser/lightning_logs",
+        default_root_dir= "/home/sliceruser/data/lightning_logs",
         auto_scale_batch_size="binsearch",
         auto_lr_find=True,
         accumulate_grad_batches=experiment.get_parameter("accumulate_grad_batches"),

@@ -48,6 +48,8 @@ def decide_if_whole_image_train(is_whole_to_train):
     if true we will trian on whole images otherwise just on 32x32x32
     randomly cropped parts
     """
+    fff=not is_whole_to_train
+    print(f" in decide_if_whole_image_train {fff}")
     if(not is_whole_to_train):
         return [DivisiblePadd(keys=["chan3_col_name"],k=32)
             ,RandCropByPosNegLabeld(
@@ -56,7 +58,7 @@ def decide_if_whole_image_train(is_whole_to_train):
                 spatial_size=(32, 32, 32),
                 pos=1,
                 neg=1,
-                num_samples=4,
+                num_samples=6,
                 image_key="chan3_col_name",
                 image_threshold=0,
             )
@@ -77,9 +79,9 @@ def get_train_transforms(RandGaussianNoised_prob
     train_transforms = Compose(
         [
             LoadImaged(keys=["chan3_col_name","label"]),
-            torchio.transforms.OneHot(num_classes=2,include=["label"] ),
             EnsureChannelFirstd(keys=["chan3_col_name","label"]),
-            #AsDiscreted(keys=["label"],to_onehot=1),
+            #torchio.transforms.OneHot(include=["label"] ), #num_classes=3,
+            #AsDiscreted(keys=["label"],to_onehot=2,threshold=0.5),
             #AsChannelFirstd(keys=["t2w","adc", "hbv","label"]),
             #Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
             #Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
@@ -87,8 +89,8 @@ def get_train_transforms(RandGaussianNoised_prob
             #CropForegroundd(keys=["t2w","adc", "hbv","label"], source_key="image"),
             EnsureTyped(keys=["chan3_col_name","label"]),
             # SelectItemsd(keys=["chan3_col_name","label"]),
+            DivisiblePadd(keys=["chan3_col_name","label"],k=32) ,            
             *decide_if_whole_image_train(is_whole_to_train),
-
             #SpatialPadd(keys=["chan3_col_name","label"]],spatial_size=maxSize) ,            
             RandGaussianNoised(keys=["chan3_col_name"], prob=RandGaussianNoised_prob),
             RandAdjustContrastd(keys=["chan3_col_name"], prob=RandAdjustContrastd_prob),
@@ -105,9 +107,9 @@ def get_val_transforms():
     val_transforms = Compose(
         [
             LoadImaged(keys=["chan3_col_name","label"]),
-            torchio.transforms.OneHot(num_classes=2,include=["label"] ),
             EnsureChannelFirstd(keys=["chan3_col_name","label"]),
-            #AsDiscreted(keys=["label"],to_onehot=1),
+            #torchio.transforms.OneHot(include=["label"] ),#num_classes=3
+            #AsDiscreted(keys=["label"],to_onehot=2,threshold=0.5),
             #AsChannelFirstd(keys=["chan3_col_name","label"]]),
             #Orientationd(keys=["chan3_col_name","label"]], axcodes="RAS"),
             # Spacingd(keys=["chan3_col_name","label"]], pixdim=(

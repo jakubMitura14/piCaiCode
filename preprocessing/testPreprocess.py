@@ -48,7 +48,7 @@ for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:
 df = df.loc[df['isAnyMissing'] ==False]
 df = df.loc[df['isAnythingInAnnotated']>0 ]    
 #just for testing    
-#df= df.head(4)
+df= df.head(30)
 ##df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
 print(df)    
 
@@ -353,15 +353,15 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 
 
 # bias field correction
-Standardize.iterateAndBiasCorrect('t2w',df)
-#Standarization
-for keyWord in ['t2w','adc', 'hbv'  ]: #'cor',,'sag'
-    ## denoising
-    #Standardize.iterateAndDenoise(keyWord,df)
-    ## standarization
-    Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,50)   
-#standardize labels
-Standardize.iterateAndchangeLabelToOnes(df)
+# Standardize.iterateAndBiasCorrect('t2w',df)
+# #Standarization
+# for keyWord in ['t2w','adc', 'hbv'  ]: #'cor',,'sag'
+#     ## denoising
+#     #Standardize.iterateAndDenoise(keyWord,df)
+#     ## standarization
+#     Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,50)   
+# #standardize labels
+# Standardize.iterateAndchangeLabelToOnes(df)
 
 #### 
 #first get adc and tbv to t2w spacing
