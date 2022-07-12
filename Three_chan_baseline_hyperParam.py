@@ -63,6 +63,24 @@ LigtningModel =loadLib("LigtningModel", "/home/sliceruser/data/piCaiCode/model/L
 Three_chan_baseline =loadLib("Three_chan_baseline", "/home/sliceruser/data/piCaiCode/Three_chan_baseline.py")
 
 
+dirs=[]
+#def getPossibleColNames(spacing_keyword,sizeWord ):
+for spacing_keyword in []:     
+    for sizeWord in ["_maxSize_","_div32_" ]: 
+        cacheDir =  "/home/sliceruser/preprocess/monai_persistent_Dataset/{spacing_keyword}/{sizeWord}"
+        #creating directory if not yet present
+        os.makedirs(cacheDir, exist_ok = True)
+        dirs.append(
+        {f"cache_dir":cacheDir ,
+        "3Chan_col_name": f"t2w{spacing_keyword}_3Chan{sizeWord}" 
+        ,"label_name":"label{spacing_keyword}{sizeWord}" 
+        ,"metDataDir":"/home/sliceruser/data/metadata/processedMetaData_current.csv"
+        }
+        )
+
+
+
+
 ##options
 options={
 "lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=True)
@@ -80,16 +98,7 @@ options={
 "optimizer_class": [torch.optim.AdamW, torch.optim.NAdam] ,
 "act":[(Act.PRELU, {"init": 0.2}),(Act.LEAKYRELU, {})],                                         
 "norm":[(Norm.INSTANCE, {}),(Norm.BATCH, {}) ],
-"dirs":[
-                                                {
-                                                "cache_dir":"/home/sliceruser/preprocess/monai_persistent_Dataset"
-                                                ,"t2w_name":"t2w_med_spac"
-                                                ,"adc_name":"registered_adc_med_spac"
-                                                ,"hbv_name":"registered_hbv_med_spac"
-                                                ,"label_name":"label_med_spac" 
-                                                ,"metDataDir":"/home/sliceruser/data/metadata/processedMetaData_current.csv"
-                                                }
-                                                    ]
+"dirs":dirs
 }
 
 
