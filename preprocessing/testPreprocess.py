@@ -48,7 +48,7 @@ for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:
 df = df.loc[df['isAnyMissing'] ==False]
 df = df.loc[df['isAnythingInAnnotated']>0 ]    
 #just for testing    
-df= df.head(30)
+#df= df.head(30)
 ##df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
 print(df)    
 
@@ -86,7 +86,8 @@ def resample_ToMedianSpac(row,colName,targetSpacing,spacing_keyword):
         study_id=str(row['study_id'])
         
         newPath = path.replace(".mha",spacing_keyword+".mha" )
-        if(not pathOs.exists(newPath)):      
+        #if(not pathOs.exists(newPath)):   #unhash   
+        if(True):      
             experiment.log_text(f" new resample {colName} {study_id}")
             resampled=None
             try:
@@ -111,7 +112,8 @@ def resample_To_t2w(row,colName,spacing_keyword,t2wColName):
         t2wImage=sitk.ReadImage(str(row[t2wColName]))
         targetSpacing=t2wImage.GetSpacing()
         newPath = path.replace(".mha",spacing_keyword+".mha" )
-        if(not pathOs.exists(newPath)):      
+        #if(not pathOs.exists(newPath)):   #unhash   
+        if(True):  
             experiment.log_text(f" new resample {colName} {study_id}")
             resampled=None
             try:
@@ -352,16 +354,16 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 
 
 
-# bias field correction
-# Standardize.iterateAndBiasCorrect('t2w',df)
-# #Standarization
-# for keyWord in ['t2w','adc', 'hbv'  ]: #'cor',,'sag'
-#     ## denoising
-#     #Standardize.iterateAndDenoise(keyWord,df)
-#     ## standarization
-#     Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,50)   
-# #standardize labels
-# Standardize.iterateAndchangeLabelToOnes(df)
+#bias field correction
+Standardize.iterateAndBiasCorrect('t2w',df)
+#Standarization
+for keyWord in ['t2w','adc', 'hbv'  ]: #'cor',,'sag'
+    ## denoising
+    #Standardize.iterateAndDenoise(keyWord,df)
+    ## standarization
+    Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,50)   
+#standardize labels
+Standardize.iterateAndchangeLabelToOnes(df)
 
 #### 
 #first get adc and tbv to t2w spacing
