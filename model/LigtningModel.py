@@ -111,30 +111,30 @@ class Model(pl.LightningModule):
         loss = self.criterion(y_hat, labels)
         #labels= torch.nn.functional.one_hot(labels, num_classes=2) 
 
-        #self.dice_metric(y_pred=y_hat, y=labels)
+        self.dice_metric(y_pred=y_hat, y=labels)
         # print(f"losss {loss}  ")
         self.log('val_loss', loss)
         return loss
 
-    # def validation_epoch_end(self, outputs):
-    #     """
-    #     just in order to log the dice metric on validation data 
-    #     """
-    #     mean_val_dice = self.dice_metric.aggregate().item()
-    #     self.dice_metric.reset()
-    #     if mean_val_dice > self.best_val_dice:
-    #         self.best_val_dice = mean_val_dice
-    #         self.best_val_epoch = self.current_epoch
-    #     # print(
-    #     #     f"current epoch: {self.current_epoch} "
-    #     #     f"current mean dice: {mean_val_dice:.4f}"
-    #     #     f"\nbest mean dice: {self.best_val_dice:.4f} "
-    #     #     f"at epoch: {self.best_val_epoch}"
-    #     # )
-    #     self.log('val_mean_Dice_metr', mean_val_dice)
-    #     self.experiment.log_metric("mean_val_dice_during_training",mean_val_dice)
-    #     self.finalLoss[0]=mean_val_dice
-        #return {"log": self.log}
+    def validation_epoch_end(self, outputs):
+        """
+        just in order to log the dice metric on validation data 
+        """
+        mean_val_dice = self.dice_metric.aggregate().item()
+        self.dice_metric.reset()
+        if mean_val_dice > self.best_val_dice:
+            self.best_val_dice = mean_val_dice
+            self.best_val_epoch = self.current_epoch
+        # print(
+        #     f"current epoch: {self.current_epoch} "
+        #     f"current mean dice: {mean_val_dice:.4f}"
+        #     f"\nbest mean dice: {self.best_val_dice:.4f} "
+        #     f"at epoch: {self.best_val_epoch}"
+        # )
+        self.log('val_mean_Dice_metr', mean_val_dice)
+        self.experiment.log_metric("mean_val_dice_during_training",mean_val_dice)
+        self.finalLoss[0]=mean_val_dice
+        return {"log": self.log}
 
     # def validation_step(self, batch, batch_idx):
     #     y_hat, y = self.infer_batch(batch)
