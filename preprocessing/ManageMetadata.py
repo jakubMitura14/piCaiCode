@@ -60,7 +60,7 @@ def load_df_only_full(df,chan3_col_name,label_name,is_whole_to_train):
                                                             ,0.1#RandAffined_prob
                                                             ,0.1#RandCoarseDropoutd_prob
                                                             ,is_whole_to_train )
-    val_transforms= transformsForMain.get_val_transforms()
+    val_transforms= transformsForMain.get_val_transforms(is_whole_to_train)
 
     for dictt in data_dicts:    
         try:

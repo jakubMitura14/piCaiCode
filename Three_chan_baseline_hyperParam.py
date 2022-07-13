@@ -114,7 +114,7 @@ config = {
         "lossF": {"type": "discrete", "values": list(range(0,len(options["lossF"])))},
         "stridesAndChannels": {"type": "discrete", "values":  list(range(0,len(options["stridesAndChannels"])))  },
         "optimizer_class": {"type": "discrete", "values":list(range(0,len(options["optimizer_class"])))  },
-        "num_res_units": {"type": "discrete", "values": [0,1,2]},
+        "num_res_units": {"type": "discrete", "values": [0]},
         "act": {"type": "discrete", "values":list(range(0,len(options["act"])))  },#,(Act.LeakyReLU,{"negative_slope":0.1, "inplace":True} )
         "norm": {"type": "discrete", "values": list(range(0,len(options["norm"])))},
         "dropout": {"type": "discrete", "values": [0.0,0.1]},
@@ -133,7 +133,7 @@ config = {
         "RandCoarseDropoutd_prob":{"type": "float", "min": 0.0, "max": 0.4},
   
         "spacing_keyword": {"type": "categorical", "values": ["_med_spac", "_one_spac","_one_and_half_spac", "_two_spac" ]},#True,False
-        "sizeWord": {"type": "categorical", "values": ["_maxSize_","_div32_"  ]},#,"_div32_"
+        "sizeWord": {"type": "categorical", "values": ["_div32_"]},#"_maxSize_" ,"_div32_"
         #"dirs": {"type": "discrete", "values": list(range(0,len(options["dirs"])))},
     },
 

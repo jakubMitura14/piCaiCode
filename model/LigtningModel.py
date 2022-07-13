@@ -103,6 +103,8 @@ class Model(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         images, labels = batch['chan3_col_name'], batch["label"]
+        print(f" in validation images {images} labels {labels} "  )
+
         y_hat = sliding_window_inference(images, (32,32,32), 1, self.net)
         print(f"sss y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
 

@@ -166,7 +166,7 @@ class PiCaiDataModule(pl.LightningDataModule):
             ,self.RandAffined_prob
             ,self.RandCoarseDropoutd_prob
             ,self.is_whole_to_train )
-        val_transforms= transformsForMain.get_val_transforms()
+        val_transforms= transformsForMain.get_val_transforms(self.is_whole_to_train )
         #todo - unhash
         # self.train_ds =  PersistentDataset(data=self.train_subjects, transform=train_transforms,cache_dir=self.cache_dir)
         # self.val_ds=     PersistentDataset(data=self.val_subjects, transform=val_transforms,cache_dir=self.cache_dir)
@@ -181,7 +181,7 @@ class PiCaiDataModule(pl.LightningDataModule):
                           , shuffle=True,num_workers=self.num_workers,collate_fn=list_data_collate)#,collate_fn=list_data_collate
 
     def val_dataloader(self):
-        return DataLoader(self.val_ds, batch_size=1, drop_last=self.drop_last,num_workers=self.num_workers)#,collate_fn=pad_list_data_collate
+        return DataLoader(self.val_ds, batch_size=1, drop_last=self.drop_last,num_workers=self.num_workers,collate_fn=list_data_collate)#,collate_fn=pad_list_data_collate
 
     # def test_dataloader(self):
     #     return DataLoader(self.test_ds, batch_size= 1, drop_last=False,num_workers=self.num_workers,collate_fn=list_data_collate)#num_workers=self.num_workers,
