@@ -187,7 +187,7 @@ def mainTrain(experiment,options,df):
         accelerator='auto',
         devices='auto',       
         default_root_dir= "/home/sliceruser/data/lightning_logs",
-        #auto_scale_batch_size="binsearch",
+        auto_scale_batch_size="binsearch",
         auto_lr_find=True,
         check_val_every_n_epoch=10,
         accumulate_grad_batches=experiment.get_parameter("accumulate_grad_batches"),
