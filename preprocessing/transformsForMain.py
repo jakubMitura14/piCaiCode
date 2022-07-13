@@ -125,17 +125,17 @@ def get_val_transforms(is_whole_to_train):
             #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
             #SpatialPadd(keys=["chan3_col_name","label"],spatial_size=maxSize) ,
             DivisiblePadd(keys=["chan3_col_name","label"],k=32) ,
-            RandCropByPosNegLabeld(
-                keys=["chan3_col_name","label"],
-                label_key="label",
-                spatial_size=(32, 32, 32),
-                pos=1,
-                neg=1,
-                num_samples=4,
-                image_key="chan3_col_name",
-                image_threshold=0
-            ),
-            #*decide_if_whole_image_train(is_whole_to_train),
+            # RandCropByPosNegLabeld(
+            #     keys=["chan3_col_name","label"],
+            #     label_key="label",
+            #     spatial_size=(32, 32, 32),
+            #     pos=1,
+            #     neg=1,
+            #     num_samples=4,
+            #     image_key="chan3_col_name",
+            #     image_threshold=0
+            # ),
+            *decide_if_whole_image_train(is_whole_to_train),
 
             #DivisiblePadd(keys=["chan3_col_name","label"],k=32) ,
 
