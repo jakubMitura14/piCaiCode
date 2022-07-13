@@ -121,22 +121,15 @@ def mainTrain(experiment,options,df):
     #     #experiment_name="baseline" # Optional
     # )
     #############loading meta data 
-
-
-
     #maxSize=manageMetaData.getMaxSize(getParam(experiment,options,"dirs")["chan3_col_name"],df)
     # print(f"************    maxSize {maxSize}   ***************")
-
     spacing_keyword=experiment.get_parameter("spacing_keyword")
     sizeWord= experiment.get_parameter("sizeWord")
     chan3_col_name=f"t2w{spacing_keyword}_3Chan{sizeWord}" 
-
     label_name=f"label{spacing_keyword}{sizeWord}" 
-
     cacheDir =  f"/home/sliceruser/preprocess/monai_persistent_Dataset/{spacing_keyword}/{sizeWord}"
     maxSize=sizeWord=="_maxSize_"
     #print(f" fffffffffffff sizeWord {maxSize}")
-
     data = DataModule.PiCaiDataModule(
         df= df,
         batch_size=2,#
@@ -159,7 +152,6 @@ def mainTrain(experiment,options,df):
     )
     data.prepare_data()
     data.setup()
-
     # definition described in model folder
     # from https://github.com/DIAGNijmegen/picai_baseline/blob/main/src/picai_baseline/unet/training_setup/neural_networks/unets.py
     unet= unets.UNet(
@@ -173,7 +165,6 @@ def mainTrain(experiment,options,df):
         norm= getParam(experiment,options,"norm",df),
         dropout= experiment.get_parameter("dropout")
     )
-
     model = LigtningModel.Model(
         net=unet,
         criterion=  getParam(experiment,options,"lossF",df),# Our seg labels are single channel images indicating class index, rather than one-hot
@@ -181,13 +172,11 @@ def mainTrain(experiment,options,df):
         optimizer_class= getParam(experiment,options,"optimizer_class",df) ,
         experiment=experiment,
         finalLoss=finalLoss
-
     )
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
         monitor='val_loss',
     )
     #stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging()
-
     trainer = pl.Trainer(
         #accelerator="cpu", #TODO(remove)
         max_epochs=experiment.get_parameter("max_epochs"),
@@ -196,29 +185,23 @@ def mainTrain(experiment,options,df):
         callbacks=[ early_stopping ],
         #logger=comet_logger,
         accelerator='auto',
-        devices='auto',
-        
+        devices='auto',       
         default_root_dir= "/home/sliceruser/data/lightning_logs",
-        auto_scale_batch_size="binsearch",
+        #auto_scale_batch_size="binsearch",
         auto_lr_find=True,
         accumulate_grad_batches=experiment.get_parameter("accumulate_grad_batches"),
         gradient_clip_val=experiment.get_parameter("gradient_clip_val")# 0.5,2.0
-
     )
     trainer.logger._default_hp_metric = False
-
     start = datetime.now()
     print('Training started at', start)
     trainer.fit(model=model, datamodule=data)
     print('Training duration:', datetime.now() - start)
     experiment.log_metric("last_val_loss",finalLoss[0])
-
-    #experiment.log_parameters(parameters)
-    
+    #experiment.log_parameters(parameters)  
     experiment.end()
     # #evaluating on test dataset
-    # with torch.no_grad():
-    
+    # with torch.no_grad():   
     # for batch in data.test_dataloader():
     #     inputs = batch['image'][tio.DATA].to(device)
     #     labels = model.net(inputs).argmax(dim=1, keepdim=True).cpu()
