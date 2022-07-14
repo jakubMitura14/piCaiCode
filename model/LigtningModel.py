@@ -133,7 +133,7 @@ class Model(pl.LightningModule):
         # )
         self.log('val_mean_Dice_metr', mean_val_dice)
         self.experiment.log_metric("mean_val_dice_during_training",mean_val_dice)
-        self.finalLoss[0]=mean_val_dice
+        self.finalLoss.append(mean_val_dice)
         return {"log": self.log}
 
     # def validation_step(self, batch, batch_idx):

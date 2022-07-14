@@ -111,7 +111,7 @@ def getParam(experiment,options,key,df):
 
 
 def mainTrain(experiment,options,df):
-    finalLoss=[0]
+    finalLoss=[]
     print("mmmmmmmmmmmmmmmmmm")
     #TODO(remove)
     # comet_logger = CometLogger(
@@ -198,7 +198,7 @@ def mainTrain(experiment,options,df):
     print('Training started at', start)
     trainer.fit(model=model, datamodule=data)
     print('Training duration:', datetime.now() - start)
-    experiment.log_metric("last_val_loss",finalLoss[0])
+    experiment.log_metric("last_val_loss",max(finalLoss))
     #experiment.log_parameters(parameters)  
     experiment.end()
     # #evaluating on test dataset
