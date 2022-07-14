@@ -349,7 +349,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 #bias field correction
 Standardize.iterateAndBiasCorrect('t2w',df)
 #Standarization
-for keyWord in ['t2w','adc', 'hbv'  ]: #'cor',,'sag'
+for keyWord in ['t2w','adc', 'hbv']: #'cor',,'sag'
     ## denoising
     #Standardize.iterateAndDenoise(keyWord,df)
     ## standarization
@@ -377,7 +377,6 @@ for keyWord in ['adcb_tw_','hbvb_tw_']:
 
 
 #######      
-
 targetSpacinggg=(spacingDict['t2w_spac_x'][3],spacingDict['t2w_spac_y'][3],spacingDict['t2w_spac_z'][3])
 preprocess_diffrent_spacings(df,targetSpacinggg,"_med_spac")
 preprocess_diffrent_spacings(df,(1.0,1.0,1.0),"_one_spac")

@@ -47,7 +47,7 @@ monai.utils.set_determinism()
 import importlib.util
 import sys
 
-percentSplit=0.5
+percentSplit=0.8
 
 def loadLib(name,path):
     spec = importlib.util.spec_from_file_location(name, path)
