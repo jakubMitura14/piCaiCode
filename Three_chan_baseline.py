@@ -1,7 +1,6 @@
 
 from comet_ml import Experiment
 from pytorch_lightning.loggers import CometLogger
-
 import time
 from pathlib import Path
 from datetime import datetime
@@ -65,37 +64,6 @@ DataModule =loadLib("DataModule", "/home/sliceruser/data/piCaiCode/model/DataMod
 LigtningModel =loadLib("LigtningModel", "/home/sliceruser/data/piCaiCode/model/LigtningModel.py")
 
 
-#comet_logger
-### pytorch model mainly
-# loss=monai.losses.FocalLoss(include_background=False, to_onehot_y=True)
-# #loss=monai.losses.metrics.DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
-# strides=[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
-# channels=[32, 64, 128, 256, 512, 1024]
-# optimizer_class=torch.optim.AdamW
-# num_res_units= 0
-# act = (Act.PRELU, {"init": 0.2}) #LeakyReLU(negative_slope=0.1, inplace=True)
-# norm= (Norm.INSTANCE, {}) #(Norm.INSTANCE, {"normalized_shape": (10, 10, 10)})#Norm.INSTANCE, #GroupNorm(1, 1, eps=1e-05, affine=False), LayerNorm((10, 10, 10), eps=1e-05, elementwise_affine=True)
-# dropout= 0.0 #0.2
-# ### lightning trainer mainly
-# precision=16# "bf16" 64
-# max_epochs=30
-# accumulate_grad_batches=1 # 3,5 ..
-# gradient_clip_val=0.0# 0.5,2.0
-# ## augmebtations mainly
-# RandGaussianNoised_prob=0.1
-# RandAdjustContrastd_prob=0.1
-# RandGaussianSmoothd_prob=0.1
-# RandRicianNoised_prob=0.1
-# RandFlipd_prob=0.1
-# RandAffined_prob=0.1
-# RandCoarseDropoutd_prob=0.1
-# is_whole_to_train =True
-# ##diffrent definitions depending on preprocessing
-# cache_dir="/home/sliceruser/preprocess/monai_persistent_Dataset"
-# t2w_name= "t2w_med_spac"
-# adc_name="registered_adc_med_spac"
-# hbv_name="registered_hbv_med_spac"
-# label_name="label_med_spac"
 
 def getParam(experiment,options,key,df):
     """
@@ -175,6 +143,7 @@ def mainTrain(experiment,options,df):
     )
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
         monitor='val_loss',
+        patience=3
     )
     #stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging()
     trainer = pl.Trainer(
