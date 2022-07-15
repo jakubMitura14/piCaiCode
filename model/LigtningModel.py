@@ -141,7 +141,7 @@ class Model(pl.LightningModule):
         y_hat = sliding_window_inference(images, (32,32,32), 1, self.net)
         #print(f"sss y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
         #print(f"sss a y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
-        labelsb = [self.post_label(i) for i in decollate_batch(labels)]
+        labelsb = [self.post_pred(i) for i in decollate_batch(labels)]
         concatLabels= torch.stack(labelsb)
         #print(f"labels {labelsb[0].size()}  labels type {type(labelsb[0])} concatLabels {  concatLabels.size()}  ")
 
