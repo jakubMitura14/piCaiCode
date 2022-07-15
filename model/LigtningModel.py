@@ -116,28 +116,28 @@ class Model(pl.LightningModule):
 
         y_hat = sliding_window_inference(images, (32,32,32), 1, self.net)
         #print(f"sss y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
-        print(f"sss a y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
+        #print(f"sss a y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
 
         #labels= torch.nn.functional.one_hot(labels, num_classes=2) 
         y_hat = [self.post_pred(i) for i in decollate_batch(y_hat)]
+        loss = self.criterion(y_hat, labels)
 
-        print(f"sss b  labels type {type(labels)} y_hat type {type(y_hat)}   ")
+        #print(f"sss b  labels type {type(labels)} y_hat type {type(y_hat)}   ")
         #print(f"sss b y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
         
         labels = [torch.nn.functional.one_hot(i.to(torch.int64), num_classes=- 1) for i in decollate_batch(labels)]
-        print(f"sss c  labels type {type(labels)} y_hat type {type(y_hat)}   ")
+        #print(f"sss c  labels type {type(labels)} y_hat type {type(y_hat)}   ")
 
         #print(f"sss c y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
-        print(f"sss d  labels type {type(labels[0])} y_hat type {type(y_hat[0])}   ")
-
-        loss = self.criterion(y_hat, labels)
+        #print(f"sss d  labels type {type(labels[0])} y_hat type {type(y_hat[0])}   ")
 
 
-        metrics = evaluate(
-            y_det=y_hat.cpu().detach().numpy(),
-            y_true=labels.cpu().detach().numpy(),
-        )
-        self.picaiLossArr.append(metrics)
+        for i in range(0, len(labels)):
+            metrics = evaluate(
+                y_det=y_hat[i].cpu().detach().numpy(),
+                y_true=labels[i].cpu().detach().numpy(),
+            )
+            self.picaiLossArr.append(metrics)
         #self.dice_metric(y_pred=y_hat, y=labels)
         # print(f"losss {loss}  ")
         self.log('val_loss', loss)
