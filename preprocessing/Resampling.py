@@ -182,4 +182,8 @@ def resample_label_with_GAN(path, targetSpac):
     resample.SetDefaultPixelValue(image.GetPixelIDValue())
     resample.SetInterpolator(sitk.sitkNearestNeighbor)
     resample.SetSize(new_size)
-    return resample.Execute(image)
+    res= resample.Execute(image)
+    res = sitk.DICOMOrient(res, 'RAS')
+
+
+    return res
