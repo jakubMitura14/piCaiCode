@@ -73,7 +73,16 @@ from monai.transforms import (
 import torchio
 
 class Model(pl.LightningModule):
-    def __init__(self, net, criterion, learning_rate, optimizer_class,experiment,finalLoss):
+    def __init__(self
+    , net
+    , criterion
+    , learning_rate
+    , optimizer_class
+    ,experiment
+    ,picaiLossArr_auroc_final
+    ,picaiLossArr_AP_final
+    ,picaiLossArr_score_final
+    ):
         super().__init__()
         self.lr = learning_rate
         self.net = net
@@ -83,14 +92,18 @@ class Model(pl.LightningModule):
         self.best_val_epoch = 0
         self.dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
         self.experiment=experiment
-        self.finalLoss=finalLoss
         self.picaiLossArr=[]
         self.post_pred = Compose([EnsureType("tensor", device="cpu"), AsDiscrete(argmax=True, to_onehot=2)])
         self.post_label = Compose([EnsureType("tensor", device="cpu"), AsDiscrete(to_onehot=2)])
         #self.post_label = Compose([EnsureType("tensor", device="cpu"), torchio.transforms.OneHot(include=["label"] ,num_classes=2)])
         #self.post_label = Compose([EnsureType("tensor", device="cpu"), torchio.transforms.OneHot(include=["label"] ,num_classes=2)])
+        self.picaiLossArr_auroc=[]
+        self.picaiLossArr_AP=[]
+        self.picaiLossArr_score=[]
 
-
+        self.picaiLossArr_auroc_final=picaiLossArr_auroc_final
+        self.picaiLossArr_AP_final=picaiLossArr_AP_final
+        self.picaiLossArr_score_final=picaiLossArr_score_final
 
     def configure_optimizers(self):
         optimizer = self.optimizer_class(self.parameters(), lr=self.lr)
@@ -116,10 +129,10 @@ class Model(pl.LightningModule):
 
         y_hat = sliding_window_inference(images, (32,32,32), 1, self.net)
         #print(f"sss y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
-        print(f"sss a y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
+        #print(f"sss a y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
         labelsb = [self.post_pred(i) for i in decollate_batch(labels)]
         concatLabels= torch.stack(labelsb)
-        print(f"labels {labelsb[0].size()}  labels type {type(labelsb[0])} concatLabels {  concatLabels.size()}  ")
+        #print(f"labels {labelsb[0].size()}  labels type {type(labelsb[0])} concatLabels {  concatLabels.size()}  ")
 
         loss = self.criterion(y_hat, concatLabels)
 
@@ -133,7 +146,8 @@ class Model(pl.LightningModule):
         #print(f"sss c  labels type {type(labels)} y_hat type {type(y_hat)}   ")
 
         #print(f"sss c y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
-        print(f"sss d y_hat {y_hat[0].size()} labels {labels[0].size()}  labels type {type(labels[0])} y_hat type {type(y_hat[0])}   ")
+        #print(f"sss d y_hat {y_hat[0].size()} labels {labels[0].size()}  labels type {type(labels[0])} y_hat type {type(y_hat[0])}   ")
+
 
 
         for i in range(0, len(labelsb)):
@@ -141,7 +155,10 @@ class Model(pl.LightningModule):
                 y_det=y_hat[i].cpu().detach().numpy(),
                 y_true=labelsb[i].cpu().detach().numpy(),
             )
-            self.picaiLossArr.append(metrics)
+            self.picaiLossArr_auroc.append(metrics.auroc)
+            self.picaiLossArr_AP.append(metrics.AP)
+            self.picaiLossArr_score.append(metrics.score)
+
         #self.dice_metric(y_pred=y_hat, y=labels)
         # print(f"losss {loss}  ")
         self.log('val_loss', loss)
@@ -163,10 +180,28 @@ class Model(pl.LightningModule):
         #     f"at epoch: {self.best_val_epoch}"
         # )
 
-        meanPiecaiMetr= mean(self.picaiLossArr)        
-        self.log('val_mean_picai_metr', meanPiecaiMetr)
-        self.experiment.log_metric("val_mean_picai_metr_training",meanPiecaiMetr)
-        self.finalLoss.append(meanPiecaiMetr)
+        meanPiecaiMetr_auroc= mean(self.picaiLossArr_auroc)
+        meanPiecaiMetr_AP= mean(self.picaiLossArr_AP)        
+        meanPiecaiMetr_score= mean(self.picaiLossArr_score)        
+
+        self.log('val_mean_auroc', meanPiecaiMetr_auroc)
+        self.log('val_mean_AP', meanPiecaiMetr_AP)
+        self.log('val_mean_score', meanPiecaiMetr_score)
+
+        self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
+        self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
+        self.experiment.log_metric('val_mean_score', meanPiecaiMetr_score)
+
+
+        self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
+        self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
+        self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
+
+        
+        self.picaiLossArr_auroc=[]
+        self.picaiLossArr_AP=[]
+        self.picaiLossArr_score=[]
+
         return {"log": self.log}
 
     # def validation_step(self, batch, batch_idx):

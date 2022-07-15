@@ -79,7 +79,9 @@ def getParam(experiment,options,key,df):
 
 
 def mainTrain(experiment,options,df):
-    finalLoss=[]
+    picaiLossArr_auroc_final=[]
+    picaiLossArr_AP_final=[]
+    picaiLossArr_score_final=[]
     print("mmmmmmmmmmmmmmmmmm")
     #TODO(remove)
     # comet_logger = CometLogger(
@@ -133,13 +135,19 @@ def mainTrain(experiment,options,df):
         norm= getParam(experiment,options,"norm",df),
         dropout= experiment.get_parameter("dropout")
     )
+
+
+
+
     model = LigtningModel.Model(
         net=unet,
         criterion=  getParam(experiment,options,"lossF",df),# Our seg labels are single channel images indicating class index, rather than one-hot
         learning_rate=1e-2,
         optimizer_class= getParam(experiment,options,"optimizer_class",df) ,
         experiment=experiment,
-        finalLoss=finalLoss
+        picaiLossArr_auroc_final=picaiLossArr_auroc_final,
+        picaiLossArr_AP_final=picaiLossArr_AP_final,
+        picaiLossArr_score_final=picaiLossArr_score_final
     )
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
         monitor='val_loss',
@@ -167,7 +175,12 @@ def mainTrain(experiment,options,df):
     print('Training started at', start)
     trainer.fit(model=model, datamodule=data)
     print('Training duration:', datetime.now() - start)
-    experiment.log_metric("last_val_loss",max(finalLoss))
+
+
+    experiment.log_metric("last_val_loss_auroc",max(picaiLossArr_auroc_final))
+    experiment.log_metric("last_val_loss_Ap",max(picaiLossArr_AP_final))
+    experiment.log_metric("last_val_loss_score",max(picaiLossArr_score_final))
+
     #experiment.log_parameters(parameters)  
     experiment.end()
     # #evaluating on test dataset

@@ -84,9 +84,9 @@ for spacing_keyword in ["_med_spac", "_one_spac","_one_and_half_spac", "_two_spa
 ##options
 to_onehot_y_loss= False
 options={
-"lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
-        ,monai.losses.DiceLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
-        ,monai.losses.DiceFocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
+"lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss, softmax=True)
+        ,monai.losses.DiceLoss(include_background=False, to_onehot_y=to_onehot_y_loss, softmax=True)
+        ,monai.losses.DiceFocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss, softmax=True)
 ],
 "stridesAndChannels":  [ {
                                                             "strides":[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
@@ -139,7 +139,7 @@ config = {
 
     # Declare what we will be optimizing, and how:
     "spec": {
-    "metric": "val_mean_picai_metr_training",
+    "metric": "last_val_loss_score",
         "objective": "minimize",
     },
 }
@@ -177,7 +177,7 @@ opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
 
 
 for experiment in opt.get_experiments(
-        project_name="picai-hyperparam-search-06"):
+        project_name="picai-hyperparam-search-07"):
     print("******* new experiment *****")    
     Three_chan_baseline.mainTrain(experiment,options,df)
 
