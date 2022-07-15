@@ -121,7 +121,7 @@ class Model(pl.LightningModule):
         concatLabels= torch.stack(labelsb)
         print(f"labels {labelsb[0].size()}  labels type {type(labelsb[0])} concatLabels {  concatLabels.size()}  ")
 
-        loss = self.criterion(y_hat, labels)
+        loss = self.criterion(y_hat[0,:,:,:,:], labels[0,:,:,:,:])
 
         #labels= torch.nn.functional.one_hot(labels, num_classes=2) 
         y_hat = [self.post_pred(i) for i in decollate_batch(y_hat)]
