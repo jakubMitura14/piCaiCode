@@ -93,7 +93,9 @@ class Model(pl.LightningModule):
         self.dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
         self.experiment=experiment
         self.picaiLossArr=[]
-        self.post_pred = Compose([ AsDiscrete(argmax=True, to_onehot=2)])
+        self.post_pred = Compose([ AsDiscrete( to_onehot=2)])
+#        self.post_pred = Compose([ AsDiscrete(argmax=True, to_onehot=2)])
+
         #self.post_label = Compose([EnsureType("tensor", device="cpu"), AsDiscrete(to_onehot=2)])
         #self.post_label = Compose([EnsureType("tensor", device="cpu"), torchio.transforms.OneHot(include=["label"] ,num_classes=2)])
         #self.post_label = Compose([EnsureType("tensor", device="cpu"), torchio.transforms.OneHot(include=["label"] ,num_classes=2)])
