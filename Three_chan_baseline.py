@@ -143,7 +143,7 @@ def mainTrain(experiment,options,df):
     )
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
         monitor='val_loss',
-        patience=3
+        patience=5
     )
     #stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging()
     trainer = pl.Trainer(
@@ -158,7 +158,7 @@ def mainTrain(experiment,options,df):
         default_root_dir= "/home/sliceruser/data/lightning_logs",
         auto_scale_batch_size="binsearch",
         auto_lr_find=True,
-        check_val_every_n_epoch=10,
+        check_val_every_n_epoch=1,
         accumulate_grad_batches=experiment.get_parameter("accumulate_grad_batches"),
         gradient_clip_val=experiment.get_parameter("gradient_clip_val")# 0.5,2.0
     )

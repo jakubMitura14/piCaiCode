@@ -50,6 +50,9 @@ import tempfile
 import shutil
 import os
 import glob
+from picai_eval import evaluate
+from statistics import mean
+
 
 import torch.nn as nn
 import torch.nn.functional as F
@@ -82,6 +85,7 @@ class Model(pl.LightningModule):
         self.dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
         self.experiment=experiment
         self.finalLoss=finalLoss
+        self.picaiLossArr=[]
 
     def configure_optimizers(self):
         optimizer = self.optimizer_class(self.parameters(), lr=self.lr)
@@ -111,7 +115,12 @@ class Model(pl.LightningModule):
         loss = self.criterion(y_hat, labels)
         #labels= torch.nn.functional.one_hot(labels, num_classes=2) 
 
-        self.dice_metric(y_pred=y_hat, y=labels)
+        metrics = evaluate(
+            y_det=y_hat,
+            y_true=labels,
+        )
+        self.picaiLossArr.append(metrics)
+        #self.dice_metric(y_pred=y_hat, y=labels)
         # print(f"losss {loss}  ")
         self.log('val_loss', loss)
         return loss
@@ -120,20 +129,22 @@ class Model(pl.LightningModule):
         """
         just in order to log the dice metric on validation data 
         """
-        mean_val_dice = self.dice_metric.aggregate().item()
-        self.dice_metric.reset()
-        if mean_val_dice > self.best_val_dice:
-            self.best_val_dice = mean_val_dice
-            self.best_val_epoch = self.current_epoch
+        # mean_val_dice = self.dice_metric.aggregate().item()
+        # self.dice_metric.reset()
+        # if mean_val_dice > self.best_val_dice:
+        #     self.best_val_dice = mean_val_dice
+        #     self.best_val_epoch = self.current_epoch
         # print(
         #     f"current epoch: {self.current_epoch} "
         #     f"current mean dice: {mean_val_dice:.4f}"
         #     f"\nbest mean dice: {self.best_val_dice:.4f} "
         #     f"at epoch: {self.best_val_epoch}"
         # )
-        self.log('val_mean_Dice_metr', mean_val_dice)
-        self.experiment.log_metric("mean_val_dice_during_training",mean_val_dice)
-        self.finalLoss.append(mean_val_dice)
+
+        meanPiecaiMetr= mean(self.picaiLossArr)        
+        self.log('val_mean_picai_metr', meanPiecaiMetr)
+        self.experiment.log_metric("val_mean_picai_metr_training",meanPiecaiMetr)
+        self.finalLoss.append(meanPiecaiMetr)
         return {"log": self.log}
 
     # def validation_step(self, batch, batch_idx):
