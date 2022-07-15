@@ -87,7 +87,9 @@ class Model(pl.LightningModule):
         self.picaiLossArr=[]
         self.post_pred = Compose([EnsureType("tensor", device="cpu"), AsDiscrete(argmax=True, to_onehot=2)])
         #self.post_label = Compose([EnsureType("tensor", device="cpu"), AsDiscrete(to_onehot=1)])
-        self.post_label = Compose([EnsureType("tensor", device="cpu"), torchio.transforms.OneHot(include=["label"] ,num_classes=2)])
+        #self.post_label = Compose([EnsureType("tensor", device="cpu"), torchio.transforms.OneHot(include=["label"] ,num_classes=2)])
+        #self.post_label = Compose([EnsureType("tensor", device="cpu"), torchio.transforms.OneHot(include=["label"] ,num_classes=2)])
+
 
 
     def configure_optimizers(self):
@@ -121,8 +123,8 @@ class Model(pl.LightningModule):
 
         print(f"sss b  labels type {type(labels)} y_hat type {type(y_hat)}   ")
         #print(f"sss b y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
-
-        labels = [self.post_label(i) for i in decollate_batch(labels)]
+        
+        labels = [torch.nn.functional.one_hot(i, num_classes=- 1) for i in decollate_batch(labels)]
 
         print(f"sss c y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
 
