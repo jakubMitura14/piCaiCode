@@ -131,94 +131,94 @@ class Model(pl.LightningModule):
         loss = self.criterion(y_hat, y)
         self.log('train_loss', loss, prog_bar=True)
         return loss
+    # def validation_step(self, batch, batch_idx):
+    #     return 0.5
+
     def validation_step(self, batch, batch_idx):
-        return 0.5
+        images, labels = batch['chan3_col_name'], batch["label"]
+        #print(f" in validation images {images} labels {labels} "  )
 
-    # def validation_step(self, batch, batch_idx):
-    #     images, labels = batch['chan3_col_name'], batch["label"]
-    #     #print(f" in validation images {images} labels {labels} "  )
+        y_hat = sliding_window_inference(images, (32,32,32), 1, self.net)
+        #print(f"sss y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
+        #print(f"sss a y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
+        labelsb = [self.post_label(i) for i in decollate_batch(labels)]
+        concatLabels= torch.stack(labelsb)
+        #print(f"labels {labelsb[0].size()}  labels type {type(labelsb[0])} concatLabels {  concatLabels.size()}  ")
 
-    #     y_hat = sliding_window_inference(images, (32,32,32), 1, self.net)
-    #     #print(f"sss y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
-    #     #print(f"sss a y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
-    #     labelsb = [self.post_label(i) for i in decollate_batch(labels)]
-    #     concatLabels= torch.stack(labelsb)
-    #     #print(f"labels {labelsb[0].size()}  labels type {type(labelsb[0])} concatLabels {  concatLabels.size()}  ")
+        loss = self.criterion(y_hat.to(device='cuda'), concatLabels.to(device='cuda'))
 
-    #     loss = self.criterion(y_hat.to(device='cuda'), concatLabels.to(device='cuda'))
+        #labels= torch.nn.functional.one_hot(labels, num_classes=2) 
+        y_hat = [self.post_pred(i) for i in decollate_batch(y_hat)]
 
-    #     #labels= torch.nn.functional.one_hot(labels, num_classes=2) 
-    #     y_hat = [self.post_pred(i) for i in decollate_batch(y_hat)]
-
-    #     #print(f"sss b  labels type {type(labels)} y_hat type {type(y_hat)}   ")
-    #     #print(f"sss b y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
+        #print(f"sss b  labels type {type(labels)} y_hat type {type(y_hat)}   ")
+        #print(f"sss b y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
         
-    #     #labelsb = [torch.nn.functional.one_hot(i.to(torch.int64), num_classes=- 1) for i in decollate_batch(labels)]
-    #     #print(f"sss c  labels type {type(labels)} y_hat type {type(y_hat)}   ")
+        #labelsb = [torch.nn.functional.one_hot(i.to(torch.int64), num_classes=- 1) for i in decollate_batch(labels)]
+        #print(f"sss c  labels type {type(labels)} y_hat type {type(y_hat)}   ")
 
-    #     #print(f"sss c y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
-    #     #print(f"sss d y_hat {y_hat[0].size()} labels {labels[0].size()}  labels type {type(labels[0])} y_hat type {type(y_hat[0])}   ")
-
-
-
-    #     for i in range(0, len(labelsb)):
-    #         metrics = evaluate(
-    #             y_det=y_hat[i].cpu().detach().numpy(),
-    #             y_true=labelsb[i].cpu().detach().numpy(),
-    #         )
-    #         self.picaiLossArr_auroc.append(metrics.auroc)
-    #         self.picaiLossArr_AP.append(metrics.AP)
-    #         self.picaiLossArr_score.append(metrics.score)
-
-    #     #self.dice_metric(y_pred=y_hat, y=labels)
-    #     # print(f"losss {loss}  ")
-    #     self.log('val_loss', loss)
-
-    #     return loss
-
-    # def validation_epoch_end(self, outputs):
-    #     """
-    #     just in order to log the dice metric on validation data 
-    #     """
-    #     # mean_val_dice = self.dice_metric.aggregate().item()
-    #     # self.dice_metric.reset()
-    #     # if mean_val_dice > self.best_val_dice:
-    #     #     self.best_val_dice = mean_val_dice
-    #     #     self.best_val_epoch = self.current_epoch
-    #     # print(
-    #     #     f"current epoch: {self.current_epoch} "
-    #     #     f"current mean dice: {mean_val_dice:.4f}"
-    #     #     f"\nbest mean dice: {self.best_val_dice:.4f} "
-    #     #     f"at epoch: {self.best_val_epoch}"
-    #     # )
-
-    #     meanPiecaiMetr_auroc= mean(self.picaiLossArr_auroc)
-    #     meanPiecaiMetr_AP= mean(self.picaiLossArr_AP)        
-    #     meanPiecaiMetr_score= mean(self.picaiLossArr_score)        
-
-    #     self.log('val_mean_auroc', meanPiecaiMetr_auroc)
-    #     self.log('val_mean_AP', meanPiecaiMetr_AP)
-    #     self.log('val_mean_score', meanPiecaiMetr_score)
-
-    #     self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
-    #     self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
-    #     self.experiment.log_metric('val_mean_score', meanPiecaiMetr_score)
+        #print(f"sss c y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
+        #print(f"sss d y_hat {y_hat[0].size()} labels {labels[0].size()}  labels type {type(labels[0])} y_hat type {type(y_hat[0])}   ")
 
 
-    #     self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
-    #     self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
-    #     self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
+
+        for i in range(0, len(labelsb)):
+            metrics = evaluate(
+                y_det=y_hat[i].cpu().detach().numpy(),
+                y_true=labelsb[i].cpu().detach().numpy(),
+            )
+            self.picaiLossArr_auroc.append(metrics.auroc)
+            self.picaiLossArr_AP.append(metrics.AP)
+            self.picaiLossArr_score.append(metrics.score)
+
+        #self.dice_metric(y_pred=y_hat, y=labels)
+        # print(f"losss {loss}  ")
+        self.log('val_loss', loss)
+
+        return loss
+
+    def validation_epoch_end(self, outputs):
+        """
+        just in order to log the dice metric on validation data 
+        """
+        # mean_val_dice = self.dice_metric.aggregate().item()
+        # self.dice_metric.reset()
+        # if mean_val_dice > self.best_val_dice:
+        #     self.best_val_dice = mean_val_dice
+        #     self.best_val_epoch = self.current_epoch
+        # print(
+        #     f"current epoch: {self.current_epoch} "
+        #     f"current mean dice: {mean_val_dice:.4f}"
+        #     f"\nbest mean dice: {self.best_val_dice:.4f} "
+        #     f"at epoch: {self.best_val_epoch}"
+        # )
+
+        meanPiecaiMetr_auroc= mean(self.picaiLossArr_auroc)
+        meanPiecaiMetr_AP= mean(self.picaiLossArr_AP)        
+        meanPiecaiMetr_score= mean(self.picaiLossArr_score)        
+
+        self.log('val_mean_auroc', meanPiecaiMetr_auroc)
+        self.log('val_mean_AP', meanPiecaiMetr_AP)
+        self.log('val_mean_score', meanPiecaiMetr_score)
+
+        self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
+        self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
+        self.experiment.log_metric('val_mean_score', meanPiecaiMetr_score)
+
+
+        self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
+        self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
+        self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
 
         
-    #     self.picaiLossArr_auroc=[]
-    #     self.picaiLossArr_AP=[]
-    #     self.picaiLossArr_score=[]
+        self.picaiLossArr_auroc=[]
+        self.picaiLossArr_AP=[]
+        self.picaiLossArr_score=[]
 
-    #     return {"log": self.log}
+        return {"log": self.log}
 
-    # def validation_step(self, batch, batch_idx):
-    #     y_hat, y = self.infer_batch(batch)
-    #     loss = self.criterion(y_hat, y)
-    #     self.log('val_loss', loss)
-    #     return loss
+    def validation_step(self, batch, batch_idx):
+        y_hat, y = self.infer_batch(batch)
+        loss = self.criterion(y_hat, y)
+        self.log('val_loss', loss)
+        return loss
 
