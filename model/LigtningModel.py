@@ -78,8 +78,6 @@ class Model(pl.LightningModule):
         self.net = net
         self.criterion = criterion
         self.optimizer_class = optimizer_class
-        self.post_label = Compose([EnsureType("tensor", device="cpu"), AsDiscrete(to_onehot=2)])
-        self.post_pred = Compose([EnsureType("tensor", device="cpu"), AsDiscrete(argmax=True, to_onehot=2)])
         self.best_val_dice = 0
         self.best_val_epoch = 0
         self.dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
