@@ -358,7 +358,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 #     ## standarization
 #     Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,50)   
 # #standardize labels
-Standardize.iterateAndchangeLabelToOnes(df)
+df=Standardize.iterateAndchangeLabelToOnes(df)
 
 # #### 
 # #first get adc and tbv to t2w spacing

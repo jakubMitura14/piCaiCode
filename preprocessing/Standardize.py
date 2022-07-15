@@ -270,6 +270,7 @@ def iterateAndchangeLabelToOnes(df):
     # train_patientsPaths=list(filter(lambda path: len(path)>2 ,train_patientsPaths))
     with mp.Pool(processes = mp.cpu_count()) as pool:
         pool.map(changeLabelToOnes,list(df.iterrows()))
+    return df
     # toUp=np.full(df.shape[0], False)#[0:3]=[True,True,True]
     # toUp[0:numRows]=np.full(numRows, True)
     #df['labels_to_one']=toUp    

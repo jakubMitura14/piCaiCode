@@ -134,6 +134,9 @@ def resample_label_with_GAN(path, targetSpac):
     print(f"new_size {new_size}")
     anySuperSampled = False
     data=sitk.GetArrayFromImage(imageOrig)
+
+    print(f" at resampling unique   {np.unique(data)}"  )
+   
     #supersampling if needed
     
     # for axis in [0,1,2]:   
