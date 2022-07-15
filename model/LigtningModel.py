@@ -129,7 +129,7 @@ class Model(pl.LightningModule):
         #print(f"sss c  labels type {type(labels)} y_hat type {type(y_hat)}   ")
 
         #print(f"sss c y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
-        #print(f"sss d  labels type {type(labels[0])} y_hat type {type(y_hat[0])}   ")
+        print(f"sss d y_hat {y_hat[0].size()} labels {labels[0].size()}  labels type {type(labels[0])} y_hat type {type(y_hat[0])}   ")
 
 
         for i in range(0, len(labels)):
