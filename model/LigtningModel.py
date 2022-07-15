@@ -116,8 +116,8 @@ class Model(pl.LightningModule):
         #labels= torch.nn.functional.one_hot(labels, num_classes=2) 
 
         metrics = evaluate(
-            y_det=y_hat,
-            y_true=labels,
+            y_det=y_hat.cpu().detach().numpy(),
+            y_true=labels.cpu().detach().numpy(),
         )
         self.picaiLossArr.append(metrics)
         #self.dice_metric(y_pred=y_hat, y=labels)
