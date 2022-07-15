@@ -246,7 +246,7 @@ def changeLabelToOnes(row):
         image1 = sitk.DICOMOrient(image1, 'RAS')
         #image1 = sitk.Cast(image1, sitk.sitkFloat32)
         data = sitk.GetArrayFromImage(image1)
-        data = (data > 0).astype('uint8')
+        data = (data > 0).astype('int32')
         print(f" at begining unique   {np.unique(data)}"  )
         #recreating image keeping relevant metadata
         image = sitk.GetImageFromArray(data)
