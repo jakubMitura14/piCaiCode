@@ -118,9 +118,10 @@ class Model(pl.LightningModule):
         #print(f"sss y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
         print(f"sss a y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
         labelsb = [self.post_pred(i) for i in decollate_batch(labels)]
-        print(f"labels {labelsb[0].size()}  labels type {type(labelsb[0])}   ")
+        concatLabels= torch.stack(labelsb)
+        print(f"labels {labelsb[0].size()}  labels type {type(labelsb[0])} concatLabels {  concatLabels.size()}  ")
 
-        loss = self.criterion(y_hat, labels)
+        loss = self.criterion(y_hat, concatLabels)
 
         #labels= torch.nn.functional.one_hot(labels, num_classes=2) 
         y_hat = [self.post_pred(i) for i in decollate_batch(y_hat)]
@@ -128,17 +129,17 @@ class Model(pl.LightningModule):
         #print(f"sss b  labels type {type(labels)} y_hat type {type(y_hat)}   ")
         #print(f"sss b y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
         
-        labelsb = [torch.nn.functional.one_hot(i.to(torch.int64), num_classes=- 1) for i in decollate_batch(labels)]
+        #labelsb = [torch.nn.functional.one_hot(i.to(torch.int64), num_classes=- 1) for i in decollate_batch(labels)]
         #print(f"sss c  labels type {type(labels)} y_hat type {type(y_hat)}   ")
 
         #print(f"sss c y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
         print(f"sss d y_hat {y_hat[0].size()} labels {labels[0].size()}  labels type {type(labels[0])} y_hat type {type(y_hat[0])}   ")
 
 
-        for i in range(0, len(labels)):
+        for i in range(0, len(labelsb)):
             metrics = evaluate(
                 y_det=y_hat[i].cpu().detach().numpy(),
-                y_true=labels[i].cpu().detach().numpy(),
+                y_true=labelsb[i].cpu().detach().numpy(),
             )
             self.picaiLossArr.append(metrics)
         #self.dice_metric(y_pred=y_hat, y=labels)
