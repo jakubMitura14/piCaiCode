@@ -111,12 +111,16 @@ class Model(pl.LightningModule):
 
         y_hat = sliding_window_inference(images, (32,32,32), 1, self.net)
         #print(f"sss y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
+        print(f"sss a y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
 
         #labels= torch.nn.functional.one_hot(labels, num_classes=2) 
         y_hat = [self.post_pred(i) for i in decollate_batch(y_hat)]
+
+        print(f"sss b y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
+
         labels = [self.post_label(i) for i in decollate_batch(labels)]
 
-        print(f"sss y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
+        print(f"sss c y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
 
         loss = self.criterion(y_hat, labels)
 
