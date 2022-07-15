@@ -86,6 +86,8 @@ class Model(pl.LightningModule):
         self.experiment=experiment
         self.finalLoss=finalLoss
         self.picaiLossArr=[]
+        self.post_pred = Compose([EnsureType("tensor", device="cpu"), AsDiscrete(argmax=True, to_onehot=2)])
+        self.post_label = Compose([EnsureType("tensor", device="cpu"), AsDiscrete(to_onehot=2)])
 
     def configure_optimizers(self):
         optimizer = self.optimizer_class(self.parameters(), lr=self.lr)
@@ -114,6 +116,8 @@ class Model(pl.LightningModule):
 
         loss = self.criterion(y_hat, labels)
         #labels= torch.nn.functional.one_hot(labels, num_classes=2) 
+        y_hat = [self.post_pred(i) for i in decollate_batch(y_hat)]
+        labels = [self.post_label(i) for i in decollate_batch(labels)]
 
         metrics = evaluate(
             y_det=y_hat.cpu().detach().numpy(),

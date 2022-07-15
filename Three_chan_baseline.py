@@ -125,7 +125,7 @@ def mainTrain(experiment,options,df):
     unet= unets.UNet(
         spatial_dims=3,
         in_channels=3,
-        out_channels=1,
+        out_channels=2,
         strides=getParam(experiment,options,"stridesAndChannels",df)["strides"],
         channels=getParam(experiment,options,"stridesAndChannels",df)["channels"],
         num_res_units= experiment.get_parameter("num_res_units"),

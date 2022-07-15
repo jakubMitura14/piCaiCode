@@ -139,7 +139,7 @@ config = {
 
     # Declare what we will be optimizing, and how:
     "spec": {
-    "metric": "last_val_loss",
+    "metric": "val_mean_picai_metr_training",
         "objective": "minimize",
     },
 }
