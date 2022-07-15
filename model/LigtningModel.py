@@ -216,9 +216,9 @@ class Model(pl.LightningModule):
 
         return {"log": self.log}
 
-    def validation_step(self, batch, batch_idx):
-        y_hat, y = self.infer_batch(batch)
-        loss = self.criterion(y_hat, y)
-        self.log('val_loss', loss)
-        return loss
+    # def validation_step(self, batch, batch_idx):
+    #     y_hat, y = self.infer_batch(batch)
+    #     loss = self.criterion(y_hat, y)
+    #     self.log('val_loss', loss)
+    #     return loss
 
