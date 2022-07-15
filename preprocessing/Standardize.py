@@ -124,7 +124,7 @@ def padToSize(image1,targetSize, paddValue):
     sizediffs=(targetSize[0]-currentSize[1]  , targetSize[1]-currentSize[1]  ,targetSize[2]-currentSize[2])
     halfDiffSize=(math.floor(sizediffs[0]/2) , math.floor(sizediffs[1]/2), math.floor(sizediffs[2]/2))
     rest=(sizediffs[0]-halfDiffSize[0]  ,sizediffs[1]-halfDiffSize[1]  ,sizediffs[2]-halfDiffSize[2]  )
-    print(f" currentSize {currentSize} targetSize {targetSize} halfDiffSize {halfDiffSize}  rest {rest} paddValue {paddValue} sizediffs {type(sizediffs)}")
+    #print(f" currentSize {currentSize} targetSize {targetSize} halfDiffSize {halfDiffSize}  rest {rest} paddValue {paddValue} sizediffs {type(sizediffs)}")
     
     halfDiffSize=np.array(halfDiffSize, dtype='int').tolist() 
     rest=np.array(rest, dtype='int').tolist() 
@@ -246,8 +246,8 @@ def changeLabelToOnes(row):
         image1 = sitk.DICOMOrient(image1, 'RAS')
         #image1 = sitk.Cast(image1, sitk.sitkFloat32)
         data = sitk.GetArrayFromImage(image1)
-        data = (data >= 1).astype('uint8')
-
+        data = (data > 0).astype('uint8')
+        print(f" at begining unique   {np.unique(data)}"  )
         #recreating image keeping relevant metadata
         image = sitk.GetImageFromArray(data)
         image.SetSpacing(image1.GetSpacing())
