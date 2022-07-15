@@ -82,7 +82,7 @@ for spacing_keyword in ["_med_spac", "_one_spac","_one_and_half_spac", "_two_spa
 
 
 ##options
-to_onehot_y_loss= True
+to_onehot_y_loss= False
 options={
 "lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
         ,monai.losses.DiceLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
