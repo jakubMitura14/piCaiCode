@@ -70,6 +70,7 @@ from monai.transforms import (
     EnsureTyped,
     EnsureType,
 )
+import torchio
 
 class Model(pl.LightningModule):
     def __init__(self, net, criterion, learning_rate, optimizer_class,experiment,finalLoss):
@@ -85,7 +86,9 @@ class Model(pl.LightningModule):
         self.finalLoss=finalLoss
         self.picaiLossArr=[]
         self.post_pred = Compose([EnsureType("tensor", device="cpu"), AsDiscrete(argmax=True, to_onehot=2)])
-        self.post_label = Compose([EnsureType("tensor", device="cpu"), AsDiscrete(to_onehot=1)])
+        #self.post_label = Compose([EnsureType("tensor", device="cpu"), AsDiscrete(to_onehot=1)])
+        self.post_label = Compose([EnsureType("tensor", device="cpu"), torchio.transforms.OneHot(include=["label"] ,num_classes=2)])
+
 
     def configure_optimizers(self):
         optimizer = self.optimizer_class(self.parameters(), lr=self.lr)
