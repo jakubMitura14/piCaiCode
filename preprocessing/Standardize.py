@@ -7,6 +7,7 @@ import time
 import pandas as pd
 from os.path import isdir,join,exists,split,dirname,basename
 import numpy as np
+
 import multiprocessing as mp
 import math
 import SimpleITK as sitk
@@ -146,6 +147,10 @@ def padToAndSaveLabel(row,colname,targetSize, paddValue,keyword,isTobeDiv):
     path = str(row[colname])
     outPath = path.replace('.nii.gz',keyword+ '.nii.gz')
     image=sitk.ReadImage(str(path))
+
+    data=sitk.GetArrayFromImage(image)
+    print(f"unique in label {np.unique(data)}")
+
     if(isTobeDiv):
         image=padToDivisibleBy32(image,paddValue)
         writer.KeepOriginalImageUIDOn()
@@ -239,10 +244,10 @@ def changeLabelToOnes(row):
     if(path!= " " and path!=""):
         image1 = sitk.ReadImage(path)
         image1 = sitk.DICOMOrient(image1, 'RAS')
-        image1 = sitk.Cast(image1, sitk.sitkFloat32)
+        #image1 = sitk.Cast(image1, sitk.sitkFloat32)
         data = sitk.GetArrayFromImage(image1)
-        data -= np.min(data)
-        data[data>= 1] = 1
+        data = (data >= 1).astype('uint8')
+
         #recreating image keeping relevant metadata
         image = sitk.GetImageFromArray(data)
         image.SetSpacing(image1.GetSpacing())
