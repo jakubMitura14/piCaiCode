@@ -125,10 +125,13 @@ class Model(pl.LightningModule):
         #print(f"sss b y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
         
         labels = [torch.nn.functional.one_hot(i.to(torch.int64), num_classes=- 1) for i in decollate_batch(labels)]
+        print(f"sss c  labels type {type(labels)} y_hat type {type(y_hat)}   ")
 
-        print(f"sss c y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
+        #print(f"sss c y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
+        print(f"sss d  labels type {type(labels[0])} y_hat type {type(y_hat[0])}   ")
 
         loss = self.criterion(y_hat, labels)
+
 
         metrics = evaluate(
             y_det=y_hat.cpu().detach().numpy(),
