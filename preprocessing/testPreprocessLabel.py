@@ -36,17 +36,17 @@ reg_prop='/home/sliceruser/data/piCaiCode/preprocessing/registration/parameters.
 trainedModelsBasicPath='/home/sliceruser/data/preprocess/standarizationModels'
 
 
-df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData.csv')
-#currently We want only imagfes with associated masks
-df = df.loc[df['isAnyMissing'] ==False]
-df = df.loc[df['isAnythingInAnnotated']>0 ]
-# ignore all with deficient spacing
-for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:    
-    colName=keyWord+ "_spac_x"
-    df = df.loc[df[colName]>0 ]
-# get only complete representaions and only those with labels
-df = df.loc[df['isAnyMissing'] ==False]
-df = df.loc[df['isAnythingInAnnotated']>0 ]    
+df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv')
+# #currently We want only imagfes with associated masks
+# df = df.loc[df['isAnyMissing'] ==False]
+# df = df.loc[df['isAnythingInAnnotated']>0 ]
+# # ignore all with deficient spacing
+# for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:    
+#     colName=keyWord+ "_spac_x"
+#     df = df.loc[df[colName]>0 ]
+# # get only complete representaions and only those with labels
+# df = df.loc[df['isAnyMissing'] ==False]
+# df = df.loc[df['isAnythingInAnnotated']>0 ]    
 #just for testing    
 #df= df.head(30)
 ##df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
