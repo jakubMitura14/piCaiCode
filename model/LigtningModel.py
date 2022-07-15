@@ -119,7 +119,13 @@ class Model(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         y_hat, y = self.infer_batch(batch)
-        loss = self.criterion(y_hat, y)
+        labelsb = [self.post_pred(i) for i in decollate_batch(y)]
+        concatLabels= torch.stack(labelsb)
+        #print(f"labels {labelsb[0].size()}  labels type {type(labelsb[0])} concatLabels {  concatLabels.size()}  ")
+
+        loss = self.criterion(y_hat.to(device='cuda'), concatLabels.to(device='cuda'))
+
+        #loss = self.criterion(y_hat, y)
         self.log('train_loss', loss, prog_bar=True)
         return loss
 
