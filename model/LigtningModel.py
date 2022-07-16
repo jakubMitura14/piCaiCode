@@ -163,8 +163,8 @@ class Model(pl.LightningModule):
         #print(f"sss c y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
         #print(f"sss d y_hat {y_hat[0].size()} labels {labels[0].size()}  labels type {type(labels[0])} y_hat type {type(y_hat[0])}   ")
 
-        valid_metrics = evaluate(y_det=iter(np.concatenate([x for x in np.array(y_hat)], axis=0)),
-                             y_true=iter(np.concatenate([x for x in np.array(labels)], axis=0)),
+        valid_metrics = evaluate(y_det=iter(np.concatenate([x for x in y_hat.cpu().detach().numpy()], axis=0)),
+                             y_true=iter(np.concatenate([x for x in labels.cpu().detach().numpy()], axis=0)),
                              y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0])
 
         # for i in range(0, len(labelsb)):
