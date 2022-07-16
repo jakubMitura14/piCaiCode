@@ -171,6 +171,7 @@ class Model(pl.LightningModule):
             self.picaiLossArr_auroc.append(metrics.auroc)
             self.picaiLossArr_AP.append(metrics.AP)
             self.picaiLossArr_score.append(metrics.score)
+            print( f"metrics.auroc {metrics.auroc} metrics.AP {metrics.AP}  metrics.score {metrics.score}  " )
 
         #self.dice_metric(y_pred=y_hat, y=labels)
         # print(f"losss {loss}  ")
@@ -211,7 +212,7 @@ class Model(pl.LightningModule):
         self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
         self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
 
-        
+        #resetting to 0 
         self.picaiLossArr_auroc=[]
         self.picaiLossArr_AP=[]
         self.picaiLossArr_score=[]
