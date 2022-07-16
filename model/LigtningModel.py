@@ -150,7 +150,8 @@ class Model(pl.LightningModule):
         loss = self.criterion(y_hat, concatLabels)
 
         #labels= torch.nn.functional.one_hot(labels, num_classes=2) 
-        y_hat = [self.post_pred(i) for i in decollate_batch(y_hat)]
+#        y_hat = [(i) for i in decollate_batch(y_hat)]
+        y_hat = decollate_batch(y_hat)
 
         #print(f"sss b  labels type {type(labels)} y_hat type {type(y_hat)}   ")
         #print(f"sss b y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
