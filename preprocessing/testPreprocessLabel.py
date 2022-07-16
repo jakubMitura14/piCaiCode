@@ -12,17 +12,48 @@ import os
 import multiprocessing as mp
 import functools
 from functools import partial
-import Standardize
-import Resampling
-import utilsPreProcessing
-from utilsPreProcessing import write_to_modif_path 
-from registration.elastixRegister import reg_adc_hbv_to_t2w,reg_adc_hbv_to_t2w_sitk
+# import Standardize
+# import Resampling
+# import utilsPreProcessing
+# from utilsPreProcessing import write_to_modif_path 
+# from registration.elastixRegister import reg_adc_hbv_to_t2w,reg_adc_hbv_to_t2w_sitk
 import os.path
 from os import path as pathOs
 import comet_ml
 from comet_ml import Experiment
-import ManageMetadata
+# import ManageMetadata
 
+import importlib.util
+import sys
+import SimpleITK as sitk
+from functools import partial
+import pandas as pd
+import importlib.util
+import sys
+
+
+
+def loadLib(name,path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    res = importlib.util.module_from_spec(spec)
+    sys.modules[name] = res
+    spec.loader.exec_module(res)
+    return res
+
+transformsForMain =loadLib("transformsForMain", "/home/sliceruser/data/piCaiCode/preprocessing/transformsForMain.py")
+manageMetaData =loadLib("ManageMetadata", "/home/sliceruser/data/piCaiCode/preprocessing/ManageMetadata.py")
+dataUtils =loadLib("dataUtils", "/home/sliceruser/data/piCaiCode/dataManag/utils/dataUtils.py")
+
+unets =loadLib("unets", "/home/sliceruser/data/piCaiCode/model/unets.py")
+DataModule =loadLib("DataModule", "/home/sliceruser/data/piCaiCode/model/DataModule.py")
+LigtningModel =loadLib("LigtningModel", "/home/sliceruser/data/piCaiCode/model/LigtningModel.py")
+Standardize=loadLib("Standardize", "/home/sliceruser/data/piCaiCode/preprocessing/Standardize.py")
+Resampling=loadLib("Resampling", "/home/sliceruser/data/piCaiCode/preprocessing/Resampling.py")
+utilsPreProcessing=loadLib("utilsPreProcessing", "/home/sliceruser/data/piCaiCode/preprocessing/utilsPreProcessing.py")
+ManageMetadata=loadLib("ManageMetadata", "/home/sliceruser/data/piCaiCode/preprocessing/ManageMetadata.py")
+
+
+from utilsPreProcessing import write_to_modif_path 
 experiment = Experiment(
     api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
     #workspace="picai", # Optional

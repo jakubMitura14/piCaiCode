@@ -17,7 +17,6 @@ import numpy as np
 import functools
 from functools import partial
 from intensity_normalization.normalize.nyul import NyulNormalize
-from intensity_normalization.typing import Modality
 from os import path as pathOs
 
 def removeOutliersBiasFieldCorrect(path,numberOfStandardDeviations = 4):
@@ -148,7 +147,8 @@ def padToAndSaveLabel(row,colname,targetSize, paddValue,keyword,isTobeDiv):
     outPath = path.replace('.nii.gz',keyword+ '.nii.gz')
     image=sitk.ReadImage(str(path))
 
-    data=sitk.GetArrayFromImage(image)
+    data= sitk.GetArrayFromImage(image)
+
     print(f"unique in label {np.unique(data)}")
 
     if(isTobeDiv):

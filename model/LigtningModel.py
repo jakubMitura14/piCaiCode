@@ -52,6 +52,7 @@ import os
 import glob
 from picai_eval import evaluate
 from statistics import mean
+from report_guided_annotation import extract_lesion_candidates
 
 
 import torch.nn as nn
@@ -143,11 +144,11 @@ class Model(pl.LightningModule):
         y_hat = sliding_window_inference(images, (32,32,32), 1, self.net)
         #print(f"sss y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
         #print(f"sss a y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
-        labelsb = [self.post_pred(i) for i in decollate_batch(labels)]
-        concatLabels= torch.stack(labelsb)
+        # labelsb = [self.post_pred(i) for i in decollate_batch(labels)]
+        # concatLabels= torch.stack(labelsb)
         #print(f"labels {labelsb[0].size()}  labels type {type(labelsb[0])} concatLabels {  concatLabels.size()}  ")
-
-        loss = self.criterion(y_hat, concatLabels)
+        print(f" uniqqqque y_hat {torch.unique(y_hat)} y  {torch.unique(labels)}  ")
+        loss = self.criterion(y_hat, labels)
 
         #labels= torch.nn.functional.one_hot(labels, num_classes=2) 
 #        y_hat = [(i) for i in decollate_batch(y_hat)]
@@ -162,21 +163,27 @@ class Model(pl.LightningModule):
         #print(f"sss c y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
         #print(f"sss d y_hat {y_hat[0].size()} labels {labels[0].size()}  labels type {type(labels[0])} y_hat type {type(y_hat[0])}   ")
 
+        valid_metrics = evaluate(y_det=iter(np.concatenate([x for x in np.array(y_hat)], axis=0)),
+                             y_true=iter(np.concatenate([x for x in np.array(labels)], axis=0)),
+                             y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0])
 
-
-        for i in range(0, len(labelsb)):
-            metrics = evaluate(
-                y_det=y_hat[i].cpu().detach().numpy(),
-                y_true=labelsb[i].cpu().detach().numpy(),
-            )
-            self.picaiLossArr_auroc.append(metrics.auroc)
-            self.picaiLossArr_AP.append(metrics.AP)
-            self.picaiLossArr_score.append(metrics.score)
+        # for i in range(0, len(labelsb)):
+        #     metrics = evaluate(
+        #         y_det=y_hat[i].cpu().detach().numpy(),
+        #         y_true=labelsb[i].cpu().detach().numpy(),
+        #     )
+        self.picaiLossArr_auroc.append(valid_metrics.auroc)
+        self.picaiLossArr_AP.append(valid_metrics.AP  )
+        self.picaiLossArr_score.append(valid_metrics.score)
         
         
-        meanPiecaiMetr_auroc= mean(self.picaiLossArr_auroc)
-        meanPiecaiMetr_AP= mean(self.picaiLossArr_AP)        
-        meanPiecaiMetr_score= mean(self.picaiLossArr_score)  
+        # meanPiecaiMetr_auroc= mean(self.picaiLossArr_auroc)
+        # meanPiecaiMetr_AP= mean(self.picaiLossArr_AP)        
+        # meanPiecaiMetr_score= mean(self.picaiLossArr_score)  
+
+        meanPiecaiMetr_auroc= valid_metrics.auroc
+        meanPiecaiMetr_AP= valid_metrics.AP   
+        meanPiecaiMetr_score= valid_metrics.score
         
         
         print( f"metrics.auroc {meanPiecaiMetr_auroc} metrics.AP {meanPiecaiMetr_AP}  metrics.score {meanPiecaiMetr_score}  " )

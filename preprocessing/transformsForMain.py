@@ -79,6 +79,7 @@ def get_train_transforms(RandGaussianNoised_prob
         [
             LoadImaged(keys=["chan3_col_name","label"]),
             EnsureChannelFirstd(keys=["chan3_col_name","label"]),
+            AsDiscrete(keys=["label"],argmax=True, to_onehot=2),
             #torchio.transforms.OneHot(include=["label"] ), #num_classes=3,
             #AsDiscreted(keys=["label"],to_onehot=2,threshold=0.5),
             #AsChannelFirstd(keys=["t2w","adc", "hbv","label"]),
@@ -108,6 +109,8 @@ def get_val_transforms(is_whole_to_train):
         [
             LoadImaged(keys=["chan3_col_name","label"]),
             EnsureChannelFirstd(keys=["chan3_col_name","label"]),
+            AsDiscrete(keys=["label"],argmax=True, to_onehot=2),
+
             #torchio.transforms.OneHot(include=["label"] ),#num_classes=3
             #AsDiscreted(keys=["label"],to_onehot=2,threshold=0.5),
             #AsChannelFirstd(keys=["chan3_col_name","label"]]),

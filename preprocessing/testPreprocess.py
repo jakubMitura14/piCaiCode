@@ -347,7 +347,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 
 
 #bias field correction
-Standardize.iterateAndBiasCorrect('t2w',df)
+#Standardize.iterateAndBiasCorrect('t2w',df)
 #Standarization
 for keyWord in ['t2w','adc', 'hbv']: #'cor',,'sag'
     ## denoising
