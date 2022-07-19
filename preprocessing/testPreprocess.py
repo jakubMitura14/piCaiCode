@@ -273,8 +273,8 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     t2wKeyWord ="t2w"+spacing_keyword    
     #needs to be on single thread as resampling GAN is acting on GPU
     # we save the metadata to main pandas data frame 
-    df["adc"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_'+'adcb_tw_',targetSpacingg,spacing_keyword)   , axis = 1) 
-    df["hbv"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_'+'hbvb_tw_',targetSpacingg,spacing_keyword)   , axis = 1) 
+    df["adc"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_c_',targetSpacingg,spacing_keyword)   , axis = 1) 
+    df["hbv"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_c_',targetSpacingg,spacing_keyword)   , axis = 1) 
     df["t2w"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 't2w',targetSpacingg,spacing_keyword)   , axis = 1) 
     df["label"+spacing_keyword]=df.apply(lambda row : resample_labels(row,targetSpacingg,spacing_keyword)   , axis = 1) 
 
@@ -292,16 +292,6 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 
     sizeWord="_div32_"
     resList=[]
-    # list(map(partial(resize_and_join
-    #                             ,colNameT2w=t2wKeyWord
-    #                             ,colNameAdc="adc"+spacing_keyword
-    #                             ,colNameHbv="hbv"+spacing_keyword
-    #                             ,sizeWord=sizeWord
-    #                             ,targetSize=maxSize
-    #                             ,ToBedivisibleBy32=True
-    #                             )  ,list(df.iterrows())))
-
-
     with mp.Pool(processes = mp.cpu_count()) as pool:
         resList=pool.map(partial(resize_and_join
                                 ,colNameT2w=t2wKeyWord
@@ -355,34 +345,34 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 #### 
 #first get adc and tbv to t2w spacing
 spacing_keyword='_tw_'
-df["adcc"+spacing_keyword]=df.apply(lambda row : resample_To_t2w(row,'adc','tw','t2w')   , axis = 1) 
-df["hbvc"+spacing_keyword]=df.apply(lambda row : resample_To_t2w(row,'hbv','tw','t2w')   , axis = 1) 
+# df["adcc"+spacing_keyword]=df.apply(lambda row : resample_To_t2w(row,'adc','tw','t2w')   , axis = 1) 
+# df["hbvc"+spacing_keyword]=df.apply(lambda row : resample_To_t2w(row,'hbv','tw','t2w')   , axis = 1) 
 
 #now registration of adc and hbv to t2w
-for keyWord in ['adcc_tw_','hbvc_tw_']:
+for keyWord in ['adc','hbv']:
     resList=[]     
     with mp.Pool(processes = mp.cpu_count()) as pool:
         resList=pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'),list(df.iterrows()))    
     
     pathss = list(map(lambda tupl :tupl[0],resList   ))
-    reg_values = list(map(lambda tupl :tupl[1],resList   ))
-    df['registered_'+keyWord]=pathss  
-    df['registered_'+keyWord+"score"]=reg_values  
+    #reg_values = list(map(lambda tupl :tupl[1],resList   ))
+    df['registered_c_'+keyWord]=pathss  
+    #df['registered_c_'+keyWord+"score"]=reg_values  
 #checking registration by reading from logs the metrics so we will get idea how well it went
 
 
 #######      
 targetSpacinggg=(spacingDict['t2w_spac_x'][3],spacingDict['t2w_spac_y'][3],spacingDict['t2w_spac_z'][3])
-preprocess_diffrent_spacings(df,targetSpacinggg,"_med_spac_b")
-preprocess_diffrent_spacings(df,(1.0,1.0,1.0),"_one_spac_b")
-preprocess_diffrent_spacings(df,(1.5,1.5,1.5),"_one_and_half_spac_b")
-preprocess_diffrent_spacings(df,(2.0,2.0,2.0),"_two_spac_b")
+preprocess_diffrent_spacings(df,targetSpacinggg,"_med_spac_c")
+preprocess_diffrent_spacings(df,(1.0,1.0,1.0),"_one_spac_c")
+preprocess_diffrent_spacings(df,(1.5,1.5,1.5),"_one_and_half_spac_c")
+preprocess_diffrent_spacings(df,(2.0,2.0,2.0),"_two_spac_c")
 
 
 
 print("fiiiniiished")
 print(df['study_id'])
-df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current_b.csv') 
+df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current_c.csv') 
 
 
 
