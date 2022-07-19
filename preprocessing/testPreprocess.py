@@ -383,7 +383,7 @@ preprocess_diffrent_spacings(df,(2.0,2.0,2.0),"_two_spac_b")
 
 print("fiiiniiished")
 print(df['study_id'])
-df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
+df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current_b.csv') 
 
 
 
