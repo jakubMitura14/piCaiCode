@@ -6,7 +6,6 @@ from functools import partial
 from os import path as pathOs
 from zipfile import BadZipFile, ZipFile
 import comet_ml
-import dask.dataframe as dd
 import numpy as np
 import pandas as pd
 import SimpleITK as sitk
