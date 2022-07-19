@@ -351,9 +351,12 @@ spacing_keyword='_tw_'
 #now registration of adc and hbv to t2w
 for keyWord in ['adc','hbv']:
     resList=[]     
-    with mp.Pool(processes = mp.cpu_count()) as pool:
-        resList=pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'),list(df.iterrows()))    
+    # with mp.Pool(processes = mp.cpu_count()) as pool:
+    #     resList=pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'),list(df.iterrows()))    
+
+    resList=list(map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'),list(df.iterrows())))    
     
+
     pathss = list(map(lambda tupl :tupl[0],resList   ))
     #reg_values = list(map(lambda tupl :tupl[1],resList   ))
     df['registered_c_'+keyWord]=pathss  
