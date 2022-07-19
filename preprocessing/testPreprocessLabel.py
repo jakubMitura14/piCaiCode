@@ -352,7 +352,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     #                             )  ,list(df.iterrows())) 
     # df[t2wKeyWord+"_3Chan"+sizeWord]=resList
     # #setting padding to labels
-    Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,maxSize, 0.0,spacing_keyword+sizeWord,True)
+    Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,maxSize, 0,spacing_keyword+sizeWord,True)
 
 
     sizeWord="_maxSize_"
@@ -369,7 +369,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 
 
     # df[t2wKeyWord+"_3Chan"+sizeWord]=resList
-    Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,maxSize, 0.0,spacing_keyword+sizeWord,False)
+    Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,maxSize, 0,spacing_keyword+sizeWord,False)
 
 
 

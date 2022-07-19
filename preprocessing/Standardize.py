@@ -1,23 +1,19 @@
 # pathBaselineImage ='/home/sliceruser/data/10001/10001_1000001_t2w.mha'
 from __future__ import print_function
-import SimpleITK as sitk
-from os import listdir
-from scipy.interpolate import interp1d
-import time
-import pandas as pd
-from os.path import isdir,join,exists,split,dirname,basename
-import numpy as np
-
-import multiprocessing as mp
-import math
-import SimpleITK as sitk
-import numpy as np
 import collections
-import numpy as np
 import functools
+import math
+import multiprocessing as mp
+import time
 from functools import partial
-from intensity_normalization.normalize.nyul import NyulNormalize
+from os import listdir
 from os import path as pathOs
+from os.path import basename, dirname, exists, isdir, join, split
+import numpy as np
+import pandas as pd
+import SimpleITK as sitk
+from intensity_normalization.normalize.nyul import NyulNormalize
+
 
 def removeOutliersBiasFieldCorrect(path,numberOfStandardDeviations = 4):
     """

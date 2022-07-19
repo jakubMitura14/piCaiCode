@@ -1,17 +1,11 @@
-import torch
-import pandas as pd
-import numpy as np
-import torchio as tio
-from torch.utils.data import DataLoader
-import os
-import SimpleITK as sitk
-from zipfile import ZipFile
-from zipfile import BadZipFile
-import dask.dataframe as dd
-import os
-import multiprocessing as mp
 import functools
+import multiprocessing as mp
+import os
 from functools import partial
+from zipfile import BadZipFile, ZipFile
+import numpy as np
+import pandas as pd
+import SimpleITK as sitk
 
 #read metadata, and add columns for additional information
 csvPath='/home/sliceruser/labels/clinical_information/marksheet.csv'
