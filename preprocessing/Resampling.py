@@ -57,8 +57,8 @@ def resample_with_GAN(path, targetSpac):
         if(new_size[axis]>origSize[axis]):
             anySuperSampled=True
             #in some cases the GPU memory is not cleared enough
-            device = cuda.get_current_device()
-            device.reset()
+            #device = cuda.get_current_device()
+            #device.reset()
             currentSpacing[axis]=targetSpac[axis]
             pre_slices = origSize[axis]
             post_slices = new_size[axis]
@@ -140,8 +140,8 @@ def resample_label_with_GAN(path, targetSpac):
         if(new_size[axis]>origSize[axis]):
             anySuperSampled=True
             #in some cases the GPU memory is not cleared enough
-            device = cuda.get_current_device()
-            device.reset()
+            #device = cuda.get_current_device()
+            #device.reset()
             currentSpacing[axis]=targetSpac[axis]
             pre_slices = origSize[axis]
             post_slices = new_size[axis]
