@@ -1,6 +1,5 @@
 import os
 from copy import deepcopy
-import monai
 import numpy as np
 import pandas as pd
 import SimpleITK as sitk
