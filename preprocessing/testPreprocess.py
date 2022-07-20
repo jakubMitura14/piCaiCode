@@ -26,7 +26,8 @@ experiment = Experiment(
 )
 
 ## some paths
-elacticPath='/home/sliceruser/Slicer/NA-MIC/Extensions-30822/SlicerElastix/lib/Slicer-5.0/elastix'
+# elacticPath='/home/sliceruser/Slicer/NA-MIC/Extensions-30822/SlicerElastix/lib/Slicer-5.0/elastix'
+elacticPath='elastix'
 reg_prop='/home/sliceruser/data/piCaiCode/preprocessing/registration/parameters.txt'  
 trainedModelsBasicPath='/home/sliceruser/data/preprocess/standarizationModels'
 
