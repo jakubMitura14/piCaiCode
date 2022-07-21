@@ -135,7 +135,7 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
         if(experiment!=None):
             experiment.log_text(f"already registered {colName} {study_id}")    
         print(f"registered already present {patId}")
-        return result     
+        return (result,0.0)     
     else:
         if(len(path)>1):
             #creating the folder if none is present
