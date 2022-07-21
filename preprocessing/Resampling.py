@@ -16,8 +16,6 @@ def copyDirAndOrigin(imageOrig,spacing,data):
     #print(image1.GetSize())
     return image1
 
-
-
 def useGan(data,post_slices,pre_slices,stepSize):
     diffPrim = post_slices-pre_slices# always positive number if too big we will run out of memoory
     diffDone=0
@@ -33,10 +31,6 @@ def useGan(data,post_slices,pre_slices,stepSize):
             
     return SOUP_GAN(data, post_slices/(pre_slices+diffDone),1)
  
-
-
-
-
 #pathT2w,pathHbv,pathADC,patht2wLabel
 def resample_with_GAN(path, targetSpac):
     imageOrig = sitk.ReadImage(path)
