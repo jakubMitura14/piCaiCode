@@ -63,7 +63,7 @@ def resample_with_GAN(path, targetSpac):
                 data = np.moveaxis(data, 0, 2)
             #Call the SR interpolation tool from KevinSR
             #print(f"thicks_ori shape {data.shape} ")
-            data =useGan(data,post_slices,pre_slices,500)
+            data =useGan(data,post_slices,pre_slices,100)
 
             # try:
             #     data =useGan(data,post_slices,pre_slices,200)
