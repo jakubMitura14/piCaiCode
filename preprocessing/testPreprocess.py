@@ -17,7 +17,7 @@ import utilsPreProcessing
 from registration.elastixRegister import (reg_adc_hbv_to_t2w,
                                           reg_adc_hbv_to_t2w_sitk)
 from utilsPreProcessing import write_to_modif_path
-
+import tensorflow as tf
 experiment = Experiment(
     api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
     #workspace="picai", # Optional
@@ -47,6 +47,12 @@ df = df.loc[df['isAnythingInAnnotated']>0 ]
 #df= df.head(30)
 ##df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
 print(df)    
+
+
+
+gpu_devices = tf.config.experimental.list_physical_devices('GPU')
+for device in gpu_devices:
+    tf.config.experimental.set_memory_growth(device, True)
 
 ########## Standarization
 
