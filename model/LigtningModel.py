@@ -161,6 +161,8 @@ class Model(pl.LightningModule):
         #print(f"sss c y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
         #print(f"sss d y_hat {y_hat[0].size()} labels {labels[0].size()}  labels type {type(labels[0])} y_hat type {type(y_hat[0])}   ")
 
+        print(f" labels sum {torch.sum(labels)} ")
+
         valid_metrics = evaluate(y_det=iter(np.concatenate([x.cpu().detach().numpy() for x in y_hat], axis=0)),
                              y_true=iter(np.concatenate([x.cpu().detach().numpy() for x in labels], axis=0)),
                              y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0])
