@@ -79,9 +79,9 @@ def getParam(experiment,options,key,df):
     # print(options[key])
     return options[key][integerr]
 
-def isAnnytingInAnnotatedInner(row,labelColNAme):
+def isAnnytingInAnnotatedInner(row,colName):
     row=row[1]
-    path=row[labelColNAme]
+    path=row[colName]
     image1 = sitk.ReadImage(path)
     #image1 = sitk.Cast(image1, sitk.sitkFloat32)
     data = sitk.GetArrayFromImage(image1)
