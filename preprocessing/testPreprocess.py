@@ -278,13 +278,13 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
 
 def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     print(f"**************    target spacing    ***************  {targetSpacingg}   {spacing_keyword}")  
-    t2wKeyWord ="t2w"+spacing_keyword    
+    t2wKeyWord ="t2w_c"+spacing_keyword    
     #needs to be on single thread as resampling GAN is acting on GPU
     # we save the metadata to main pandas data frame 
-    df["adc"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_c_'+'adc',targetSpacingg,spacing_keyword)   , axis = 1) 
-    df["hbv"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_c_'+'hbv',targetSpacingg,spacing_keyword)   , axis = 1) 
-    df["t2w"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 't2w',targetSpacingg,spacing_keyword)   , axis = 1) 
-    df["label"+spacing_keyword]=df.apply(lambda row : resample_labels(row,targetSpacingg,spacing_keyword)   , axis = 1) 
+    df["adc_c"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_c_'+'adc',targetSpacingg,spacing_keyword)   , axis = 1) 
+    df["hbv_c"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_c_'+'hbv',targetSpacingg,spacing_keyword)   , axis = 1) 
+    df[t2wKeyWord]=df.apply(lambda row : resample_ToMedianSpac(row, 't2w',targetSpacingg,spacing_keyword)   , axis = 1) 
+    df["label_c"+spacing_keyword]=df.apply(lambda row : resample_labels(row,targetSpacingg,spacing_keyword)   , axis = 1) 
 
 
 
@@ -303,15 +303,15 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     with mp.Pool(processes = mp.cpu_count()) as pool:
         resList=pool.map(partial(resize_and_join
                                 ,colNameT2w=t2wKeyWord
-                                ,colNameAdc="adc"+spacing_keyword
-                                ,colNameHbv="hbv"+spacing_keyword
+                                ,colNameAdc="adc_c"+spacing_keyword
+                                ,colNameHbv="hbv_c"+spacing_keyword
                                 ,sizeWord=sizeWord
                                 ,targetSize=maxSize
                                 ,ToBedivisibleBy32=True
                                 )  ,list(df.iterrows())) 
-    df[t2wKeyWord+"_3Chan"+sizeWord]=resList
+    df[t2wKeyWord+"_3Chan_c"+sizeWord]=resList
     #setting padding to labels
-    Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,maxSize, 0.0,spacing_keyword+sizeWord,True)
+    Standardize.iterateAndpadLabels(df,"label_c"+spacing_keyword,maxSize, 0.0,spacing_keyword+sizeWord,True)
 
 
     sizeWord="_maxSize_"
@@ -319,16 +319,16 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     with mp.Pool(processes = mp.cpu_count()) as pool:
         resList=pool.map(partial(resize_and_join
                                 ,colNameT2w=t2wKeyWord
-                                ,colNameAdc="adc"+spacing_keyword
-                                ,colNameHbv="hbv"+spacing_keyword
+                                ,colNameAdc="adc_c"+spacing_keyword
+                                ,colNameHbv="hbv_c"+spacing_keyword
                                 ,sizeWord=sizeWord
                                 ,targetSize=maxSize
                                 ,ToBedivisibleBy32=False
                                 )  ,list(df.iterrows())) 
 
 
-    df[t2wKeyWord+"_3Chan"+sizeWord]=resList
-    Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,maxSize, 0.0,spacing_keyword+sizeWord,False)
+    df[t2wKeyWord+"_3Chan_c"+sizeWord]=resList
+    Standardize.iterateAndpadLabels(df,"label_c"+spacing_keyword,maxSize, 0.0,spacing_keyword+sizeWord,False)
 
 
 
