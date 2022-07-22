@@ -130,36 +130,36 @@ def resample_label_with_GAN(path, targetSpac):
    
     #supersampling if needed
     
-    # for axis in [0,1,2]:   
-    #     if(new_size[axis]>origSize[axis]):
-    #         anySuperSampled=True
-    #         #in some cases the GPU memory is not cleared enough
-    #         #device = cuda.get_current_device()
-    #         #device.reset()
-    #         currentSpacing[axis]=targetSpac[axis]
-    #         pre_slices = origSize[axis]
-    #         post_slices = new_size[axis]
-    #         Z_FAC = post_slices/pre_slices # Sampling factor in Z direction
-    #         if(axis==1):
-    #             data = np.moveaxis(data, 1, 2)
-    #         if(axis==2):
-    #             data = np.moveaxis(data, 0, 2)
-    #         #Call the SR interpolation tool from KevinSR
-    #         #print(f"thicks_ori shape {data.shape} ")
+    for axis in [0,1,2]:   
+        if(new_size[axis]>origSize[axis]):
+            anySuperSampled=True
+            #in some cases the GPU memory is not cleared enough
+            #device = cuda.get_current_device()
+            #device.reset()
+            currentSpacing[axis]=targetSpac[axis]
+            pre_slices = origSize[axis]
+            post_slices = new_size[axis]
+            Z_FAC = post_slices/pre_slices # Sampling factor in Z direction
+            if(axis==1):
+                data = np.moveaxis(data, 1, 2)
+            if(axis==2):
+                data = np.moveaxis(data, 0, 2)
+            #Call the SR interpolation tool from KevinSR
+            #print(f"thicks_ori shape {data.shape} ")
 
-    #         data = mask_interpolation(data, Z_FAC)
-    #         #print(f"thins_gen shape {data.shape} ")
-    #         if(axis==1):
-    #             data = np.moveaxis(data, 2, 1)
-    #         if(axis==2):
-    #             data = np.moveaxis(data, 2, 0)            
+            data = mask_interpolation(data, Z_FAC)
+            #print(f"thins_gen shape {data.shape} ")
+            if(axis==1):
+                data = np.moveaxis(data, 2, 1)
+            if(axis==2):
+                data = np.moveaxis(data, 2, 0)            
             
 
-    #we need to recreate itk image object only if some supersampling was performed
-    # if(anySuperSampled):
-    #     image=copyDirAndOrigin(imageOrig,tuple(currentSpacing),data)
-    # else:
-    #     image=imageOrig
+    we need to recreate itk image object only if some supersampling was performed
+    if(anySuperSampled):
+        image=copyDirAndOrigin(imageOrig,tuple(currentSpacing),data)
+    else:
+        image=imageOrig
 
     # image=copyDirAndOrigin(imageOrig,tuple(currentSpacing),data)
     
