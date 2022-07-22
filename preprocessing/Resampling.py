@@ -124,7 +124,7 @@ def resample_label_with_GAN(path, targetSpac):
     print(f"new_size {new_size}")
     anySuperSampled = False
     data=sitk.GetArrayFromImage(imageOrig)
-    data = (data > 0.5).astype('int32')
+    data = (data > 0.5).astype('int8')
 
     print(f" at resampling unique   {np.unique(data)}"  )
    
@@ -161,9 +161,9 @@ def resample_label_with_GAN(path, targetSpac):
     # else:
     #     image=imageOrig
 
-    # # image=copyDirAndOrigin(imageOrig,tuple(currentSpacing),data)
+    image=copyDirAndOrigin(imageOrig,tuple(currentSpacing),data)
     
-    image=imageOrig
+    #image=imageOrig
 
     #copmpleting resampling given some subsampling needs to be performed
     resample = sitk.ResampleImageFilter()
