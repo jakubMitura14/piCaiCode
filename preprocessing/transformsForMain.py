@@ -59,12 +59,10 @@ class standardizeLabels(MapTransform):
 
     def __init__(
         self,
-        num_classes: int,
         keys: KeysCollection = "label",
         allow_missing_keys: bool = False,
     ):
         super().__init__(keys, allow_missing_keys)
-        self.num_classes = num_classes
 
     def __call__(self, data):
 
