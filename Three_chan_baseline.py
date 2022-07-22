@@ -85,7 +85,7 @@ def isAnnytingInAnnotatedInner(row,colName):
     image1 = sitk.ReadImage(path)
     #image1 = sitk.Cast(image1, sitk.sitkFloat32)
     data = sitk.GetArrayFromImage(image1)
-    return sum(data)>0
+    return np.sum(data)
 
 
 def mainTrain(experiment,options,df):
@@ -114,7 +114,7 @@ def mainTrain(experiment,options,df):
     with mp.Pool(processes = mp.cpu_count()) as pool:
         resList=pool.map(partial(isAnnytingInAnnotatedInner,colName=label_name),list(df.iterrows()))    
     df['locIsInAnnot']= resList
-    df = df.loc[df['locIsInAnnot']]
+    df = df.loc[df['locIsInAnnot']>0]
 
 
     data = DataModule.PiCaiDataModule(
