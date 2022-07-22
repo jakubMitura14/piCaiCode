@@ -47,15 +47,6 @@ import torchio
 import numpy as np
 
 class standardizeLabels(MapTransform):
-    """
-    Convert an integer label to encoded array representation of length num_classes,
-    with 1 filled in up to label index, and 0 otherwise. For example for num_classes=5,
-    embedding of 2 -> (1,1,0,0,0)
-    Args:
-        num_classes: the number of classes to convert to encoded format.
-        keys: keys of the corresponding items to be transformed. Defaults to ``'label'``.
-        allow_missing_keys: don't raise exception if key is missing.
-    """
 
     def __init__(
         self,
@@ -68,7 +59,7 @@ class standardizeLabels(MapTransform):
 
         d = dict(data)
         for key in self.keys:
-            d[key] = (d[key] > 0.5).astype('float32')
+            d[key] = (d[key] > 0.5).astype('int8')
         return d
 
 
