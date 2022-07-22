@@ -155,7 +155,7 @@ def resample_label_with_GAN(path, targetSpac):
                 data = np.moveaxis(data, 2, 0)            
             
 
-    we need to recreate itk image object only if some supersampling was performed
+    #we need to recreate itk image object only if some supersampling was performed
     if(anySuperSampled):
         image=copyDirAndOrigin(imageOrig,tuple(currentSpacing),data)
     else:
