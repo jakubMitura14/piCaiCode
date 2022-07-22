@@ -17,7 +17,7 @@ import utilsPreProcessing
 from registration.elastixRegister import (reg_adc_hbv_to_t2w,
                                           reg_adc_hbv_to_t2w_sitk)
 from utilsPreProcessing import write_to_modif_path
-import tensorflow as tf
+
 experiment = Experiment(
     api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
     #workspace="picai", # Optional
@@ -26,7 +26,6 @@ experiment = Experiment(
 )
 
 ## some paths
-# elacticPath='/home/sliceruser/Slicer/NA-MIC/Extensions-30822/SlicerElastix/lib/Slicer-5.0/elastix'
 elacticPath='elastix'
 reg_prop='/home/sliceruser/data/piCaiCode/preprocessing/registration/parameters.txt'  
 trainedModelsBasicPath='/home/sliceruser/data/preprocess/standarizationModels'
@@ -47,12 +46,6 @@ df = df.loc[df['isAnythingInAnnotated']>0 ]
 #df= df.head(30)
 ##df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
 print(df)    
-
-
-
-gpu_devices = tf.config.experimental.list_physical_devices('GPU')
-for device in gpu_devices:
-    tf.config.experimental.set_memory_growth(device, True)
 
 ########## Standarization
 
@@ -151,16 +144,15 @@ def resample_labels(row,targetSpacing,spacing_keyword):
     
         
         newPath = outPath.replace(".mha",spacing_keyword+".nii.gz" )
-        if(not pathOs.exists(newPath)):
-            resampled = Resampling.resample_label_with_GAN(path,targetSpacing)         
-            # try:
-            #     experiment.log_text(f" new resample label {study_id}")
-            #     resampled = Resampling.resample_label_with_GAN(path,targetSpacing)
-            # except:
-            #     print("error resampling")
-            #     #recursively apply resampling
-            #     resample_labels(row,targetSpacing,spacing_keyword)
-            #     #resampled = Resampling.resample_label_with_GAN(path,targetSpacing)
+        if(not pathOs.exists(newPath)):         
+            try:
+                experiment.log_text(f" new resample label {study_id}")
+                resampled = Resampling.resample_label_with_GAN(path,targetSpacing)
+            except:
+                print("error resampling")
+                #recursively apply resampling
+                resample_labels(row,targetSpacing,spacing_keyword)
+                #resampled = Resampling.resample_label_with_GAN(path,targetSpacing)
 
             write_to_modif_path(resampled,outPath,".mha",spacing_keyword+".nii.gz" )
         else:
@@ -275,16 +267,15 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
     # df[t2wKeyWord+"_3Chan"+sizeWord]=resList
 
 
-
 def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     print(f"**************    target spacing    ***************  {targetSpacingg}   {spacing_keyword}")  
-    t2wKeyWord ="t2w_c"+spacing_keyword    
+    t2wKeyWord ="t2w"+spacing_keyword    
     #needs to be on single thread as resampling GAN is acting on GPU
     # we save the metadata to main pandas data frame 
-    df["adc_c"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_c_'+'adc',targetSpacingg,spacing_keyword)   , axis = 1) 
-    df["hbv_c"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_c_'+'hbv',targetSpacingg,spacing_keyword)   , axis = 1) 
-    df[t2wKeyWord]=df.apply(lambda row : resample_ToMedianSpac(row, 't2w',targetSpacingg,spacing_keyword)   , axis = 1) 
-    df["label_c"+spacing_keyword]=df.apply(lambda row : resample_labels(row,targetSpacingg,spacing_keyword)   , axis = 1) 
+    df["adc"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_'+'adc_d'+'_tw_d_',targetSpacingg,spacing_keyword)   , axis = 1) 
+    df["hbv"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_'+'hbv_d'+'_tw_d_',targetSpacingg,spacing_keyword)   , axis = 1) 
+    df["t2w"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 't2w',targetSpacingg,spacing_keyword)   , axis = 1) 
+    df["label"+spacing_keyword]=df.apply(lambda row : resample_labels(row,targetSpacingg,spacing_keyword)   , axis = 1) 
 
 
 
@@ -300,52 +291,45 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 
     sizeWord="_div32_"
     resList=[]
-    # with mp.Pool(processes = mp.cpu_count()) as pool:
-    #     resList=pool.map(partial(resize_and_join
+    # list(map(partial(resize_and_join
     #                             ,colNameT2w=t2wKeyWord
-    #                             ,colNameAdc="adc_c"+spacing_keyword
-    #                             ,colNameHbv="hbv_c"+spacing_keyword
+    #                             ,colNameAdc="adc"+spacing_keyword
+    #                             ,colNameHbv="hbv"+spacing_keyword
     #                             ,sizeWord=sizeWord
     #                             ,targetSize=maxSize
     #                             ,ToBedivisibleBy32=True
-    #                             )  ,list(df.iterrows())) 
+    #                             )  ,list(df.iterrows())))
 
-    resList=list(map(partial(resize_and_join
-                            ,colNameT2w=t2wKeyWord
-                            ,colNameAdc="adc_c"+spacing_keyword
-                            ,colNameHbv="hbv_c"+spacing_keyword
-                            ,sizeWord=sizeWord
-                            ,targetSize=maxSize
-                            ,ToBedivisibleBy32=True
-                            )  ,list(df.iterrows())) )
 
-    df[t2wKeyWord+"_3Chan_c"+sizeWord]=resList
+    with mp.Pool(processes = mp.cpu_count()) as pool:
+        resList=pool.map(partial(resize_and_join
+                                ,colNameT2w=t2wKeyWord
+                                ,colNameAdc="adc"+spacing_keyword
+                                ,colNameHbv="hbv"+spacing_keyword
+                                ,sizeWord=sizeWord
+                                ,targetSize=maxSize
+                                ,ToBedivisibleBy32=True
+                                )  ,list(df.iterrows())) 
+    df[t2wKeyWord+"_3Chan"+sizeWord]=resList
     #setting padding to labels
-    Standardize.iterateAndpadLabels(df,"label_c"+spacing_keyword,maxSize, 0.0,spacing_keyword+sizeWord,True)
+    Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,maxSize, 0.0,spacing_keyword+sizeWord,True)
 
 
     sizeWord="_maxSize_"
     resList=[]
-    # with mp.Pool(processes = mp.cpu_count()) as pool:
-    #     resList=pool.map(partial(resize_and_join
-    #                             ,colNameT2w=t2wKeyWord
-    #                             ,colNameAdc="adc_c"+spacing_keyword
-    #                             ,colNameHbv="hbv_c"+spacing_keyword
-    #                             ,sizeWord=sizeWord
-    #                             ,targetSize=maxSize
-    #                             ,ToBedivisibleBy32=False
-    #                             )  ,list(df.iterrows())) 
-    resList=list(map(partial(resize_and_join
-                            ,colNameT2w=t2wKeyWord
-                            ,colNameAdc="adc_c"+spacing_keyword
-                            ,colNameHbv="hbv_c"+spacing_keyword
-                            ,sizeWord=sizeWord
-                            ,targetSize=maxSize
-                            ,ToBedivisibleBy32=False
-                            )  ,list(df.iterrows())) )
+    with mp.Pool(processes = mp.cpu_count()) as pool:
+        resList=pool.map(partial(resize_and_join
+                                ,colNameT2w=t2wKeyWord
+                                ,colNameAdc="adc"+spacing_keyword
+                                ,colNameHbv="hbv"+spacing_keyword
+                                ,sizeWord=sizeWord
+                                ,targetSize=maxSize
+                                ,ToBedivisibleBy32=False
+                                )  ,list(df.iterrows())) 
 
-    df[t2wKeyWord+"_3Chan_c"+sizeWord]=resList
-    Standardize.iterateAndpadLabels(df,"label_c"+spacing_keyword,maxSize, 0.0,spacing_keyword+sizeWord,False)
+
+    df[t2wKeyWord+"_3Chan"+sizeWord]=resList
+    Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,maxSize, 0.0,spacing_keyword+sizeWord,False)
 
 
 
@@ -369,38 +353,35 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 
 #### 
 #first get adc and tbv to t2w spacing
-spacing_keyword='_tw_'
-# df["adcc"+spacing_keyword]=df.apply(lambda row : resample_To_t2w(row,'adc','tw','t2w')   , axis = 1) 
-# df["hbvc"+spacing_keyword]=df.apply(lambda row : resample_To_t2w(row,'hbv','tw','t2w')   , axis = 1) 
+spacing_keyword='_tw_d_'
+df["adc_d"+spacing_keyword]=df.apply(lambda row : resample_To_t2w(row,'adc','tw','t2w')   , axis = 1) 
+df["hbv_d"+spacing_keyword]=df.apply(lambda row : resample_To_t2w(row,'hbv','tw','t2w')   , axis = 1) 
 
 #now registration of adc and hbv to t2w
-for keyWord in ['adc','hbv']:
+for keyWord in ['adc_d'+'_tw_d_','hbv_d'+'_tw_d_']:
     resList=[]     
     with mp.Pool(processes = mp.cpu_count()) as pool:
-         resList=pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'),list(df.iterrows()))    
-
-    #resList=list(map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'),list(df.iterrows())))    
+        resList=pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'),list(df.iterrows()))    
     
-
     pathss = list(map(lambda tupl :tupl[0],resList   ))
-    #reg_values = list(map(lambda tupl :tupl[1],resList   ))
-    df['registered_c_'+keyWord]=pathss  
-    #df['registered_c_'+keyWord+"score"]=reg_values  
+    reg_values = list(map(lambda tupl :tupl[1],resList   ))
+    df['registered_'+keyWord]=pathss  
+    df['registered_'+keyWord+"score"]=reg_values  
 #checking registration by reading from logs the metrics so we will get idea how well it went
 
 
 #######      
 targetSpacinggg=(spacingDict['t2w_spac_x'][3],spacingDict['t2w_spac_y'][3],spacingDict['t2w_spac_z'][3])
-preprocess_diffrent_spacings(df,targetSpacinggg,"_med_spac_c")
-preprocess_diffrent_spacings(df,(1.0,1.0,1.0),"_one_spac_c")
-preprocess_diffrent_spacings(df,(1.5,1.5,1.5),"_one_and_half_spac_c")
-preprocess_diffrent_spacings(df,(2.0,2.0,2.0),"_two_spac_c")
+preprocess_diffrent_spacings(df,targetSpacinggg,"_med_spac_b")
+preprocess_diffrent_spacings(df,(1.0,1.0,1.0),"_one_spac_b")
+preprocess_diffrent_spacings(df,(1.5,1.5,1.5),"_one_and_half_spac_b")
+preprocess_diffrent_spacings(df,(2.0,2.0,2.0),"_two_spac_b")
 
 
 
 print("fiiiniiished")
 print(df['study_id'])
-df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current_c.csv') 
+df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current_b.csv') 
 
 
 
