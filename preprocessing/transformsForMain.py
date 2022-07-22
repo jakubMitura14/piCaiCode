@@ -37,10 +37,43 @@ from monai.transforms import (
     RandAffined,
     ConcatItemsd,
     RandCoarseDropoutd,
-    AsDiscreted
+    AsDiscreted,
+    MapTransform
     
 )
+from monai.config import KeysCollection
+
 import torchio
+import numpy as np
+
+class standardizeLabels(MapTransform):
+    """
+    Convert an integer label to encoded array representation of length num_classes,
+    with 1 filled in up to label index, and 0 otherwise. For example for num_classes=5,
+    embedding of 2 -> (1,1,0,0,0)
+    Args:
+        num_classes: the number of classes to convert to encoded format.
+        keys: keys of the corresponding items to be transformed. Defaults to ``'label'``.
+        allow_missing_keys: don't raise exception if key is missing.
+    """
+
+    def __init__(
+        self,
+        num_classes: int,
+        keys: KeysCollection = "label",
+        allow_missing_keys: bool = False,
+    ):
+        super().__init__(keys, allow_missing_keys)
+        self.num_classes = num_classes
+
+    def __call__(self, data):
+
+        d = dict(data)
+        for key in self.keys:
+            d[key] = (d[key] > 0.5).astype('float32')
+        return d
+
+
 
 
 def decide_if_whole_image_train(is_whole_to_train):
@@ -79,6 +112,7 @@ def get_train_transforms(RandGaussianNoised_prob
         [
             LoadImaged(keys=["chan3_col_name","label"]),
             EnsureChannelFirstd(keys=["chan3_col_name","label"]),
+            standardizeLabels(keys=["label"]),
             AsDiscreted(keys=["label"],to_onehot=2),
             #torchio.transforms.OneHot(include=["label"] ), #num_classes=3,
             #AsDiscreted(keys=["label"],to_onehot=2,threshold=0.5),
@@ -109,6 +143,7 @@ def get_val_transforms(is_whole_to_train):
         [
             LoadImaged(keys=["chan3_col_name","label"]),
             EnsureChannelFirstd(keys=["chan3_col_name","label"]),
+            standardizeLabels(keys=["label"]),
             AsDiscreted(keys=["label"], to_onehot=2),
 
             #torchio.transforms.OneHot(include=["label"] ),#num_classes=3

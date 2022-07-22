@@ -40,8 +40,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 import multiprocessing
 from comet_ml import Optimizer
-
+import functools
+import multiprocessing as mp
+import os
+import os.path
 monai.utils.set_determinism()
+from functools import partial
 
 import importlib.util
 import sys
@@ -75,7 +79,13 @@ def getParam(experiment,options,key,df):
     # print(options[key])
     return options[key][integerr]
 
-
+def isAnnytingInAnnotatedInner(row,labelColNAme):
+    row=row[1]
+    path=row[labelColNAme]
+    image1 = sitk.ReadImage(path)
+    #image1 = sitk.Cast(image1, sitk.sitkFloat32)
+    data = sitk.GetArrayFromImage(image1)
+    return sum(data)>0
 
 
 def mainTrain(experiment,options,df):
@@ -98,8 +108,15 @@ def mainTrain(experiment,options,df):
     chan3_col_name=f"t2w{spacing_keyword}_3Chan{sizeWord}" 
     label_name=f"label{spacing_keyword}{sizeWord}" 
     cacheDir =  f"/home/sliceruser/preprocess/monai_persistent_Dataset/{spacing_keyword}/{sizeWord}"
-    maxSize=sizeWord=="_maxSize_"
-    #print(f" fffffffffffff sizeWord {maxSize}")
+
+    ##filtering out some pathological cases
+    resList=[]     
+    with mp.Pool(processes = mp.cpu_count()) as pool:
+        resList=pool.map(partial(isAnnytingInAnnotatedInner,colName=label_name),list(df.iterrows()))    
+    df['locIsInAnnot']= resList
+    df = df.loc[df['locIsInAnnot']]
+
+
     data = DataModule.PiCaiDataModule(
         df= df,
         batch_size=2,#
