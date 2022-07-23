@@ -73,7 +73,8 @@ from monai.transforms import (
 )
 import torchio
 def getMeanIgnoreNan(a):
-    b = a[np.logical_not(np.isnan(a))]
+    b=list(filter(lambda it: np.isnan(it),a))
+    # b = a[np.logical_not(np.isnan(a))]
     return np.mean(b)
     
 class Model(pl.LightningModule):
