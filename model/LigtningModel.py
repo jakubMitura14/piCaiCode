@@ -143,7 +143,8 @@ class Model(pl.LightningModule):
         images, labels = batch['chan3_col_name'], batch["label"]
         #print(f" in validation images {images} labels {labels} "  )
 
-        y_hat = sliding_window_inference(images, (32,32,32), 1, self.net)
+        #y_hat = sliding_window_inference(images, (32,32,32), 1, self.net)
+        y_hat = self.net(images)
         #print(f"sss y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
         #print(f"sss a y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
         # labelsb = [self.post_pred(i) for i in decollate_batch(labels)]
@@ -153,7 +154,7 @@ class Model(pl.LightningModule):
         loss = self.criterion(y_hat, labels)
 
         #labels= torch.nn.functional.one_hot(labels, num_classes=2) 
-#        y_hat = [(i) for i in decollate_batch(y_hat)]
+        #y_hat = [(i) for i in decollate_batch(y_hat)]
         y_hat = decollate_batch(y_hat)
 
         #print(f"sss b  labels type {type(labels)} y_hat type {type(y_hat)}   ")
@@ -176,8 +177,8 @@ class Model(pl.LightningModule):
         #         y_det=y_hat[i].cpu().detach().numpy(),
         #         y_true=labelsb[i].cpu().detach().numpy(),
         #     )
-        #self.picaiLossArr_auroc.append(valid_metrics.auroc)
-        #self.picaiLossArr_AP.append(valid_metrics.AP  )
+        self.picaiLossArr_auroc.append(valid_metrics.auroc)
+        self.picaiLossArr_AP.append(valid_metrics.AP  )
         self.picaiLossArr_score.append(valid_metrics.score)
         
         
@@ -185,13 +186,12 @@ class Model(pl.LightningModule):
         # meanPiecaiMetr_AP= mean(self.picaiLossArr_AP)        
         # meanPiecaiMetr_score= mean(self.picaiLossArr_score)  
 
-        #meanPiecaiMetr_auroc= valid_metrics.auroc
-        #meanPiecaiMetr_AP= valid_metrics.AP   
+        meanPiecaiMetr_auroc= valid_metrics.auroc
+        meanPiecaiMetr_AP= valid_metrics.AP   
         meanPiecaiMetr_score= valid_metrics.score
         
         
-        #print( f"metrics.auroc {meanPiecaiMetr_auroc} metrics.AP {meanPiecaiMetr_AP}  metrics.score {meanPiecaiMetr_score}  " )
-        print( f" metrics.score {meanPiecaiMetr_score}  " )
+        print( f"metrics.auroc {meanPiecaiMetr_auroc} metrics.AP {meanPiecaiMetr_AP}  metrics.score {meanPiecaiMetr_score}  " )
 
         #self.dice_metric(y_pred=y_hat, y=labels)
         # print(f"losss {loss}  ")
@@ -219,21 +219,21 @@ class Model(pl.LightningModule):
         # )
 
         
-        # meanPiecaiMetr_auroc= getMeanIgnoreNan(self.picaiLossArr_auroc) # mean(self.picaiLossArr_auroc)
-        # meanPiecaiMetr_AP= getMeanIgnoreNan(self.picaiLossArr_AP) # mean(self.picaiLossArr_AP)        
+        meanPiecaiMetr_auroc= getMeanIgnoreNan(self.picaiLossArr_auroc) # mean(self.picaiLossArr_auroc)
+        meanPiecaiMetr_AP= getMeanIgnoreNan(self.picaiLossArr_AP) # mean(self.picaiLossArr_AP)        
         meanPiecaiMetr_score= getMeanIgnoreNan(self.picaiLossArr_score) #mean(self.picaiLossArr_score)        
 
-        # self.log('val_mean_auroc', meanPiecaiMetr_auroc)
-        # self.log('val_mean_AP', meanPiecaiMetr_AP)
+        self.log('val_mean_auroc', meanPiecaiMetr_auroc)
+        self.log('val_mean_AP', meanPiecaiMetr_AP)
         self.log('val_mean_score', meanPiecaiMetr_score)
 
-        # self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
-        # self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
+        self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
+        self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
         self.experiment.log_metric('val_mean_score', meanPiecaiMetr_score)
 
 
-        # self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
-        # self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
+        self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
+        self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
         self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
 
         #resetting to 0 

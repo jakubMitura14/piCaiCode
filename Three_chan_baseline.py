@@ -194,8 +194,8 @@ def mainTrain(experiment,options,df):
     print('Training duration:', datetime.now() - start)
 
 
-    # experiment.log_metric("last_val_loss_auroc",max(picaiLossArr_auroc_final))
-    # experiment.log_metric("last_val_loss_Ap",max(picaiLossArr_AP_final))
+    experiment.log_metric("last_val_loss_auroc",max(picaiLossArr_auroc_final))
+    experiment.log_metric("last_val_loss_Ap",max(picaiLossArr_AP_final))
     experiment.log_metric("last_val_loss_score",max(picaiLossArr_score_final))
 
     #experiment.log_parameters(parameters)  
