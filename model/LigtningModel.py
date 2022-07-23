@@ -177,21 +177,24 @@ class Model(pl.LightningModule):
         #         y_det=y_hat[i].cpu().detach().numpy(),
         #         y_true=labelsb[i].cpu().detach().numpy(),
         #     )
-        self.picaiLossArr_auroc.append(valid_metrics.auroc)
-        self.picaiLossArr_AP.append(valid_metrics.AP  )
-        self.picaiLossArr_score.append(valid_metrics.score)
-        
-        
-        # meanPiecaiMetr_auroc= mean(self.picaiLossArr_auroc)
-        # meanPiecaiMetr_AP= mean(self.picaiLossArr_AP)        
-        # meanPiecaiMetr_score= mean(self.picaiLossArr_score)  
+        try:
+            self.picaiLossArr_auroc.append(valid_metrics.auroc)
+            self.picaiLossArr_AP.append(valid_metrics.AP  )
+            self.picaiLossArr_score.append(valid_metrics.score)
+            
+            
+            # meanPiecaiMetr_auroc= mean(self.picaiLossArr_auroc)
+            # meanPiecaiMetr_AP= mean(self.picaiLossArr_AP)        
+            # meanPiecaiMetr_score= mean(self.picaiLossArr_score)  
 
-        meanPiecaiMetr_auroc= valid_metrics.auroc
-        meanPiecaiMetr_AP= valid_metrics.AP   
-        meanPiecaiMetr_score= valid_metrics.score
-        
-        
-        print( f"metrics.auroc {meanPiecaiMetr_auroc} metrics.AP {meanPiecaiMetr_AP}  metrics.score {meanPiecaiMetr_score}  " )
+            meanPiecaiMetr_auroc= valid_metrics.auroc
+            meanPiecaiMetr_AP= valid_metrics.AP   
+            meanPiecaiMetr_score= valid_metrics.score
+            
+            
+            print( f"metrics.auroc {meanPiecaiMetr_auroc} metrics.AP {meanPiecaiMetr_AP}  metrics.score {meanPiecaiMetr_score}  " )
+        except:
+            pass
 
         #self.dice_metric(y_pred=y_hat, y=labels)
         # print(f"losss {loss}  ")
