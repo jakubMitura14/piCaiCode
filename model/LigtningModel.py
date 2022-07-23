@@ -72,11 +72,9 @@ from monai.transforms import (
     EnsureType,
 )
 import torchio
-def getMeanIgnoreNan(array1):
-    nan_array = np.isnan(array1)
-    not_nan_array = ~ nan_array
-    array2 = array1[not_nan_array]
-    return np.mean(array2)
+def getMeanIgnoreNan(a):
+    b = a[np.logical_not(np.isnan(a))]
+    return np.mean(b)
     
 class Model(pl.LightningModule):
     def __init__(self
