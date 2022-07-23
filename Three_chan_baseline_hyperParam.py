@@ -40,7 +40,7 @@ from monai.networks.layers.factories import Act, Norm
 import torch.nn as nn
 import torch.nn.functional as F
 import multiprocessing
-
+import torch_optimizer as optim
 monai.utils.set_determinism()
 
 import importlib.util
@@ -96,7 +96,7 @@ options={
                                                             "strides":[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)]
                                                             ,"channels":[32, 64, 128, 256, 512]
                                                             }  ],
-"optimizer_class": [torch.optim.AggMo, torch.optim.NAdam] ,
+"optimizer_class": [optim.AggMo, torch.optim.NAdam] ,
 "act":[(Act.PRELU, {"init": 0.2}),(Act.LEAKYRELU, {})],                                         
 "norm":[(Norm.INSTANCE, {}),(Norm.BATCH, {}) ],
 }
