@@ -140,7 +140,7 @@ config = {
     # Declare what we will be optimizing, and how:
     "spec": {
     "metric": "last_val_loss_score",
-        "objective": "minimize",
+        "objective": "maximize",
     },
 }
 
