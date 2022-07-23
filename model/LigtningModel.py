@@ -72,6 +72,9 @@ from monai.transforms import (
     EnsureType,
 )
 import torchio
+
+torch.autograd.set_detect_anomaly(True)
+
 def getMeanIgnoreNan(a):
     b=list(filter(lambda it: not np.isnan(it),a))
     # b = a[np.logical_not(np.isnan(a))]
@@ -133,6 +136,7 @@ class Model(pl.LightningModule):
         
         #print(f"labels {labelsb[0].size()}  labels type {type(labelsb[0])} concatLabels {  concatLabels.size()}  ")
         loss = self.criterion(y_hat, y)
+        print(f"training images {np.sum(batch['chan3_col_name'])} label {np.sum(y)} y_hat {np.sum(y_hat)} loss {loss}"  )
 
         self.log('train_loss', loss, prog_bar=True)
         return loss
@@ -168,7 +172,7 @@ class Model(pl.LightningModule):
 
         #print(f" labels sum {torch.sum(labels)} ")
         y_det=np.concatenate([x.cpu().detach().numpy() for x in y_hat], axis=0)
-        
+        print(f"validation images {np.sum(images)} label {np.sum(label)} y_hat {np.sum(y_hat)} loss {loss}"  )
         if not np.isnan(np.sum(y_det)):
             valid_metrics = evaluate(y_det=iter(y_det),
                                 y_true=iter(np.concatenate([x.cpu().detach().numpy() for x in labels], axis=0)),
