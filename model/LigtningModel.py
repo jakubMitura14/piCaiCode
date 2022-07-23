@@ -147,6 +147,8 @@ class Model(pl.LightningModule):
         images, labels = batch['chan3_col_name'], batch["label"]
         #print(f" in validation images {images} labels {labels} "  )
 
+        primLabelsSum= torch.sum(labels)
+
         y_hat = sliding_window_inference(images, (32,32,32), 1, self.net)
         #y_hat = self.net(images)
         #print(f"sss y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
@@ -181,7 +183,7 @@ class Model(pl.LightningModule):
         labels= list(map(lambda tupl : tupl[1], zipped))
 
 
-        print(f" zipped len {len(zipped)} nonZeroHat {nonZeroHat}  nonZeroLab {nonZeroLab} ")
+        print(f" zipped len {len(zipped)} nonZeroHat {nonZeroHat}  nonZeroLab {nonZeroLab} primLabelsSum {primLabelsSum}")
         if(len(zipped)>0 ):
             y_det=np.concatenate([x.cpu().detach().numpy() for x in y_hat], axis=0)
             y_true=np.concatenate([x.cpu().detach().numpy() for x in labels], axis=0)
