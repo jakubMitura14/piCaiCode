@@ -86,7 +86,7 @@ to_onehot_y_loss= False
 options={
 "lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
         #,monai.losses.DiceLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
-        #,monai.losses.DiceFocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
+        ,monai.losses.DiceFocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
 ],
 "stridesAndChannels":  [ {
                                                             "strides":[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
@@ -121,7 +121,7 @@ config = {
         "max_epochs": {"type": "discrete", "values": [300]},#900
 
         "accumulate_grad_batches": {"type": "discrete", "values": [1,3]},
-        "gradient_clip_val": {"type": "discrete", "values": [0.2,0.5]},#,2.0
+        "gradient_clip_val": {"type": "discrete", "values": [0.0]},#,2.0, 0.2,0.5
 
         "RandGaussianNoised_prob": {"type": "float", "min": 0.0, "max": 0.5},
         "RandAdjustContrastd_prob": {"type": "float", "min": 0.0, "max": 0.5},
@@ -132,7 +132,7 @@ config = {
         "RandCoarseDropoutd_prob":{"type": "float", "min": 0.0, "max": 0.5},
   
         "spacing_keyword": {"type": "categorical", "values": ["_med_spac", "_one_spac","_one_and_half_spac", "_two_spac" ]},#True,False
-        "sizeWord": {"type": "categorical", "values": ["_div32_"]},#"_maxSize_" ,"_div32_"
+        "sizeWord": {"type": "categorical", "values": ["_div32_","_maxSize_"]},# ,"_div32_"
         #"dirs": {"type": "discrete", "values": list(range(0,len(options["dirs"])))},
     },
 
@@ -176,7 +176,7 @@ opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
 
 
 for experiment in opt.get_experiments(
-        project_name="picai-hyperparam-search-13"):
+        project_name="picai-hyperparam-search-14"):
     print("******* new experiment *****")    
     Three_chan_baseline.mainTrain(experiment,options,df)
 
