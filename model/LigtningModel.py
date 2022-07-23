@@ -161,7 +161,7 @@ class Model(pl.LightningModule):
         #print(f"sss c y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
         #print(f"sss d y_hat {y_hat[0].size()} labels {labels[0].size()}  labels type {type(labels[0])} y_hat type {type(y_hat[0])}   ")
 
-        print(f" labels sum {torch.sum(labels)} ")
+        #print(f" labels sum {torch.sum(labels)} ")
 
         valid_metrics = evaluate(y_det=iter(np.concatenate([x.cpu().detach().numpy() for x in y_hat], axis=0)),
                              y_true=iter(np.concatenate([x.cpu().detach().numpy() for x in labels], axis=0)),
@@ -194,6 +194,13 @@ class Model(pl.LightningModule):
 
         return loss
 
+    def getMeanIgnoreNan(array1):
+        nan_array = np.isnan(array1)
+        not_nan_array = ~ nan_array
+        array2 = array1[not_nan_array]
+        return np.mean(array2)
+
+
     def validation_epoch_end(self, outputs):
         """
         just in order to log the dice metric on validation data 
@@ -210,9 +217,10 @@ class Model(pl.LightningModule):
         #     f"at epoch: {self.best_val_epoch}"
         # )
 
-        meanPiecaiMetr_auroc= mean(self.picaiLossArr_auroc)
-        meanPiecaiMetr_AP= mean(self.picaiLossArr_AP)        
-        meanPiecaiMetr_score= mean(self.picaiLossArr_score)        
+        
+        meanPiecaiMetr_auroc= self.getMeanIgnoreNan(self.picaiLossArr_auroc) # mean(self.picaiLossArr_auroc)
+        meanPiecaiMetr_AP= self.getMeanIgnoreNan(self.picaiLossArr_AP) # mean(self.picaiLossArr_AP)        
+        meanPiecaiMetr_score= self.getMeanIgnoreNan(self.picaiLossArr_score) #mean(self.picaiLossArr_score)        
 
         self.log('val_mean_auroc', meanPiecaiMetr_auroc)
         self.log('val_mean_AP', meanPiecaiMetr_AP)
