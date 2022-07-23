@@ -175,7 +175,11 @@ class Model(pl.LightningModule):
         zipped= list(filter(lambda tupl : (torch.sum(tupl[0])>0 and torch.sum(tupl[1])>0   )  ,zipped))
         y_hat= list(map(lambda tupl : tupl[0], zipped))
         labels= list(map(lambda tupl : tupl[1], zipped))
-        print(f" zipped len {len(zipped)}")
+        nonZeroHat= len(list(filter(lambda tupl : (torch.sum(tupl[0])>0 )  ,zipped)))
+        nonZeroLab= len(list(filter(lambda tupl : (torch.sum(tupl[1])>0 )  ,zipped)))
+ 
+
+        print(f" zipped len {len(zipped)} nonZeroHat {nonZeroHat}  nonZeroLab {nonZeroLab} ")
         if(len(zipped)>0 ):
             y_det=np.concatenate([x.cpu().detach().numpy() for x in y_hat], axis=0)
             y_true=np.concatenate([x.cpu().detach().numpy() for x in labels], axis=0)
