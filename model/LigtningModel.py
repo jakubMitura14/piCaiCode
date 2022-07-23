@@ -180,7 +180,7 @@ class Model(pl.LightningModule):
         y_true=np.concatenate([x.cpu().detach().numpy() for x in labels], axis=0)
 
 
-        print(f"validation images {torch.sum(torch.isnan(images))} label {torch.sum(torch.isnan(labels))} y_hat {np.sum(y_det)} loss {loss}"  )
+        #print(f"validation images {torch.sum(torch.isnan(images))} label {torch.sum(torch.isnan(labels))} y_hat {np.sum(y_det)} loss {loss}"  )
         if not np.isnan(np.sum(y_det)):
             valid_metrics = evaluate(y_det=iter(y_det),
                                 y_true=iter(y_true),
