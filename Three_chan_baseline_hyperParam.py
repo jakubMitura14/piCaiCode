@@ -116,11 +116,11 @@ config = {
         "num_res_units": {"type": "discrete", "values": [0]},
         "act": {"type": "discrete", "values":list(range(0,len(options["act"])))  },#,(Act.LeakyReLU,{"negative_slope":0.1, "inplace":True} )
         "norm": {"type": "discrete", "values": list(range(0,len(options["norm"])))},
-        "dropout": {"type": "discrete", "values": [0.0,0.1]},
+        "dropout": {"type": "float", "min": 0.0, "max": 0.2},
         "precision": {"type": "discrete", "values": [16]},
         "max_epochs": {"type": "discrete", "values": [300]},#900
 
-        "accumulate_grad_batches": {"type": "discrete", "values": [1,3]},
+        "accumulate_grad_batches": {"type": "discrete", "values": [1,3,10]},
         "gradient_clip_val": {"type": "discrete", "values": [0.0]},#,2.0, 0.2,0.5
 
         "RandGaussianNoised_prob": {"type": "float", "min": 0.0, "max": 0.5},
@@ -176,7 +176,7 @@ opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
 
 
 for experiment in opt.get_experiments(
-        project_name="picai-hyperparam-search-14"):
+        project_name="picai-hyperparam-search-15"):
     print("******* new experiment *****")    
     Three_chan_baseline.mainTrain(experiment,options,df)
 

@@ -171,11 +171,19 @@ class Model(pl.LightningModule):
         #print(f"sss d y_hat {y_hat[0].size()} labels {labels[0].size()}  labels type {type(labels[0])} y_hat type {type(y_hat[0])}   ")
 
         #print(f" labels sum {torch.sum(labels)} ")
+        zipped=zip(y_det,labels)
+        zipped= list(filter(lambda tupl : (torch.sum(tupl[0])>0 and torch.sum(tupl[1])>0   )  ,zipped))
+        y_hat= list(map(lambda tupl : tupl[0], zipped))
+        labels= list(map(lambda tupl : tupl[1], zipped))
+
         y_det=np.concatenate([x.cpu().detach().numpy() for x in y_hat], axis=0)
+        y_true=np.concatenate([x.cpu().detach().numpy() for x in labels], axis=0)
+
+
         print(f"validation images {torch.sum(torch.isnan(images))} label {torch.sum(torch.isnan(labels))} y_hat {np.sum(y_det)} loss {loss}"  )
         if not np.isnan(np.sum(y_det)):
             valid_metrics = evaluate(y_det=iter(y_det),
-                                y_true=iter(np.concatenate([x.cpu().detach().numpy() for x in labels], axis=0)),
+                                y_true=iter(y_true),
                                 y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0])
 
         # for i in range(0, len(labelsb)):
