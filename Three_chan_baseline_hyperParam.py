@@ -148,11 +148,13 @@ maxSize=manageMetaData.getMaxSize("t2w_med_spac",df)
 
 
 exampleSpacing="_med_spac"
+t2www=f"t2w{exampleSpacing}_3Chan_maxSize_"
+labb=f"label{exampleSpacing}_maxSize_"
 
 df= manageMetaData.load_df_only_full(
     df
-    ,f"t2w{exampleSpacing}_3Chan_maxSize_"
-    ,f"label{exampleSpacing}_maxSize_"
+    ,t2www
+    ,labb
     ,True )
 df= manageMetaData.load_df_only_full(
     df
