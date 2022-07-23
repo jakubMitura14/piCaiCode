@@ -171,7 +171,7 @@ class Model(pl.LightningModule):
         #print(f"sss d y_hat {y_hat[0].size()} labels {labels[0].size()}  labels type {type(labels[0])} y_hat type {type(y_hat[0])}   ")
 
         #print(f" labels sum {torch.sum(labels)} ")
-        zipped=zip(y_det,labels)
+        zipped=zip(y_hat,labels)
         zipped= list(filter(lambda tupl : (torch.sum(tupl[0])>0 and torch.sum(tupl[1])>0   )  ,zipped))
         y_hat= list(map(lambda tupl : tupl[0], zipped))
         labels= list(map(lambda tupl : tupl[1], zipped))
