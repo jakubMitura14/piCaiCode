@@ -133,14 +133,14 @@ config = {
         "RandCoarseDropoutd_prob":{"type": "float", "min": 0.0, "max": 0.5},
   
         "spacing_keyword": {"type": "categorical", "values": ["_med_spac", "_one_spac","_one_and_half_spac", "_two_spac" ]},#True,False
-        "sizeWord": {"type": "categorical", "values": ["_div32_"]},#"_maxSize_" ,"_div32_"
+        "sizeWord": {"type": "categorical", "values": ["_div32_","_maxSize_"]},#"_maxSize_" ,"_div32_"
         #"dirs": {"type": "discrete", "values": list(range(0,len(options["dirs"])))},
     },
 
     # Declare what we will be optimizing, and how:
     "spec": {
     "metric": "last_val_loss_score",
-        "objective": "maximize",
+        "objective": "minimize",
     },
 }
 
@@ -177,7 +177,7 @@ opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
 
 
 for experiment in opt.get_experiments(
-        project_name="picai-hyperparam-search-11"):
+        project_name="picai-hyperparam-search-12"):
     print("******* new experiment *****")    
     Three_chan_baseline.mainTrain(experiment,options,df)
 
