@@ -72,7 +72,12 @@ from monai.transforms import (
     EnsureType,
 )
 import torchio
-
+def getMeanIgnoreNan(array1):
+    nan_array = np.isnan(array1)
+    not_nan_array = ~ nan_array
+    array2 = array1[not_nan_array]
+    return np.mean(array2)
+    
 class Model(pl.LightningModule):
     def __init__(self
     , net
@@ -194,11 +199,7 @@ class Model(pl.LightningModule):
 
         return loss
 
-    def getMeanIgnoreNan(array1):
-        nan_array = np.isnan(array1)
-        not_nan_array = ~ nan_array
-        array2 = array1[not_nan_array]
-        return np.mean(array2)
+
 
 
     def validation_epoch_end(self, outputs):
@@ -218,9 +219,9 @@ class Model(pl.LightningModule):
         # )
 
         
-        meanPiecaiMetr_auroc= self.getMeanIgnoreNan(self.picaiLossArr_auroc) # mean(self.picaiLossArr_auroc)
-        meanPiecaiMetr_AP= self.getMeanIgnoreNan(self.picaiLossArr_AP) # mean(self.picaiLossArr_AP)        
-        meanPiecaiMetr_score= self.getMeanIgnoreNan(self.picaiLossArr_score) #mean(self.picaiLossArr_score)        
+        meanPiecaiMetr_auroc= getMeanIgnoreNan(self.picaiLossArr_auroc) # mean(self.picaiLossArr_auroc)
+        meanPiecaiMetr_AP= getMeanIgnoreNan(self.picaiLossArr_AP) # mean(self.picaiLossArr_AP)        
+        meanPiecaiMetr_score= getMeanIgnoreNan(self.picaiLossArr_score) #mean(self.picaiLossArr_score)        
 
         self.log('val_mean_auroc', meanPiecaiMetr_auroc)
         self.log('val_mean_AP', meanPiecaiMetr_AP)
