@@ -143,8 +143,8 @@ class Model(pl.LightningModule):
         images, labels = batch['chan3_col_name'], batch["label"]
         #print(f" in validation images {images} labels {labels} "  )
 
-        #y_hat = sliding_window_inference(images, (32,32,32), 1, self.net)
-        y_hat = self.net(images)
+        y_hat = sliding_window_inference(images, (32,32,32), 1, self.net)
+        #y_hat = self.net(images)
         #print(f"sss y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
         #print(f"sss a y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
         # labelsb = [self.post_pred(i) for i in decollate_batch(labels)]
