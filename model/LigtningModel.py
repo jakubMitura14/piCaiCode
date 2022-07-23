@@ -167,17 +167,18 @@ class Model(pl.LightningModule):
         #print(f"sss d y_hat {y_hat[0].size()} labels {labels[0].size()}  labels type {type(labels[0])} y_hat type {type(y_hat[0])}   ")
 
         #print(f" labels sum {torch.sum(labels)} ")
-
-        valid_metrics = evaluate(y_det=iter(np.concatenate([x.cpu().detach().numpy() for x in y_hat], axis=0)),
-                             y_true=iter(np.concatenate([x.cpu().detach().numpy() for x in labels], axis=0)),
-                             y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0])
+        yNp=y_hat.cpu().detach().numpy()
+        
+        if not np.isnan(np.sum(yNp)):
+            valid_metrics = evaluate(y_det=iter(np.concatenate([x for x in yNp], axis=0)),
+                                y_true=iter(np.concatenate([x.cpu().detach().numpy() for x in labels], axis=0)),
+                                y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0])
 
         # for i in range(0, len(labelsb)):
         #     metrics = evaluate(
         #         y_det=y_hat[i].cpu().detach().numpy(),
         #         y_true=labelsb[i].cpu().detach().numpy(),
         #     )
-        try:
             self.picaiLossArr_auroc.append(valid_metrics.auroc)
             self.picaiLossArr_AP.append(valid_metrics.AP  )
             self.picaiLossArr_score.append(valid_metrics.score)
@@ -193,8 +194,7 @@ class Model(pl.LightningModule):
             
             
             print( f"metrics.auroc {meanPiecaiMetr_auroc} metrics.AP {meanPiecaiMetr_AP}  metrics.score {meanPiecaiMetr_score}  " )
-        except:
-            pass
+
 
         #self.dice_metric(y_pred=y_hat, y=labels)
         # print(f"losss {loss}  ")
