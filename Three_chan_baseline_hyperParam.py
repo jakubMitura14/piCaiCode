@@ -85,8 +85,8 @@ for spacing_keyword in ["_med_spac", "_one_spac","_one_and_half_spac", "_two_spa
 to_onehot_y_loss= False
 options={
 "lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
-        ,monai.losses.DiceLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
-        ,monai.losses.DiceFocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
+        #,monai.losses.DiceLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
+        #,monai.losses.DiceFocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
 ],
 "stridesAndChannels":  [ {
                                                             "strides":[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
@@ -96,11 +96,10 @@ options={
                                                             "strides":[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)]
                                                             ,"channels":[32, 64, 128, 256, 512]
                                                             }  ],
-"optimizer_class": [torch.optim.AdamW, torch.optim.NAdam] ,
+"optimizer_class": [torch.optim.AggMo, torch.optim.NAdam] ,
 "act":[(Act.PRELU, {"init": 0.2}),(Act.LEAKYRELU, {})],                                         
 "norm":[(Norm.INSTANCE, {}),(Norm.BATCH, {}) ],
 }
-
 
 #####hyperparameters
 # based on https://www.comet.com/docs/python-sdk/introduction-optimizer/
@@ -122,7 +121,7 @@ config = {
         "max_epochs": {"type": "discrete", "values": [300]},#900
 
         "accumulate_grad_batches": {"type": "discrete", "values": [1,3]},
-        "gradient_clip_val": {"type": "discrete", "values": [0.0,0.5,2.0]},
+        "gradient_clip_val": {"type": "discrete", "values": [0.2,0.5]},#,2.0
 
         "RandGaussianNoised_prob": {"type": "float", "min": 0.0, "max": 0.5},
         "RandAdjustContrastd_prob": {"type": "float", "min": 0.0, "max": 0.5},
