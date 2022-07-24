@@ -177,12 +177,14 @@ class Model(pl.LightningModule):
 
         #print(f"before decollate y_hat {y_hat.size()} labels{labels.size()}")
         y_hat=torch.sigmoid(y_hat)
+        print( f"before extract lesion  sum a {torch.sum(y_hat)  } " )
+
         y_hat = decollate_batch(y_hat)
         labels = decollate_batch(labels)
+        print(f"y hat arg maxxed sum {torch.sum(np.argmax(y_hat[0].cpu().detach().numpy(),axis=0) )}   ")
 
         # y_hat = decollate_batch(decollate_batch(y_hat)[0])
         # labels = decollate_batch(decollate_batch(labels)[0])
-        print( f" ffor lesion extractt {[np.shape(np.argmax(x.cpu().detach().numpy(),axis=0)) for x in y_hat]} " )
 
         #print(f"after decollate  y_hat{y_hat[0].size()} labels{labels[0].size()} y_hat len {len(y_hat)} labels len {len(labels)}")
         y_det=[extract_lesion_candidates( np.argmax(x.cpu().detach().numpy(),axis=0) )[0] for x in y_hat]
