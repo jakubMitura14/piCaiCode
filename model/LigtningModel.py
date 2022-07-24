@@ -186,7 +186,7 @@ class Model(pl.LightningModule):
 
         #print(f"after decollate  y_hat{y_hat[0].size()} labels{labels[0].size()} y_hat len {len(y_hat)} labels len {len(labels)}")
 
-        y_det=[extract_lesion_candidates(x.cpu().detach().numpy()) for x in y_hat[0]]
+        y_det=[extract_lesion_candidates(x.cpu().detach().numpy())[0] for x in y_hat]
         y_true=[x.cpu().detach().numpy() for x in labels]
 
 
