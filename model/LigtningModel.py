@@ -189,6 +189,7 @@ class Model(pl.LightningModule):
         y_det=[extract_lesion_candidates(x.cpu().detach().numpy())[0] for x in y_hat]
         y_true=[x.cpu().detach().numpy() for x in labels]
 
+        print( f"suums y_det {np.sum(y_det[0])}   {np.sum(y_true[0])}  len { len(y_det) } ")
 
         #print(f"single case {evaluate_case(y_hat[0], labels[0])}")
 
