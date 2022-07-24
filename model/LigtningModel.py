@@ -51,7 +51,7 @@ import shutil
 import os
 import glob
 from picai_eval import evaluate
-from picai_eval import evaluate_case
+from picai_eval.picai_eval import evaluate_case
 from statistics import mean
 from report_guided_annotation import extract_lesion_candidates
 from scipy.ndimage import gaussian_filter
