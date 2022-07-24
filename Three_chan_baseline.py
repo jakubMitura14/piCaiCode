@@ -185,7 +185,7 @@ def mainTrain(experiment,options,df):
         auto_lr_find=True,
         check_val_every_n_epoch=1,
         accumulate_grad_batches=experiment.get_parameter("accumulate_grad_batches"),
-        gradient_clip_val=experiment.get_parameter("gradient_clip_val")# 0.5,2.0
+        gradient_clip_val=experiment.get_parameter("gradient_clip_val"),# 0.5,2.0
         log_every_n_steps=30
     )
     trainer.logger._default_hp_metric = False
