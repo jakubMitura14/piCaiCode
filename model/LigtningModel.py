@@ -177,7 +177,6 @@ class Model(pl.LightningModule):
 
         #print(f"before decollate y_hat {y_hat.size()} labels{labels.size()}")
         y_hat=torch.sigmoid(y_hat)
-
         y_hat = decollate_batch(decollate_batch(y_hat)[0])
         labels = decollate_batch(decollate_batch(labels)[0])
 
@@ -207,8 +206,8 @@ class Model(pl.LightningModule):
         #print(f" zipped len {len(zipped)} nonZeroHat {nonZeroHat}  nonZeroLab {nonZeroLab} primLabelsSum {primLabelsSum}")
         #if(len(zipped)>0 ):
         if(True):
-            y_det=iter(np.concatenate(y_det, axis=0))
-            y_true=iter(np.concatenate(y_true, axis=0))
+            # y_det=iter(np.concatenate(y_det, axis=0))
+            # y_true=iter(np.concatenate(y_true, axis=0))
 
             # y_det=np.concatenate([x.cpu().detach().numpy() for x in y_hat], axis=0)
             # y_true=np.concatenate([x.cpu().detach().numpy() for x in labels], axis=0)
