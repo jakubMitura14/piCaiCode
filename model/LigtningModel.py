@@ -177,10 +177,11 @@ class Model(pl.LightningModule):
 
         #print(f"before decollate y_hat {y_hat.size()} labels{labels.size()}")
         y_hat=torch.sigmoid(y_hat)
-        y_hat = decollate_batch(decollate_batch(y_hat)[0])
-        labels = decollate_batch(decollate_batch(labels)[0])
+        y_hat = decollate_batch(y_hat)
+        labels = decollate_batch(labels)
 
-
+        # y_hat = decollate_batch(decollate_batch(y_hat)[0])
+        # labels = decollate_batch(decollate_batch(labels)[0])
         
 
         #print(f"after decollate  y_hat{y_hat[0].size()} labels{labels[0].size()} y_hat len {len(y_hat)} labels len {len(labels)}")
