@@ -51,6 +51,7 @@ import shutil
 import os
 import glob
 from picai_eval import evaluate
+from picai_eval import evaluate_case
 from statistics import mean
 from report_guided_annotation import extract_lesion_candidates
 from scipy.ndimage import gaussian_filter
@@ -181,11 +182,16 @@ class Model(pl.LightningModule):
         labels = decollate_batch(decollate_batch(labels)[0])
 
 
+        
 
         #print(f"after decollate  y_hat{y_hat[0].size()} labels{labels[0].size()} y_hat len {len(y_hat)} labels len {len(labels)}")
 
-        y_det=[x.cpu().detach().numpy() for x in extract_lesion_candidates(y_hat)[0]]
+        y_det=[extract_lesion_candidates(x.cpu().detach().numpy()) for x in y_hat[0]]
         y_true=[x.cpu().detach().numpy() for x in labels]
+
+
+        print(f"single case {evaluate_case(y_hat[0], labels[0])}")
+
 
         # zipped=zip(y_hat,labels)
         # nonZeroHat= len(list(filter(lambda tupl : (torch.sum(tupl[0]).item()>0 )  ,zipped)))
