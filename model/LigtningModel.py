@@ -53,6 +53,7 @@ import glob
 from picai_eval import evaluate
 from statistics import mean
 from report_guided_annotation import extract_lesion_candidates
+from scipy.ndimage import gaussian_filter
 
 
 import torch.nn as nn
@@ -174,6 +175,7 @@ class Model(pl.LightningModule):
         #print(f" labels sum {torch.sum(labels)} ")
 
         #print(f"before decollate y_hat {y_hat.size()} labels{labels.size()}")
+        y_hat=torch.sigmoid(y_hat)
 
         y_hat = decollate_batch(decollate_batch(y_hat)[0])
         labels = decollate_batch(decollate_batch(labels)[0])
@@ -182,8 +184,8 @@ class Model(pl.LightningModule):
 
         #print(f"after decollate  y_hat{y_hat[0].size()} labels{labels[0].size()} y_hat len {len(y_hat)} labels len {len(labels)}")
 
-        y_det=np.concatenate([x.cpu().detach().numpy() for x in y_hat], axis=0)
-        y_true=np.concatenate([x.cpu().detach().numpy() for x in labels], axis=0)
+        y_det=[x.cpu().detach().numpy() for x in extract_lesion_candidates(y_hat)[0]]
+        y_true=[x.cpu().detach().numpy() for x in labels]
 
         # zipped=zip(y_hat,labels)
         # nonZeroHat= len(list(filter(lambda tupl : (torch.sum(tupl[0]).item()>0 )  ,zipped)))
@@ -198,8 +200,8 @@ class Model(pl.LightningModule):
         #print(f" zipped len {len(zipped)} nonZeroHat {nonZeroHat}  nonZeroLab {nonZeroLab} primLabelsSum {primLabelsSum}")
         #if(len(zipped)>0 ):
         if(True):
-            y_det=iter([x.cpu().detach().numpy() for x in y_hat])
-            y_true=iter([x.cpu().detach().numpy() for x in labels])
+            y_det=iter(y_det)
+            y_true=iter(y_true)
 
             # y_det=np.concatenate([x.cpu().detach().numpy() for x in y_hat], axis=0)
             # y_true=np.concatenate([x.cpu().detach().numpy() for x in labels], axis=0)
@@ -210,7 +212,8 @@ class Model(pl.LightningModule):
             valid_metrics = evaluate(y_det=y_det,
                                 y_true=y_true,
                                 #y_true=iter(y_true),
-                                y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0])
+                                #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+                                )
 
         # for i in range(0, len(labelsb)):
         #     metrics = evaluate(
