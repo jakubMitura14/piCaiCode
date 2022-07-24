@@ -198,8 +198,8 @@ class Model(pl.LightningModule):
         #print(f" zipped len {len(zipped)} nonZeroHat {nonZeroHat}  nonZeroLab {nonZeroLab} primLabelsSum {primLabelsSum}")
         #if(len(zipped)>0 ):
         if(True):
-            y_det=[x.cpu().detach().numpy() for x in y_hat]
-            y_true=[x.cpu().detach().numpy() for x in labels]
+            y_det=iter([x.cpu().detach().numpy() for x in y_hat])
+            y_true=iter([x.cpu().detach().numpy() for x in labels])
 
             # y_det=np.concatenate([x.cpu().detach().numpy() for x in y_hat], axis=0)
             # y_true=np.concatenate([x.cpu().detach().numpy() for x in labels], axis=0)
