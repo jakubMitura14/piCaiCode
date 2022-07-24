@@ -138,7 +138,7 @@ class Model(pl.LightningModule):
         
         #print(f"labels {labelsb[0].size()}  labels type {type(labelsb[0])} concatLabels {  concatLabels.size()}  ")
         loss = self.criterion(y_hat, y)
-        print(f"training images {torch.sum(torch.isnan(batch['chan3_col_name']))} label {torch.sum(torch.isnan(y))} y_hat {torch.sum(torch.isnan(y_hat))} loss {loss}"  )
+        #print(f"training images {torch.sum(torch.isnan(batch['chan3_col_name']))} label {torch.sum(torch.isnan(y))} y_hat {torch.sum(torch.isnan(y_hat))} loss {loss}"  )
 
         self.log('train_loss', loss, prog_bar=True)
         return loss
@@ -189,7 +189,7 @@ class Model(pl.LightningModule):
         y_det=[extract_lesion_candidates(x.cpu().detach().numpy())[0] for x in y_hat]
         y_true=[x.cpu().detach().numpy() for x in labels]
 
-        print( f"suums y_det {np.sum(y_det[0])} y_true  {np.sum(y_true[0])}  len { len(y_det) } shapes  y_det {np.shape(y_det[0])} y_true  {np.shape(y_true[0])} ")
+        print( f"suums y_det {np.sum(y_det[0])} y_true  {np.sum(y_true[0])} y_det {np.sum(y_det[1])} y_true  {np.sum(y_true[1])}  len { len(y_det) } shapes  y_det {np.shape(y_det[0])} y_true  {np.shape(y_true[0])} ")
 
         #print(f"single case {evaluate_case(y_hat[0], labels[0])}")
 
@@ -207,8 +207,8 @@ class Model(pl.LightningModule):
         #print(f" zipped len {len(zipped)} nonZeroHat {nonZeroHat}  nonZeroLab {nonZeroLab} primLabelsSum {primLabelsSum}")
         #if(len(zipped)>0 ):
         if(True):
-            y_det=iter(y_det)
-            y_true=iter(y_true)
+            y_det=iter(np.concatenate(y_det, axis=0))
+            y_true=iter(np.concatenate(y_true, axis=0))
 
             # y_det=np.concatenate([x.cpu().detach().numpy() for x in y_hat], axis=0)
             # y_true=np.concatenate([x.cpu().detach().numpy() for x in labels], axis=0)
