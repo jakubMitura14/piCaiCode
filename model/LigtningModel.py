@@ -188,7 +188,7 @@ class Model(pl.LightningModule):
         y_det=[extract_lesion_candidates( np.argmax(x.cpu().detach().numpy(),axis=1) )[0] for x in y_hat]
         y_true=[x.cpu().detach().numpy() for x in labels]
 
-        print( f"suums y_det {np.sum(y_det[0])} y_true  {np.sum(y_true[0])} y_det {np.sum(y_det[1])} y_true  {np.sum(y_true[1])}  len { len(y_det) } shapes  y_det {np.shape(y_det[0])} y_true  {np.shape(y_true[0])} ")
+        print( f"suums y_det {np.sum(y_det[0])} y_true  {np.sum(y_true[0])} len { len(y_det) } shapes  y_det {np.shape(y_det[0])} y_true  {np.shape(y_true[0])} ")
 
         #print(f"single case {evaluate_case(y_hat[0], labels[0])}")
 
