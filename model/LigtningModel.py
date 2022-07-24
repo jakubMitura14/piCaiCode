@@ -177,7 +177,7 @@ class Model(pl.LightningModule):
         y_hat = decollate_batch(y_hat)
         labels = decollate_batch(labels)
 
-        print("after decollate  y_hat{y_hat} labels{labels}  ")
+        print(f"after decollate  y_hat{y_hat[0].size} labels{labels[0].size}  ")
 
         zipped=zip(y_hat,labels)
         nonZeroHat= len(list(filter(lambda tupl : (torch.sum(tupl[0]).item()>0 )  ,zipped)))
