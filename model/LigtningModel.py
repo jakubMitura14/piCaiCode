@@ -181,7 +181,7 @@ class Model(pl.LightningModule):
 
         y_hat = decollate_batch(y_hat)
         labels = decollate_batch(labels)
-        print(f"y hat arg maxxed sum {torch.sum(np.argmax(y_hat[0].cpu().detach().numpy(),axis=0) )}   ")
+        print(f"y hat arg maxxed sum {np.sum(np.argmax(y_hat[0].cpu().detach().numpy(),axis=0) )}   ")
 
         # y_hat = decollate_batch(decollate_batch(y_hat)[0])
         # labels = decollate_batch(decollate_batch(labels)[0])
