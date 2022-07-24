@@ -161,7 +161,6 @@ class Model(pl.LightningModule):
 
         #labels= torch.nn.functional.one_hot(labels, num_classes=2) 
         #y_hat = [(i) for i in decollate_batch(y_hat)]
-        y_hat = decollate_batch(y_hat)
 
         #print(f"sss b  labels type {type(labels)} y_hat type {type(y_hat)}   ")
         #print(f"sss b y_hat {y_hat.size()} labels {labels.size()} labels type {type(labels)} y_hat type {type(y_hat)}   ")
@@ -173,6 +172,13 @@ class Model(pl.LightningModule):
         #print(f"sss d y_hat {y_hat[0].size()} labels {labels[0].size()}  labels type {type(labels[0])} y_hat type {type(y_hat[0])}   ")
 
         #print(f" labels sum {torch.sum(labels)} ")
+
+
+        y_hat = decollate_batch(y_hat)
+        labels = decollate_batch(labels)
+
+        print("after decollate  y_hat{y_hat} labels{labels}  ")
+
         zipped=zip(y_hat,labels)
         nonZeroHat= len(list(filter(lambda tupl : (torch.sum(tupl[0]).item()>0 )  ,zipped)))
         nonZeroLab= len(list(filter(lambda tupl : (torch.sum(tupl[1]).item()>0 )  ,zipped)))

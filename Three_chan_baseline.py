@@ -119,7 +119,7 @@ def mainTrain(experiment,options,df):
 
     data = DataModule.PiCaiDataModule(
         df= df,
-        batch_size=4,#
+        batch_size=2,#
         trainSizePercent=percentSplit,# TODO(change to 0.7 or 0.8
         num_workers=os.cpu_count(),
         drop_last=False,#True,
@@ -186,6 +186,7 @@ def mainTrain(experiment,options,df):
         check_val_every_n_epoch=1,
         accumulate_grad_batches=experiment.get_parameter("accumulate_grad_batches"),
         gradient_clip_val=experiment.get_parameter("gradient_clip_val")# 0.5,2.0
+        log_every_n_steps=30
     )
     trainer.logger._default_hp_metric = False
     start = datetime.now()
