@@ -174,11 +174,11 @@ class Model(pl.LightningModule):
 
         #print(f" labels sum {torch.sum(labels)} ")
         zipped=zip(y_hat,labels)
-        nonZeroHat= len(list(filter(lambda tupl : (torch.sum(tupl[0])>0 )  ,zipped)))
-        nonZeroLab= len(list(filter(lambda tupl : (torch.sum(tupl[1])>0 )  ,zipped)))
+        nonZeroHat= len(list(filter(lambda tupl : (torch.sum(tupl[0]).item()>0 )  ,zipped)))
+        nonZeroLab= len(list(filter(lambda tupl : (torch.sum(tupl[1]).item()>0 )  ,zipped)))
  
 
-        zipped= list(filter(lambda tupl : (torch.sum(tupl[0])>0 and torch.sum(tupl[1])>0   )  ,zipped))
+        zipped= list(filter(lambda tupl : (torch.sum(tupl[0].item())>0 and torch.sum(tupl[1].item())>0   )  ,zipped))
         y_hat= list(map(lambda tupl : tupl[0], zipped))
         labels= list(map(lambda tupl : tupl[1], zipped))
 
