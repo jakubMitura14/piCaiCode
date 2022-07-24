@@ -182,7 +182,7 @@ class Model(pl.LightningModule):
 
         # y_hat = decollate_batch(decollate_batch(y_hat)[0])
         # labels = decollate_batch(decollate_batch(labels)[0])
-        
+        print( f" ffor lesion extractt {[np.argmax(x.cpu().detach().numpy(),axis=1) for x in y_hat]} " )
 
         #print(f"after decollate  y_hat{y_hat[0].size()} labels{labels[0].size()} y_hat len {len(y_hat)} labels len {len(labels)}")
         y_det=[extract_lesion_candidates( np.argmax(x.cpu().detach().numpy(),axis=1) )[0] for x in y_hat]
