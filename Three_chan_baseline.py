@@ -109,8 +109,9 @@ def mainTrain(experiment,options,df):
     chan3_col_name_val=f"t2w{spacing_keyword}_3Chan_maxSize_" 
 
 
-
     label_name=f"label{spacing_keyword}{sizeWord}" 
+    label_name_val=f"label{spacing_keyword}_maxSize_"
+
     cacheDir =  f"/home/sliceruser/preprocess/monai_persistent_Dataset/{spacing_keyword}/{sizeWord}"
 
     ##filtering out some pathological cases
@@ -131,6 +132,7 @@ def mainTrain(experiment,options,df):
         cache_dir=cacheDir,
         chan3_col_name =chan3_col_name,
         chan3_col_name_val=chan3_col_name_val,
+        label_name_val=label_name_val,
         label_name=label_name
         #maxSize=maxSize
         ,RandGaussianNoised_prob=experiment.get_parameter("RandGaussianNoised_prob")

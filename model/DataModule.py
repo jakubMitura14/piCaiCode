@@ -86,7 +86,7 @@ spec.loader.exec_module(dataUtils)
 class PiCaiDataModule(pl.LightningDataModule):
     def __init__(self,trainSizePercent,batch_size,num_workers
     ,drop_last,df,cache_dir,chan3_col_name,chan3_col_name_val
-    ,label_name,
+    ,label_name,label_name_val,
     RandGaussianNoised_prob
     ,RandAdjustContrastd_prob
     ,RandGaussianSmoothd_prob
@@ -115,6 +115,7 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.chan3_col_name=chan3_col_name
         self.chan3_col_name_val=chan3_col_name_val
         self.label_name=label_name
+        self.label_name_val=label_name_val
         self.RandGaussianNoised_prob=RandGaussianNoised_prob
         self.RandAdjustContrastd_prob=RandAdjustContrastd_prob
         self.RandGaussianSmoothd_prob=RandGaussianSmoothd_prob
@@ -153,7 +154,7 @@ class PiCaiDataModule(pl.LightningDataModule):
     def setup(self, stage=None):
         set_determinism(seed=0)
         self.subjects = list(map(lambda row: manageMetaData.getMonaiSubjectDataFromDataFrame(row[1]
-        ,self.chan3_col_name,self.label_name,self.chan3_col_name_val)   , list(self.df.iterrows())))
+        ,self.chan3_col_name,self.label_name,self.chan3_col_name_val,self.label_name_val)   , list(self.df.iterrows())))
         train_set, valid_set,test_set = self.splitDataSet(self.subjects , self.trainSizePercent,True)
         
         self.train_subjects = train_set

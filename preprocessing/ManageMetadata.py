@@ -19,7 +19,7 @@ def loadLib(name,path):
 #transformsForMain =loadLib("transformsForMain", "/home/sliceruser/data/piCaiCode/preprocessing/transformsForMain.py")
 
 
-def getMonaiSubjectDataFromDataFrame(row,chan3_col_name,label_name,chan3_col_name_val):
+def getMonaiSubjectDataFromDataFrame(row,chan3_col_name,label_name,chan3_col_name_val,label_name_val):
         """
         given row from data frame prepares Subject object from it
         """
@@ -39,6 +39,7 @@ def getMonaiSubjectDataFromDataFrame(row,chan3_col_name,label_name,chan3_col_nam
         # , "histopath_type":row['histopath_type']
         # , "lesion_GS":row['lesion_GS']
         , "label":str(row[label_name])
+        , "label_name_val":str(row[label_name_val])
         
         
         }
