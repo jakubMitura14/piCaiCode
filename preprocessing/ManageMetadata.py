@@ -19,11 +19,12 @@ def loadLib(name,path):
 #transformsForMain =loadLib("transformsForMain", "/home/sliceruser/data/piCaiCode/preprocessing/transformsForMain.py")
 
 
-def getMonaiSubjectDataFromDataFrame(row,chan3_col_name,label_name):
+def getMonaiSubjectDataFromDataFrame(row,chan3_col_name,label_name,chan3_col_name_val):
         """
         given row from data frame prepares Subject object from it
         """
-        subject= {"chan3_col_name": str(row[chan3_col_name])        
+        subject= {"chan3_col_name": str(row[chan3_col_name])
+        ,"chan3_col_name_val": str(row[chan3_col_name_val])        
         #, "cor":str(row['cor'])
         #, "hbv":str(row[hbv_name])
         #, "sag":str(row['sag'])

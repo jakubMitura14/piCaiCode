@@ -130,8 +130,8 @@ def get_train_transforms(RandGaussianNoised_prob
 def get_val_transforms(is_whole_to_train):
     val_transforms = Compose(
         [
-            LoadImaged(keys=["chan3_col_name","label"]),
-            EnsureChannelFirstd(keys=["chan3_col_name","label"]),
+            LoadImaged(keys=["chan3_col_name_val","label"]),
+            EnsureChannelFirstd(keys=["chan3_col_name_val","label"]),
             standardizeLabels(keys=["label"]),
             AsDiscreted(keys=["label"], to_onehot=2),
 
@@ -142,10 +142,10 @@ def get_val_transforms(is_whole_to_train):
             # Spacingd(keys=["chan3_col_name","label"]], pixdim=(
             #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
             #SpatialPadd(keys=["chan3_col_name","label"],spatial_size=maxSize) ,
-            DivisiblePadd(keys=["chan3_col_name","label"],k=32) ,
+            DivisiblePadd(keys=["chan3_col_name_val","label"],k=32) ,
 
-            *decide_if_whole_image_train(is_whole_to_train),
-            EnsureTyped(keys=["chan3_col_name","label"]),
+            #*decide_if_whole_image_train(is_whole_to_train),
+            EnsureTyped(keys=["chan3_col_name_val","label"]),
             #SelectItemsd(keys=["chan3_col_name","label"]),
             # ConcatItemsd(keys=["t2w","adc","hbv"],name="chan3_col_name")
         ]
