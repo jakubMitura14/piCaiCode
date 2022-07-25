@@ -65,7 +65,7 @@ class standardizeLabels(MapTransform):
 
 
 
-def decide_if_whole_image_train(is_whole_to_train):
+def decide_if_whole_image_train(is_whole_to_train, chan3Name,labelName):
     """
     if true we will trian on whole images otherwise just on 32x32x32
     randomly cropped parts
@@ -74,13 +74,13 @@ def decide_if_whole_image_train(is_whole_to_train):
     print(f" in decide_if_whole_image_train {fff}")
     if(not is_whole_to_train):
         return [RandCropByPosNegLabeld(
-                keys=["chan3_col_name","label"],
-                label_key="label",
+                keys=[chan3Name,labelName],
+                label_key=labelName,
                 spatial_size=(32, 32, 32),
                 pos=1,
                 neg=1,
                 num_samples=4,
-                image_key="chan3_col_name",
+                image_key=chan3Name,
                 image_threshold=0
             )
              ]
@@ -114,7 +114,7 @@ def get_train_transforms(RandGaussianNoised_prob
             # SelectItemsd(keys=["chan3_col_name","label"]),
             DivisiblePadd(keys=["chan3_col_name","label"],k=32) ,            
           
-            *decide_if_whole_image_train(is_whole_to_train),
+            *decide_if_whole_image_train(is_whole_to_train,"chan3_col_name","label"),
             #SpatialPadd(keys=["chan3_col_name","label"]],spatial_size=maxSize) ,            
             RandGaussianNoised(keys=["chan3_col_name"], prob=RandGaussianNoised_prob),
             RandAdjustContrastd(keys=["chan3_col_name"], prob=RandAdjustContrastd_prob),
@@ -144,7 +144,7 @@ def get_val_transforms(is_whole_to_train):
             #SpatialPadd(keys=["chan3_col_name","label"],spatial_size=maxSize) ,
             DivisiblePadd(keys=["chan3_col_name_val","label_name_val"],k=32) ,
 
-            *decide_if_whole_image_train(is_whole_to_train),
+            *decide_if_whole_image_train(is_whole_to_train,"chan3_col_name_val","label_name_val"),
             EnsureTyped(keys=["chan3_col_name_val","label_name_val"]),
             #SelectItemsd(keys=["chan3_col_name","label"]),
             # ConcatItemsd(keys=["t2w","adc","hbv"],name="chan3_col_name")
