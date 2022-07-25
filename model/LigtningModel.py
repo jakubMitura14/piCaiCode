@@ -216,7 +216,8 @@ class Model(pl.LightningModule):
         just in order to log the dice metric on validation data 
         """
 
-        if(len(self.list_yHat_val)>0):
+        if(len(self.list_yHat_val)>1):
+            print(f" leen {len(self.list_yHat_val)}")
             chunkLen=8
             chunksNumb=math.floor(len(self.list_yHat_val)/chunkLen)
 
@@ -236,6 +237,8 @@ class Model(pl.LightningModule):
             
             startIndex= chunksNumb*chunkLen
             endIndex=len(self.list_yHat_val)-1
+            print(f" startIndex {startIndex}  endIndex {endIndex}")
+
             # and the last part
             valid_metrics = evaluate(y_det=list(map(getArrayFromPath, self.list_yHat_val[startIndex:endIndex])),
                                     y_true=list(map(getArrayFromPath, self.list_gold_val[startIndex:endIndex]  )),
