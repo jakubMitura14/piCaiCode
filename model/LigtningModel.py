@@ -219,8 +219,12 @@ class Model(pl.LightningModule):
         # labels = decollate_batch(decollate_batch(labels)[0])
 
         #print(f"after decollate  y_hat{y_hat[0].size()} labels{labels[0].size()} y_hat len {len(y_hat)} labels len {len(labels)}")
-        y_det=[extract_lesion_candidates( np.argmax(x.cpu().detach().numpy(),axis=0) )[0] for x in y_det]
+        y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
         y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
+
+        # y_det=[extract_lesion_candidates( np.argmax(x.cpu().detach().numpy(),axis=0) )[0] for x in y_det]
+        # y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
+
 
         for i in range(0,len(y_true)):
             tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
