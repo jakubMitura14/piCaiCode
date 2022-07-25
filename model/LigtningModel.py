@@ -90,8 +90,8 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId):
     """
     gold_im = sitk.GetImageFromArray(gold_arr)
     y_hat_im = sitk.GetImageFromArray(y_hat_arr)
-    gold_im_path = join(directory, patId, "_gold.nii.gz" )
-    yHat_im_path = join(directory, patId, "_hat.nii.gz" )
+    gold_im_path = join(directory, patId+ "_gold.nii.gz" )
+    yHat_im_path = join(directory, patId+ "_hat.nii.gz" )
     
     writer = sitk.ImageFileWriter()
     writer.SetFileName(gold_im_path)
