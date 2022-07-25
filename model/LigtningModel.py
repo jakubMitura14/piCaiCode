@@ -186,10 +186,10 @@ class Model(pl.LightningModule):
         y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
 
 
-        for i in range(0,len(y_true)):
-            tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
-            self.list_gold_val.append(tupl[0])
-            self.list_yHat_val.append(tupl[1])
+        # for i in range(0,len(y_true)):
+        #     tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
+        #     self.list_gold_val.append(tupl[0])
+        #     self.list_yHat_val.append(tupl[1])
         #now we need to save files in temporary direcory and save outputs to the appripriate lists wit paths
         
 
