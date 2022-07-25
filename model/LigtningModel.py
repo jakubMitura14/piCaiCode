@@ -313,48 +313,50 @@ class Model(pl.LightningModule):
         #     f"\nbest mean dice: {self.best_val_dice:.4f} "
         #     f"at epoch: {self.best_val_epoch}"
         # )
+        if(len(self.list_yHat_val)>0):
+            valid_metrics = evaluate(y_det=list(map(getArrayFromPath, self.list_yHat_val)),
+                                y_true=list(map(getArrayFromPath, self.list_gold_val  )),
+                                #y_true=iter(y_true),
+                                #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+                                )
 
-        valid_metrics = evaluate(y_det=list(map(getArrayFromPath, self.list_yHat_val)),
-                            y_true=list(map(getArrayFromPath, self.list_gold_val  )),
-                            #y_true=iter(y_true),
-                            #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
-                            )
+            meanPiecaiMetr_auroc= valid_metrics.auroc
+            meanPiecaiMetr_AP=valid_metrics.AP 
+            meanPiecaiMetr_score=valid_metrics.score
+            
 
-        meanPiecaiMetr_auroc= valid_metrics.auroc
-        meanPiecaiMetr_AP=valid_metrics.AP 
-        meanPiecaiMetr_score=valid_metrics.score
         
-
-    
-        # meanPiecaiMetr_auroc= getMeanIgnoreNan(self.picaiLossArr_auroc) # mean(self.picaiLossArr_auroc)
-        # meanPiecaiMetr_AP= getMeanIgnoreNan(self.picaiLossArr_AP) # mean(self.picaiLossArr_AP)        
-        # meanPiecaiMetr_score= getMeanIgnoreNan(self.picaiLossArr_score) #mean(self.picaiLossArr_score)        
+            # meanPiecaiMetr_auroc= getMeanIgnoreNan(self.picaiLossArr_auroc) # mean(self.picaiLossArr_auroc)
+            # meanPiecaiMetr_AP= getMeanIgnoreNan(self.picaiLossArr_AP) # mean(self.picaiLossArr_AP)        
+            # meanPiecaiMetr_score= getMeanIgnoreNan(self.picaiLossArr_score) #mean(self.picaiLossArr_score)        
 
 
-        self.log('val_mean_auroc', meanPiecaiMetr_auroc)
-        self.log('val_mean_AP', meanPiecaiMetr_AP)
-        self.log('val_mean_score', meanPiecaiMetr_score)
+            self.log('val_mean_auroc', meanPiecaiMetr_auroc)
+            self.log('val_mean_AP', meanPiecaiMetr_AP)
+            self.log('val_mean_score', meanPiecaiMetr_score)
 
-        self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
-        self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
-        self.experiment.log_metric('val_mean_score', meanPiecaiMetr_score)
-
-
-        self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
-        self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
-        self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
-
-        #resetting to 0 
-        # self.picaiLossArr_auroc=[]
-        # self.picaiLossArr_AP=[]
-        # self.picaiLossArr_score=[]
+            self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
+            self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
+            self.experiment.log_metric('val_mean_score', meanPiecaiMetr_score)
 
 
-        #clearing and recreatin temporary directory
-        shutil.rmtree(self.temp_val_dir)    
-        self.temp_val_dir=tempfile.mkdtemp()
-        self.list_gold_val=[]
-        self.list_yHat_val=[]
+            self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
+            self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
+            self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
+
+            #resetting to 0 
+            # self.picaiLossArr_auroc=[]
+            # self.picaiLossArr_AP=[]
+            # self.picaiLossArr_score=[]
+
+
+            #clearing and recreatin temporary directory
+            shutil.rmtree(self.temp_val_dir)    
+            self.temp_val_dir=tempfile.mkdtemp()
+            self.list_gold_val=[]
+            self.list_yHat_val=[]
+
+
         return {"log": self.log}
 
     # def validation_step(self, batch, batch_idx):
