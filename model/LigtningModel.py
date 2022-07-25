@@ -220,43 +220,49 @@ class Model(pl.LightningModule):
             print(f" leen {len(self.list_yHat_val)}")
             chunkLen=8
             chunksNumb=math.floor(len(self.list_yHat_val)/chunkLen)
-            meanPiecaiMetr_auroc=0
-            meanPiecaiMetr_AP=0
-            meanPiecaiMetr_score=0
-            for i in range(0,chunksNumb):
-                startIndex= i*chunkLen
-                endIndex=(i+1)*chunkLen
-                print(f" startIndex {startIndex}  endIndex {endIndex}")
-                valid_metrics = evaluate(y_det=list(map(getArrayFromPath, self.list_yHat_val[startIndex:endIndex])),
-                                    y_true=list(map(getArrayFromPath, self.list_gold_val[startIndex:endIndex]  )),
-                                    #y_true=iter(y_true),
-                                    #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
-                                    )
-                self.picaiLossArr_auroc.append(valid_metrics.auroc)
-                self.picaiLossArr_AP.append(valid_metrics.AP)
-                self.picaiLossArr_score.append(valid_metrics.score)
+            valid_metrics = evaluate(y_det=self.list_yHat_val,
+                                y_true=self.list_gold_val,
+                                #y_true=iter(y_true),
+                                #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+                                )
+
+            meanPiecaiMetr_auroc=valid_metrics.auroc
+            meanPiecaiMetr_AP=valid_metrics.AP
+            meanPiecaiMetr_score=valid_metrics.score
+            # for i in range(0,chunksNumb):
+            #     startIndex= i*chunkLen
+            #     endIndex=(i+1)*chunkLen
+            #     print(f" startIndex {startIndex}  endIndex {endIndex}")
+            #     valid_metrics = evaluate(y_det=list(map(getArrayFromPath, self.list_yHat_val[startIndex:endIndex])),
+            #                         y_true=list(map(getArrayFromPath, self.list_gold_val[startIndex:endIndex]  )),
+            #                         #y_true=iter(y_true),
+            #                         #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+            #                         )
+            #     self.picaiLossArr_auroc.append(valid_metrics.auroc)
+            #     self.picaiLossArr_AP.append(valid_metrics.AP)
+            #     self.picaiLossArr_score.append(valid_metrics.score)
             
             
-            startIndex= chunksNumb*chunkLen
-            endIndex=len(self.list_yHat_val)
-            if endIndex>startIndex:
-                print(f" startIndex {startIndex}  endIndex {endIndex}")
+            # startIndex= chunksNumb*chunkLen
+            # endIndex=len(self.list_yHat_val)
+            # if endIndex>startIndex:
+            #     print(f" startIndex {startIndex}  endIndex {endIndex}")
 
-                # and the last part
-                valid_metrics = evaluate(y_det=list(map(getArrayFromPath, self.list_yHat_val[startIndex:endIndex])),
-                                        y_true=list(map(getArrayFromPath, self.list_gold_val[startIndex:endIndex]  )),
-                                        #y_true=iter(y_true),
-                                        #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
-                                        )
-                self.picaiLossArr_auroc.append(valid_metrics.auroc)
-                self.picaiLossArr_AP.append(valid_metrics.AP)
-                self.picaiLossArr_score.append(valid_metrics.score)
+            #     # and the last part
+            #     valid_metrics = evaluate(y_det=list(map(getArrayFromPath, self.list_yHat_val[startIndex:endIndex])),
+            #                             y_true=list(map(getArrayFromPath, self.list_gold_val[startIndex:endIndex]  )),
+            #                             #y_true=iter(y_true),
+            #                             #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+            #                             )
+            #     self.picaiLossArr_auroc.append(valid_metrics.auroc)
+            #     self.picaiLossArr_AP.append(valid_metrics.AP)
+            #     self.picaiLossArr_score.append(valid_metrics.score)
 
 
 
-                meanPiecaiMetr_auroc= np.nanmean(self.picaiLossArr_auroc) 
-                meanPiecaiMetr_AP=np.nanmean(self.picaiLossArr_AP) 
-                meanPiecaiMetr_score=np.nanmean(self.picaiLossArr_score) 
+            #     meanPiecaiMetr_auroc= np.nanmean(self.picaiLossArr_auroc) 
+            #     meanPiecaiMetr_AP=np.nanmean(self.picaiLossArr_AP) 
+            #     meanPiecaiMetr_score=np.nanmean(self.picaiLossArr_score) 
             
 
         
