@@ -263,25 +263,25 @@ class Model(pl.LightningModule):
 
 
 
-            # print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
+            print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
 
-            # self.log('val_mean_auroc', meanPiecaiMetr_auroc)
-            # self.log('val_mean_AP', meanPiecaiMetr_AP)
-            # self.log('val_mean_score', meanPiecaiMetr_score)
+            self.log('val_mean_auroc', meanPiecaiMetr_auroc)
+            self.log('val_mean_AP', meanPiecaiMetr_AP)
+            self.log('val_mean_score', meanPiecaiMetr_score)
 
-            # self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
-            # self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
-            # self.experiment.log_metric('val_mean_score', meanPiecaiMetr_score)
+            self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
+            self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
+            self.experiment.log_metric('val_mean_score', meanPiecaiMetr_score)
 
 
-            # self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
-            # self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
-            # self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
+            self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
+            self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
+            self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
 
-            # #resetting to 0 
-            # self.picaiLossArr_auroc=[]
-            # self.picaiLossArr_AP=[]
-            # self.picaiLossArr_score=[]
+            #resetting to 0 
+            self.picaiLossArr_auroc=[]
+            self.picaiLossArr_AP=[]
+            self.picaiLossArr_score=[]
 
 
             #clearing and recreatin temporary directory
