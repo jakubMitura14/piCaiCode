@@ -175,22 +175,22 @@ class Model(pl.LightningModule):
         patIds=batch['patient_id']
         y_det = sliding_window_inference(images, (32,32,32), 1, self.net)
         loss = self.criterion(y_det, y_true)
-        y_det=torch.sigmoid(y_det)
-        # print( f"before extract lesion  sum a {torch.sum(y_hat)  } " )
+        # y_det=torch.sigmoid(y_det)
+        # # print( f"before extract lesion  sum a {torch.sum(y_hat)  } " )
 
-        y_det = decollate_batch(y_det)
-        y_true = decollate_batch(y_true)
-        patIds = decollate_batch(patIds)
-        #print(f"after decollate  y_hat{y_hat[0].size()} labels{labels[0].size()} y_hat len {len(y_hat)} labels len {len(labels)}")
-        y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
-        y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
+        # y_det = decollate_batch(y_det)
+        # y_true = decollate_batch(y_true)
+        # patIds = decollate_batch(patIds)
+        # #print(f"after decollate  y_hat{y_hat[0].size()} labels{labels[0].size()} y_hat len {len(y_hat)} labels len {len(labels)}")
+        # y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
+        # y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
 
 
-        for i in range(0,len(y_true)):
-            tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
-            self.list_gold_val.append(tupl[0])
-            self.list_yHat_val.append(tupl[1])
-        #now we need to save files in temporary direcory and save outputs to the appripriate lists wit paths
+        # for i in range(0,len(y_true)):
+        #     tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
+        #     self.list_gold_val.append(tupl[0])
+        #     self.list_yHat_val.append(tupl[1])
+        # #now we need to save files in temporary direcory and save outputs to the appripriate lists wit paths
         
 
         self.log('val_loss', loss)
@@ -259,25 +259,29 @@ class Model(pl.LightningModule):
             # meanPiecaiMetr_AP= getMeanIgnoreNan(self.picaiLossArr_AP) # mean(self.picaiLossArr_AP)        
             # meanPiecaiMetr_score= getMeanIgnoreNan(self.picaiLossArr_score) #mean(self.picaiLossArr_score)        
 
-            print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
-
-            self.log('val_mean_auroc', meanPiecaiMetr_auroc)
-            self.log('val_mean_AP', meanPiecaiMetr_AP)
-            self.log('val_mean_score', meanPiecaiMetr_score)
-
-            self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
-            self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
-            self.experiment.log_metric('val_mean_score', meanPiecaiMetr_score)
 
 
-            self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
-            self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
-            self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
 
-            #resetting to 0 
-            self.picaiLossArr_auroc=[]
-            self.picaiLossArr_AP=[]
-            self.picaiLossArr_score=[]
+
+            # print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
+
+            # self.log('val_mean_auroc', meanPiecaiMetr_auroc)
+            # self.log('val_mean_AP', meanPiecaiMetr_AP)
+            # self.log('val_mean_score', meanPiecaiMetr_score)
+
+            # self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
+            # self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
+            # self.experiment.log_metric('val_mean_score', meanPiecaiMetr_score)
+
+
+            # self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
+            # self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
+            # self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
+
+            # #resetting to 0 
+            # self.picaiLossArr_auroc=[]
+            # self.picaiLossArr_AP=[]
+            # self.picaiLossArr_score=[]
 
 
             #clearing and recreatin temporary directory
