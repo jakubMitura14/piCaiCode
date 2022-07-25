@@ -170,7 +170,7 @@ class Model(pl.LightningModule):
     #     return 0.5
 
     def validation_step(self, batch, batch_idx):
-        images, labels = batch['chan3_col_name'], batch["label"]
+        images, labels = batch['chan3_col_name_val'], batch["label_name_val"]
         #print(f" in validation images {images} labels {labels} "  )
         patIds=batch['patient_id']
         primLabelsSum= torch.sum(labels)
