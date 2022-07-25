@@ -55,8 +55,10 @@ from picai_eval import evaluate
 from statistics import mean
 from report_guided_annotation import extract_lesion_candidates
 from scipy.ndimage import gaussian_filter
-
-
+import tempfile
+import shutil
+from os import path as pathOs
+from os.path import basename, dirname, exists, isdir, join, split
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -81,7 +83,31 @@ def getMeanIgnoreNan(a):
     b=list(filter(lambda it: not np.isnan(it),a))
     # b = a[np.logical_not(np.isnan(a))]
     return np.mean(b)
+
+def saveFilesInDir(gold_arr,y_hat_arr, directory, patId):
+    """
+    saves arrays in given directory and return paths to them
+    """
+    gold_im = sitk.GetImageFromArray(gold_arr)
+    y_hat_im = sitk.GetImageFromArray(y_hat_arr)
+    gold_im_path = join(directory, patId, "_gold.nii.gz" )
+    yHat_im_path = join(directory, patId, "_hat.nii.gz" )
     
+    writer = sitk.ImageFileWriter()
+    writer.SetFileName(gold_im_path)
+    writer.Execute(gold_im)
+
+    writer = sitk.ImageFileWriter()
+    writer.SetFileName(yHat_im_path)
+    writer.Execute(y_hat_im)
+
+    return(gold_im_path,yHat_im_path)
+
+
+def getArrayFromPath(path):
+    image1=sitk.ReadImage(path)
+    return sitk.GetArrayFromImage(image1)
+
 class Model(pl.LightningModule):
     def __init__(self
     , net
@@ -116,6 +142,10 @@ class Model(pl.LightningModule):
         self.picaiLossArr_auroc_final=picaiLossArr_auroc_final
         self.picaiLossArr_AP_final=picaiLossArr_AP_final
         self.picaiLossArr_score_final=picaiLossArr_score_final
+        #temporary directory for validation images and their labels
+        self.temp_val_dir=tempfile.mkdtemp()
+        self.list_gold_val=[]
+        self.list_yHat_val=[]
 
     def configure_optimizers(self):
         optimizer = self.optimizer_class(self.parameters(), lr=self.lr)
@@ -148,7 +178,7 @@ class Model(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         images, labels = batch['chan3_col_name'], batch["label"]
         #print(f" in validation images {images} labels {labels} "  )
-
+        patIds=batch['patient_id']
         primLabelsSum= torch.sum(labels)
 
         y_hat = sliding_window_inference(images, (32,32,32), 1, self.net)
@@ -177,73 +207,86 @@ class Model(pl.LightningModule):
 
         #print(f"before decollate y_hat {y_hat.size()} labels{labels.size()}")
         y_hat=torch.sigmoid(y_hat)
-        print( f"before extract lesion  sum a {torch.sum(y_hat)  } " )
+        # print( f"before extract lesion  sum a {torch.sum(y_hat)  } " )
 
-        y_hat = decollate_batch(y_hat)
-        labels = decollate_batch(labels)
-        print(f"y hat arg maxxed sum {np.sum(np.argmax(y_hat[0].cpu().detach().numpy(),axis=0) )}  zzero {np.sum(y_hat[0].cpu().detach().numpy()[0,:,:,:])} first {np.sum(y_hat[0].cpu().detach().numpy()[0,:,:,:])}      ")
-        print(f"y true arg maxxed sum {np.sum(np.argmax(labels[0].cpu().detach().numpy(),axis=0) )}  zzero {np.sum(labels[0].cpu().detach().numpy()[0,:,:,:])} first {np.sum(labels[0].cpu().detach().numpy()[0,:,:,:])}      ")
+        y_det = decollate_batch(y_hat)
+        y_true = decollate_batch(labels)
+        patIds = decollate_batch(patIds)
+        # print(f"y hat arg maxxed sum {np.sum(np.argmax(y_hat[0].cpu().detach().numpy(),axis=0) )}  zzero {np.sum(y_hat[0].cpu().detach().numpy()[0,:,:,:])} first {np.sum(y_hat[0].cpu().detach().numpy()[0,:,:,:])}      ")
+        # print(f"y true arg maxxed sum {np.sum(np.argmax(labels[0].cpu().detach().numpy(),axis=0) )}  zzero {np.sum(labels[0].cpu().detach().numpy()[0,:,:,:])} first {np.sum(labels[0].cpu().detach().numpy()[0,:,:,:])}      ")
 
         # y_hat = decollate_batch(decollate_batch(y_hat)[0])
         # labels = decollate_batch(decollate_batch(labels)[0])
 
         #print(f"after decollate  y_hat{y_hat[0].size()} labels{labels[0].size()} y_hat len {len(y_hat)} labels len {len(labels)}")
-        y_det=[extract_lesion_candidates( np.argmax(x.cpu().detach().numpy(),axis=0) )[0] for x in y_hat]
-        y_true=[np.argmax(x.cpu().detach().numpy(),axis=0) for x in labels]
+        y_det=[extract_lesion_candidates( np.argmax(x.cpu().detach().numpy(),axis=0) )[0] for x in y_det]
+        y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
 
-        print( f"suums y_det {np.sum(y_det[0])} y_true  {np.sum(y_true[0])} len { len(y_det) } shapes  y_det {np.shape(y_det[0])} y_true  {np.shape(y_true[0])} ")
+        for i in range(0,len(y_true)):
+            tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
+            self.list_gold_val.append(tupl[0])
+            self.list_yHat_val.append(tupl[1])
+        #now we need to save files in temporary direcory and save outputs to the appripriate lists wit paths
+        
 
-        #print(f"single case {evaluate_case(y_hat[0], labels[0])}")
 
 
-        # zipped=zip(y_hat,labels)
-        # nonZeroHat= len(list(filter(lambda tupl : (torch.sum(tupl[0]).item()>0 )  ,zipped)))
-        # nonZeroLab= len(list(filter(lambda tupl : (torch.sum(tupl[1]).item()>0 )  ,zipped)))
+
+
+
+        # print( f"suums y_det {np.sum(y_det[0])} y_true  {np.sum(y_true[0])} len { len(y_det) } shapes  y_det {np.shape(y_det[0])} y_true  {np.shape(y_true[0])} ")
+
+        # #print(f"single case {evaluate_case(y_hat[0], labels[0])}")
+
+
+        # # zipped=zip(y_hat,labels)
+        # # nonZeroHat= len(list(filter(lambda tupl : (torch.sum(tupl[0]).item()>0 )  ,zipped)))
+        # # nonZeroLab= len(list(filter(lambda tupl : (torch.sum(tupl[1]).item()>0 )  ,zipped)))
  
 
-        # zipped= list(filter(lambda tupl : (torch.sum(tupl[0].item())>0 and torch.sum(tupl[1].item())>0   )  ,zipped))
-        # y_hat= list(map(lambda tupl : tupl[0], zipped))
-        # labels= list(map(lambda tupl : tupl[1], zipped))
+        # # zipped= list(filter(lambda tupl : (torch.sum(tupl[0].item())>0 and torch.sum(tupl[1].item())>0   )  ,zipped))
+        # # y_hat= list(map(lambda tupl : tupl[0], zipped))
+        # # labels= list(map(lambda tupl : tupl[1], zipped))
 
 
-        #print(f" zipped len {len(zipped)} nonZeroHat {nonZeroHat}  nonZeroLab {nonZeroLab} primLabelsSum {primLabelsSum}")
-        #if(len(zipped)>0 ):
-        if(True):
-            # y_det=iter(np.concatenate(y_det, axis=0))
-            # y_true=iter(np.concatenate(y_true, axis=0))
+        # #print(f" zipped len {len(zipped)} nonZeroHat {nonZeroHat}  nonZeroLab {nonZeroLab} primLabelsSum {primLabelsSum}")
+        # #if(len(zipped)>0 ):
+        # if(True):
+        #     # y_det=iter(np.concatenate(y_det, axis=0))
+        #     # y_true=iter(np.concatenate(y_true, axis=0))
 
-            # y_det=np.concatenate([x.cpu().detach().numpy() for x in y_hat], axis=0)
-            # y_true=np.concatenate([x.cpu().detach().numpy() for x in labels], axis=0)
+        #     # y_det=np.concatenate([x.cpu().detach().numpy() for x in y_hat], axis=0)
+        #     # y_true=np.concatenate([x.cpu().detach().numpy() for x in labels], axis=0)
 
 
 
-        #print(f"validation images {torch.sum(torch.isnan(images))} label {torch.sum(torch.isnan(labels))} y_hat {np.sum(y_det)} loss {loss}"  )
-            valid_metrics = evaluate(y_det=y_det,
-                                y_true=y_true,
-                                #y_true=iter(y_true),
-                                #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
-                                )
+        # #print(f"validation images {torch.sum(torch.isnan(images))} label {torch.sum(torch.isnan(labels))} y_hat {np.sum(y_det)} loss {loss}"  )
+        #     valid_metrics = evaluate(y_det=y_det,
+        #                         y_true=y_true,
+        #                         #y_true=iter(y_true),
+        #                         #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+        #                         )
 
-        # for i in range(0, len(labelsb)):
-        #     metrics = evaluate(
-        #         y_det=y_hat[i].cpu().detach().numpy(),
-        #         y_true=labelsb[i].cpu().detach().numpy(),
-        #     )
-            self.picaiLossArr_auroc.append(valid_metrics.auroc)
-            self.picaiLossArr_AP.append(valid_metrics.AP  )
-            self.picaiLossArr_score.append(valid_metrics.score)
+        # # for i in range(0, len(labelsb)):
+        # #     metrics = evaluate(
+        # #         y_det=y_hat[i].cpu().detach().numpy(),
+        # #         y_true=labelsb[i].cpu().detach().numpy(),
+        # #     )
+        #     self.picaiLossArr_auroc.append(valid_metrics.auroc)
+        #     self.picaiLossArr_AP.append(valid_metrics.AP  )
+        #     self.picaiLossArr_score.append(valid_metrics.score)
             
             
-            # meanPiecaiMetr_auroc= mean(self.picaiLossArr_auroc)
-            # meanPiecaiMetr_AP= mean(self.picaiLossArr_AP)        
-            # meanPiecaiMetr_score= mean(self.picaiLossArr_score)  
+        #     # meanPiecaiMetr_auroc= mean(self.picaiLossArr_auroc)
+        #     # meanPiecaiMetr_AP= mean(self.picaiLossArr_AP)        
+        #     # meanPiecaiMetr_score= mean(self.picaiLossArr_score)  
 
-            meanPiecaiMetr_auroc= valid_metrics.auroc
-            meanPiecaiMetr_AP= valid_metrics.AP   
-            meanPiecaiMetr_score= valid_metrics.score
+        #     meanPiecaiMetr_auroc= valid_metrics.auroc
+        #     meanPiecaiMetr_AP= valid_metrics.AP   
+        #     meanPiecaiMetr_score= valid_metrics.score
             
             
-            print( f"metrics.auroc {meanPiecaiMetr_auroc} metrics.AP {meanPiecaiMetr_AP}  metrics.score {meanPiecaiMetr_score}  " )
+        #     print( f"metrics.auroc {meanPiecaiMetr_auroc} metrics.AP {meanPiecaiMetr_AP}  metrics.score {meanPiecaiMetr_score}  " )
 
 
         #self.dice_metric(y_pred=y_hat, y=labels)
@@ -271,10 +314,22 @@ class Model(pl.LightningModule):
         #     f"at epoch: {self.best_val_epoch}"
         # )
 
+        valid_metrics = evaluate(y_det=list(map(getArrayFromPath, self.list_yHat_val)),
+                            y_true=list(map(getArrayFromPath, self.list_gold_val  )),
+                            #y_true=iter(y_true),
+                            #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+                            )
+
+        meanPiecaiMetr_auroc= valid_metrics.auroc
+        meanPiecaiMetr_AP=valid_metrics.AP 
+        meanPiecaiMetr_score=valid_metrics.score
         
-        meanPiecaiMetr_auroc= getMeanIgnoreNan(self.picaiLossArr_auroc) # mean(self.picaiLossArr_auroc)
-        meanPiecaiMetr_AP= getMeanIgnoreNan(self.picaiLossArr_AP) # mean(self.picaiLossArr_AP)        
-        meanPiecaiMetr_score= getMeanIgnoreNan(self.picaiLossArr_score) #mean(self.picaiLossArr_score)        
+
+    
+        # meanPiecaiMetr_auroc= getMeanIgnoreNan(self.picaiLossArr_auroc) # mean(self.picaiLossArr_auroc)
+        # meanPiecaiMetr_AP= getMeanIgnoreNan(self.picaiLossArr_AP) # mean(self.picaiLossArr_AP)        
+        # meanPiecaiMetr_score= getMeanIgnoreNan(self.picaiLossArr_score) #mean(self.picaiLossArr_score)        
+
 
         self.log('val_mean_auroc', meanPiecaiMetr_auroc)
         self.log('val_mean_AP', meanPiecaiMetr_AP)
@@ -290,10 +345,16 @@ class Model(pl.LightningModule):
         self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
 
         #resetting to 0 
-        self.picaiLossArr_auroc=[]
-        self.picaiLossArr_AP=[]
-        self.picaiLossArr_score=[]
+        # self.picaiLossArr_auroc=[]
+        # self.picaiLossArr_AP=[]
+        # self.picaiLossArr_score=[]
 
+
+        #clearing and recreatin temporary directory
+        shutil.rmtree(self.temp_val_dir)    
+        self.temp_val_dir=tempfile.mkdtemp()
+        self.list_gold_val=[]
+        self.list_yHat_val=[]
         return {"log": self.log}
 
     # def validation_step(self, batch, batch_idx):

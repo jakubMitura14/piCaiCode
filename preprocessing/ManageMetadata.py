@@ -29,7 +29,7 @@ def getMonaiSubjectDataFromDataFrame(row,chan3_col_name,label_name):
         #, "sag":str(row['sag'])
         #, "t2w":str(row[t2w_name])
         # , "isAnythingInAnnotated":row['isAnythingInAnnotated']
-        # , "patient_id":row['patient_id']
+        , "patient_id":str(row['patient_id'])
         # , "study_id":row['study_id']
         # , "patient_age":row['patient_age']
         # , "psa":row['psa']
