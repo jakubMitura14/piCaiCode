@@ -170,20 +170,16 @@ class Model(pl.LightningModule):
     #     return 0.5
 
     def validation_step(self, batch, batch_idx):
-        images, labels = batch['chan3_col_name_val'], batch["label_name_val"]
+        images, y_true = batch['chan3_col_name_val'], batch["label_name_val"]
         #print(f" in validation images {images} labels {labels} "  )
         patIds=batch['patient_id']
-        primLabelsSum= torch.sum(labels)
-
-        y_hat = sliding_window_inference(images, (32,32,32), 1, self.net)
-
-        loss = self.criterion(y_hat, labels)
-
-        y_hat=torch.sigmoid(y_hat)
+        y_det = sliding_window_inference(images, (32,32,32), 1, self.net)
+        loss = self.criterion(y_det, y_true)
+        y_det=torch.sigmoid(y_det)
         # print( f"before extract lesion  sum a {torch.sum(y_hat)  } " )
 
-        y_det = decollate_batch(y_hat)
-        y_true = decollate_batch(labels)
+        y_det = decollate_batch(y_det)
+        y_true = decollate_batch(y_true)
         patIds = decollate_batch(patIds)
         #print(f"after decollate  y_hat{y_hat[0].size()} labels{labels[0].size()} y_hat len {len(y_hat)} labels len {len(labels)}")
         y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
