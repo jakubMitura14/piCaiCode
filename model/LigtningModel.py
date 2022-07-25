@@ -205,7 +205,8 @@ class Model(pl.LightningModule):
         just in order to log the dice metric on validation data 
         """
 
-        if(len(self.list_yHat_val)>1):
+        #if(len(self.list_yHat_val)>1):
+        if(False):
             print(f" leen {len(self.list_yHat_val)}")
             chunkLen=8
             chunksNumb=math.floor(len(self.list_yHat_val)/chunkLen)
