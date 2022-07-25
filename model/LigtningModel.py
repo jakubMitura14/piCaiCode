@@ -220,8 +220,9 @@ class Model(pl.LightningModule):
             print(f" leen {len(self.list_yHat_val)}")
             chunkLen=8
             chunksNumb=math.floor(len(self.list_yHat_val)/chunkLen)
-
-
+            meanPiecaiMetr_auroc=0
+            meanPiecaiMetr_AP=0
+            meanPiecaiMetr_score=0
             for i in range(0,chunksNumb):
                 startIndex= i*chunkLen
                 endIndex=(i+1)*chunkLen
