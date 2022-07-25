@@ -124,7 +124,7 @@ config = {
         "RandCoarseDropoutd_prob":{"type": "float", "min": 0.0, "max": 0.5},
   
         "spacing_keyword": {"type": "categorical", "values": ["_med_spac", "_one_spac","_one_and_half_spac", "_two_spac" ]},#True,False
-        "sizeWord": {"type": "categorical", "values": [ "_div32_","_maxSize_" ]},# ,"_div32_"  "_maxSize_"
+        "sizeWord": {"type": "categorical", "values": [ "_div32_"]},# ,"_div32_"  "_maxSize_"
         #"dirs": {"type": "discrete", "values": list(range(0,len(options["dirs"])))},
     },
 

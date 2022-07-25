@@ -89,18 +89,25 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId):
     """
     saves arrays in given directory and return paths to them
     """
-    gold_im = sitk.GetImageFromArray(gold_arr)
-    y_hat_im = sitk.GetImageFromArray(y_hat_arr)
-    gold_im_path = join(directory, patId+ "_gold.nii.gz" )
-    yHat_im_path = join(directory, patId+ "_hat.nii.gz" )
+    # gold_im = sitk.GetImageFromArray(gold_arr)
+    # y_hat_im = sitk.GetImageFromArray(y_hat_arr)
+    # gold_im_path = join(directory, patId+ "_gold.nii.gz" )
+    # yHat_im_path = join(directory, patId+ "_hat.nii.gz" )
     
-    writer = sitk.ImageFileWriter()
-    writer.SetFileName(gold_im_path)
-    writer.Execute(gold_im)
+    gold_im_path = join(directory, patId+ "_gold.npy" )
+    yHat_im_path = join(directory, patId+ "_hat.npy" )
+    np.save(gold_im_path, gold_arr)
+    np.save(yHat_im_path, y_hat_arr)
 
-    writer = sitk.ImageFileWriter()
-    writer.SetFileName(yHat_im_path)
-    writer.Execute(y_hat_im)
+
+
+    # writer = sitk.ImageFileWriter()
+    # writer.SetFileName(gold_im_path)
+    # writer.Execute(gold_im)
+
+    # writer = sitk.ImageFileWriter()
+    # writer.SetFileName(yHat_im_path)
+    # writer.Execute(y_hat_im)
 
     return(gold_im_path,yHat_im_path)
 
@@ -175,21 +182,21 @@ class Model(pl.LightningModule):
         patIds=batch['patient_id']
         y_det = sliding_window_inference(images, (32,32,32), 1, self.net)
         loss = self.criterion(y_det, y_true)
-        # y_det=torch.sigmoid(y_det)
-        # # print( f"before extract lesion  sum a {torch.sum(y_hat)  } " )
+        y_det=torch.sigmoid(y_det)
+        # print( f"before extract lesion  sum a {torch.sum(y_hat)  } " )
 
-        # y_det = decollate_batch(y_det)
-        # y_true = decollate_batch(y_true)
-        # patIds = decollate_batch(patIds)
-        # #print(f"after decollate  y_hat{y_hat[0].size()} labels{labels[0].size()} y_hat len {len(y_hat)} labels len {len(labels)}")
-        # y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
-        # y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
+        y_det = decollate_batch(y_det)
+        y_true = decollate_batch(y_true)
+        patIds = decollate_batch(patIds)
+        #print(f"after decollate  y_hat{y_hat[0].size()} labels{labels[0].size()} y_hat len {len(y_hat)} labels len {len(labels)}")
+        y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
+        y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
 
 
-        # for i in range(0,len(y_true)):
-        #     tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
-        #     self.list_gold_val.append(tupl[0])
-        #     self.list_yHat_val.append(tupl[1])
+        for i in range(0,len(y_true)):
+            tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
+            self.list_gold_val.append(tupl[0])
+            self.list_yHat_val.append(tupl[1])
         #now we need to save files in temporary direcory and save outputs to the appripriate lists wit paths
         
 
@@ -205,8 +212,7 @@ class Model(pl.LightningModule):
         just in order to log the dice metric on validation data 
         """
 
-        #if(len(self.list_yHat_val)>1):
-        if(False):
+        if(len(self.list_yHat_val)>1):
             print(f" leen {len(self.list_yHat_val)}")
             chunkLen=8
             chunksNumb=math.floor(len(self.list_yHat_val)/chunkLen)
@@ -259,10 +265,6 @@ class Model(pl.LightningModule):
             # meanPiecaiMetr_auroc= getMeanIgnoreNan(self.picaiLossArr_auroc) # mean(self.picaiLossArr_auroc)
             # meanPiecaiMetr_AP= getMeanIgnoreNan(self.picaiLossArr_AP) # mean(self.picaiLossArr_AP)        
             # meanPiecaiMetr_score= getMeanIgnoreNan(self.picaiLossArr_score) #mean(self.picaiLossArr_score)        
-
-
-
-
 
             print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
 

@@ -106,11 +106,13 @@ def mainTrain(experiment,options,df):
     spacing_keyword=experiment.get_parameter("spacing_keyword")
     sizeWord= experiment.get_parameter("sizeWord")
     chan3_col_name=f"t2w{spacing_keyword}_3Chan{sizeWord}" 
-    chan3_col_name_val=f"t2w{spacing_keyword}_3Chan_maxSize_" 
+    chan3_col_name_val=chan3_col_name 
+    #chan3_col_name_val=f"t2w{spacing_keyword}_3Chan_maxSize_" 
 
 
     label_name=f"label{spacing_keyword}{sizeWord}" 
-    label_name_val=f"label{spacing_keyword}_maxSize_"
+    label_name_val=label_name
+    #label_name_val=f"label{spacing_keyword}_maxSize_"
 
     cacheDir =  f"/home/sliceruser/preprocess/monai_persistent_Dataset/{spacing_keyword}/{sizeWord}"
 
