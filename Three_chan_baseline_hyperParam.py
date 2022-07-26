@@ -159,8 +159,8 @@ df= manageMetaData.load_df_only_full(
 # (You can leave out API_KEY if you already set it)
 #opt = Optimizer(config)
 
-
-opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
+opt = Optimizer("05d7194d6d594a92a3de75a481bec91b")
+#opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
 
 
 # print("zzzzzzzzz")
