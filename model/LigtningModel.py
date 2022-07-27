@@ -300,6 +300,9 @@ class Model(pl.LightningModule):
         #in case we have Nan values training is unstable and we want to terminate it     
         if(self.isAnyNan):
             self.log('val_mean_score', -0.2)
+            self.picaiLossArr_score_final=[-0.2]
+            self.picaiLossArr_AP_final=[-0.2]
+            self.picaiLossArr_auroc_final=[-0.2]
             print(" naans in outputt  ")
 
         #self.isAnyNan=False
