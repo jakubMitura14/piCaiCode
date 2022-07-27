@@ -302,7 +302,7 @@ class Model(pl.LightningModule):
             self.log('val_mean_score', -0.2)
             print(" naans in outputt  ")
 
-        self.isAnyNan=False
+        #self.isAnyNan=False
         return {"log": self.log}
 
     # def validation_step(self, batch, batch_idx):
