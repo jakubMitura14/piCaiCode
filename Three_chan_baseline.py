@@ -178,8 +178,10 @@ def mainTrain(experiment,options,df):
         picaiLossArr_score_final=picaiLossArr_score_final
     )
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
-        monitor='val_loss',
-        patience=5
+        monitor='val_mean_score',
+        patience=2,
+        mode="max",
+        divergence_threshold=(-0.1)
     )
     #stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging()
     trainer = pl.Trainer(
@@ -206,9 +208,9 @@ def mainTrain(experiment,options,df):
     print('Training duration:', datetime.now() - start)
 
 
-    experiment.log_metric("last_val_loss_auroc",-np.nanmax(picaiLossArr_auroc_final))
-    experiment.log_metric("last_val_loss_Ap",-np.nanmax(picaiLossArr_AP_final))
-    experiment.log_metric("last_val_loss_score",-np.nanmax(picaiLossArr_score_final))
+    experiment.log_metric("last_val_loss_auroc",np.nanmax(picaiLossArr_auroc_final))
+    experiment.log_metric("last_val_loss_Ap",np.nanmax(picaiLossArr_AP_final))
+    experiment.log_metric("last_val_loss_score",np.nanmax(picaiLossArr_score_final))
 
     #experiment.log_parameters(parameters)  
     experiment.end()

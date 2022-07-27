@@ -154,6 +154,7 @@ class Model(pl.LightningModule):
         self.temp_val_dir=tempfile.mkdtemp()
         self.list_gold_val=[]
         self.list_yHat_val=[]
+        self.isAnyNan=False
 
     def configure_optimizers(self):
         optimizer = self.optimizer_class(self.parameters(), lr=self.lr)
@@ -179,8 +180,13 @@ class Model(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         images, y_true = batch['chan3_col_name_val'], batch["label_name_val"]
         #print(f" in validation images {images} labels {labels} "  )
+  
         patIds=batch['patient_id']
         y_det = sliding_window_inference(images, (32,32,32), 1, self.net)
+        #marking that we had some Nan numbers in the tensor
+        if(torch.sum(torch.isnan( y_det))>0):
+            self.isAnyNan=True
+        
         loss = self.criterion(y_det, y_true)
         y_det=torch.sigmoid(y_det)
         # print( f"before extract lesion  sum a {torch.sum(y_hat)  } " )
@@ -212,10 +218,9 @@ class Model(pl.LightningModule):
         just in order to log the dice metric on validation data 
         """
 
-        if(len(self.list_yHat_val)>1):
-            print(f" leen {len(self.list_yHat_val)}")
+        if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
             chunkLen=8
-            chunksNumb=math.floor(len(self.list_yHat_val)/chunkLen)
+
             valid_metrics = evaluate(y_det=self.list_yHat_val,
                                 y_true=self.list_gold_val,
                                 #y_true=iter(y_true),
@@ -292,8 +297,10 @@ class Model(pl.LightningModule):
             self.temp_val_dir=tempfile.mkdtemp()
             self.list_gold_val=[]
             self.list_yHat_val=[]
-
-
+        #in case we have Nan values training is unstable and we want to terminate it     
+        if(self.isAnyNan):
+            self.log('val_mean_score', -0.2)
+        self.isAnyNan=False
         return {"log": self.log}
 
     # def validation_step(self, batch, batch_idx):

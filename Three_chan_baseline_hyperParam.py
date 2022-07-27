@@ -88,7 +88,7 @@ options={
                                                             "strides":[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)]
                                                             ,"channels":[32, 64, 128, 256, 512]
                                                             }  ],
-"optimizer_class": [optim.AggMo] ,#look in https://pytorch-optimizer.readthedocs.io/en/latest/api.html
+"optimizer_class": [optim.AggMo, torch.optim.NAdam] ,#look in https://pytorch-optimizer.readthedocs.io/en/latest/api.html
 "act":[(Act.PRELU, {"init": 0.2}),(Act.LEAKYRELU, {})],                                         
 "norm":[(Norm.INSTANCE, {}),(Norm.BATCH, {}) ],
 }
@@ -113,7 +113,7 @@ config = {
         "max_epochs": {"type": "discrete", "values": [300]},#900
 
         "accumulate_grad_batches": {"type": "discrete", "values": [1,3,10]},
-        "gradient_clip_val": {"type": "discrete", "values": [0.0]},#,2.0, 0.2,0.5
+        "gradient_clip_val": {"type": "discrete", "values": [0.0,0.2,0.5,2.0,100.0]},#,2.0, 0.2,0.5
 
         "RandGaussianNoised_prob": {"type": "float", "min": 0.0, "max": 0.5},
         "RandAdjustContrastd_prob": {"type": "float", "min": 0.0, "max": 0.5},
@@ -131,7 +131,7 @@ config = {
     # Declare what we will be optimizing, and how:
     "spec": {
     "metric": "last_val_loss_score",
-        "objective": "minimize",
+        "objective": "maximize",
     },
 }
 
@@ -159,8 +159,8 @@ df= manageMetaData.load_df_only_full(
 # (You can leave out API_KEY if you already set it)
 #opt = Optimizer(config)
 
-opt = Optimizer("6f64b92b125c4e189c33a6ae3a718d11", api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
-#opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
+#opt = Optimizer("6f64b92b125c4e189c33a6ae3a718d11", api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
+opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
 
 
 # print("zzzzzzzzz")
@@ -170,7 +170,7 @@ opt = Optimizer("6f64b92b125c4e189c33a6ae3a718d11", api_key="yB0irIjdk9t7gbpTlSU
 
 
 for experiment in opt.get_experiments(
-        project_name="picai-hyperparam-search-19"):
+        project_name="picai-hyperparam-search-20"):
     print("******* new experiment *****")    
     Three_chan_baseline.mainTrain(experiment,options,df)
 
