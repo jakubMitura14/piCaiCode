@@ -179,7 +179,7 @@ def mainTrain(experiment,options,df):
     )
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
         monitor='val_mean_score',
-        patience=2,
+        patience=5,
         mode="max",
         divergence_threshold=(-0.1)
     )
