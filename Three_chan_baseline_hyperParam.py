@@ -160,8 +160,8 @@ df= manageMetaData.load_df_only_full(
 # (You can leave out API_KEY if you already set it)
 #opt = Optimizer(config)
 
-#opt = Optimizer("7e7ecc7b196e4a9da030d51296622454", api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
-opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
+opt = Optimizer("7e7ecc7b196e4a9da030d51296622454", api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
+#opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
 # print("zzzzzzzzz")
 #  print(opt.get_experiments(
 #          api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
@@ -169,7 +169,7 @@ opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
 
 
 for experiment in opt.get_experiments(
-        project_name="picai-hyperparam-search-21"):
+        project_name="picai-hyperparam-search-22"):
     print("******* new experiment *****")    
     Three_chan_baseline.mainTrain(experiment,options,df)
 
