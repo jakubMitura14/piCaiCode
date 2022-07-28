@@ -78,7 +78,8 @@ to_onehot_y_loss= False
 options={
 "lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
         #,monai.losses.DiceLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
-        ,monai.losses.DiceFocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
+        #,monai.losses.DiceFocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
+        
 ],
 "stridesAndChannels":  [ {
                                                             "strides":[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
@@ -88,8 +89,8 @@ options={
                                                             "strides":[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)]
                                                             ,"channels":[32, 64, 128, 256, 512]
                                                             }  ],
-"optimizer_class": [optim.AggMo, torch.optim.NAdam] ,#look in https://pytorch-optimizer.readthedocs.io/en/latest/api.html
-"act":[(Act.PRELU, {"init": 0.2}),(Act.LEAKYRELU, {})],                                         
+"optimizer_class": [torch.optim.NAdam] ,# optim.AggMo,   look in https://pytorch-optimizer.readthedocs.io/en/latest/api.html
+"act":[(Act.PRELU, {"init": 0.2})],#,(Act.LEAKYRELU, {})                                         
 "norm":[(Norm.INSTANCE, {}),(Norm.BATCH, {}) ],
 }
 
@@ -159,8 +160,8 @@ df= manageMetaData.load_df_only_full(
 # (You can leave out API_KEY if you already set it)
 #opt = Optimizer(config)
 
-opt = Optimizer("7e7ecc7b196e4a9da030d51296622454", api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
-#opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
+#opt = Optimizer("7e7ecc7b196e4a9da030d51296622454", api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
+opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
 # print("zzzzzzzzz")
 #  print(opt.get_experiments(
 #          api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
@@ -168,7 +169,7 @@ opt = Optimizer("7e7ecc7b196e4a9da030d51296622454", api_key="yB0irIjdk9t7gbpTlSU
 
 
 for experiment in opt.get_experiments(
-        project_name="picai-hyperparam-search-20"):
+        project_name="picai-hyperparam-search-21"):
     print("******* new experiment *****")    
     Three_chan_baseline.mainTrain(experiment,options,df)
 
