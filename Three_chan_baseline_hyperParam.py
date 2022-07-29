@@ -106,7 +106,7 @@ config = {
         "lossF": {"type": "discrete", "values": list(range(0,len(options["lossF"])))},
         "stridesAndChannels": {"type": "discrete", "values":  list(range(0,len(options["stridesAndChannels"])))  },
         "optimizer_class": {"type": "discrete", "values":list(range(0,len(options["optimizer_class"])))  },
-        "num_res_units": {"type": "discrete", "values": [0,1,2,3]},
+        "num_res_units": {"type": "discrete", "values": [0]},
         "act": {"type": "discrete", "values":list(range(0,len(options["act"])))  },#,(Act.LeakyReLU,{"negative_slope":0.1, "inplace":True} )
         "norm": {"type": "discrete", "values": list(range(0,len(options["norm"])))},
         "dropout": {"type": "float", "min": 0.0, "max": 0.5},
@@ -160,8 +160,8 @@ df= manageMetaData.load_df_only_full(
 # (You can leave out API_KEY if you already set it)
 #opt = Optimizer(config)
 
-opt = Optimizer("8b617302a75749f29eb221076be8874a", api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
-#opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
+#opt = Optimizer("8b617302a75749f29eb221076be8874a", api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
+opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
 # print("zzzzzzzzz")
 #  print(opt.get_experiments(
 #          api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
