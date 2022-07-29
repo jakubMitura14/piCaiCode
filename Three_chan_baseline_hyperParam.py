@@ -102,30 +102,30 @@ config = {
     "algorithm": "bayes",
 
     # Declare  hyperparameters in 
-    "parameters": {
+"parameters": {
         "lossF": {"type": "discrete", "values": list(range(0,len(options["lossF"])))},
         "stridesAndChannels": {"type": "discrete", "values":  list(range(0,len(options["stridesAndChannels"])))  },
         "optimizer_class": {"type": "discrete", "values":list(range(0,len(options["optimizer_class"])))  },
-        "num_res_units": {"type": "discrete", "values": [0]},
+        "num_res_units": {"type": "discrete", "values": [0,1,2,3]},
         "act": {"type": "discrete", "values":list(range(0,len(options["act"])))  },#,(Act.LeakyReLU,{"negative_slope":0.1, "inplace":True} )
         "norm": {"type": "discrete", "values": list(range(0,len(options["norm"])))},
-        "dropout": {"type": "float", "min": 0.0, "max": 0.2},
+        "dropout": {"type": "float", "min": 0.0, "max": 0.5},
         "precision": {"type": "discrete", "values": [16]},
         "max_epochs": {"type": "discrete", "values": [300]},#900
 
         "accumulate_grad_batches": {"type": "discrete", "values": [1,3,10]},
-        "gradient_clip_val": {"type": "discrete", "values": [0.0,0.2,0.5,2.0,100.0]},#,2.0, 0.2,0.5
+        "gradient_clip_val": {"type": "discrete", "values": [0.0, 0.2,0.5,2.0,100.0]},#,2.0, 0.2,0.5
 
         "RandGaussianNoised_prob": {"type": "float", "min": 0.0, "max": 0.5},
-        "RandAdjustContrastd_prob": {"type": "float", "min": 0.0, "max": 0.5},
-        "RandGaussianSmoothd_prob": {"type": "float", "min": 0.0, "max": 0.5},
-        "RandRicianNoised_prob": {"type": "float", "min": 0.0, "max": 0.5},
-        "RandFlipd_prob": {"type": "float", "min": 0.0, "max": 0.5},
+        "RandAdjustContrastd_prob": {"type": "float", "min": 0.3, "max": 0.8},
+        "RandGaussianSmoothd_prob": {"type": "discrete", "values": [0.0]},
+        "RandRicianNoised_prob": {"type": "float", "min": 0.2, "max": 0.7},
+        "RandFlipd_prob": {"type": "float", "min": 0.3, "max": 0.7},
         "RandAffined_prob": {"type": "float", "min": 0.0, "max": 0.5},
-        "RandCoarseDropoutd_prob":{"type": "float", "min": 0.0, "max": 0.5},
+        "RandCoarseDropoutd_prob":{"type": "discrete", "values": [0.0]},
   
-        "spacing_keyword": {"type": "categorical", "values": ["_med_spac", "_one_spac","_one_and_half_spac", "_two_spac" ]},#True,False
-        "sizeWord": {"type": "categorical", "values": [ "_div32_"]},# ,"_div32_"  "_maxSize_"
+        "spacing_keyword": {"type": "categorical", "values": ["_med_spac", "_one_spac" ]},#"_one_and_half_spac", "_two_spac"
+        "sizeWord": {"type": "categorical", "values": ["_div32_","_maxSize_"]},# ,"_div32_"
         #"dirs": {"type": "discrete", "values": list(range(0,len(options["dirs"])))},
     },
 
@@ -159,8 +159,8 @@ df= manageMetaData.load_df_only_full(
 # Next, create an optimizer, passing in the config:
 # (You can leave out API_KEY if you already set it)
 #opt = Optimizer(config)
-opt = Optimizer("8cba014e11654c99aeb62536dd13c438", api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
-#opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
+#opt = Optimizer("8cba014e11654c99aeb62536dd13c438", api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
+opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
 # print("zzzzzzzzz")
 #  print(opt.get_experiments(
 #          api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
@@ -168,7 +168,7 @@ opt = Optimizer("8cba014e11654c99aeb62536dd13c438", api_key="yB0irIjdk9t7gbpTlSU
 
 
 for experiment in opt.get_experiments(
-        project_name="picai-hyperparam-search-22"):
+        project_name="picai-hyperparam-search-23"):
     print("******* new experiment *****")    
     Three_chan_baseline.mainTrain(experiment,options,df)
 
