@@ -89,7 +89,7 @@ options={
                                                             "strides":[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)]
                                                             ,"channels":[32, 64, 128, 256, 512]
                                                             }  ],
-"optimizer_class": [torch.optim.NAdam,torch.optim.LBFGS] ,# optim.AggMo,   look in https://pytorch-optimizer.readthedocs.io/en/latest/api.html
+"optimizer_class": [torch.optim.NAdam] ,# ,torch.optim.LBFGS optim.AggMo,   look in https://pytorch-optimizer.readthedocs.io/en/latest/api.html
 "act":[(Act.PRELU, {"init": 0.2})],#,(Act.LEAKYRELU, {})                                         
 "norm":[(Norm.INSTANCE, {}),(Norm.BATCH, {}) ],
 #TODO() learning rate schedulers https://medium.com/mlearning-ai/make-powerful-deep-learning-models-quickly-using-pytorch-lightning-29f040158ef3
