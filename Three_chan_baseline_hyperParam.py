@@ -83,9 +83,9 @@ loss = SamplesLoss(loss="sinkhorn")
 to_onehot_y_loss= False
 options={
 "lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
-        ,SamplesLoss(loss="sinkhorn")
-        ,SamplesLoss(loss="hausdorff")
-        ,SamplesLoss(loss="energy")
+        ,SamplesLoss(loss="sinkhorn",p=3)
+        ,SamplesLoss(loss="hausdorff",p=3)
+        ,SamplesLoss(loss="energy",p=3)
         #,monai.losses.DiceLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
         #,monai.losses.DiceLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
         #,monai.losses.DiceFocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
