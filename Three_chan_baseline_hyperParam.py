@@ -117,7 +117,7 @@ config = {
         "lossF": {"type": "discrete", "values": list(range(0,len(options["lossF"])))},
         "stridesAndChannels": {"type": "discrete", "values":  list(range(0,len(options["stridesAndChannels"])))  },
         "optimizer_class": {"type": "discrete", "values":list(range(0,len(options["optimizer_class"])))  },
-        "num_res_units": {"type": "discrete", "values": [0]},
+        "num_res_units": {"type": "discrete", "values": [0,1,2]},
         "act": {"type": "discrete", "values":list(range(0,len(options["act"])))  },#,(Act.LeakyReLU,{"negative_slope":0.1, "inplace":True} )
         "norm": {"type": "discrete", "values": list(range(0,len(options["norm"])))},
         "dropout": {"type": "float", "min": 0.0, "max": 0.5},
