@@ -77,7 +77,7 @@ for spacing_keyword in ["_med_spac", "_one_spac","_one_and_half_spac", "_two_spa
 
 
 # Define a Sinkhorn (~Wasserstein) loss between sampled measures
-loss = SamplesLoss(loss="sinkhorn")
+#loss = SamplesLoss(loss="sinkhorn")
 
 ##options
 to_onehot_y_loss= False
