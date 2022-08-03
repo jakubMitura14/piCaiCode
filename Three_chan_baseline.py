@@ -130,7 +130,7 @@ def mainTrain(experiment,options,df):
         df= df,
         batch_size=2,#
         trainSizePercent=percentSplit,# TODO(change to 0.7 or 0.8
-        num_workers=os.cpu_count(),
+        num_workers=1#os.cpu_count(),
         drop_last=False,#True,
         #we need to use diffrent cache folders depending on weather we are dividing data or not
         cache_dir=cacheDir,
@@ -194,7 +194,7 @@ def mainTrain(experiment,options,df):
         accelerator='auto',
         devices='auto',       
         default_root_dir= "/home/sliceruser/data/lightning_logs",
-        auto_scale_batch_size="binsearch",
+        #auto_scale_batch_size="binsearch",
         auto_lr_find=True,
         check_val_every_n_epoch=10,
         accumulate_grad_batches=experiment.get_parameter("accumulate_grad_batches"),
