@@ -130,7 +130,7 @@ def mainTrain(experiment,options,df):
         df= df,
         batch_size=2,#
         trainSizePercent=percentSplit,# TODO(change to 0.7 or 0.8
-        num_workers=1#os.cpu_count(),
+        num_workers=1,#os.cpu_count(),
         drop_last=False,#True,
         #we need to use diffrent cache folders depending on weather we are dividing data or not
         cache_dir=cacheDir,
