@@ -188,7 +188,7 @@ def mainTrain(experiment,options,df):
         #accelerator="cpu", #TODO(remove)
         max_epochs=experiment.get_parameter("max_epochs"),
         #gpus=1,
-        precision=experiment.get_parameter("precision"), 
+        #precision=experiment.get_parameter("precision"), 
         callbacks=[ early_stopping ],
         #logger=comet_logger,
         accelerator='auto',
