@@ -165,13 +165,14 @@ df= manageMetaData.load_df_only_full(
     ,f"t2w{exampleSpacing}_3Chan_div32_"
     ,f"label{exampleSpacing}_div32_"
     ,False )
-
+#COMET INFO: COMET_OPTIMIZER_ID=bfa44ecc70f348f1b05ecefcf8f7cd29
 
 # Next, create an optimizer, passing in the config:
 # (You can leave out API_KEY if you already set it)
 #opt = Optimizer(config)
-#opt = Optimizer("560c894771e74ec4896ef048be50d67a", api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
-opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
+opt = Optimizer("bfa44ecc70f348f1b05ecefcf8f7cd29", api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
+
+#opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
 # print("zzzzzzzzz")
 #  print(opt.get_experiments(
 #          api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
