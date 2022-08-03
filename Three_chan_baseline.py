@@ -193,7 +193,7 @@ def mainTrain(experiment,options,df):
         #logger=comet_logger,
         accelerator='auto',
         devices='auto',       
-        default_root_dir= "/home/sliceruser/data/lightning_logsB",
+        default_root_dir= "/home/sliceruser/data/lightning_logs",
         auto_scale_batch_size="binsearch",
         auto_lr_find=True,
         check_val_every_n_epoch=10,
