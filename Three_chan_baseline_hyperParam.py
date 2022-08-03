@@ -42,6 +42,8 @@ import torch.nn.functional as F
 import multiprocessing
 import torch_optimizer as optim
 monai.utils.set_determinism()
+import geomloss
+from geomloss import SamplesLoss  # See also ImagesLoss, VolumesLoss
 
 import importlib.util
 import sys
@@ -73,10 +75,18 @@ for spacing_keyword in ["_med_spac", "_one_spac","_one_and_half_spac", "_two_spa
 
 
 
+
+# Define a Sinkhorn (~Wasserstein) loss between sampled measures
+loss = SamplesLoss(loss="sinkhorn")
+
 ##options
 to_onehot_y_loss= False
 options={
 "lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
+        ,SamplesLoss(loss="sinkhorn")
+        ,SamplesLoss(loss="hausdorff")
+        ,SamplesLoss(loss="energy")
+        #,monai.losses.DiceLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
         #,monai.losses.DiceLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
         #,monai.losses.DiceFocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
         
@@ -89,7 +99,7 @@ options={
                                                             "strides":[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)]
                                                             ,"channels":[32, 64, 128, 256, 512]
                                                             }  ],
-"optimizer_class": [torch.optim.NAdam] ,# ,torch.optim.LBFGS optim.AggMo,   look in https://pytorch-optimizer.readthedocs.io/en/latest/api.html
+"optimizer_class": [torch.optim.NAdam,torch.optim.LBFGS] ,# ,torch.optim.LBFGS optim.AggMo,   look in https://pytorch-optimizer.readthedocs.io/en/latest/api.html
 "act":[(Act.PRELU, {"init": 0.2})],#,(Act.LEAKYRELU, {})                                         
 "norm":[(Norm.INSTANCE, {}),(Norm.BATCH, {}) ],
 #TODO() learning rate schedulers https://medium.com/mlearning-ai/make-powerful-deep-learning-models-quickly-using-pytorch-lightning-29f040158ef3
@@ -112,7 +122,7 @@ config = {
         "norm": {"type": "discrete", "values": list(range(0,len(options["norm"])))},
         "dropout": {"type": "float", "min": 0.0, "max": 0.5},
         "precision": {"type": "discrete", "values": [16]},
-        "max_epochs": {"type": "discrete", "values": [300]},#900
+        "max_epochs": {"type": "discrete", "values": [100]},#900
 
         "accumulate_grad_batches": {"type": "discrete", "values": [1,3,10]},
         "gradient_clip_val": {"type": "discrete", "values": [0.0, 0.2,0.5,2.0,100.0]},#,2.0, 0.2,0.5
@@ -160,8 +170,8 @@ df= manageMetaData.load_df_only_full(
 # Next, create an optimizer, passing in the config:
 # (You can leave out API_KEY if you already set it)
 #opt = Optimizer(config)
-opt = Optimizer("560c894771e74ec4896ef048be50d67a", api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
-#opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
+#opt = Optimizer("560c894771e74ec4896ef048be50d67a", api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
+opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4")
 # print("zzzzzzzzz")
 #  print(opt.get_experiments(
 #          api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
@@ -169,7 +179,7 @@ opt = Optimizer("560c894771e74ec4896ef048be50d67a", api_key="yB0irIjdk9t7gbpTlSU
 
 
 for experiment in opt.get_experiments(
-        project_name="picai-hyperparam-search-23"):
+        project_name="picai-hyperparam-search-24"):
     print("******* new experiment *****")    
     Three_chan_baseline.mainTrain(experiment,options,df)
 
