@@ -141,10 +141,10 @@ def get_val_transforms(is_whole_to_train):
             #Orientationd(keys=["chan3_col_name","label"]], axcodes="RAS"),
             # Spacingd(keys=["chan3_col_name","label"]], pixdim=(
             #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
-            SpatialPadd(keys=["chan3_col_name","label"],spatial_size=maxSize) ,
+            #SpatialPadd(keys=["chan3_col_name","label"],spatial_size=maxSize) ,
             DivisiblePadd(keys=["chan3_col_name_val","label_name_val"],k=32) ,
 
-            #*decide_if_whole_image_train(is_whole_to_train,"chan3_col_name_val","label_name_val"),
+            *decide_if_whole_image_train(is_whole_to_train,"chan3_col_name_val","label_name_val"),
             EnsureTyped(keys=["chan3_col_name_val","label_name_val"]),
             #SelectItemsd(keys=["chan3_col_name","label"]),
             # ConcatItemsd(keys=["t2w","adc","hbv"],name="chan3_col_name")
