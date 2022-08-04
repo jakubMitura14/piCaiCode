@@ -136,7 +136,7 @@ config = {
         "RandCoarseDropoutd_prob":{"type": "discrete", "values": [0.0]},
   
         "spacing_keyword": {"type": "categorical", "values": [ "_one_spac" ]},#"_med_spac","_one_and_half_spac", "_two_spac"
-        "sizeWord": {"type": "categorical", "values": ["_div32_","_maxSize_"]},# ,"_div32_"
+        "sizeWord": {"type": "categorical", "values": ["_div32_"]},#,"_maxSize_"# ,"_div32_"
         #"dirs": {"type": "discrete", "values": list(range(0,len(options["dirs"])))},
     },
 
@@ -170,9 +170,9 @@ df= manageMetaData.load_df_only_full(
 # Next, create an optimizer, passing in the config:
 # (You can leave out API_KEY if you already set it)
 #opt = Optimizer(config)
-opt = Optimizer("7f2a2ec647dc499086a7affb7578b574", api_key="yB0irIjdk9t7gbpTlSUPnXBd4"
-,trials=500)
-#opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4",trials=500)
+# opt = Optimizer("7f2a2ec647dc499086a7affb7578b574", api_key="yB0irIjdk9t7gbpTlSUPnXBd4"
+# ,trials=500)
+opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4",trials=500)
 # print("zzzzzzzzz")
 #  print(opt.get_experiments(
 #          api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
@@ -180,7 +180,7 @@ opt = Optimizer("7f2a2ec647dc499086a7affb7578b574", api_key="yB0irIjdk9t7gbpTlSU
 
 
 for experiment in opt.get_experiments(
-        project_name="picai-hyperparam-search-25"):
+        project_name="picai-hyperparam-search-26"):
     print("******* new experiment *****")    
     Three_chan_baseline.mainTrain(experiment,options,df)
 

@@ -76,7 +76,7 @@ def decide_if_whole_image_train(is_whole_to_train, chan3Name,labelName):
         return [RandCropByPosNegLabeld(
                 keys=[chan3Name,labelName],
                 label_key=labelName,
-                spatial_size=(32, 32, 32),
+                spatial_size=(64, 64, 32),
                 pos=1,
                 neg=1,
                 num_samples=4,
@@ -144,7 +144,7 @@ def get_val_transforms(is_whole_to_train):
             #SpatialPadd(keys=["chan3_col_name","label"],spatial_size=maxSize) ,
             DivisiblePadd(keys=["chan3_col_name_val","label_name_val"],k=32) ,
 
-            *decide_if_whole_image_train(is_whole_to_train,"chan3_col_name_val","label_name_val"),
+            #*decide_if_whole_image_train(is_whole_to_train,"chan3_col_name_val","label_name_val"),
             EnsureTyped(keys=["chan3_col_name_val","label_name_val"]),
             #SelectItemsd(keys=["chan3_col_name","label"]),
             # ConcatItemsd(keys=["t2w","adc","hbv"],name="chan3_col_name")
