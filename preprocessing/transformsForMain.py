@@ -76,7 +76,7 @@ def decide_if_whole_image_train(is_whole_to_train, chan3Name,labelName):
         return [RandCropByPosNegLabeld(
                 keys=[chan3Name,labelName],
                 label_key=labelName,
-                spatial_size=(128, 128, 32),
+                spatial_size=(96, 96, 32),
                 pos=1,
                 neg=1,
                 num_samples=2,
