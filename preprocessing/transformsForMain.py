@@ -67,7 +67,7 @@ class standardizeLabels(MapTransform):
 
 def decide_if_whole_image_train(is_whole_to_train, chan3Name,labelName):
     """
-    if true we will trian on whole images otherwise just on 32x32x32
+    if true we will trian on whole images otherwise just on 64x64x32
     randomly cropped parts
     """
     fff=not is_whole_to_train
@@ -79,7 +79,7 @@ def decide_if_whole_image_train(is_whole_to_train, chan3Name,labelName):
                 spatial_size=(64, 64, 32),
                 pos=1,
                 neg=1,
-                num_samples=4,
+                num_samples=2,
                 image_key=chan3Name,
                 image_threshold=0
             )
