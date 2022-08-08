@@ -354,11 +354,11 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 #### 
 #first get adc and tbv to t2w spacing
 spacing_keyword='_tw_d_'
-df["adc_d"+spacing_keyword]=df.apply(lambda row : resample_To_t2w(row,'adc','tw','t2w')   , axis = 1) 
-df["hbv_d"+spacing_keyword]=df.apply(lambda row : resample_To_t2w(row,'hbv','tw','t2w')   , axis = 1) 
+# df["adc_d"+spacing_keyword]=df.apply(lambda row : resample_To_t2w(row,'adc','tw','t2w')   , axis = 1) 
+# df["hbv_d"+spacing_keyword]=df.apply(lambda row : resample_To_t2w(row,'hbv','tw','t2w')   , axis = 1) 
 
 #now registration of adc and hbv to t2w
-for keyWord in ['adc_d'+'_tw_d_','hbv_d'+'_tw_d_']:
+for keyWord in ['adc','hbv']:
     resList=[]     
     with mp.Pool(processes = mp.cpu_count()) as pool:
         resList=pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'),list(df.iterrows()))    
