@@ -145,27 +145,27 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
                 p.wait()
             print(f"**********  ***********  ****************  registering {patId}  ")
 
-            parameterMap = sitk.GetDefaultParameterMap('translation')
-            parameterMap['MaximumNumberOfIterations'] = ['1']
-            parameterMap['Interpolator'] = ['BSplineInterpolator']
-            resultImage = sitk.Elastix(sitk.ReadImage(row[1][t2wColName]),  \
-                                    sitk.ReadImage(path), \
-                                    parameterMap)
-            writer = sitk.ImageFileWriter()
-            writer.KeepOriginalImageUIDOn()
-            writer.SetFileName(result)
-            writer.Execute(resultImage) 
+            # parameterMap = sitk.GetDefaultParameterMap('translation')
+            # parameterMap['MaximumNumberOfIterations'] = ['1']
+            # parameterMap['Interpolator'] = ['BSplineInterpolator']
+            # resultImage = sitk.Elastix(sitk.ReadImage(row[1][t2wColName]),  \
+            #                         sitk.ReadImage(path), \
+            #                         parameterMap)
+            # writer = sitk.ImageFileWriter()
+            # writer.KeepOriginalImageUIDOn()
+            # writer.SetFileName(result)
+            # writer.Execute(resultImage) 
             
-            # cmd=f"{elacticPath} -f {row[1][t2wColName]} -m {path} -out {outPath} -p {reg_prop} -threads 1"
-            # print(cmd)
-            # p = Popen(cmd, shell=True)#,stdout=subprocess.PIPE , stderr=subprocess.PIPE
-            # p.wait()
-            # #we will repeat operation multiple max 9 times if the result would not be written
-            # if((not pathOs.exists(result)) and reIndex<15):
-            #     reIndexNew=reIndex+1
-            #     if(reIndex==6): #in case it do not work we will try diffrent parametrization
-            #         reg_prop=reg_prop.replace("parameters","parametersB")              
-            #     reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment,reIndexNew)
+            cmd=f"{elacticPath} -f {row[1][t2wColName]} -m {path} -out {outPath} -p {reg_prop} -threads 1"
+            print(cmd)
+            p = Popen(cmd, shell=True)#,stdout=subprocess.PIPE , stderr=subprocess.PIPE
+            p.wait()
+            #we will repeat operation multiple max 9 times if the result would not be written
+            if((not pathOs.exists(result)) and reIndex<15):
+                reIndexNew=reIndex+1
+                if(reIndex==6): #in case it do not work we will try diffrent parametrization
+                    reg_prop=reg_prop.replace("parameters","parametersB")              
+                reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment,reIndexNew)
             #in case it will not work via elastix we will use simple itk    
             # if(not pathOs.exists(result)):
             #     try:
