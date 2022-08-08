@@ -33,15 +33,15 @@ trainedModelsBasicPath='/home/sliceruser/data/preprocess/standarizationModels'
 
 df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData.csv')
 #currently We want only imagfes with associated masks
-df = df.loc[df['isAnyMissing'] ==False]
-df = df.loc[df['isAnythingInAnnotated']>0 ]
-# ignore all with deficient spacing
-for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:    
-    colName=keyWord+ "_spac_x"
-    df = df.loc[df[colName]>0 ]
-# get only complete representaions and only those with labels
-df = df.loc[df['isAnyMissing'] ==False]
-df = df.loc[df['isAnythingInAnnotated']>0 ]    
+# df = df.loc[df['isAnyMissing'] ==False]
+# df = df.loc[df['isAnythingInAnnotated']>0 ]
+# # ignore all with deficient spacing
+# for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:    
+#     colName=keyWord+ "_spac_x"
+#     df = df.loc[df[colName]>0 ]
+# # get only complete representaions and only those with labels
+# df = df.loc[df['isAnyMissing'] ==False]
+# df = df.loc[df['isAnythingInAnnotated']>0 ]    
 #just for testing    
 #df= df.head(30)
 ##df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
@@ -374,8 +374,8 @@ for keyWord in ['adc_d'+'_tw_d_','hbv_d'+'_tw_d_']:
 targetSpacinggg=(spacingDict['t2w_spac_x'][3],spacingDict['t2w_spac_y'][3],spacingDict['t2w_spac_z'][3])
 preprocess_diffrent_spacings(df,targetSpacinggg,"_med_spac_b")
 preprocess_diffrent_spacings(df,(1.0,1.0,1.0),"_one_spac_b")
-preprocess_diffrent_spacings(df,(1.5,1.5,1.5),"_one_and_half_spac_b")
-preprocess_diffrent_spacings(df,(2.0,2.0,2.0),"_two_spac_b")
+# preprocess_diffrent_spacings(df,(1.5,1.5,1.5),"_one_and_half_spac_b")
+# preprocess_diffrent_spacings(df,(2.0,2.0,2.0),"_two_spac_b")
 
 
 

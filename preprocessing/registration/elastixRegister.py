@@ -79,7 +79,7 @@ def euler_sitk(fixed_image, moving_image):
     # angle_x = 0
     # angle_y = -pi, 0, pi
     # angle_z = -pi, 0, pi
-    registration_method.SetOptimizerAsGradientDescentLineSearch(learningRate=0.1,numberOfIterations=850, estimateLearningRate = registration_method.EachIteration)
+    registration_method.SetOptimizerAsGradientDescentLineSearch(learningRate=0.1,numberOfIterations=1, estimateLearningRate = registration_method.EachIteration)
     # registration_method.SetOptimizerAsExhaustive(numberOfSteps=[0,1,1,0,0,0], stepLength = np.pi, numberOfIterations=1000)
     # registration_method.SetOptimizerScales([1,1,1,1,1,1])
 
@@ -145,27 +145,27 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
                 p.wait()
             print(f"**********  ***********  ****************  registering {patId}  ")
 
-            # parameterMap = sitk.GetDefaultParameterMap('translation')
-            # parameterMap['MaximumNumberOfIterations'] = ['1']
-            # parameterMap['Interpolator'] = ['BSplineInterpolator']
-            # resultImage = sitk.Elastix(sitk.ReadImage(row[1][t2wColName]),  \
-            #                         sitk.ReadImage(path), \
-            #                         parameterMap)
-            # writer = sitk.ImageFileWriter()
-            # writer.KeepOriginalImageUIDOn()
-            # writer.SetFileName(result)
-            # writer.Execute(resultImage) 
+            parameterMap = sitk.GetDefaultParameterMap('translation')
+            parameterMap['MaximumNumberOfIterations'] = ['1']
+            parameterMap['Interpolator'] = ['BSplineInterpolator']
+            resultImage = sitk.Elastix(sitk.ReadImage(row[1][t2wColName]),  \
+                                    sitk.ReadImage(path), \
+                                    parameterMap)
+            writer = sitk.ImageFileWriter()
+            writer.KeepOriginalImageUIDOn()
+            writer.SetFileName(result)
+            writer.Execute(resultImage) 
             
-            cmd=f"{elacticPath} -f {row[1][t2wColName]} -m {path} -out {outPath} -p {reg_prop} -threads 1"
-            print(cmd)
-            p = Popen(cmd, shell=True)#,stdout=subprocess.PIPE , stderr=subprocess.PIPE
-            p.wait()
-            #we will repeat operation multiple max 9 times if the result would not be written
-            if((not pathOs.exists(result)) and reIndex<15):
-                reIndexNew=reIndex+1
-                if(reIndex==6): #in case it do not work we will try diffrent parametrization
-                    reg_prop=reg_prop.replace("parameters","parametersB")              
-                reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment,reIndexNew)
+            # cmd=f"{elacticPath} -f {row[1][t2wColName]} -m {path} -out {outPath} -p {reg_prop} -threads 1"
+            # print(cmd)
+            # p = Popen(cmd, shell=True)#,stdout=subprocess.PIPE , stderr=subprocess.PIPE
+            # p.wait()
+            # #we will repeat operation multiple max 9 times if the result would not be written
+            # if((not pathOs.exists(result)) and reIndex<15):
+            #     reIndexNew=reIndex+1
+            #     if(reIndex==6): #in case it do not work we will try diffrent parametrization
+            #         reg_prop=reg_prop.replace("parameters","parametersB")              
+            #     reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment,reIndexNew)
             #in case it will not work via elastix we will use simple itk    
             # if(not pathOs.exists(result)):
             #     try:
