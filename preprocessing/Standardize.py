@@ -54,9 +54,12 @@ def removeOutliersBiasFieldCorrect(path,numberOfStandardDeviations = 4):
 
 
 def removeOutliersAndWrite(path):
-    image=removeOutliersBiasFieldCorrect(path)
     outPath = path.replace('.mha','_bfc.mha')
+    image=removeOutliersBiasFieldCorrect(path)
+
     if(not pathOs.exists(outPath)):
+        image=removeOutliersBiasFieldCorrect(path)
+
         print("biasFieldCorrect "+path)
         #standardazing orientation 
         writer = sitk.ImageFileWriter()
