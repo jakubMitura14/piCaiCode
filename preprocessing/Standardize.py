@@ -55,13 +55,16 @@ def removeOutliersBiasFieldCorrect(path,numberOfStandardDeviations = 4):
 
 def removeOutliersAndWrite(path):
     image=removeOutliersBiasFieldCorrect(path)
-    print("biasFieldCorrect "+path)
-    #standardazing orientation 
-    writer = sitk.ImageFileWriter()
-    writer.KeepOriginalImageUIDOn()
-    writer.SetFileName(path)
-    writer.Execute(image)   
- 
+    outPath = path.replace('.mha','_bfc.mha')
+    if(not pathOs.exists(outPath)):
+        print("biasFieldCorrect "+path)
+        #standardazing orientation 
+        writer = sitk.ImageFileWriter()
+        writer.KeepOriginalImageUIDOn()
+        writer.SetFileName(outPath)
+        writer.Execute(image)
+    return outPath       
+    
 
 def standardizeFromPathAndOverwrite(path,nyul_normalizer): 
     #print("standardizeFromPathAndOverwrite "+path)
@@ -177,8 +180,10 @@ def iterateAndpadLabels(df,colname,targetSize, paddValue,keyword,isTobeDiv):
 def iterateAndBiasCorrect(seriesString,df):
     train_patientsPaths=df[seriesString].dropna().astype('str').to_numpy()
     train_patientsPaths=list(filter(lambda path: len(path)>2 ,train_patientsPaths))   
+    resList=[]
     with mp.Pool(processes = mp.cpu_count()) as pool:
-        pool.map(removeOutliersAndWrite,train_patientsPaths)
+        resList=pool.map(removeOutliersAndWrite,train_patientsPaths)
+    df['bfc_'+seriesString]=resList      
 
 
 
