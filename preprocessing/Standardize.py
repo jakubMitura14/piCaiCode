@@ -55,7 +55,6 @@ def removeOutliersBiasFieldCorrect(path,numberOfStandardDeviations = 4):
 
 def removeOutliersAndWrite(path):
     outPath = path.replace('.mha','_bfc.mha')
-    image=removeOutliersBiasFieldCorrect(path)
     print("biasFieldCorrect "+path)
 
     if(not pathOs.exists(outPath)):
