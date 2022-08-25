@@ -362,11 +362,13 @@ for keyWord in ['adc','hbv']:
     resList=[]     
     with mp.Pool(processes = mp.cpu_count()) as pool:
         resList=pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'),list(df.iterrows()))    
-    
-    pathss = list(map(lambda tupl :tupl[0],resList   ))
-    reg_values = list(map(lambda tupl :tupl[1],resList   ))
-    df['registered_'+keyWord]=pathss  
-    df['registered_'+keyWord+"score"]=reg_values  
+
+    df['registered_'+keyWord]=resList      
+    # pathss = list(map(lambda tupl :tupl[0],resList   ))
+    # reg_values = list(map(lambda tupl :tupl[1],resList   ))
+
+    # df['registered_'+keyWord]=pathss  
+    # df['registered_'+keyWord+"score"]=reg_values  
 #checking registration by reading from logs the metrics so we will get idea how well it went
 
 
