@@ -144,18 +144,18 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
                 p = Popen(cmd, shell=True)
                 p.wait()
             print(f"**********  ***********  ****************  registering {patId}  ")
-            euler_sitk(sitk.ReadImage(row[1][t2wColName]), sitk.ReadImage(path))
+            #euler_sitk(sitk.ReadImage(row[1][t2wColName]), sitk.ReadImage(path))
 
-            # parameterMap = sitk.GetDefaultParameterMap('translation')
-            # parameterMap['MaximumNumberOfIterations'] = ['1']
-            # parameterMap['Interpolator'] = ['BSplineInterpolator']
-            # resultImage = sitk.Elastix(sitk.ReadImage(row[1][t2wColName]),  \
-            #                         sitk.ReadImage(path), \
-            #                         parameterMap)
-            # writer = sitk.ImageFileWriter()
-            # writer.KeepOriginalImageUIDOn()
-            # writer.SetFileName(result)
-            # writer.Execute(resultImage) 
+            parameterMap = sitk.GetDefaultParameterMap('translation')
+            parameterMap['MaximumNumberOfIterations'] = ['1']
+            parameterMap['Interpolator'] = ['BSplineInterpolator']
+            resultImage = sitk.Elastix(sitk.ReadImage(row[1][t2wColName]),  \
+                                    sitk.ReadImage(path), \
+                                    parameterMap)
+            writer = sitk.ImageFileWriter()
+            writer.KeepOriginalImageUIDOn()
+            writer.SetFileName(result)
+            writer.Execute(resultImage) 
 
 
 

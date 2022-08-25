@@ -1,3 +1,8 @@
 https://github.com/facebookresearch/dino
 https://www.youtube.com/watch?v=BFivrO_PXt4
 
+feature extraction pytorch
+https://pytorch.org/blog/FX-feature-extraction-torchvision/
+ 
+other semisupervised 
+https://paperswithcode.com/paper/puzzle-cam-improved-localization-via-matching 
