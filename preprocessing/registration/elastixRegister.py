@@ -180,7 +180,7 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
             #     except:
             #         #maybe it can not be done ?
             #     return ("",0.0)
-            return (result,getRegistrationScore(logPath) )    #        
+            #return (result,getRegistrationScore(logPath) )    #        
             return result #        
         else:
             return ""    
