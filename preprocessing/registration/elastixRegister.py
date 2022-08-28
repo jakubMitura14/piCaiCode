@@ -125,9 +125,9 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
     
     patId=str(row[1]['patient_id'])
     path=str(row[1][colName])
-    outPath = path.replace(".mha","_for_"+colName)
-    result=pathOs.join(outPath,"result.0.mha")
-    logPath=pathOs.join(outPath,"elastix.log")
+    outPath = path.replace(".mha","_reg_for_"+colName+'.mha')
+    # result=pathOs.join(outPath,"result.0.mha")
+    # logPath=pathOs.join(outPath,"elastix.log")
     # print(result)
     # print(pathOs.exists(result))
     #returning faster if the result is already present
@@ -140,10 +140,10 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
     # else:
         # if(len(path)>1):
             #creating the folder if none is present
-    if(not pathOs.exists(outPath)):
-        cmd='mkdir '+ outPath
-        p = Popen(cmd, shell=True)
-        p.wait()
+    # if(not pathOs.exists(outPath)):
+    #     cmd='mkdir '+ outPath
+    #     p = Popen(cmd, shell=True)
+    #     p.wait()
     print(f"**********  ***********  ****************  registering {patId}  ")
     #euler_sitk(sitk.ReadImage(row[1][t2wColName]), sitk.ReadImage(path))
 
