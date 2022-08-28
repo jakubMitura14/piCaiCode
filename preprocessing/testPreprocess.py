@@ -272,8 +272,8 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     t2wKeyWord ="t2w"+spacing_keyword    
     #needs to be on single thread as resampling GAN is acting on GPU
     # we save the metadata to main pandas data frame 
-    df["adc"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_'+'adc_d'+'_tw_d_',targetSpacingg,spacing_keyword)   , axis = 1) 
-    df["hbv"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_'+'hbv_d'+'_tw_d_',targetSpacingg,spacing_keyword)   , axis = 1) 
+    df["adc"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_'+'adc',targetSpacingg,spacing_keyword)   , axis = 1) 
+    df["hbv"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_'+'hbv',targetSpacingg,spacing_keyword)   , axis = 1) 
     df["t2w"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 't2w',targetSpacingg,spacing_keyword)   , axis = 1) 
     df["label"+spacing_keyword]=df.apply(lambda row : resample_labels(row,targetSpacingg,spacing_keyword)   , axis = 1) 
 
