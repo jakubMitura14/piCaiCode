@@ -125,7 +125,7 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
     
     patId=str(row[1]['patient_id'])
     path=str(row[1][colName])
-    outPath = path.replace(".mha","_reg_for_"+colName+'.mha')
+    result = path.replace(".mha","_reg_for_"+colName+'.mha')
     # result=pathOs.join(outPath,"result.0.mha")
     # logPath=pathOs.join(outPath,"elastix.log")
     # print(result)
