@@ -145,25 +145,27 @@ def padToAndSaveLabel(row,colname,targetSize, paddValue,keyword,isTobeDiv):
     row=row[1]
     writer = sitk.ImageFileWriter()
     path = str(row[colname])
-    outPath = path.replace('.nii.gz',keyword+ '.nii.gz')
-    image=sitk.ReadImage(str(path))
+    if(path!=" "):
+        outPath = path.replace('.nii.gz',keyword+ '.nii.gz')
+        image=sitk.ReadImage(str(path))
 
-    data= sitk.GetArrayFromImage(image)
+        data= sitk.GetArrayFromImage(image)
 
-    print(f"unique in label {np.unique(data)}")
+        print(f"unique in label {np.unique(data)}")
 
-    if(isTobeDiv):
-        image=padToDivisibleBy32(image,paddValue)
-        writer.KeepOriginalImageUIDOn()
-        writer.SetFileName(outPath)
-        writer.Execute(image) 
-    else:
-        image=padToSize(image,targetSize,paddValue)
-        writer.KeepOriginalImageUIDOn()
-        writer.SetFileName(outPath)
-        writer.Execute(image)
-    return outPath                 
-            
+        if(isTobeDiv):
+            image=padToDivisibleBy32(image,paddValue)
+            writer.KeepOriginalImageUIDOn()
+            writer.SetFileName(outPath)
+            writer.Execute(image) 
+        else:
+            image=padToSize(image,targetSize,paddValue)
+            writer.KeepOriginalImageUIDOn()
+            writer.SetFileName(outPath)
+            writer.Execute(image)
+        return outPath 
+    return " "                     
+                
 
 
 #######  
@@ -171,6 +173,7 @@ def padToAndSaveLabel(row,colname,targetSize, paddValue,keyword,isTobeDiv):
 
 def iterateAndpadLabels(df,colname,targetSize, paddValue,keyword,isTobeDiv):
     reslist=[]
+    
     with mp.Pool(processes = mp.cpu_count()) as pool:
         reslist=pool.map(partial(padToAndSaveLabel,colname=colname,targetSize=targetSize,paddValue=paddValue,keyword=keyword,isTobeDiv=isTobeDiv ),list(df.iterrows()))
     #reslist=list(map(partial(padToAndSaveLabel,colname=colname,targetSize=targetSize,paddValue=paddValue,keyword=keyword,isTobeDiv=isTobeDiv ),list(df.iterrows())))
