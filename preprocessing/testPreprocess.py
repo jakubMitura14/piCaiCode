@@ -88,8 +88,8 @@ def resample_ToMedianSpac(row,colName,targetSpacing,spacing_keyword):
             try:
                 print(f"resampling colname {colName} {study_id}")
                 resampled = Resampling.resample_with_GAN(path,targetSpacing)
-            except:
-                print("error resampling")
+            except Exception as e:
+                print(f"error resampling {e}")
                 resampled = Resampling.resample_with_GAN(path,targetSpacing)
             print(f" resempled Res colname {colName}  {study_id} size {resampled.GetSize() } spacing {resampled.GetSpacing()}  ")
             write_to_modif_path(resampled,path,".mha",spacing_keyword+".mha" )
@@ -114,8 +114,8 @@ def resample_To_t2w(row,colName,spacing_keyword,t2wColName):
             try:
                 print(f"resampling colname {colName} {study_id}")
                 resampled = Resampling.resample_with_GAN(path,targetSpacing)
-            except:
-                print("error resampling")
+            except Exception as e:
+                print(f"error resampling {e}")
                 resampled = Resampling.resample_with_GAN(path,targetSpacing)
             print(f" resempled Res colname {colName}  {study_id} size {resampled.GetSize() } spacing {resampled.GetSpacing()} newPath {newPath}  ")
             write_to_modif_path(resampled,path,".mha",spacing_keyword+".mha" )
@@ -148,8 +148,8 @@ def resample_labels(row,targetSpacing,spacing_keyword):
             try:
                 experiment.log_text(f" new resample label {study_id}")
                 resampled = Resampling.resample_label_with_GAN(path,targetSpacing)
-            except:
-                print("error resampling")
+            except Exception as e:
+                print(f"error resampling {e}")
                 #recursively apply resampling
                 resample_labels(row,targetSpacing,spacing_keyword)
                 #resampled = Resampling.resample_label_with_GAN(path,targetSpacing)
