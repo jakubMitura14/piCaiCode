@@ -130,6 +130,7 @@ class Model(pl.LightningModule):
         super().__init__()
         self.lr = learning_rate
         self.net = net
+        self.modelRegression = detectSemiSupervised.UNetToRegresion(2)
         self.criterion = criterion
         self.optimizer_class = optimizer_class
         self.best_val_dice = 0
@@ -138,11 +139,6 @@ class Model(pl.LightningModule):
         self.experiment=experiment
         self.picaiLossArr=[]
         self.post_pred = Compose([ AsDiscrete( to_onehot=2)])
-#       self.post_pred = Compose([ AsDiscrete(argmax=True, to_onehot=2)])
-
-        #self.post_label = Compose([EnsureType("tensor", device="cpu"), AsDiscrete(to_onehot=2)])
-        #self.post_label = Compose([EnsureType("tensor", device="cpu"), torchio.transforms.OneHot(include=["label"] ,num_classes=2)])
-        #self.post_label = Compose([EnsureType("tensor", device="cpu"), torchio.transforms.OneHot(include=["label"] ,num_classes=2)])
         self.picaiLossArr_auroc=[]
         self.picaiLossArr_AP=[]
         self.picaiLossArr_score=[]
@@ -169,7 +165,7 @@ class Model(pl.LightningModule):
         return y_hat, y
 
     def prepare_batch_all(self, batch):
-        return batch['all']['chan3_col_name'], batch['all']['label']
+        return batch['all']['chan3_col_name'], batch['all']['num_lesions_to_retain']
     
     def infer_batch_all(self, batch):
         x, y = self.prepare_batch_pos(batch)
@@ -183,7 +179,11 @@ class Model(pl.LightningModule):
             loss = self.criterion(y_hat, y)
             self.log('train_loss', loss, prog_bar=True)
             return loss
+        # in case we have odd iteration we get access only to number of lesions present in the image not where they are (if they are present at all)    
         else:
+            y_hat, y = self.infer_batch_all(batch)
+            regress_res=self.modelRegression(y_hat)
+            return F.smooth_l1_loss(regress_res, y)
 
     # def validation_step(self, batch, batch_idx):
     #     return 0.5
@@ -243,46 +243,6 @@ class Model(pl.LightningModule):
             meanPiecaiMetr_auroc=valid_metrics.auroc
             meanPiecaiMetr_AP=valid_metrics.AP
             meanPiecaiMetr_score=valid_metrics.score
-            # for i in range(0,chunksNumb):
-            #     startIndex= i*chunkLen
-            #     endIndex=(i+1)*chunkLen
-            #     print(f" startIndex {startIndex}  endIndex {endIndex}")
-            #     valid_metrics = evaluate(y_det=list(map(getArrayFromPath, self.list_yHat_val[startIndex:endIndex])),
-            #                         y_true=list(map(getArrayFromPath, self.list_gold_val[startIndex:endIndex]  )),
-            #                         #y_true=iter(y_true),
-            #                         #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
-            #                         )
-            #     self.picaiLossArr_auroc.append(valid_metrics.auroc)
-            #     self.picaiLossArr_AP.append(valid_metrics.AP)
-            #     self.picaiLossArr_score.append(valid_metrics.score)
-            
-            
-            # startIndex= chunksNumb*chunkLen
-            # endIndex=len(self.list_yHat_val)
-            # if endIndex>startIndex:
-            #     print(f" startIndex {startIndex}  endIndex {endIndex}")
-
-            #     # and the last part
-            #     valid_metrics = evaluate(y_det=list(map(getArrayFromPath, self.list_yHat_val[startIndex:endIndex])),
-            #                             y_true=list(map(getArrayFromPath, self.list_gold_val[startIndex:endIndex]  )),
-            #                             #y_true=iter(y_true),
-            #                             #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
-            #                             )
-            #     self.picaiLossArr_auroc.append(valid_metrics.auroc)
-            #     self.picaiLossArr_AP.append(valid_metrics.AP)
-            #     self.picaiLossArr_score.append(valid_metrics.score)
-
-
-
-            #     meanPiecaiMetr_auroc= np.nanmean(self.picaiLossArr_auroc) 
-            #     meanPiecaiMetr_AP=np.nanmean(self.picaiLossArr_AP) 
-            #     meanPiecaiMetr_score=np.nanmean(self.picaiLossArr_score) 
-            
-
-        
-            # meanPiecaiMetr_auroc= getMeanIgnoreNan(self.picaiLossArr_auroc) # mean(self.picaiLossArr_auroc)
-            # meanPiecaiMetr_AP= getMeanIgnoreNan(self.picaiLossArr_AP) # mean(self.picaiLossArr_AP)        
-            # meanPiecaiMetr_score= getMeanIgnoreNan(self.picaiLossArr_score) #mean(self.picaiLossArr_score)        
 
             print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
 

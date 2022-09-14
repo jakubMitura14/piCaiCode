@@ -379,7 +379,7 @@ df=semisuperPreprosess.iterate_and_addLesionNumber(df)
 #######      
 targetSpacinggg=(spacingDict['t2w_spac_x'][3],spacingDict['t2w_spac_y'][3],spacingDict['t2w_spac_z'][3])
 preprocess_diffrent_spacings(df,targetSpacinggg,"_med_spac_b")
-preprocess_diffrent_spacings(df,(1.0,1.0,1.0),"_one_spac_b")
+preprocess_diffrent_spacings(df,(1.0,1.0,1.0),"_one_spac_c")
 # preprocess_diffrent_spacings(df,(1.5,1.5,1.5),"_one_and_half_spac_b")
 # preprocess_diffrent_spacings(df,(2.0,2.0,2.0),"_two_spac_b")
 
