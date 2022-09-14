@@ -102,6 +102,7 @@ options={
 "optimizer_class": [torch.optim.NAdam,torch.optim.LBFGS] ,# ,torch.optim.LBFGS optim.AggMo,   look in https://pytorch-optimizer.readthedocs.io/en/latest/api.html
 "act":[(Act.PRELU, {"init": 0.2})],#,(Act.LEAKYRELU, {})                                         
 "norm":[(Norm.INSTANCE, {}),(Norm.BATCH, {}) ],
+"centerCropSize":[(256, 256,32)],
 #TODO() learning rate schedulers https://medium.com/mlearning-ai/make-powerful-deep-learning-models-quickly-using-pytorch-lightning-29f040158ef3
 }
 
@@ -120,13 +121,12 @@ config = {
         "num_res_units": {"type": "discrete", "values": [0]},#,1,2
         "act": {"type": "discrete", "values":list(range(0,len(options["act"])))  },#,(Act.LeakyReLU,{"negative_slope":0.1, "inplace":True} )
         "norm": {"type": "discrete", "values": list(range(0,len(options["norm"])))},
+        "centerCropSize": {"type": "discrete", "values": list(range(0,len(options["centerCropSize"])))},
         "dropout": {"type": "float", "min": 0.0, "max": 0.5},
         "precision": {"type": "discrete", "values": [16]},
         "max_epochs": {"type": "discrete", "values": [100]},#900
-
         "accumulate_grad_batches": {"type": "discrete", "values": [1,3,10]},
         "gradient_clip_val": {"type": "discrete", "values": [0.0, 0.2,0.5,2.0,100.0]},#,2.0, 0.2,0.5
-
         "RandGaussianNoised_prob": {"type": "float", "min": 0.0, "max": 0.5},
         "RandAdjustContrastd_prob": {"type": "float", "min": 0.3, "max": 0.8},
         "RandGaussianSmoothd_prob": {"type": "discrete", "values": [0.0]},
@@ -149,7 +149,6 @@ config = {
 
 df = pd.read_csv("/home/sliceruser/data/metadata/processedMetaData_current.csv")
 maxSize=manageMetaData.getMaxSize("t2w_med_spac",df)
-
 
 exampleSpacing="_med_spac"
 t2www=f"t2w{exampleSpacing}_3Chan_maxSize_"

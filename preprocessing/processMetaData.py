@@ -50,11 +50,11 @@ def unpackk(zipDir,targetDir):
 # unpackk( '/home/sliceruser/picai_public_images_fold3.zip', targetDir)      
 # unpackk( '/home/sliceruser/picai_public_images_fold4.zip', targetDir) 
 
-unpackk( '/home/sliceruser/data/zipped/picai_public_images_fold0.zip', targetDir)      
-unpackk( '/home/sliceruser/data/zipped/picai_public_images_fold1.zip', targetDir)      
-unpackk( '/home/sliceruser/data/zipped/picai_public_images_fold2.zip', targetDir)      
-unpackk( '/home/sliceruser/data/zipped/picai_public_images_fold3.zip', targetDir)      
-unpackk( '/home/sliceruser/data/zipped/picai_public_images_fold4.zip', targetDir) 
+# unpackk( '/home/sliceruser/data/zipped/picai_public_images_fold0.zip', targetDir)      
+# unpackk( '/home/sliceruser/data/zipped/picai_public_images_fold1.zip', targetDir)      
+# unpackk( '/home/sliceruser/data/zipped/picai_public_images_fold2.zip', targetDir)      
+# unpackk( '/home/sliceruser/data/zipped/picai_public_images_fold3.zip', targetDir)      
+# unpackk( '/home/sliceruser/data/zipped/picai_public_images_fold4.zip', targetDir) 
 
 
 

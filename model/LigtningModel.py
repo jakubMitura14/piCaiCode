@@ -138,7 +138,7 @@ class Model(pl.LightningModule):
         self.experiment=experiment
         self.picaiLossArr=[]
         self.post_pred = Compose([ AsDiscrete( to_onehot=2)])
-#        self.post_pred = Compose([ AsDiscrete(argmax=True, to_onehot=2)])
+#       self.post_pred = Compose([ AsDiscrete(argmax=True, to_onehot=2)])
 
         #self.post_label = Compose([EnsureType("tensor", device="cpu"), AsDiscrete(to_onehot=2)])
         #self.post_label = Compose([EnsureType("tensor", device="cpu"), torchio.transforms.OneHot(include=["label"] ,num_classes=2)])
@@ -194,8 +194,10 @@ class Model(pl.LightningModule):
         y_det = decollate_batch(y_det)
         y_true = decollate_batch(y_true)
         patIds = decollate_batch(patIds)
-        #print(f"after decollate  y_hat{y_hat[0].size()} labels{labels[0].size()} y_hat len {len(y_hat)} labels len {len(labels)}")
-        y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
+        print(f" y_det 0 {y_det[0].size()} ")
+        #Todo check is the order of dimensions as expected by the library
+
+        y_det=[extract_lesion_candidates( torch.permute(x,(2,1,0) ).cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
         y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
 
 

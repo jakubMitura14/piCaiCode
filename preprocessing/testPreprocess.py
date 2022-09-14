@@ -14,6 +14,7 @@ import ManageMetadata
 import Resampling
 import Standardize
 import utilsPreProcessing
+import semisuperPreprosess
 from registration.elastixRegister import (reg_adc_hbv_to_t2w,
                                           reg_adc_hbv_to_t2w_sitk)
 from utilsPreProcessing import write_to_modif_path
@@ -369,6 +370,9 @@ for keyWord in ['adc','hbv']:
 
     # df['registered_'+keyWord]=pathss  
     # df['registered_'+keyWord+"score"]=reg_values  
+#adding data about number of lesions that algorithm should detect
+df=semisuperPreprosess.iterate_and_addLesionNumber(df)
+
 #checking registration by reading from logs the metrics so we will get idea how well it went
 
 

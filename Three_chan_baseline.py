@@ -147,6 +147,7 @@ def mainTrain(experiment,options,df):
         ,RandAffined_prob=experiment.get_parameter("RandAffined_prob")
         ,RandCoarseDropoutd_prob=experiment.get_parameter("RandCoarseDropoutd_prob")
         ,is_whole_to_train= (sizeWord=="_maxSize_")
+        ,centerCropSize=getParam(experiment,options,"centerCropSize",df)
     )
     data.prepare_data()
     data.setup()
