@@ -146,7 +146,7 @@ df["isAnyMissing"]=df.apply(lambda row : str(row['study_id']) in  listOfDeficien
 
 def ifShortReturnMinus(tupl, patId,colName):
     if(len(tupl)!=3):
-        print("incorrect spacial data "+ colName+ "  "+patId+ " length "+ len(tupl) ) 
+        print("incorrect spacial data "+ str(colName)+ "  "+str(patId)+ " length "+ str(len(tupl)) ) 
         return (-1,-1,-1)
     return tupl    
 #getting sizes and spacings ...
