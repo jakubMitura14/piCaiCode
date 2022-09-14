@@ -29,7 +29,7 @@ df["hbv_resmaplA"]=""
 #     df[colName]=False
 df['labels_to_one']=False 
 
-targetDir= '/home/sliceruser/data/orig'
+targetDir= '/home/sliceruser/data/origC'
 def unpackk(zipDir,targetDir):
     with ZipFile(zipDir, "r") as zip_ref:
         for name in zip_ref.namelist():
@@ -50,11 +50,11 @@ def unpackk(zipDir,targetDir):
 # unpackk( '/home/sliceruser/picai_public_images_fold3.zip', targetDir)      
 # unpackk( '/home/sliceruser/picai_public_images_fold4.zip', targetDir) 
 
-# unpackk( '/home/sliceruser/data/zipped/picai_public_images_fold0.zip', targetDir)      
-# unpackk( '/home/sliceruser/data/zipped/picai_public_images_fold1.zip', targetDir)      
-# unpackk( '/home/sliceruser/data/zipped/picai_public_images_fold2.zip', targetDir)      
-# unpackk( '/home/sliceruser/data/zipped/picai_public_images_fold3.zip', targetDir)      
-# unpackk( '/home/sliceruser/data/zipped/picai_public_images_fold4.zip', targetDir) 
+unpackk( '/home/sliceruser/data/origB/picai_public_images_fold0.zip', targetDir)      
+unpackk( '/home/sliceruser/data/origB/picai_public_images_fold1.zip', targetDir)      
+unpackk( '/home/sliceruser/data/origB/picai_public_images_fold2.zip', targetDir)      
+unpackk( '/home/sliceruser/data/origB/picai_public_images_fold3.zip', targetDir)      
+unpackk( '/home/sliceruser/data/origB/picai_public_images_fold4.zip', targetDir) 
 
 
 
@@ -146,7 +146,7 @@ df["isAnyMissing"]=df.apply(lambda row : str(row['study_id']) in  listOfDeficien
 
 def ifShortReturnMinus(tupl, patId,colName):
     if(len(tupl)!=3):
-        print("incorrect spacial data "+ str(colName)+ "  "+str(patId)+ " length "+ str(len(tupl)) ) 
+        print("incorrect spacial data "+ str(colName)+ "  "+str(patId)+ " length "+ str(len(tupl))+ "  "+ str(tupl) ) 
         return (-1,-1,-1)
     return tupl    
 #getting sizes and spacings ...
