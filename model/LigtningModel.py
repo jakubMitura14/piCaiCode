@@ -76,7 +76,7 @@ from monai.transforms import (
     EnsureType,
 )
 import torchio
-
+import detectSemiSupervised
 torch.autograd.set_detect_anomaly(True)
 
 def divide_chunks(l, n):
@@ -160,20 +160,31 @@ class Model(pl.LightningModule):
         optimizer = self.optimizer_class(self.parameters(), lr=self.lr)
         return optimizer
     
-    def prepare_batch(self, batch):
-        return batch['chan3_col_name'], batch['label']
+    def prepare_batch_pos(self, batch):
+        return batch['pos']['chan3_col_name'], batch['pos']['label']
     
-    def infer_batch(self, batch):
-        x, y = self.prepare_batch(batch)
+    def infer_batch_pos(self, batch):
+        x, y = self.prepare_batch_pos(batch)
+        y_hat = self.net(x)
+        return y_hat, y
+
+    def prepare_batch_all(self, batch):
+        return batch['all']['chan3_col_name'], batch['all']['label']
+    
+    def infer_batch_all(self, batch):
+        x, y = self.prepare_batch_pos(batch)
         y_hat = self.net(x)
         return y_hat, y
 
     def training_step(self, batch, batch_idx):
-        y_hat, y = self.infer_batch(batch)
-        loss = self.criterion(y_hat, y)
+        # every second iteration we will do the training for segmentation
+        if self.global_step%2==0:
+            y_hat, y = self.infer_batch_pos(batch)
+            loss = self.criterion(y_hat, y)
+            self.log('train_loss', loss, prog_bar=True)
+            return loss
+        else:
 
-        self.log('train_loss', loss, prog_bar=True)
-        return loss
     # def validation_step(self, batch, batch_idx):
     #     return 0.5
 

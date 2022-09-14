@@ -29,7 +29,7 @@ df["hbv_resmaplA"]=""
 #     df[colName]=False
 df['labels_to_one']=False 
 
-targetDir= '/home/sliceruser/data/origC'
+targetDir= '/home/sliceruser/data/orig'
 def unpackk(zipDir,targetDir):
     with ZipFile(zipDir, "r") as zip_ref:
         for name in zip_ref.namelist():

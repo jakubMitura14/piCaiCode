@@ -91,10 +91,13 @@ def get_size_meta(row,colName):
     row=row[1]
     patId=str(row['patient_id'])
     path=str(row[colName])
-    if(len(path)>1):
-        image = sitk.ReadImage(path)
-        sizz= image.GetSize()
-        return list(sizz)
+    try:
+        if(len(path)>1):
+            image = sitk.ReadImage(path)
+            sizz= image.GetSize()
+            return list(sizz)
+    except:
+        print(f"file read error {path}")
     return [-1,-1,-1]
 
 resList=[]
