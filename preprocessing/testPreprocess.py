@@ -292,25 +292,25 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 
     sizeWord="_div32_"
     resList=[]
-    resList=list(map(partial(resize_and_join
-                                ,colNameT2w=t2wKeyWord
-                                ,colNameAdc="adc"+spacing_keyword
-                                ,colNameHbv="hbv"+spacing_keyword
-                                ,sizeWord=sizeWord
-                                ,targetSize=maxSize
-                                ,ToBedivisibleBy32=True
-                                )  ,list(df.iterrows())))
-
-
-    # with mp.Pool(processes = mp.cpu_count()) as pool:
-    #     resList=pool.map(partial(resize_and_join
+    # resList=list(map(partial(resize_and_join
     #                             ,colNameT2w=t2wKeyWord
     #                             ,colNameAdc="adc"+spacing_keyword
     #                             ,colNameHbv="hbv"+spacing_keyword
     #                             ,sizeWord=sizeWord
     #                             ,targetSize=maxSize
     #                             ,ToBedivisibleBy32=True
-    #                             )  ,list(df.iterrows())) 
+    #                             )  ,list(df.iterrows())))
+
+
+    with mp.Pool(processes = mp.cpu_count()) as pool:
+        resList=pool.map(partial(resize_and_join
+                                ,colNameT2w=t2wKeyWord
+                                ,colNameAdc="adc"+spacing_keyword
+                                ,colNameHbv="hbv"+spacing_keyword
+                                ,sizeWord=sizeWord
+                                ,targetSize=maxSize
+                                ,ToBedivisibleBy32=True
+                                )  ,list(df.iterrows())) 
     df[t2wKeyWord+"_3Chan"+sizeWord]=resList
     #setting padding to labels
     Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,maxSize, 0.0,spacing_keyword+sizeWord,True)
