@@ -105,7 +105,6 @@ def get_train_transforms(RandGaussianNoised_prob
         [
             LoadImaged(keys=["chan3_col_name","label"]),
             EnsureChannelFirstd(keys=["chan3_col_name","label"]),
-            ResizeWithPadOrCropd(keys=["chan3_col_name","label"],spatial_size=centerCropSize ),
             standardizeLabels(keys=["label"]),
             AsDiscreted(keys=["label"],to_onehot=2),
             #torchio.transforms.OneHot(include=["label"] ), #num_classes=3,
@@ -118,6 +117,7 @@ def get_train_transforms(RandGaussianNoised_prob
             EnsureTyped(keys=["chan3_col_name","label"]),
             # SelectItemsd(keys=["chan3_col_name","label"]),
             DivisiblePadd(keys=["chan3_col_name","label"],k=32) ,            
+            ResizeWithPadOrCropd(keys=["chan3_col_name","label"],spatial_size=centerCropSize ),
           
             #*decide_if_whole_image_train(is_whole_to_train,"chan3_col_name","label"),
             #SpatialPadd(keys=["chan3_col_name","label"]],spatial_size=maxSize) ,            
@@ -137,7 +137,6 @@ def get_val_transforms(is_whole_to_train,centerCropSize):
         [
             LoadImaged(keys=["chan3_col_name_val","label_name_val"]),
             EnsureChannelFirstd(keys=["chan3_col_name_val","label_name_val"]),
-            ResizeWithPadOrCropd(keys=["chan3_col_name","label"],spatial_size=centerCropSize ),
             standardizeLabels(keys=["label_name_val"]),
             AsDiscreted(keys=["label_name_val"], to_onehot=2),
 
@@ -149,6 +148,7 @@ def get_val_transforms(is_whole_to_train,centerCropSize):
             #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
             #SpatialPadd(keys=["chan3_col_name","label"],spatial_size=maxSize) ,
             DivisiblePadd(keys=["chan3_col_name_val","label_name_val"],k=32) ,
+            ResizeWithPadOrCropd(keys=["chan3_col_name","label"],spatial_size=centerCropSize ),
 
             #*decide_if_whole_image_train(is_whole_to_train,"chan3_col_name_val","label_name_val"),
             EnsureTyped(keys=["chan3_col_name_val","label_name_val"]),
