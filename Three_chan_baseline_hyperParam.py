@@ -138,7 +138,7 @@ config = {
         "RandCoarseDropoutd_prob":{"type": "discrete", "values": [0.0]},
   
         "spacing_keyword": {"type": "categorical", "values": [ "_one_spac_c" ,"_med_spac_b"]},#"_med_spac","_one_and_half_spac", "_two_spac"
-        "sizeWord": {"type": "categorical", "values": ["_div32_"]},#,"_maxSize_"# ,"_div32_"
+        "sizeWord": {"type": "categorical", "values": ["_maxSize_"]},#,"_maxSize_"# ,"_div32_"
         #"dirs": {"type": "discrete", "values": list(range(0,len(options["dirs"])))},
     },
 
