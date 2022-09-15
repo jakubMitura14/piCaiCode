@@ -36,9 +36,9 @@ class UNetToRegresion(nn.Module):
             ConvBnReLU3d(in_channels=1, out_channels=1, kernel_size=3, stride=2,qconfig = torch.quantization.get_default_qconfig('fbgemm')),
             nn.AdaptiveMaxPool3d((8,8,2)),#ensuring such dimension 
             nn.Flatten(),
-            nn.BatchNorm3d(8*8*4),
+            #nn.BatchNorm3d(8*8*4),
             nn.Linear(in_features=8*8*4, out_features=100),
-            nn.BatchNorm3d(100),
+            #nn.BatchNorm3d(100),
             nn.ReLU(inplace=True),
             nn.Linear(in_features=100, out_features=1)
         )
