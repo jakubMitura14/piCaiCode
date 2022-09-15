@@ -149,9 +149,9 @@ config = {
 }
 
 df = pd.read_csv("/home/sliceruser/data/metadata/processedMetaData_current_b.csv")
-maxSize=manageMetaData.getMaxSize("t2w_med_spac",df)
+maxSize=manageMetaData.getMaxSize("t2w_med_spac_b",df)
 
-exampleSpacing="_med_spac"
+exampleSpacing="_med_spac_b"
 t2www=f"t2w{exampleSpacing}_3Chan_maxSize_"
 labb=f"label{exampleSpacing}_maxSize_"
 
