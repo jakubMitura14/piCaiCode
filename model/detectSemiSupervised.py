@@ -31,9 +31,9 @@ class UNetToRegresion(nn.Module):
         in_channels,
     ) -> None:
         super().__init__()
-        self.model = nn.Sequential(ConvBnReLU3d(in_channels=in_channels, out_channels=1, kernel_size=3, stride=2),
-            ConvBnReLU3d(in_channels=1, out_channels=1, kernel_size=3, stride=2),
-            ConvBnReLU3d(in_channels=1, out_channels=1, kernel_size=3, stride=2),
+        self.model = nn.Sequential(ConvBnReLU3d(in_channels=in_channels, out_channels=1, kernel_size=3, stride=2,qconfig = torch.quantization.get_default_qconfig('fbgemm')),
+            ConvBnReLU3d(in_channels=1, out_channels=1, kernel_size=3, stride=2,qconfig = torch.quantization.get_default_qconfig('fbgemm')),
+            ConvBnReLU3d(in_channels=1, out_channels=1, kernel_size=3, stride=2,qconfig = torch.quantization.get_default_qconfig('fbgemm')),
             nn.AdaptiveMaxPool3d((8,8,2)),#ensuring such dimension 
             nn.Flatten(),
             nn.BatchNorm3d(8*8*4),
