@@ -104,7 +104,7 @@ imageRef_path - reference image from which we will take metadata
 def writeDummyLabels(outPath,dim_x,dim_y,dim_z,imageRef_path):
     origImage = sitk.ReadImage(imageRef_path)
     #intentionally inverting order as it is expected by simple itk
-    arr= np.zeros(dim_z,dim_y,dim_x).astype('int32')
+    arr= np.zeros((dim_z,dim_y,dim_x)).astype('int32')
     image = sitk.GetImageFromArray(arr)
     image.SetSpacing(origImage.GetSpacing())
     image.SetOrigin(origImage.GetOrigin())
