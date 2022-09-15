@@ -1,5 +1,4 @@
 import SimpleITK as sitk
-# sitk.GetDefaultParameterMap('translation')
 from subprocess import Popen
 import subprocess
 import SimpleITK as sitk
@@ -125,66 +124,64 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
     
     patId=str(row[1]['patient_id'])
     path=str(row[1][colName])
-    result = path.replace(".mha","_reg_for_"+colName+'.mha')
-    # result=pathOs.join(outPath,"result.0.mha")
-    # logPath=pathOs.join(outPath,"elastix.log")
+    outPath = path.replace(".mha","_for_"+colName)
+    result=pathOs.join(outPath,"result.0.mha")
+    logPath=pathOs.join(outPath,"elastix.log")
     # print(result)
     # print(pathOs.exists(result))
     #returning faster if the result is already present
     #if(pathOs.exists(outPath)):
     if(pathOs.exists(result)):
+        if(experiment!=None):
+            experiment.log_text(f"already registered {colName} {study_id}")    
         print(f"registered already present {patId}")
         return result     
-    #     if(experiment!=None):
-    #         experiment.log_text(f"already registered {colName} {study_id}")    
-    #     print(f"registered already present {patId}")
-    #     return (result,0.0)     TODO( unhash )
-    # # else:
-        # if(len(path)>1):
+    else:
+        if(len(path)>1):
             #creating the folder if none is present
-    # if(not pathOs.exists(outPath)):
-    #     cmd='mkdir '+ outPath
-    #     p = Popen(cmd, shell=True)
-    #     p.wait()
-    print(f"**********  ***********  ****************  registering {patId}  ")
-    #euler_sitk(sitk.ReadImage(row[1][t2wColName]), sitk.ReadImage(path))
+            if(not pathOs.exists(outPath)):
+                cmd='mkdir '+ outPath
+                p = Popen(cmd, shell=True)
+                p.wait()
+            print(f"**********  ***********  ****************  registering {patId}  ")
+            #euler_sitk(sitk.ReadImage(row[1][t2wColName]), sitk.ReadImage(path))
 
-    parameterMap = sitk.GetDefaultParameterMap('translation')
-    parameterMap['MaximumNumberOfIterations'] = ['1']
-    parameterMap['Interpolator'] = ['BSplineInterpolator']
-    resultImage = sitk.Elastix(sitk.ReadImage(row[1][t2wColName]),  \
-                            sitk.ReadImage(path), \
-                            parameterMap)
-    writer = sitk.ImageFileWriter()
-    writer.KeepOriginalImageUIDOn()
-    writer.SetFileName(result)
-    writer.Execute(resultImage) 
-
-
-
-    # cmd=f"{elacticPath} -f {row[1][t2wColName]} -m {path} -out {outPath} -p {reg_prop} -threads 1"
-    # print(cmd)
-    # p = Popen(cmd, shell=True)#,stdout=subprocess.PIPE , stderr=subprocess.PIPE
-    # p.wait()
-    # #we will repeat operation multiple max 9 times if the result would not be written
-    # if((not pathOs.exists(result)) and reIndex<15):
-    #     reIndexNew=reIndex+1
-    #     if(reIndex==6): #in case it do not work we will try diffrent parametrization
-    #         reg_prop=reg_prop.replace("parameters","parametersB")              
-    #     reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment,reIndexNew)
+            # parameterMap = sitk.GetDefaultParameterMap('translation')
+            # parameterMap['MaximumNumberOfIterations'] = ['1']
+            # parameterMap['Interpolator'] = ['BSplineInterpolator']
+            # resultImage = sitk.Elastix(sitk.ReadImage(row[1][t2wColName]),  \
+            #                         sitk.ReadImage(path), \
+            #                         parameterMap)
+            # writer = sitk.ImageFileWriter()
+            # writer.KeepOriginalImageUIDOn()
+            # writer.SetFileName(result)
+            # writer.Execute(resultImage) 
 
 
 
+            cmd=f"{elacticPath} -f {row[1][t2wColName]} -m {path} -out {outPath} -p {reg_prop} -threads 1"
+            print(cmd)
+            p = Popen(cmd, shell=True)#,stdout=subprocess.PIPE , stderr=subprocess.PIPE
+            p.wait()
+            #we will repeat operation multiple max 9 times if the result would not be written
+            if((not pathOs.exists(result)) and reIndex<15):
+                reIndexNew=reIndex+1
+                if(reIndex==6): #in case it do not work we will try diffrent parametrization
+                    reg_prop=reg_prop.replace("parameters","parametersB")              
+                reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment,reIndexNew)
 
-    #in case it will not work via elastix we will use simple itk    
-    # if(not pathOs.exists(result)):
-    #     try:
-    #         reg_adc_hbv_to_t2w_sitk(row,colName,t2wColName,result)
-    #     except:
-    #         #maybe it can not be done ?
-    #     return ("",0.0)
-    #return (result,getRegistrationScore(logPath) )    #        
-    return result #        
-# else:
-#     return ""    
-#     return ""    
+
+
+
+            #in case it will not work via elastix we will use simple itk    
+            # if(not pathOs.exists(result)):
+            #     try:
+            #         reg_adc_hbv_to_t2w_sitk(row,colName,t2wColName,result)
+            #     except:
+            #         #maybe it can not be done ?
+            #     return ("",0.0)
+            #return (result,getRegistrationScore(logPath) )    #        
+            return result #        
+        else:
+            return " "    
+    return " "    

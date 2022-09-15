@@ -18,6 +18,7 @@ import semisuperPreprosess
 from registration.elastixRegister import (reg_adc_hbv_to_t2w,
                                           reg_adc_hbv_to_t2w_sitk)
 from utilsPreProcessing import write_to_modif_path
+import math
 
 experiment = Experiment(
     api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
@@ -27,9 +28,11 @@ experiment = Experiment(
 )
 
 ## some paths
-elacticPath='elastix'
+elacticPath='/home/sliceruser/elastixBase/elastix-5.0.1-linux/bin/elastix'
 reg_prop='/home/sliceruser/data/piCaiCode/preprocessing/registration/parameters.txt'  
 trainedModelsBasicPath='/home/sliceruser/data/preprocess/standarizationModels'
+
+physical_size =(81.0, 192.0, 192.0)#taken from picai used to crop image so only center will remain
 
 
 df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData.csv')
@@ -290,34 +293,18 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     print(f" max sizee {maxSize}")
     ###now we join it into 3 channel image we save two versions one is divisible by 32 other is set to max size ...
 
-    sizeWord="_div32_"
-    resList=[]
-    # resList=list(map(partial(resize_and_join
-    #                             ,colNameT2w=t2wKeyWord
-    #                             ,colNameAdc="adc"+spacing_keyword
-    #                             ,colNameHbv="hbv"+spacing_keyword
-    #                             ,sizeWord=sizeWord
-    #                             ,targetSize=maxSize
-    #                             ,ToBedivisibleBy32=True
-    #                             )  ,list(df.iterrows())))
-
-
-    with mp.Pool(processes = mp.cpu_count()) as pool:
-        resList=pool.map(partial(resize_and_join
-                                ,colNameT2w=t2wKeyWord
-                                ,colNameAdc="adc"+spacing_keyword
-                                ,colNameHbv="hbv"+spacing_keyword
-                                ,sizeWord=sizeWord
-                                ,targetSize=maxSize
-                                ,ToBedivisibleBy32=True
-                                )  ,list(df.iterrows())) 
-    df[t2wKeyWord+"_3Chan"+sizeWord]=resList
-    #setting padding to labels
-    Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,maxSize, 0.0,spacing_keyword+sizeWord,True)
-
-
-    # sizeWord="_maxSize_"
+    # sizeWord="_div32_"
     # resList=[]
+    # # resList=list(map(partial(resize_and_join
+    # #                             ,colNameT2w=t2wKeyWord
+    # #                             ,colNameAdc="adc"+spacing_keyword
+    # #                             ,colNameHbv="hbv"+spacing_keyword
+    # #                             ,sizeWord=sizeWord
+    # #                             ,targetSize=maxSize
+    # #                             ,ToBedivisibleBy32=True
+    # #                             )  ,list(df.iterrows())))
+
+
     # with mp.Pool(processes = mp.cpu_count()) as pool:
     #     resList=pool.map(partial(resize_and_join
     #                             ,colNameT2w=t2wKeyWord
@@ -325,12 +312,33 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     #                             ,colNameHbv="hbv"+spacing_keyword
     #                             ,sizeWord=sizeWord
     #                             ,targetSize=maxSize
-    #                             ,ToBedivisibleBy32=False
+    #                             ,ToBedivisibleBy32=True
+    #                             ,targetSpacingg=targetSpacingg
     #                             )  ,list(df.iterrows())) 
-
-
     # df[t2wKeyWord+"_3Chan"+sizeWord]=resList
-    # Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,maxSize, 0.0,spacing_keyword+sizeWord,False)
+    # #setting padding to labels
+    # Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,maxSize, 0.0,spacing_keyword+sizeWord,True)
+    sizzX= physical_size[0]/targetSpacingg[0]
+    sizzY= physical_size[1]/targetSpacingg[1]
+    sizzZ= physical_size[2]/targetSpacingg[2]
+    sizz=(sizzX,sizzY,sizzZ)
+    targetSize=(math.ceil(sizz[0]/32)*32, math.ceil(sizz[1]/32)*32,math.ceil(sizz[2]/32)*32  )
+    
+    sizeWord="_maxSize_"
+    resList=[]
+    with mp.Pool(processes = mp.cpu_count()) as pool:
+        resList=pool.map(partial(resize_and_join
+                                ,colNameT2w=t2wKeyWord
+                                ,colNameAdc="adc"+spacing_keyword
+                                ,colNameHbv="hbv"+spacing_keyword
+                                ,sizeWord=sizeWord
+                                ,targetSize=targetSize
+                                ,ToBedivisibleBy32=False
+                                )  ,list(df.iterrows())) 
+
+
+    df[t2wKeyWord+"_3Chan"+sizeWord]=resList
+    Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,maxSize, 0.0,spacing_keyword+sizeWord,False)
 
 
 
@@ -342,21 +350,17 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 
 
 #bias field correction
-# Standardize.iterateAndBiasCorrect('t2w',df)
+Standardize.iterateAndBiasCorrect('t2w',df)
 # #Standarization
-# for keyWord in ['bfc_'+'t2w','adc', 'hbv']: #'cor',,'sag'
-#     ## denoising
-#     #Standardize.iterateAndDenoise(keyWord,df)
-#     ## standarization
-#     Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,80)   
-# #standardize labels
-# Standardize.iterateAndchangeLabelToOnes(df)
+for keyWord in ['bfc_'+'t2w','adc', 'hbv']: #'cor',,'sag'
+    ## denoising
+    #Standardize.iterateAndDenoise(keyWord,df)
+    ## standarization
+    Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,80)   
+#standardize labels
+Standardize.iterateAndchangeLabelToOnes(df)
 
 #### 
-#first get adc and tbv to t2w spacing
-spacing_keyword='_tw_d_'
-# df["adc_d"+spacing_keyword]=df.apply(lambda row : resample_To_t2w(row,'adc','tw','t2w')   , axis = 1) 
-# df["hbv_d"+spacing_keyword]=df.apply(lambda row : resample_To_t2w(row,'hbv','tw','t2w')   , axis = 1) 
 
 #now registration of adc and hbv to t2w
 for keyWord in ['adc','hbv']:

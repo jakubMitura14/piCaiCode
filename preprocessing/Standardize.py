@@ -124,11 +124,21 @@ def padToSize(image1,targetSize, paddValue):
     sizediffs=(targetSize[0]-currentSize[1]  , targetSize[1]-currentSize[1]  ,targetSize[2]-currentSize[2])
     halfDiffSize=(math.floor(sizediffs[0]/2) , math.floor(sizediffs[1]/2), math.floor(sizediffs[2]/2))
     rest=(sizediffs[0]-halfDiffSize[0]  ,sizediffs[1]-halfDiffSize[1]  ,sizediffs[2]-halfDiffSize[2]  )
+    
     #print(f" currentSize {currentSize} targetSize {targetSize} halfDiffSize {halfDiffSize}  rest {rest} paddValue {paddValue} sizediffs {type(sizediffs)}")
     
     halfDiffSize=np.array(halfDiffSize, dtype='int').tolist() 
     rest=np.array(rest, dtype='int').tolist() 
-    return sitk.ConstantPad(image1, halfDiffSize, rest, paddValue)
+    
+    #saving only non negative entries
+    halfDiffSize_to_pad= list(map(lambda dim : max(dim,0) ,halfDiffSize ))
+    rest_to_pad= list(map(lambda dim : max(dim,0) ,rest ))
+    #get only negative entries - those mean that we need to crop and we negate it to get positive numbers
+    halfDiffSize_to_crop= list(map(lambda dim : (-1)*min(dim,0) ,halfDiffSize ))
+    rest_to_crop= list(map(lambda dim : (-1)*min(dim,0) ,rest ))
+
+    padded= sitk.ConstantPad(image1, halfDiffSize_to_pad, rest_to_pad, paddValue)
+    return sitk.Crop(image1, halfDiffSize_to_crop,rest_to_crop )
     #return sitk.ConstantPad(image1, (1,1,1), (1,1,1), paddValue)
 
 
@@ -136,6 +146,8 @@ def padToDivisibleBy32(image1,paddValue):
     """
     padds so all dimensions will be divisible by 32
     """
+
+
     sizz=image1.GetSize()
     targetSize=(math.ceil(sizz[0]/32)*32, math.ceil(sizz[1]/32)*32,math.ceil(sizz[2]/32)*32  )
     return padToSize(image1,targetSize, paddValue)
