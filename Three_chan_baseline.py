@@ -142,7 +142,7 @@ def mainTrain(experiment,options,df):
     dim_x,dim_y,dim_z=centerCropSize
 
     imageRef_path=list(filter(lambda it: it!= '', df[label_name].to_numpy()))[0]
-    dummyLabelPath='/home/sliceruser/dummyData/zeroLabel.nii.gz'
+    dummyLabelPath='/home/sliceruser/data/dummyData/zeroLabel.nii.gz'
     semisuperPreprosess.writeDummyLabels(dummyLabelPath,dim_x,dim_y,dim_z,imageRef_path)
     
     with mp.Pool(processes = mp.cpu_count()) as pool:
