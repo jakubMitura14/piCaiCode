@@ -76,7 +76,15 @@ from monai.transforms import (
     EnsureType,
 )
 import torchio
-import detectSemiSupervised
+
+def loadLib(name,path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    res = importlib.util.module_from_spec(spec)
+    sys.modules[name] = res
+    spec.loader.exec_module(res)
+    return res
+
+detectSemiSupervised =loadLib("detectSemiSupervised", "/media/jakub/NewVolume/projects/piCaiCode/model/detectSemiSupervised.py")
 torch.autograd.set_detect_anomaly(True)
 
 def divide_chunks(l, n):
