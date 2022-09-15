@@ -16,7 +16,7 @@ def loadLib(name,path):
     spec.loader.exec_module(res)
     return res
     
-#transformsForMain =loadLib("transformsForMain", "/home/sliceruser/data/piCaiCode/preprocessing/transformsForMain.py")
+# transformsForMain =loadLib("transformsForMain", "/home/sliceruser/data/piCaiCode/preprocessing/transformsForMain.py")
 
 
 def getMonaiSubjectDataFromDataFrame(row,chan3_col_name,label_name,chan3_col_name_val,label_name_val):
@@ -48,40 +48,39 @@ def getMonaiSubjectDataFromDataFrame(row,chan3_col_name,label_name,chan3_col_nam
         return subject
 
 
-def load_df_only_full(df,chan3_col_name,label_name,is_whole_to_train):
-    df = df.loc[df['isAnyMissing'] ==False]
-    df = df.loc[df['isAnythingInAnnotated']>0 ]
-    # deficientPatIDs=[]
-    # data_dicts = list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1],chan3_col_name,label_name)  , list(df.iterrows())))
-    # train_transforms=transformsForMain.get_train_transforms(0.1#RandGaussianNoised_prob
-    #                                                         ,0.1#RandAdjustContrastd_prob
-    #                                                         ,0.1#RandGaussianSmoothd_prob
-    #                                                         ,0.1#RandRicianNoised_prob
-    #                                                         ,0.1#RandFlipd_prob
-    #                                                         ,0.1#RandAffined_prob
-    #                                                         ,0.1#RandCoarseDropoutd_prob
-    #                                                         ,is_whole_to_train )
-    # val_transforms= transformsForMain.get_val_transforms(is_whole_to_train)
+def load_df_only_full(df,chan3_col_name,label_name,is_whole_to_train,transformsForMain):
+    # df = df.loc[df['isAnyMissing'] ==False]
+    # df = df.loc[df['isAnythingInAnnotated']>0 ]
+    deficientPatIDs=[]
+    data_dicts = list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1],chan3_col_name,label_name)  , list(df.iterrows())))
+    train_transforms=transformsForMain.get_train_transforms(0.1#RandGaussianNoised_prob
+                                                            ,0.1#RandAdjustContrastd_prob
+                                                            ,0.1#RandGaussianSmoothd_prob
+                                                            ,0.1#RandRicianNoised_prob
+                                                            ,0.1#RandFlipd_prob
+                                                            ,0.1#RandAffined_prob
+                                                            ,0.1#RandCoarseDropoutd_prob
+                                                            ,is_whole_to_train )
+    val_transforms= transformsForMain.get_val_transforms(is_whole_to_train)
 
-    # for dictt in data_dicts:    
-    #     try:
-    #         dat = train_transforms(dictt)
-    #         dat = val_transforms(dictt)
-    #     except:
-    #         print("error loading image")
-    #         dat = train_transforms(dictt)# TODO remove
-    #         dat = val_transforms(dictt)# TODO remove            
-    #         pass
-    #         #deficientPatIDs.append(dictt['patient_id'])
-    #         #print(dictt['patient_id'])
+    for dictt in data_dicts:    
+        try:
+            dat = train_transforms(dictt)
+            dat = val_transforms(dictt)
+        except:
+            # print("error loading image")
+            # dat = train_transforms(dictt)# TODO remove
+            # dat = val_transforms(dictt)# TODO remove            
+            deficientPatIDs.append(dictt['patient_id'])
+            print(dictt['patient_id'])
 
 
-    # def isInDeficienList(row):
-    #         return row['patient_id'] not in deficientPatIDs
+    def isInDeficienList(row):
+            return row['patient_id'] not in deficientPatIDs
 
-    # df["areTransformsNotDeficient"]= df.apply(lambda row : isInDeficienList(row), axis = 1)  
+    df["areTransformsNotDeficient"]= df.apply(lambda row : isInDeficienList(row), axis = 1)  
 
-    # df = df.loc[ df['areTransformsNotDeficient']]
+    df = df.loc[ df['areTransformsNotDeficient']]
 
     return df
 

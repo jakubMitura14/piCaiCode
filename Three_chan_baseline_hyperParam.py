@@ -64,6 +64,7 @@ DataModule =loadLib("DataModule", "/home/sliceruser/data/piCaiCode/model/DataMod
 LigtningModel =loadLib("LigtningModel", "/home/sliceruser/data/piCaiCode/model/LigtningModel.py")
 Three_chan_baseline =loadLib("Three_chan_baseline", "/home/sliceruser/data/piCaiCode/Three_chan_baseline.py")
 detectSemiSupervised =loadLib("detectSemiSupervised", "/home/sliceruser/data/piCaiCode/model/detectSemiSupervised.py")
+transformsForMain =loadLib("transformsForMain", "/home/sliceruser/data/piCaiCode/preprocessing/transformsForMain.py")
 
 
 #dirs=[]
@@ -159,12 +160,15 @@ df= manageMetaData.load_df_only_full(
     df
     ,t2www
     ,labb
-    ,True )
+    ,True ,transformsForMain)
 df= manageMetaData.load_df_only_full(
     df
     ,f"t2w{exampleSpacing}_3Chan_div32_"
     ,f"label{exampleSpacing}_div32_"
-    ,False )
+    ,False,transformsForMain )
+
+
+    
 #COMET INFO: COMET_OPTIMIZER_ID=bfa44ecc70f348f1b05ecefcf8f7cd29
 
 # Next, create an optimizer, passing in the config:
