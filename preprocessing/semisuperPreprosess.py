@@ -1,6 +1,18 @@
 #based on https://github.com/DIAGNijmegen/picai_baseline/blob/bb887a32a105e2e38dbcef5e559e7c69c06bc952/src/picai_baseline/nnunet_semi_supervised/generate_automatic_annotations.py#L85
 
-
+from __future__ import print_function
+import collections
+import functools
+import math
+import multiprocessing as mp
+import time
+from functools import partial
+from os import listdir
+from os import path as pathOs
+from os.path import basename, dirname, exists, isdir, join, split
+import numpy as np
+import pandas as pd
+import SimpleITK as sitk
 import json
 import subprocess
 from dataclasses import dataclass
@@ -83,3 +95,22 @@ def iterate_and_addLesionNumber(df):
     return df
 
 
+"""
+creates the file with dummy data for label - in cases where is no valid labels
+outPath - full directory together with file name and extension
+dim_ x,y,z dimensions of the label we want
+imageRef_path - reference image from which we will take metadata
+"""
+def writeDummyLabels(outPath,dim_x,dim_y,dim_z,imageRef_path):
+    origImage = sitk.ReadImage(imageRef_path)
+    #intentionally inverting order as it is expected by simple itk
+    arr= np.zeros(dim_z,dim_y,dim_x).astype('int32')
+    image = sitk.GetImageFromArray(arr)
+    image.SetSpacing(origImage.GetSpacing())
+    image.SetOrigin(origImage.GetOrigin())
+    image.SetDirection(origImage.GetDirection())
+    #saving to hard drive
+    writer = sitk.ImageFileWriter()
+    writer.KeepOriginalImageUIDOn()
+    writer.SetFileName(outPath)
+    writer.Execute(image)    

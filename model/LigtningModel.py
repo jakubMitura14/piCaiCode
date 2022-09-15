@@ -167,7 +167,7 @@ class Model(pl.LightningModule):
         return optimizer
     
     def prepare_batch(self, batch):
-        return batch['chan3_col_name'], batch['pos'], batch['num_lesions_to_retain']
+        return batch['chan3_col_name'], batch['label'], batch['num_lesions_to_retain']
     
     def infer_batch(self, batch):
         x, y, numLesions = self.prepare_batch(batch)

@@ -89,6 +89,18 @@ def isAnnytingInAnnotatedInner(row,colName):
     return np.sum(data)
 
 
+def addDummyLabelPath(row, labelName, dummyLabelPath):
+    """
+    adds dummy label to the given column in every spot it is empty
+    """
+    row = row[1]
+    if(row[labelName]==' '):
+        return dummyLabelPath
+    else:
+        return row[labelName]    
+
+
+
 def mainTrain(experiment,options,df):
     picaiLossArr_auroc_final=[]
     picaiLossArr_AP_final=[]
@@ -125,6 +137,17 @@ def mainTrain(experiment,options,df):
     #     resList=pool.map(partial(isAnnytingInAnnotatedInner,colName=label_name),list(df.iterrows()))    
     # df['locIsInAnnot']= resList
     # df = df.loc[df['locIsInAnnot']>0]
+    ##setting dummy zero filled label for the images without labels
+    centerCropSize=getParam(experiment,options,'centerCropSize',df)
+    dim_x,dim_y,dim_z=centerCropSize
+
+    imageRef_path=list(filter(lambda it: it!= '', df['chan3_col_name'].to_numpy()))[0]
+    dummyLabelPath='/home/sliceruser/dummyData/zeroLabel.nii.gz'
+    semisuperPreprosess.writeDummyLabels(dummyLabelPath,dim_x,dim_y,dim_z,imageRef_path)
+    
+    with mp.Pool(processes = mp.cpu_count()) as pool:
+        resList=pool.map(partial(addDummyLabelPath,labelName=label_name ,dummyLabelPath= dummyLabelPath ) ,list(df.iterrows())) 
+    df[label_name]=resList
 
 
     data = DataModule.PiCaiDataModule(
@@ -150,6 +173,8 @@ def mainTrain(experiment,options,df):
         ,is_whole_to_train= (sizeWord=="_maxSize_")
         ,centerCropSize=getParam(experiment,options,"centerCropSize",df)
     )
+
+
     data.prepare_data()
     data.setup()
     # definition described in model folder
@@ -213,7 +238,9 @@ def mainTrain(experiment,options,df):
     experiment.log_metric("last_val_loss_auroc",np.nanmax(picaiLossArr_auroc_final))
     experiment.log_metric("last_val_loss_Ap",np.nanmax(picaiLossArr_AP_final))
     experiment.log_metric("last_val_loss_score",np.nanmax(picaiLossArr_score_final))
-
+    #removing dummy label 
+    os.remove(dummyLabelPath)
+    
     #experiment.log_parameters(parameters)  
     experiment.end()
     # #evaluating on test dataset
