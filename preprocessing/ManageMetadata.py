@@ -47,12 +47,11 @@ def getMonaiSubjectDataFromDataFrame(row,chan3_col_name,label_name,chan3_col_nam
 
         return subject
 
-
-def load_df_only_full(df,chan3_col_name,label_name,is_whole_to_train,transformsForMain):
+def load_df_only_full(df,chan3_col_name,label_name,is_whole_to_train,transformsForMain,chan3_col_name_val,label_name_val):
     # df = df.loc[df['isAnyMissing'] ==False]
     # df = df.loc[df['isAnythingInAnnotated']>0 ]
     deficientPatIDs=[]
-    data_dicts = list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1],chan3_col_name,label_name)  , list(df.iterrows())))
+    data_dicts = list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1],chan3_col_name,label_name,chan3_col_name_val,label_name_val)  , list(df.iterrows())))
     train_transforms=transformsForMain.get_train_transforms(0.1#RandGaussianNoised_prob
                                                             ,0.1#RandAdjustContrastd_prob
                                                             ,0.1#RandGaussianSmoothd_prob
