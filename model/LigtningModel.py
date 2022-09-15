@@ -86,7 +86,7 @@ def loadLib(name,path):
     spec.loader.exec_module(res)
     return res
 
-detectSemiSupervised =loadLib("detectSemiSupervised", "/media/jakub/NewVolume/projects/piCaiCode/model/detectSemiSupervised.py")
+detectSemiSupervised =loadLib("detectSemiSupervised", "/home/sliceruser/data/piCaiCode/model/detectSemiSupervised.py")
 torch.autograd.set_detect_anomaly(True)
 
 def divide_chunks(l, n):
