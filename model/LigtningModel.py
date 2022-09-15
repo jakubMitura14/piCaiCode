@@ -209,7 +209,7 @@ class Model(pl.LightningModule):
         print(f" y_det 0 {y_det[0].size()} ")
         #Todo check is the order of dimensions as expected by the library
 
-        y_det=[extract_lesion_candidates( torch.permute(x,(2,1,0) ).cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
+        y_det=[extract_lesion_candidates( torch.permute(x,(2,1,0,3) ).cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
         y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
 
 
