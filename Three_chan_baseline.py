@@ -141,7 +141,7 @@ def mainTrain(experiment,options,df):
     centerCropSize=getParam(experiment,options,'centerCropSize',df)
     dim_x,dim_y,dim_z=centerCropSize
 
-    imageRef_path=list(filter(lambda it: it!= '', df['chan3_col_name'].to_numpy()))[0]
+    imageRef_path=list(filter(lambda it: it!= '', df[chan3_col_name].to_numpy()))[0]
     dummyLabelPath='/home/sliceruser/dummyData/zeroLabel.nii.gz'
     semisuperPreprosess.writeDummyLabels(dummyLabelPath,dim_x,dim_y,dim_z,imageRef_path)
     
