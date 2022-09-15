@@ -386,8 +386,8 @@ preprocess_diffrent_spacings(df,(1.0,1.0,1.0),"_one_spac_c")
 
 
 print("fiiiniiished")
-print(df['study_id'])
 df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current_b.csv') 
+print(df['num_lesions_to_retain'])
 
 
 

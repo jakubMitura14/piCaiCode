@@ -147,7 +147,7 @@ config = {
     },
 }
 
-df = pd.read_csv("/home/sliceruser/data/metadata/processedMetaData_current.csv")
+df = pd.read_csv("/home/sliceruser/data/metadata/processedMetaData_current_b.csv")
 maxSize=manageMetaData.getMaxSize("t2w_med_spac",df)
 
 exampleSpacing="_med_spac"

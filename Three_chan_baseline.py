@@ -66,6 +66,7 @@ dataUtils =loadLib("dataUtils", "/home/sliceruser/data/piCaiCode/dataManag/utils
 unets =loadLib("unets", "/home/sliceruser/data/piCaiCode/model/unets.py")
 DataModule =loadLib("DataModule", "/home/sliceruser/data/piCaiCode/model/DataModule.py")
 LigtningModel =loadLib("LigtningModel", "/home/sliceruser/data/piCaiCode/model/LigtningModel.py")
+semisuperPreprosess =loadLib("semisuperPreprosess", "/home/sliceruser/data/piCaiCode/preprocessing/semisuperPreprosess.py")
 
 
 
