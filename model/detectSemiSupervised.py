@@ -19,30 +19,26 @@ from monai.networks.layers.simplelayers import SkipConnection
 from monai.utils import alias, deprecated_arg, export
 import functools
 import operator
+from torch.nn.intrinsic.qat import ConvBnReLU3d
 
 """
 based on example from 
 https://datascience.stackexchange.com/questions/40906/determining-size-of-fc-layer-after-conv-layer-in-pytorch
+
 """
 class UNetToRegresion(nn.Module):
     def __init__(self,
         in_channels,
-        act: Union[Tuple, str] = Act.PRELU,
-        norm: Union[Tuple, str] = Norm.INSTANCE,
-        adn_ordering: str = "NDA",
     ) -> None:
         super().__init__()
-        self.model = nn.Sequential(
-            nn.Conv3d(in_channels=in_channels, out_channels=1, kernel_size=3, stride=2),
-            nn.ReLU(inplace=True),
-            nn.Conv3d(in_channels=in_channels, out_channels=1, kernel_size=3, stride=2),
-            nn.ReLU(inplace=True),
-            nn.MaxPool3d(kernel_size=2),
-            nn.Conv3d(in_channels=1, out_channels=1, kernel_size=3, stride=2),
-            nn.ReLU(inplace=True),
-            nn.AdaptiveMaxPool3d((8,8,4)),#ensuring such dimension 
+        self.model = nn.Sequential(ConvBnReLU3d(in_channels=in_channels, out_channels=1, kernel_size=3, stride=2),
+            ConvBnReLU3d(in_channels=1, out_channels=1, kernel_size=3, stride=2),
+            ConvBnReLU3d(in_channels=1, out_channels=1, kernel_size=3, stride=2),
+            nn.AdaptiveMaxPool3d((8,8,2)),#ensuring such dimension 
             nn.Flatten(),
+            nn.BatchNorm3d(8*8*4)
             nn.Linear(in_features=8*8*4, out_features=100),
+            nn.BatchNorm3d(100),
             nn.ReLU(inplace=True),
             nn.Linear(in_features=100, out_features=1)
         )

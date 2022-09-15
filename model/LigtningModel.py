@@ -156,34 +156,25 @@ class Model(pl.LightningModule):
         optimizer = self.optimizer_class(self.parameters(), lr=self.lr)
         return optimizer
     
-    def prepare_batch_pos(self, batch):
-        return batch['pos']['chan3_col_name'], batch['pos']['label']
+    def prepare_batch(self, batch):
+        return batch['chan3_col_name'], batch['pos'], batch['num_lesions_to_retain']
     
-    def infer_batch_pos(self, batch):
-        x, y = self.prepare_batch_pos(batch)
+    def infer_batch(self, batch):
+        x, y, numLesions = self.prepare_batch(batch)
         y_hat = self.net(x)
-        return y_hat, y
-
-    def prepare_batch_all(self, batch):
-        return batch['all']['chan3_col_name'], batch['all']['num_lesions_to_retain']
-    
-    def infer_batch_all(self, batch):
-        x, y = self.prepare_batch_pos(batch)
-        y_hat = self.net(x)
-        return y_hat, y
+        return y_hat, y, numLesions
 
     def training_step(self, batch, batch_idx):
         # every second iteration we will do the training for segmentation
+        y_hat, y , numLesions= self.infer_batch(batch)
         if self.global_step%2==0:
-            y_hat, y = self.infer_batch_pos(batch)
             loss = self.criterion(y_hat, y)
             self.log('train_loss', loss, prog_bar=True)
             return loss
         # in case we have odd iteration we get access only to number of lesions present in the image not where they are (if they are present at all)    
         else:
-            y_hat, y = self.infer_batch_all(batch)
             regress_res=self.modelRegression(y_hat)
-            return F.smooth_l1_loss(regress_res, y)
+            return F.smooth_l1_loss(regress_res,numLesions )
 
     # def validation_step(self, batch, batch_idx):
     #     return 0.5

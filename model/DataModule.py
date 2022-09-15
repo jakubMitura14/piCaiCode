@@ -144,7 +144,8 @@ class PiCaiDataModule(pl.LightningDataModule):
         
         onlyPositiveSubj=list(map(lambda row: manageMetaData.getMonaiSubjectDataFromDataFrame(row[1]
         ,self.chan3_col_name,self.label_name,self.chan3_col_name_val,self.label_name_val)   , list(onlyPositve.iterrows())))
-        return allSubj,onlyPositve
+        
+        return allSubj,onlyPositiveSubj
 
     #TODO replace with https://docs.monai.io/en/stable/data.html
     def splitDataSet(self,patList, trainSizePercent,noTestSet):
@@ -177,7 +178,9 @@ class PiCaiDataModule(pl.LightningDataModule):
 
         train_set_all, valid_set_all,test_set_all = self.splitDataSet(self.allSubjects , self.trainSizePercent,True)
         train_set_pos, valid_set_pos,test_set_pos = self.splitDataSet(self.onlyPositiveSubjects , self.trainSizePercent,True)
-        
+        #so we get just the example where we should not detect a thing 
+        onlyNegatives=list(filter(lambda subj :  subj['num_lesions_to_retain']==0  ,valid_set_all))
+
         # self.train_subjects = train_set
         # self.val_subjects = valid_set
         # self.test_subjects = test_set
@@ -197,26 +200,34 @@ class PiCaiDataModule(pl.LightningDataModule):
         # self.val_ds=     PersistentDataset(data=self.val_subjects, transform=val_transforms,cache_dir=self.cache_dir)
         # self.test_ds=    PersistentDataset(data=self.test_subjects, transform=val_transforms,cache_dir=self.cache_dir)    
 
+
         self.train_ds_all =  Dataset(data=train_set_all, transform=train_transforms)
-        self.val_ds_all=     Dataset(data=valid_set_all, transform=val_transforms)
+        self.val_ds=     Dataset(data=valid_set_pos+onlyNegatives, transform=val_transforms)
         self.train_ds_pos =  Dataset(data=train_set_pos, transform=train_transforms)
-        self.val_ds_pos=     Dataset(data=valid_set_pos, transform=val_transforms)
         #self.test_ds=    Dataset(data=self.test_subjects, transform=val_transforms)
         
     def train_dataloader(self):
-        return {"all": DataLoader(self.train_ds_all, batch_size=self.batch_size, drop_last=self.drop_last
+        if self.trainer.current_epoch % 2 == 0:
+            return DataLoader(self.train_ds_pos, batch_size=self.batch_size, drop_last=self.drop_last
                           ,num_workers=self.num_workers,collate_fn=list_data_collate)
-        , "pos": DataLoader(self.train_ds_pos, batch_size=self.batch_size, drop_last=self.drop_last
-                          ,num_workers=self.num_workers,collate_fn=list_data_collate)}
+        return DataLoader(self.train_ds_all, batch_size=self.batch_size, drop_last=self.drop_last
+                          ,num_workers=self.num_workers,collate_fn=list_data_collate)
+
+
+
+        # return {"all": DataLoader(self.train_ds_all, batch_size=self.batch_size, drop_last=self.drop_last
+        #                   ,num_workers=self.num_workers,collate_fn=list_data_collate)
+        # , "pos": DataLoader(self.train_ds_pos, batch_size=self.batch_size, drop_last=self.drop_last
+        #                   ,num_workers=self.num_workers,collate_fn=list_data_collate)}
         # return DataLoader(self.train_ds, batch_size=self.batch_size, drop_last=self.drop_last
         #                   ,num_workers=self.num_workers,collate_fn=list_data_collate)#,collate_fn=list_data_collate , shuffle=True
 
     def val_dataloader(self):
-        return {"all": DataLoader(self.val_ds_all, batch_size=1, drop_last=self.drop_last,num_workers=self.num_workers,collate_fn=list_data_collate)#,collate_fn=pad_list_data_collate
-               ,"pos": DataLoader(self.val_ds_pos, batch_size=1, drop_last=self.drop_last,num_workers=self.num_workers,collate_fn=list_data_collate)#,collate_fn=pad_list_data_collate
-               }
+        # return {"all": DataLoader(self.val_ds_all, batch_size=1, drop_last=self.drop_last,num_workers=self.num_workers,collate_fn=list_data_collate)#,collate_fn=pad_list_data_collate
+        #        ,"pos": DataLoader(self.val_ds_pos, batch_size=1, drop_last=self.drop_last,num_workers=self.num_workers,collate_fn=list_data_collate)#,collate_fn=pad_list_data_collate
+        #        }
 
-        # return DataLoader(self.val_ds, batch_size=1, drop_last=self.drop_last,num_workers=self.num_workers,collate_fn=list_data_collate)#,collate_fn=pad_list_data_collate
+        return DataLoader(self.val_ds, batch_size=1, drop_last=self.drop_last,num_workers=self.num_workers,collate_fn=list_data_collate)#,collate_fn=pad_list_data_collate
 
     # def test_dataloader(self):
     #     return DataLoader(self.test_ds, batch_size= 1, drop_last=False,num_workers=self.num_workers,collate_fn=list_data_collate)#num_workers=self.num_workers,
