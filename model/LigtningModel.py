@@ -152,6 +152,7 @@ def getArrayFromPath(path):
 
 def extractLesions_my(x):
     return extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0]
+
 class Model(pl.LightningModule):
     def __init__(self
     , net
@@ -243,11 +244,11 @@ class Model(pl.LightningModule):
         # print(f" y_det 0 {y_det[0].size()} ")
         #Todo check is the order of dimensions as expected by the library
 
-
-        y_det=[]
+        print(f"  ")
+        y_det_out=[]
         with mp.Pool(processes = mp.cpu_count()) as pool:
-            y_det=pool.map(extractLesions_my,y_det)
-
+            y_det_out=pool.map(extractLesions_my,y_det)
+        y_det=y_det_out
 
         # y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
         # y_det=[extract_lesion_candidates( torch.permute(x,(2,1,0,3) ).cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
