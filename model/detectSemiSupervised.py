@@ -37,7 +37,7 @@ class UNetToRegresion(nn.Module):
             nn.AdaptiveMaxPool3d((8,8,2)),#ensuring such dimension 
             nn.Flatten(),
             #nn.BatchNorm3d(8*8*4),
-            nn.Linear(in_features=8*8*4, out_features=100),
+            nn.Linear(in_features=8*8*2, out_features=100),
             #nn.BatchNorm3d(100),
             nn.ReLU(inplace=True),
             nn.Linear(in_features=100, out_features=1)
