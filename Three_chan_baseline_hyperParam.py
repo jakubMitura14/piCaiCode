@@ -122,14 +122,15 @@ def getSegResNet(dropout,input_image_size):
         in_channels=3,
         out_channels=2,
         dropout_prob=dropout,
-        input_image_size=input_image_size
     )
 def getSegResNetVAE(dropout,input_image_size):
     return monai.networks.nets.SegResNetVAE(
         spatial_dims=3,
         in_channels=3,
         out_channels=2,
-        dropout_prob=dropout
+        dropout_prob=dropout,
+        input_image_size=input_image_size
+
     )
 
 
