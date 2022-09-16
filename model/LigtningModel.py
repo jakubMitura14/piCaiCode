@@ -186,56 +186,57 @@ class Model(pl.LightningModule):
             regress_res=self.modelRegression(y_hat)
             numLesions=list(map(lambda entry : int(entry), numLesions ))
             numLesions=torch.Tensor(numLesions).to(self.device)
-            return F.smooth_l1_loss(regress_res, numLesions )
+            return F.smooth_l1_loss(torch.flatten(regress_res), torch.flatten(numLesions) )
 
     # def validation_step(self, batch, batch_idx):
     #     return 0.5
 
     def validation_step(self, batch, batch_idx):
-        images, y_true,numLesions = batch['chan3_col_name_val'], batch["label_name_val"], batch['num_lesions_to_retain']
-        print(f" in validation images {images.size()} labels {y_true.size()} "  )
+        # images, y_true,numLesions = batch['chan3_col_name_val'], batch["label_name_val"], batch['num_lesions_to_retain']
+        # print(f" in validation images {images.size()} labels {y_true.size()} "  )
 
-        patIds=batch['patient_id']
-        y_det = sliding_window_inference(images, (32,32,32), 1, self.net)
+        # patIds=batch['patient_id']
+        # y_det = sliding_window_inference(images, (32,32,32), 1, self.net)
         
         
-        regress_res=self.modelRegression(y_det)
-        numLesions=list(map(lambda entry : int(entry), numLesions ))
-        numLesions=torch.Tensor(numLesions).to(self.device)
-        regressLoss=F.smooth_l1_loss(regress_res, numLesions )
+        # regress_res=self.modelRegression(y_det)
+        # numLesions=list(map(lambda entry : int(entry), numLesions ))
+        # numLesions=torch.Tensor(numLesions).to(self.device)
+        # regressLoss=F.smooth_l1_loss(regress_res, numLesions )
 
-        #marking that we had some Nan numbers in the tensor
-        if(torch.sum(torch.isnan( y_det))>0):
-            self.isAnyNan=True
+        # #marking that we had some Nan numbers in the tensor
+        # if(torch.sum(torch.isnan( y_det))>0):
+        #     self.isAnyNan=True
         
         
-        y_det=torch.sigmoid(y_det)
-        # print( f"before extract lesion  sum a {torch.sum(y_hat)  } " )
+        # y_det=torch.sigmoid(y_det)
+        # # print( f"before extract lesion  sum a {torch.sum(y_hat)  } " )
 
-        y_det = decollate_batch(y_det)
-        y_true = decollate_batch(y_true)
-        patIds = decollate_batch(patIds)
-        print(f" y_det 0 {y_det[0].size()} ")
-        #Todo check is the order of dimensions as expected by the library
+        # y_det = decollate_batch(y_det)
+        # y_true = decollate_batch(y_true)
+        # patIds = decollate_batch(patIds)
+        # print(f" y_det 0 {y_det[0].size()} ")
+        # #Todo check is the order of dimensions as expected by the library
 
-        y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
-        # y_det=[extract_lesion_candidates( torch.permute(x,(2,1,0,3) ).cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
-        y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
+        # y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
+        # # y_det=[extract_lesion_candidates( torch.permute(x,(2,1,0,3) ).cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
+        # y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
 
-        regress_res_cpu=regress_res.cpu().detach().numpy()
-        for i in range(0,len(y_true)):
-            #if regression tell that there are no changes we want it to zero out the final result
-            y_det_curr=y_det[i]
-            if(np.rint(regress_res_cpu[i])==0):
-                y_det_curr=np.zeros_like(y_det_curr)
-            tupl=saveFilesInDir(y_true[i],y_det_curr, self.temp_val_dir, patIds[i])
-            self.list_gold_val.append(tupl[0])
-            self.list_yHat_val.append(tupl[1])
-        #now we need to save files in temporary direcory and save outputs to the appripriate lists wit paths
+        # regress_res_cpu=regress_res.cpu().detach().numpy()
+        # for i in range(0,len(y_true)):
+        #     #if regression tell that there are no changes we want it to zero out the final result
+        #     y_det_curr=y_det[i]
+        #     if(np.rint(regress_res_cpu[i])==0):
+        #         y_det_curr=np.zeros_like(y_det_curr)
+        #     tupl=saveFilesInDir(y_true[i],y_det_curr, self.temp_val_dir, patIds[i])
+        #     self.list_gold_val.append(tupl[0])
+        #     self.list_yHat_val.append(tupl[1])
+        # #now we need to save files in temporary direcory and save outputs to the appripriate lists wit paths
         
-        self.log('val_loss', regressLoss)
+        # self.log('val_loss', regressLoss)
 
-        return regressLoss
+        # return regressLoss
+        return 1.0
 
 
 
