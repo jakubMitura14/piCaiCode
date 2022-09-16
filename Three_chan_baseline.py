@@ -51,7 +51,7 @@ import importlib.util
 import sys
 import ThreeChanNoExperiment
 
-percentSplit=0.8
+percentSplit=0.9
 
 def loadLib(name,path):
     spec = importlib.util.spec_from_file_location(name, path)
