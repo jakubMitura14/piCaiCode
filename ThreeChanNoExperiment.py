@@ -47,9 +47,9 @@ import importlib.util
 import sys
 import preprocessing.transformsForMain
 import preprocessing.ManageMetadata
-import model.unets
-import model.DataModule
-import model.LigtningModel
+import model.unets as unets
+import model.DataModule as DataModule
+import model.LigtningModel as LigtningModel
 import preprocessing.semisuperPreprosess
 
 
@@ -96,7 +96,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     df[label_name]=resList
 
 
-    data = model.DataModule.PiCaiDataModule(
+    data = DataModule.PiCaiDataModule(
         df= df,
         batch_size=2,#
         trainSizePercent=percentSplit,# TODO(change to 0.7 or 0.8
@@ -125,7 +125,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     data.setup()
     # definition described in model folder
     # from https://github.com/DIAGNijmegen/picai_baseline/blob/main/src/picai_baseline/unet/training_setup/neural_networks/unets.py
-    unet= model.unets.UNet(
+    unet= unets.UNet(
         spatial_dims=3,
         in_channels=3,
         out_channels=2,
@@ -137,7 +137,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         dropout= dropout
     )
 
-    model = model.LigtningModel.Model(
+    model = LigtningModel.Model(
         net=unet,
         criterion=  criterion,# Our seg labels are single channel images indicating class index, rather than one-hot
         learning_rate=1e-2,
