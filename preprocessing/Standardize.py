@@ -160,21 +160,22 @@ def padToAndSaveLabel(row,colname,targetSize, paddValue,keyword,isTobeDiv):
     if(path!=" "):
         outPath = path.replace('.nii.gz',keyword+ '.nii.gz')
         image=sitk.ReadImage(str(path))
+        print(f"resize label too {targetSize}")
+        # data= sitk.GetArrayFromImage(image)
 
-        data= sitk.GetArrayFromImage(image)
+        #print(f"unique in label {np.unique(data)}")
 
-        print(f"unique in label {np.unique(data)}")
-
-        if(isTobeDiv):
-            image=padToDivisibleBy32(image,paddValue)
-            writer.KeepOriginalImageUIDOn()
-            writer.SetFileName(outPath)
-            writer.Execute(image) 
-        else:
-            image=padToSize(image,targetSize,paddValue)
-            writer.KeepOriginalImageUIDOn()
-            writer.SetFileName(outPath)
-            writer.Execute(image)
+        # if(isTobeDiv):
+        #     image=padToDivisibleBy32(image,paddValue)
+        #     writer.KeepOriginalImageUIDOn()
+        #     writer.SetFileName(outPath)
+        #     writer.Execute(image) 
+        # else:
+        image=padToSize(image,targetSize,paddValue)
+        writer.KeepOriginalImageUIDOn()
+        writer.SetFileName(outPath)
+        writer.Execute(image)
+        print(f"result label size {image.GetSize()}")
         return outPath 
     return " "                     
                 
