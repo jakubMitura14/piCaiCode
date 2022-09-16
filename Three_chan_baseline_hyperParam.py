@@ -149,6 +149,7 @@ def getSwinUNETR(dropout,input_image_size):
         spatial_dims=3,
         in_channels=3,
         out_channels=2,
+        img_size=input_image_size
     )
 def getVNet(dropout,input_image_size):
     return monai.networks.nets.VNet(
