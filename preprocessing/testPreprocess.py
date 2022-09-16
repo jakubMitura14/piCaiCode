@@ -357,9 +357,9 @@ for keyWord in ['t2w','adc', 'hbv']: #'cor',,'sag'
     ## denoising
     #Standardize.iterateAndDenoise(keyWord,df)
     ## standarization
-    Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,80)   
+    #Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,80)   
 #standardize labels
-Standardize.iterateAndchangeLabelToOnes(df)
+#Standardize.iterateAndchangeLabelToOnes(df)
 
 #### 
 
