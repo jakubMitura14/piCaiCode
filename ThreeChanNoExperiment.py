@@ -43,10 +43,8 @@ import os.path
 monai.utils.set_determinism()
 from functools import partial
 
-import importlib.util
-import sys
-import preprocessing.transformsForMain
-import preprocessing.ManageMetadata
+# import preprocessing.transformsForMain
+# import preprocessing.ManageMetadata
 import model.unets as unets
 import model.DataModule as DataModule
 import model.LigtningModel as LigtningModel
