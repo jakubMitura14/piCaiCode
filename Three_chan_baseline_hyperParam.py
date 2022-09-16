@@ -165,20 +165,13 @@ def getViTAutoEnc(dropout,input_image_size):
         patch_size=(16,16,16)
     )
 
-def getVarFullyConnectedNet(dropout,input_image_size):
-    return monai.networks.nets.VarFullyConnectedNet(
-        spatial_dims=3,
-        in_channels=3,
-        out_channels=2,
-        hidden_channels=[10, 20, 10]
-    )
 
 
     
 #getAttentionUnet
 options={
 
-"models":[getUnetA, getUnetB,getAhnet,getVarFullyConnectedNet,getSegResNet,getSegResNetVAE,getSwinUNETR,getVNet,getViTAutoEnc ],
+"models":[getUnetA, getUnetB,getAhnet,getSegResNet,getSegResNetVAE,getSwinUNETR,getVNet,getViTAutoEnc ],
 
 
 "lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
