@@ -225,7 +225,8 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
         and str(row[1][colNameAdc])!= " " and str(row[1][colNameAdc])!="" 
         and str(row[1][colNameHbv])!= " " and str(row[1][colNameHbv])!=""
         ):
-        if(not pathOs.exists(outPath)):
+        # if(not pathOs.exists(outPath)):
+        if(True):
             patId=str(row[1]['patient_id'])
             print(f" str(row[1][colNameAdc])  {str(row[1][colNameAdc])}  str(row[1][colNameHbv]) {str(row[1][colNameHbv])}"    )
             imgT2w=sitk.ReadImage(str(row[1][colNameT2w]))
