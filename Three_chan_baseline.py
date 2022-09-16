@@ -95,8 +95,6 @@ def mainTrain(experiment,options,df,experiment_name):
     label_name=f"label{spacing_keyword}{sizeWord}" 
     label_name_val=label_name
     cacheDir =  f"/home/sliceruser/preprocess/monai_persistent_Dataset/{spacing_keyword}/{sizeWord}"
-    centerCropSize=getParam(experiment,options,'centerCropSize',df)
-    dim_x,dim_y,dim_z=centerCropSize
 
     imageRef_path=list(filter(lambda it: it!= '', df[label_name].to_numpy()))[0]
     dummyLabelPath='/home/sliceruser/data/dummyData/zeroLabel.nii.gz'
