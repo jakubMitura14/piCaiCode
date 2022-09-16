@@ -140,11 +140,11 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId):
     return(gold_im_path,yHat_im_path)
 
 
-def saveToValidate(i,y_det,regress_res_cpu,temp_val_dir):
+def saveToValidate(i,y_det,regress_res_cpu,temp_val_dir,y_true,patIds):
     y_det_curr=y_det[i]
     if(np.rint(regress_res_cpu[i])==0):
         y_det_curr=np.zeros_like(y_det_curr)
-    return saveFilesInDir(y_true[i],y_det_curr, self.temp_val_dir, patIds[i])
+    return saveFilesInDir(y_true[i],y_det_curr, temp_val_dir, patIds[i])
 
 def getArrayFromPath(path):
     image1=sitk.ReadImage(path)
@@ -257,7 +257,9 @@ class Model(pl.LightningModule):
 
         tupless=[]
         with mp.Pool(processes = mp.cpu_count()) as pool:
-            tupless=y_det=pool.map(partial(saveToValidate,y_det=y_det,regress_res_cpu=regress_res_cpu ,temp_val_dir= self.temp_val_dir),list(range(0,len(y_true))))
+            tupless=y_det=pool.map(partial(saveToValidate,y_det=y_det,regress_res_cpu=regress_res_cpu 
+                ,temp_val_dir= self.temp_val_dir,y_true=y_true,patIds=patIds),list(range(0,len(y_true))))
+        
         for i in range(0,len(y_true)):
             self.list_gold_val.append(tupless[i][0])
             self.list_yHat_val.append(tupless[i][1])            
