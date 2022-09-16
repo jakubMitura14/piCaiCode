@@ -80,9 +80,9 @@ import torch.nn.functional as F
 # import preprocessing.ManageMetadata as manageMetaData
 # import dataManag.utils.dataUtils as dataUtils
 # import multiprocessing
-
-from ... import preprocessing.transformsForMain as transformsForMain
-from ... import preprocessing.ManageMetadata as manageMetaData
+from ... import preprocessing
+from preprocessing import transformsForMain as transformsForMain
+from preprocessing import ManageMetadata as manageMetaData
 
 
 
