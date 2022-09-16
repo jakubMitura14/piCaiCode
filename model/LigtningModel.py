@@ -226,7 +226,7 @@ class Model(pl.LightningModule):
         for i in range(0,len(y_true)):
             #if regression tell that there are no changes we want it to zero out the final result
             y_det_curr=y_det[i]
-            if(round(regress_res_cpu[i])==0):
+            if(np.rint(regress_res_cpu[i])==0):
                 y_det_curr=np.zeros_like(y_det_curr)
             tupl=saveFilesInDir(y_true[i],y_det_curr, self.temp_val_dir, patIds[i])
             self.list_gold_val.append(tupl[0])
