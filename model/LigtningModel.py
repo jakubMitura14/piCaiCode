@@ -184,7 +184,7 @@ class Model(pl.LightningModule):
         # in case we have odd iteration we get access only to number of lesions present in the image not where they are (if they are present at all)    
         else:
             regress_res=self.modelRegression(y_hat)
-            return F.smooth_l1_loss(regress_res,numLesions )
+            return F.smooth_l1_loss(regress_res, torch.Tensor(numLesions) )
 
     # def validation_step(self, batch, batch_idx):
     #     return 0.5
