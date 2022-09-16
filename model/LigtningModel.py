@@ -198,6 +198,7 @@ class Model(pl.LightningModule):
             regress_res=self.modelRegression(y_hat)
             numLesions=list(map(lambda entry : int(entry), numLesions ))
             numLesions=torch.Tensor(numLesions).to(self.device)
+            print(f" regress res {torch.flatten(regress_res).size()}  orig {torch.flatten(numLesions).size() } ")
             return F.smooth_l1_loss(torch.flatten(regress_res), torch.flatten(numLesions) )
 
     # def validation_step(self, batch, batch_idx):
@@ -214,7 +215,7 @@ class Model(pl.LightningModule):
         regress_res=self.modelRegression(y_det)
         numLesions=list(map(lambda entry : int(entry), numLesions ))
         numLesions=torch.Tensor(numLesions).to(self.device)
-        regressLoss=F.smooth_l1_loss(regress_res, numLesions )
+        regressLoss=F.smooth_l1_loss(torch.flatten(regress_res), torch.flatten(numLesions ))
 
         #marking that we had some Nan numbers in the tensor
         if(torch.sum(torch.isnan( y_det))>0):
@@ -234,7 +235,7 @@ class Model(pl.LightningModule):
         # y_det=[extract_lesion_candidates( torch.permute(x,(2,1,0,3) ).cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
         y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
 
-        regress_res_cpu=regress_res.cpu().detach().numpy()
+        regress_res_cpu=torch.flatten(regress_res).cpu().detach().numpy()
         for i in range(0,len(y_true)):
             #if regression tell that there are no changes we want it to zero out the final result
             y_det_curr=y_det[i]

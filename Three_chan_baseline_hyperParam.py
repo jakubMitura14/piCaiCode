@@ -138,7 +138,7 @@ config = {
         "RandAffined_prob": {"type": "float", "min": 0.0, "max": 0.5},
         "RandCoarseDropoutd_prob":{"type": "discrete", "values": [0.0]},
   
-        "spacing_keyword": {"type": "categorical", "values": [ "_one_spac_c" ]},#"_med_spac_b"      #"_med_spac","_one_and_half_spac", "_two_spac"
+        "spacing_keyword": {"type": "categorical", "values": [ "_med_spac_b"]},#"_one_spac_c" ,"_med_spac_b"      #"_med_spac","_one_and_half_spac", "_two_spac"
         "sizeWord": {"type": "categorical", "values": ["_maxSize_"]},#,"_maxSize_"# ,"_div32_"
         #"dirs": {"type": "discrete", "values": list(range(0,len(options["dirs"])))},
     },
