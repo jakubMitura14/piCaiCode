@@ -169,7 +169,8 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
                 if(reIndex==6): #in case it do not work we will try diffrent parametrization
                     reg_prop=reg_prop.replace("parameters","parametersB")              
                 reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment,reIndexNew)
-
+            if(not pathOs.exists(result)):
+                return " "
 
 
 
