@@ -186,7 +186,7 @@ class Model(pl.LightningModule):
             regress_res=self.modelRegression(y_hat)
             print(f" numLesions {numLesions} type {type(numLesions)} regress_res {regress_res}")
             numLesions=list(map(lambda entry : int(entry), numLesions ))
-            numLesions=torch.Tensor(numLesions)
+            numLesions=torch.Tensor(numLesions).to(self.device)
             return F.smooth_l1_loss(regress_res, numLesions )
 
     # def validation_step(self, batch, batch_idx):
