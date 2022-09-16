@@ -48,7 +48,7 @@ from functools import partial
 import model.unets as unets
 import model.DataModule as DataModule
 import model.LigtningModel as LigtningModel
-import preprocessing.semisuperPreprosess
+# import preprocessing.semisuperPreprosess
 
 
 def isAnnytingInAnnotatedInner(row,colName):
