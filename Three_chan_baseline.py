@@ -111,7 +111,7 @@ def mainTrain(experiment,options,df,experiment_name):
     RandAffined_prob=experiment.get_parameter("RandAffined_prob")
     RandCoarseDropoutd_prob=experiment.get_parameter("RandCoarseDropoutd_prob")
     is_whole_to_train= (sizeWord=="_maxSize_")
-    centerCropSize=getParam(experiment,options,"centerCropSize",df)
+    centerCropSize=(81.0, 160.0, 192.0)#=getParam(experiment,options,"centerCropSize",df)
     net=getParam(experiment,options,"models",df)
     
     # strides=getParam(experiment,options,"stridesAndChannels",df)["strides"]
