@@ -169,7 +169,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         accumulate_grad_batches=accumulate_grad_batches,
         gradient_clip_val=gradient_clip_val,# 0.5,2.0
         log_every_n_steps=30,
-        strategy='ddp' # for multi gpu training
+        strategy='ddp2' # for multi gpu training
     )
 
 
