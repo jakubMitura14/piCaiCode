@@ -130,7 +130,7 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.cache_dir=cache_dir
         self.batch_size = batch_size
         self.df = df
-        self.num_workers = 0#num_workers
+        self.num_workers = num_workers
         self.drop_last = drop_last
         self.train_set = None
         self.val_set = None
