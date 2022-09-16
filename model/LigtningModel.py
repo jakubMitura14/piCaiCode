@@ -150,8 +150,8 @@ def getArrayFromPath(path):
     image1=sitk.ReadImage(path)
     return sitk.GetArrayFromImage(image1)
 
-def extractLesions(x):
-    extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0]
+def extractLesions_my(x):
+    return extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0]
 class Model(pl.LightningModule):
     def __init__(self
     , net
@@ -246,7 +246,7 @@ class Model(pl.LightningModule):
 
         y_det=[]
         with mp.Pool(processes = mp.cpu_count()) as pool:
-            y_det=pool.map(extractLesions,y_det)
+            y_det=pool.map(extractLesions_my,y_det)
 
 
         # y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
