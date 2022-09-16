@@ -152,21 +152,21 @@ config = {
 df = pd.read_csv("/home/sliceruser/data/metadata/processedMetaData_current_b.csv")
 # maxSize=manageMetaData.getMaxSize("t2w_med_spac_b",df)
 
-exampleSpacing="_med_spac_b"
-exampleSpacingB="_med_spac_b"
-t2www=f"t2w{exampleSpacing}_3Chan_div32_"
-labb=f"label{exampleSpacing}_div32_"
+# exampleSpacing="_med_spac_b"
+# exampleSpacingB="_med_spac_b"
+# t2www=f"t2w{exampleSpacing}_3Chan_div32_"
+# labb=f"label{exampleSpacing}_div32_"
 
-df= manageMetaData.load_df_only_full(
-    df
-    ,t2www
-    ,labb
-    ,True ,transformsForMain,t2www,labb )
-df= manageMetaData.load_df_only_full(
-    df
-    ,f"t2w{exampleSpacingB}_3Chan_div32_"
-    ,f"label{exampleSpacingB}_div32_"
-    ,False,transformsForMain,t2www,labb )
+# df= manageMetaData.load_df_only_full(
+#     df
+#     ,t2www
+#     ,labb
+#     ,True ,transformsForMain,t2www,labb )
+# df= manageMetaData.load_df_only_full(
+#     df
+#     ,f"t2w{exampleSpacingB}_3Chan_div32_"
+#     ,f"label{exampleSpacingB}_div32_"
+#     ,False,transformsForMain,t2www,labb )
 
 
 
