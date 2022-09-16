@@ -174,9 +174,10 @@ def getVarFullyConnectedNet(dropout,input_image_size):
 
 
     
-
+#getAttentionUnet
 options={
-"models":[getUnetA, getUnetB,getAhnet,getVarFullyConnectedNet,getSegResNet,getSegResNetVAE,getAttentionUnet,getSwinUNETR,getVNet,getViTAutoEnc ],
+
+"models":[getUnetA, getUnetB,getAhnet,getVarFullyConnectedNet,getSegResNet,getSegResNetVAE,getSwinUNETR,getVNet,getViTAutoEnc ],
 
 
 "lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
