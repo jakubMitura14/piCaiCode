@@ -77,10 +77,10 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
          ,RandGaussianNoised_prob,RandAdjustContrastd_prob,RandGaussianSmoothd_prob,
          RandRicianNoised_prob,RandFlipd_prob, RandAffined_prob,RandCoarseDropoutd_prob
          ,is_whole_to_train,centerCropSize,
-         strides,channels,num_res_units,act,norm,dropout
+         num_res_units,act,norm,dropout
          ,criterion, optimizer_class,max_epochs,accumulate_grad_batches,gradient_clip_val
          ,picaiLossArr_auroc_final,picaiLossArr_AP_final,picaiLossArr_score_final
-          ,experiment_name ):        
+          ,experiment_name,net ):        
 
     #TODO(remove)
     comet_logger = CometLogger(
@@ -124,20 +124,20 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     data.setup()
     # definition described in model folder
     # from https://github.com/DIAGNijmegen/picai_baseline/blob/main/src/picai_baseline/unet/training_setup/neural_networks/unets.py
-    unet= unets.UNet(
-        spatial_dims=3,
-        in_channels=3,
-        out_channels=2,
-        strides=strides,
-        channels=channels,
-        num_res_units= num_res_units,
-        act = act,
-        norm= norm,
-        dropout= dropout
-    )
+    # unet= unets.UNet(
+    #     spatial_dims=3,
+    #     in_channels=3,
+    #     out_channels=2,
+    #     strides=strides,
+    #     channels=channels,
+    #     num_res_units= num_res_units,
+    #     act = act,
+    #     norm= norm,
+    #     dropout= dropout
+    # )
 
     model = LigtningModel.Model(
-        net=unet,
+        net=net,
         criterion=  criterion,# Our seg labels are single channel images indicating class index, rather than one-hot
         learning_rate=1e-2,
         optimizer_class= optimizer_class,

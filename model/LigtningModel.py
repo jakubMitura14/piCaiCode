@@ -219,7 +219,7 @@ class Model(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         images, y_true,numLesions = batch['chan3_col_name_val'], batch["label_name_val"], batch['num_lesions_to_retain']
-        print(f" in validation images {images.size()} labels {y_true.size()} "  )
+        #print(f" in validation images {images.size()} labels {y_true.size()} "  )
 
         patIds=batch['patient_id']
         y_det = sliding_window_inference(images, (32,32,32), 1, self.net)

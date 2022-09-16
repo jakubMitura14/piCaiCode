@@ -60,12 +60,12 @@ def loadLib(name,path):
 
 manageMetaData =loadLib("ManageMetadata", "/home/sliceruser/data/piCaiCode/preprocessing/ManageMetadata.py")
 dataUtils =loadLib("dataUtils", "/home/sliceruser/data/piCaiCode/dataManag/utils/dataUtils.py")
-
 unets =loadLib("unets", "/home/sliceruser/data/piCaiCode/model/unets.py")
 DataModule =loadLib("DataModule", "/home/sliceruser/data/piCaiCode/model/DataModule.py")
 LigtningModel =loadLib("LigtningModel", "/home/sliceruser/data/piCaiCode/model/LigtningModel.py")
 Three_chan_baseline =loadLib("Three_chan_baseline", "/home/sliceruser/data/piCaiCode/Three_chan_baseline.py")
 detectSemiSupervised =loadLib("detectSemiSupervised", "/home/sliceruser/data/piCaiCode/model/detectSemiSupervised.py")
+
 
 
 #dirs=[]
@@ -84,7 +84,103 @@ for spacing_keyword in ["_med_spac", "_one_spac","_one_and_half_spac", "_two_spa
 
 ##options
 to_onehot_y_loss= False
+
+def getUnetA(dropout):
+    return unets.UNet(
+        spatial_dims=3,
+        in_channels=3,
+        out_channels=2,
+        strides=[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)],
+        channels=[32, 64, 128, 256, 512, 1024],
+        num_res_units= 0,
+        act = (Act.PRELU, {"init": 0.2}),
+        norm= (Norm.BATCH, {}),
+        dropout= dropout
+    )
+def getUnetB(dropout):
+    return unets.UNet(
+        spatial_dims=3,
+        in_channels=3,
+        out_channels=2,
+        strides=[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)],
+        channels=[32, 64, 128, 256, 512],
+        num_res_units= 0,
+        act = (Act.PRELU, {"init": 0.2}),
+        norm= (Norm.BATCH, {}),
+        dropout= dropout
+    )
+def getAhnet(dropout):
+    return monai.networks.nets.AHNet(
+        spatial_dims=3,
+        in_channels=3,
+        out_channels=2
+    )
+
+def getSegResNet(dropout):
+    return monai.networks.nets.SegResNet(
+        spatial_dims=3,
+        in_channels=3,
+        out_channels=2,
+        dropout_prob=dropout
+    )
+def getSegResNetVAE(dropout):
+    return monai.networks.nets.SegResNetVAE(
+        spatial_dims=3,
+        in_channels=3,
+        out_channels=2,
+        dropout_prob=dropout
+    )
+
+def getDynUNet(dropout):
+    return monai.networks.nets.DynUNet(
+        spatial_dims=3,
+        in_channels=3,
+        out_channels=2,
+    )
+
+
+
+def getAttentionUnet(dropout):
+    return monai.networks.nets.AttentionUnet(
+        spatial_dims=3,
+        in_channels=3,
+        out_channels=2,
+        dropout=dropout
+    )
+def getSwinUNETR(dropout):
+    return monai.networks.nets.SwinUNETR(
+        spatial_dims=3,
+        in_channels=3,
+        out_channels=2,
+    )
+def getVNet(dropout):
+    return monai.networks.nets.VNet(
+        spatial_dims=3,
+        in_channels=3,
+        out_channels=2,
+        dropout_prob=dropout
+    )
+def getViTAutoEnc(dropout):
+    return monai.networks.nets.ViTAutoEnc(
+        spatial_dims=3,
+        in_channels=3,
+        out_channels=2,
+    )
+
+def getVarFullyConnectedNet(dropout):
+    return monai.networks.nets.VarFullyConnectedNet(
+        spatial_dims=3,
+        in_channels=3,
+        out_channels=2,
+    )
+
+
+    
+
 options={
+"models":[getUnetA, getUnetB,getAhnet,getVarFullyConnectedNet,getSegResNet,getSegResNetVAE,getDynUNet,getAttentionUnet,getSwinUNETR,getVNet,getViTAutoEnc ],
+
+
 "lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
         # ,SamplesLoss(loss="sinkhorn",p=3)
         # ,SamplesLoss(loss="hausdorff",p=3)
@@ -94,18 +190,18 @@ options={
         #,monai.losses.DiceFocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
         
 ],
-"stridesAndChannels":  [ {
-                                                            "strides":[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
-                                                            ,"channels":[32, 64, 128, 256, 512, 1024]
-                                                            },
-                                                            #  {
-                                                            # "strides":[(2, 2, 2), (1, 2, 2),(1, 1, 1), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
-                                                            # ,"channels":[32, 64, 128, 256, 512, 1024, 2048]
-                                                            # },
-                                                            {
-                                                            "strides":[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)]
-                                                            ,"channels":[32, 64, 128, 256, 512]
-                                                            }  ],
+# "stridesAndChannels":  [ {
+#                                                             "strides":[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
+#                                                             ,"channels":[32, 64, 128, 256, 512, 1024]
+#                                                             },
+#                                                             #  {
+#                                                             # "strides":[(2, 2, 2), (1, 2, 2),(1, 1, 1), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
+#                                                             # ,"channels":[32, 64, 128, 256, 512, 1024, 2048]
+#                                                             # },
+#                                                             {
+#                                                             "strides":[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)]
+#                                                             ,"channels":[32, 64, 128, 256, 512]
+#                                                             }  ],
 "optimizer_class": [torch.optim.NAdam] ,#torch.optim.LBFGS ,torch.optim.LBFGS optim.AggMo,   look in https://pytorch-optimizer.readthedocs.io/en/latest/api.html
 "act":[(Act.PRELU, {"init": 0.2})],#,(Act.LEAKYRELU, {})                                         
 "norm":[(Norm.BATCH, {}) ],
@@ -123,15 +219,16 @@ config = {
     # Declare  hyperparameters in 
 "parameters": {
         "lossF": {"type": "discrete", "values": list(range(0,len(options["lossF"])))},
-        "stridesAndChannels": {"type": "discrete", "values":  list(range(0,len(options["stridesAndChannels"])))  },
+        #"stridesAndChannels": {"type": "discrete", "values":  list(range(0,len(options["stridesAndChannels"])))  },
         "optimizer_class": {"type": "discrete", "values":list(range(0,len(options["optimizer_class"])))  },
-        "num_res_units": {"type": "discrete", "values": [0]},#,1,2
-        "act": {"type": "discrete", "values":list(range(0,len(options["act"])))  },#,(Act.LeakyReLU,{"negative_slope":0.1, "inplace":True} )
-        "norm": {"type": "discrete", "values": list(range(0,len(options["norm"])))},
-        "centerCropSize": {"type": "discrete", "values": list(range(0,len(options["centerCropSize"])))},
+        "models": {"type": "discrete", "values":list(range(0,len(options["models"])))  },
+        # "num_res_units": {"type": "discrete", "values": [0]},#,1,2
+        # "act": {"type": "discrete", "values":list(range(0,len(options["act"])))  },#,(Act.LeakyReLU,{"negative_slope":0.1, "inplace":True} )
+        # "norm": {"type": "discrete", "values": list(range(0,len(options["norm"])))},
+        # "centerCropSize": {"type": "discrete", "values": list(range(0,len(options["centerCropSize"])))},
         "dropout": {"type": "float", "min": 0.0, "max": 0.5},
-        "precision": {"type": "discrete", "values": [16]},
-        "max_epochs": {"type": "discrete", "values": [100]},#900
+        #"precision": {"type": "discrete", "values": [16]},
+        #"max_epochs": {"type": "discrete", "values": [100]},#900
         "accumulate_grad_batches": {"type": "discrete", "values": [1,3,10]},
         "gradient_clip_val": {"type": "discrete", "values": [0.0, 0.2,0.5,2.0,100.0]},#,2.0, 0.2,0.5
         "RandGaussianNoised_prob": {"type": "float", "min": 0.0, "max": 0.5},
@@ -141,9 +238,8 @@ config = {
         "RandFlipd_prob": {"type": "float", "min": 0.3, "max": 0.7},
         "RandAffined_prob": {"type": "float", "min": 0.0, "max": 0.5},
         "RandCoarseDropoutd_prob":{"type": "discrete", "values": [0.0]},
-  
         "spacing_keyword": {"type": "categorical", "values": ["_one_spac_c" ,"_med_spac_b"  ]},#    #"_med_spac","_one_and_half_spac", "_two_spac"
-        "sizeWord": {"type": "categorical", "values": ["_maxSize_"]},#,"_maxSize_"# ,"_div32_"
+        #"sizeWord": {"type": "categorical", "values": ["_maxSize_"]},#,"_maxSize_"# ,"_div32_"
         #"dirs": {"type": "discrete", "values": list(range(0,len(options["dirs"])))},
     },
 

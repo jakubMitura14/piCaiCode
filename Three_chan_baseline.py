@@ -88,7 +88,7 @@ def mainTrain(experiment,options,df,experiment_name):
     picaiLossArr_score_final=[]
     
     spacing_keyword=experiment.get_parameter("spacing_keyword")
-    sizeWord= experiment.get_parameter("sizeWord")
+    sizeWord= "_maxSize_" #experiment.get_parameter("sizeWord")
     chan3_col_name=f"t2w{spacing_keyword}_3Chan{sizeWord}" 
     chan3_col_name_val=chan3_col_name 
     df=df.loc[df[chan3_col_name] != ' ']
@@ -112,28 +112,30 @@ def mainTrain(experiment,options,df,experiment_name):
     RandCoarseDropoutd_prob=experiment.get_parameter("RandCoarseDropoutd_prob")
     is_whole_to_train= (sizeWord=="_maxSize_")
     centerCropSize=getParam(experiment,options,"centerCropSize",df)
-    strides=getParam(experiment,options,"stridesAndChannels",df)["strides"]
-    channels=getParam(experiment,options,"stridesAndChannels",df)["channels"]
-    num_res_units= experiment.get_parameter("num_res_units")
-    act = getParam(experiment,options,"act",df)
-    norm= getParam(experiment,options,"norm",df)
+    net=getParam(experiment,options,"models",df)
+    
+    # strides=getParam(experiment,options,"stridesAndChannels",df)["strides"]
+    # channels=getParam(experiment,options,"stridesAndChannels",df)["channels"]
+    num_res_units= 0#experiment.get_parameter("num_res_units")
+    act = (Act.PRELU, {"init": 0.2}) #getParam(experiment,options,"act",df)
+    norm= (Norm.BATCH, {}) #getParam(experiment,options,"norm",df)
     dropout= experiment.get_parameter("dropout")
     criterion=  getParam(experiment,options,"lossF",df)# Our seg labels are single channel images indicating class index, rather than one-hot
     optimizer_class= getParam(experiment,options,"optimizer_class",df)
-    max_epochs=experiment.get_parameter("max_epochs")
+    max_epochs=100#experiment.get_parameter("max_epochs")
     accumulate_grad_batches=experiment.get_parameter("accumulate_grad_batches")
     gradient_clip_val=experiment.get_parameter("gradient_clip_val")# 0.5,2.0
-
+    net=net(dropout)
 
     ThreeChanNoExperiment.train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
          ,chan3_col_name,chan3_col_name_val,label_name_val
          ,RandGaussianNoised_prob,RandAdjustContrastd_prob,RandGaussianSmoothd_prob,
          RandRicianNoised_prob,RandFlipd_prob, RandAffined_prob,RandCoarseDropoutd_prob
          ,is_whole_to_train,centerCropSize,
-         strides,channels,num_res_units,act,norm,dropout
+        num_res_units,act,norm,dropout
          ,criterion, optimizer_class,max_epochs,accumulate_grad_batches,gradient_clip_val
          ,picaiLossArr_auroc_final,picaiLossArr_AP_final,picaiLossArr_score_final
-          ,experiment_name )
+          ,experiment_name ,net)
 
     experiment.log_metric("last_val_loss_auroc",np.nanmax(picaiLossArr_auroc_final))
     experiment.log_metric("last_val_loss_Ap",np.nanmax(picaiLossArr_AP_final))
