@@ -138,7 +138,7 @@ def padToSize(image1,targetSize, paddValue):
     rest_to_crop= list(map(lambda dim : (-1)*min(dim,0) ,rest ))
 
     padded= sitk.ConstantPad(image1, halfDiffSize_to_pad, rest_to_pad, paddValue)
-    return sitk.Crop(image1, halfDiffSize_to_crop,rest_to_crop )
+    return sitk.Crop(padded, halfDiffSize_to_crop,rest_to_crop )
     #return sitk.ConstantPad(image1, (1,1,1), (1,1,1), paddValue)
 
 

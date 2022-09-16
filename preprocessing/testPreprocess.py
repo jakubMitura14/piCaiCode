@@ -182,8 +182,9 @@ def join_and_save_3Channel(row,colNameT2w,colNameAdc,colNameHbv):
         and str(row[colNameAdc])!= " " and str(row[colNameAdc])!="" 
         and str(row[colNameHbv])!= " " and str(row[colNameHbv])!=""
         ):
-        if(not pathOs.exists(outPath)):
+        if(True):
             patId=str(row['patient_id'])
+        # if(not pathOs.exists(outPath)):
 
             imgT2w=sitk.ReadImage(str(row[colNameT2w]))
             imgAdc=sitk.ReadImage(str(row[colNameAdc]))
