@@ -175,7 +175,7 @@ class Model(pl.LightningModule):
         super().__init__()
         self.lr = learning_rate
         self.net = net
-        self.modelRegression = detectSemiSupervised.UNetToRegresion(2)
+        self.modelRegression = UNetToRegresion(2)
         self.criterion = criterion
         self.optimizer_class = optimizer_class
         self.best_val_dice = 0
