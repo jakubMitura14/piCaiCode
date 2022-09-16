@@ -32,7 +32,7 @@ elacticPath='/home/sliceruser/elastixBase/elastix-5.0.1-linux/bin/elastix'
 reg_prop='/home/sliceruser/data/piCaiCode/preprocessing/registration/parameters.txt'  
 trainedModelsBasicPath='/home/sliceruser/data/preprocess/standarizationModels'
 
-physical_size =(81.0, 192.0, 192.0)#taken from picai used to crop image so only center will remain
+physical_size =(81.0, 160.0, 192.0)#taken from picai used to crop image so only center will remain
 
 
 df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData.csv')
