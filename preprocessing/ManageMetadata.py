@@ -19,69 +19,41 @@ def loadLib(name,path):
 # transformsForMain =loadLib("transformsForMain", "/home/sliceruser/data/piCaiCode/preprocessing/transformsForMain.py")
 
 
-def getMonaiSubjectDataFromDataFrame(row,chan3_col_name,label_name,chan3_col_name_val,label_name_val):
-        """
-        given row from data frame prepares Subject object from it
-        """
-        subject= {"chan3_col_name": str(row[chan3_col_name])
-        ,"chan3_col_name_val": str(row[chan3_col_name_val])        
-        #, "cor":str(row['cor'])
-        #, "hbv":str(row[hbv_name])
-        #, "sag":str(row['sag'])
-        #, "t2w":str(row[t2w_name])
-        , "isAnythingInAnnotated":str(row['isAnythingInAnnotated'])
-        , "patient_id":str(row['patient_id'])
-        , "num_lesions_to_retain":str(row['num_lesions_to_retain'])
-        # , "study_id":row['study_id']
-        # , "patient_age":row['patient_age']
-        # , "psa":row['psa']
-        # , "psad":row['psad']
-        # , "prostate_volume":row['prostate_volume']
-        # , "histopath_type":row['histopath_type']
-        # , "lesion_GS":row['lesion_GS']
-        , "label":str(row[label_name])
-        , "label_name_val":str(row[label_name_val])
-        
-        
-        }
+# def load_df_only_full(df,chan3_col_name,label_name,is_whole_to_train,transformsForMain,chan3_col_name_val,label_name_val):
+#     # df = df.loc[df['isAnyMissing'] ==False]
+#     # df = df.loc[df['isAnythingInAnnotated']>0 ]
+#     deficientPatIDs=[]
+#     data_dicts = list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1],chan3_col_name,label_name,chan3_col_name_val,label_name_val)  , list(df.iterrows())))
+#     train_transforms=transformsForMain.get_train_transforms(0.1#RandGaussianNoised_prob
+#                                                             ,0.1#RandAdjustContrastd_prob
+#                                                             ,0.1#RandGaussianSmoothd_prob
+#                                                             ,0.1#RandRicianNoised_prob
+#                                                             ,0.1#RandFlipd_prob
+#                                                             ,0.1#RandAffined_prob
+#                                                             ,0.1#RandCoarseDropoutd_prob
+#                                                             ,is_whole_to_train , (32,32,16))
+#     val_transforms= transformsForMain.get_val_transforms(is_whole_to_train, (32,32,16))
 
-        return subject
-
-def load_df_only_full(df,chan3_col_name,label_name,is_whole_to_train,transformsForMain,chan3_col_name_val,label_name_val):
-    # df = df.loc[df['isAnyMissing'] ==False]
-    # df = df.loc[df['isAnythingInAnnotated']>0 ]
-    deficientPatIDs=[]
-    data_dicts = list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1],chan3_col_name,label_name,chan3_col_name_val,label_name_val)  , list(df.iterrows())))
-    train_transforms=transformsForMain.get_train_transforms(0.1#RandGaussianNoised_prob
-                                                            ,0.1#RandAdjustContrastd_prob
-                                                            ,0.1#RandGaussianSmoothd_prob
-                                                            ,0.1#RandRicianNoised_prob
-                                                            ,0.1#RandFlipd_prob
-                                                            ,0.1#RandAffined_prob
-                                                            ,0.1#RandCoarseDropoutd_prob
-                                                            ,is_whole_to_train , (32,32,16))
-    val_transforms= transformsForMain.get_val_transforms(is_whole_to_train, (32,32,16))
-
-    for dictt in data_dicts:    
-        try:
-            dat = train_transforms(dictt)
-            dat = val_transforms(dictt)
-        except:
-            # print("error loading image")
-            # dat = train_transforms(dictt)# TODO remove
-            # dat = val_transforms(dictt)# TODO remove            
-            deficientPatIDs.append(dictt['patient_id'])
-            print(dictt['patient_id'])
+#     for dictt in data_dicts:    
+#         try:
+#             dat = train_transforms(dictt)
+#             dat = val_transforms(dictt)
+#         except:
+#             # print("error loading image")
+#             # dat = train_transforms(dictt)# TODO remove
+#             # dat = val_transforms(dictt)# TODO remove            
+#             deficientPatIDs.append(dictt['patient_id'])
+#             print(dictt['patient_id'])
 
 
-    def isInDeficienList(row):
-            return row['patient_id'] not in deficientPatIDs
+#     def isInDeficienList(row):
+#             return row['patient_id'] not in deficientPatIDs
 
-    df["areTransformsNotDeficient"]= df.apply(lambda row : isInDeficienList(row), axis = 1)  
+#     df["areTransformsNotDeficient"]= df.apply(lambda row : isInDeficienList(row), axis = 1)  
 
-    df = df.loc[ df['areTransformsNotDeficient']]
+#     df = df.loc[ df['areTransformsNotDeficient']]
 
-    return df
+#     return df
 
 
 

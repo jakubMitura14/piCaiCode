@@ -80,11 +80,37 @@ import torch.nn.functional as F
 # import preprocessing.ManageMetadata as manageMetaData
 # import dataManag.utils.dataUtils as dataUtils
 # import multiprocessing
-from ... import preprocessing
-from preprocessing import transformsForMain as transformsForMain
-from preprocessing import ManageMetadata as manageMetaData
+from model import transformsForMain as transformsForMain
 
 
+
+def getMonaiSubjectDataFromDataFrame(row,chan3_col_name,label_name,chan3_col_name_val,label_name_val):
+        """
+        given row from data frame prepares Subject object from it
+        """
+        subject= {"chan3_col_name": str(row[chan3_col_name])
+        ,"chan3_col_name_val": str(row[chan3_col_name_val])        
+        #, "cor":str(row['cor'])
+        #, "hbv":str(row[hbv_name])
+        #, "sag":str(row['sag'])
+        #, "t2w":str(row[t2w_name])
+        , "isAnythingInAnnotated":str(row['isAnythingInAnnotated'])
+        , "patient_id":str(row['patient_id'])
+        , "num_lesions_to_retain":str(row['num_lesions_to_retain'])
+        # , "study_id":row['study_id']
+        # , "patient_age":row['patient_age']
+        # , "psa":row['psa']
+        # , "psad":row['psad']
+        # , "prostate_volume":row['prostate_volume']
+        # , "histopath_type":row['histopath_type']
+        # , "lesion_GS":row['lesion_GS']
+        , "label":str(row[label_name])
+        , "label_name_val":str(row[label_name_val])
+        
+        
+        }
+
+        return subject
 
 
 class PiCaiDataModule(pl.LightningDataModule):
@@ -143,10 +169,10 @@ class PiCaiDataModule(pl.LightningDataModule):
         onlyPositve = self.df.loc[self.df['isAnyMissing'] ==False]
         onlyPositve = onlyPositve.loc[onlyPositve['isAnythingInAnnotated']>0 ]
 
-        allSubj=list(map(lambda row: manageMetaData.getMonaiSubjectDataFromDataFrame(row[1]
+        allSubj=list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1]
         ,self.chan3_col_name,self.label_name,self.chan3_col_name_val,self.label_name_val)   , list(self.df.iterrows())))
         
-        onlyPositiveSubj=list(map(lambda row: manageMetaData.getMonaiSubjectDataFromDataFrame(row[1]
+        onlyPositiveSubj=list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1]
         ,self.chan3_col_name,self.label_name,self.chan3_col_name_val,self.label_name_val)   , list(onlyPositve.iterrows())))
         
         return allSubj,onlyPositiveSubj
