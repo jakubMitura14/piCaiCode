@@ -106,7 +106,7 @@ def writeDummyLabels(outPath,imageRef_path):
     #intentionally inverting order as it is expected by simple itk
     data= sitk.GetArrayFromImage(origImage)
     sizz= data.size
-
+    print(f"sizz {sizz} ")
     arr= np.zeros((sizz[0],sizz[1],sizz[2])).astype('int32')
     image = sitk.GetImageFromArray(arr)
     image.SetSpacing(origImage.GetSpacing())
