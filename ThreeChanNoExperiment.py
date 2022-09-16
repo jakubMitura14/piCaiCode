@@ -42,6 +42,7 @@ import os
 import os.path
 monai.utils.set_determinism()
 from functools import partial
+from pytorch_lightning.loggers import CometLogger
 
 # import preprocessing.transformsForMain
 # import preprocessing.ManageMetadata
@@ -79,15 +80,15 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
          strides,channels,num_res_units,act,norm,dropout
          ,criterion, optimizer_class,max_epochs,accumulate_grad_batches,gradient_clip_val
          ,picaiLossArr_auroc_final,picaiLossArr_AP_final,picaiLossArr_score_final
-           ):        
+          ,experiment_name ):        
 
     #TODO(remove)
-    # comet_logger = CometLogger(
-    #     api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
-    #     #workspace="OPI", # Optional
-    #     project_name="picai_base_3Channels", # Optional
-    #     #experiment_name="baseline" # Optional
-    # )
+    comet_logger = CometLogger(
+        api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
+        #workspace="OPI", # Optional
+        project_name=experiment_name, # Optional
+        #experiment_name="baseline" # Optional
+    )
     
     with mp.Pool(processes = mp.cpu_count()) as pool:
         resList=pool.map(partial(addDummyLabelPath,labelName=label_name ,dummyLabelPath= dummyLabelPath ) ,list(df.iterrows())) 
@@ -165,10 +166,10 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         default_root_dir= "/home/sliceruser/data/lightning_logs",
         auto_scale_batch_size="binsearch",
         auto_lr_find=True,
-        check_val_every_n_epoch=10,
+        check_val_every_n_epoch=1,
         accumulate_grad_batches=accumulate_grad_batches,
         gradient_clip_val=gradient_clip_val,# 0.5,2.0
-        log_every_n_steps=30,
+        log_every_n_steps=10,
         #strategy='ddp' # for multi gpu training
     )
 

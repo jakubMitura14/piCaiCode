@@ -82,7 +82,7 @@ def getParam(experiment,options,key,df):
     return options[key][integerr]
 
 
-def mainTrain(experiment,options,df):
+def mainTrain(experiment,options,df,experiment_name):
     picaiLossArr_auroc_final=[]
     picaiLossArr_AP_final=[]
     picaiLossArr_score_final=[]
@@ -133,7 +133,7 @@ def mainTrain(experiment,options,df):
          strides,channels,num_res_units,act,norm,dropout
          ,criterion, optimizer_class,max_epochs,accumulate_grad_batches,gradient_clip_val
          ,picaiLossArr_auroc_final,picaiLossArr_AP_final,picaiLossArr_score_final
-           )
+          ,experiment_name )
 
     experiment.log_metric("last_val_loss_auroc",np.nanmax(picaiLossArr_auroc_final))
     experiment.log_metric("last_val_loss_Ap",np.nanmax(picaiLossArr_AP_final))

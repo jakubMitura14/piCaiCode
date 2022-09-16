@@ -98,13 +98,17 @@ options={
                                                             "strides":[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
                                                             ,"channels":[32, 64, 128, 256, 512, 1024]
                                                             },
+                                                             {
+                                                            "strides":[(2, 2, 2), (1, 2, 2),(1, 1, 1), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
+                                                            ,"channels":[32, 64, 128, 256, 512, 1024, 2048]
+                                                            },
                                                             {
                                                             "strides":[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)]
                                                             ,"channels":[32, 64, 128, 256, 512]
                                                             }  ],
 "optimizer_class": [torch.optim.NAdam,torch.optim.LBFGS] ,# ,torch.optim.LBFGS optim.AggMo,   look in https://pytorch-optimizer.readthedocs.io/en/latest/api.html
 "act":[(Act.PRELU, {"init": 0.2})],#,(Act.LEAKYRELU, {})                                         
-"norm":[(Norm.INSTANCE, {}),(Norm.BATCH, {}) ],
+"norm":[(Norm.BATCH, {}) ],
 "centerCropSize":[(256, 256,32)],
 #TODO() learning rate schedulers https://medium.com/mlearning-ai/make-powerful-deep-learning-models-quickly-using-pytorch-lightning-29f040158ef3
 }
@@ -138,7 +142,7 @@ config = {
         "RandAffined_prob": {"type": "float", "min": 0.0, "max": 0.5},
         "RandCoarseDropoutd_prob":{"type": "discrete", "values": [0.0]},
   
-        "spacing_keyword": {"type": "categorical", "values": [ "_med_spac_b"]},#"_one_spac_c" ,"_med_spac_b"      #"_med_spac","_one_and_half_spac", "_two_spac"
+        "spacing_keyword": {"type": "categorical", "values": ["_one_spac_c" ,"_med_spac_b"  ]},#    #"_med_spac","_one_and_half_spac", "_two_spac"
         "sizeWord": {"type": "categorical", "values": ["_maxSize_"]},#,"_maxSize_"# ,"_div32_"
         #"dirs": {"type": "discrete", "values": list(range(0,len(options["dirs"])))},
     },
@@ -185,10 +189,10 @@ opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4",trials=500)
 #          api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
 #          project_name="picai-hyperparam-search-01"))
 
-
+experiment_name="picai-hyperparam-search-28"
 for experiment in opt.get_experiments(
         project_name="picai-hyperparam-search-28"):
     print("******* new experiment *****")    
-    Three_chan_baseline.mainTrain(experiment,options,df)
+    Three_chan_baseline.mainTrain(experiment,options,df,experiment_name)
 
 

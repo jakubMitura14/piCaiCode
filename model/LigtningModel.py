@@ -84,6 +84,10 @@ import functools
 import operator
 from torch.nn.intrinsic.qat import ConvBnReLU3d
 
+import multiprocessing as mp
+import time
+from functools import partial
+
 # def loadLib(name,path):
 #     spec = importlib.util.spec_from_file_location(name, path)
 #     res = importlib.util.module_from_spec(spec)
@@ -140,6 +144,8 @@ def getArrayFromPath(path):
     image1=sitk.ReadImage(path)
     return sitk.GetArrayFromImage(image1)
 
+def extractLesions(x):
+    extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0]
 class Model(pl.LightningModule):
     def __init__(self
     , net
@@ -198,7 +204,7 @@ class Model(pl.LightningModule):
             regress_res=self.modelRegression(y_hat)
             numLesions=list(map(lambda entry : int(entry), numLesions ))
             numLesions=torch.Tensor(numLesions).to(self.device)
-            print(f" regress res {torch.flatten(regress_res).size()}  orig {torch.flatten(numLesions).size() } ")
+            # print(f" regress res {torch.flatten(regress_res).size()}  orig {torch.flatten(numLesions).size() } ")
             return F.smooth_l1_loss(torch.flatten(regress_res), torch.flatten(numLesions) )
 
     # def validation_step(self, batch, batch_idx):
@@ -228,22 +234,40 @@ class Model(pl.LightningModule):
         y_det = decollate_batch(y_det)
         y_true = decollate_batch(y_true)
         patIds = decollate_batch(patIds)
-        print(f" y_det 0 {y_det[0].size()} ")
+        # print(f" y_det 0 {y_det[0].size()} ")
         #Todo check is the order of dimensions as expected by the library
 
-        y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
+
+        y_det=[]
+        with mp.Pool(processes = mp.cpu_count()) as pool:
+            y_det=pool.map(extractLesions,y_det)
+
+
+        # y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
         # y_det=[extract_lesion_candidates( torch.permute(x,(2,1,0,3) ).cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
         y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
-
         regress_res_cpu=torch.flatten(regress_res).cpu().detach().numpy()
-        for i in range(0,len(y_true)):
-            #if regression tell that there are no changes we want it to zero out the final result
+
+        def saveToValidate(i,y_det,regress_res_cpu,temp_val_dir):
             y_det_curr=y_det[i]
             if(np.rint(regress_res_cpu[i])==0):
                 y_det_curr=np.zeros_like(y_det_curr)
-            tupl=saveFilesInDir(y_true[i],y_det_curr, self.temp_val_dir, patIds[i])
-            self.list_gold_val.append(tupl[0])
-            self.list_yHat_val.append(tupl[1])
+            return saveFilesInDir(y_true[i],y_det_curr, self.temp_val_dir, patIds[i])
+        tupless=[]
+        with mp.Pool(processes = mp.cpu_count()) as pool:
+            tupless=y_det=pool.map(partial(saveToValidate,y_det=y_det,regress_res_cpu=regress_res_cpu ,temp_val_dir= self.temp_val_dir),list(range(0,len(y_true))))
+        for i in range(0,len(y_true)):
+            self.list_gold_val.append(tupless[i][0])
+            self.list_yHat_val.append(tupless[i][1])            
+
+        # for i in range(0,len(y_true)):
+        #     #if regression tell that there are no changes we want it to zero out the final result
+        #     y_det_curr=y_det[i]
+        #     if(np.rint(regress_res_cpu[i])==0):
+        #         y_det_curr=np.zeros_like(y_det_curr)
+        #     tupl=saveFilesInDir(y_true[i],y_det_curr, self.temp_val_dir, patIds[i])
+        #     self.list_gold_val.append(tupl[0])
+        #     self.list_yHat_val.append(tupl[1])
         #now we need to save files in temporary direcory and save outputs to the appripriate lists wit paths
         
         self.log('val_loss', regressLoss)
@@ -257,7 +281,7 @@ class Model(pl.LightningModule):
         """
         just in order to log the dice metric on validation data 
         """
-
+        print("******* validation_epoch_end *****")
         if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
             chunkLen=8
 
