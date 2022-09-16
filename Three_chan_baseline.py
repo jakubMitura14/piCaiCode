@@ -98,8 +98,8 @@ def mainTrain(experiment,options,df,experiment_name):
 
     imageRef_path=list(filter(lambda it: it!= '', df[label_name].to_numpy()))[0]
     dummyLabelPath='/home/sliceruser/data/dummyData/zeroLabel.nii.gz'
-    
-    semisuperPreprosess.writeDummyLabels(dummyLabelPath,imageRef_path)
+    sizz=semisuperPreprosess.writeDummyLabels(dummyLabelPath,imageRef_path)
+    img_size = (sizz[2],sizz[1],sizz[0])
 
     RandGaussianNoised_prob=experiment.get_parameter("RandGaussianNoised_prob")
     RandAdjustContrastd_prob=experiment.get_parameter("RandAdjustContrastd_prob")
@@ -123,7 +123,7 @@ def mainTrain(experiment,options,df,experiment_name):
     max_epochs=3#100#experiment.get_parameter("max_epochs")
     accumulate_grad_batches=experiment.get_parameter("accumulate_grad_batches")
     gradient_clip_val=experiment.get_parameter("gradient_clip_val")# 0.5,2.0
-    net=net(dropout)
+    net=net(dropout,img_size)
 
     ThreeChanNoExperiment.train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
          ,chan3_col_name,chan3_col_name_val,label_name_val

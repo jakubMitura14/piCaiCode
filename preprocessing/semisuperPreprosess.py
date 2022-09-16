@@ -116,4 +116,5 @@ def writeDummyLabels(outPath,imageRef_path):
     writer = sitk.ImageFileWriter()
     writer.KeepOriginalImageUIDOn()
     writer.SetFileName(outPath)
-    writer.Execute(image)    
+    writer.Execute(image)  
+    return sizz  
