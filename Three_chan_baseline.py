@@ -122,8 +122,7 @@ def mainTrain(experiment,options,df):
     chan3_col_name_val=chan3_col_name 
     #chan3_col_name_val=f"t2w{spacing_keyword}_3Chan_maxSize_" 
     # chan3_col_name_val=f"t2w{spacing_keyword}_3Chan_div32_" 
-
-
+    df=df.loc[df[chan3_col_name] != ' ']
     label_name=f"label{spacing_keyword}{sizeWord}" 
     label_name_val=label_name
     #label_name_val=f"label{spacing_keyword}_maxSize_"
