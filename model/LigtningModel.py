@@ -78,16 +78,51 @@ from monai.transforms import (
 import torchio
 import importlib.util
 import sys
+import warnings
+from typing import Optional, Sequence, Tuple, Union
+import torch
+import torch.nn as nn
+from monai.networks.blocks.convolutions import Convolution, ResidualUnit
+from monai.networks.layers.factories import Act, Norm
+from monai.networks.layers.simplelayers import SkipConnection
+from monai.utils import alias, deprecated_arg, export
+import functools
+import operator
+from torch.nn.intrinsic.qat import ConvBnReLU3d
 
-def loadLib(name,path):
-    spec = importlib.util.spec_from_file_location(name, path)
-    res = importlib.util.module_from_spec(spec)
-    sys.modules[name] = res
-    spec.loader.exec_module(res)
-    return res
+# def loadLib(name,path):
+#     spec = importlib.util.spec_from_file_location(name, path)
+#     res = importlib.util.module_from_spec(spec)
+#     sys.modules[name] = res
+#     spec.loader.exec_module(res)
+#     return res
 
-detectSemiSupervised =loadLib("detectSemiSupervised", "/home/sliceruser/data/piCaiCode/model/detectSemiSupervised.py")
-torch.autograd.set_detect_anomaly(True)
+# detectSemiSupervised =loadLib("detectSemiSupervised", "/home/sliceruser/data/piCaiCode/model/detectSemiSupervised.py")
+
+
+class UNetToRegresion(nn.Module):
+    def __init__(self,
+        in_channels,
+    ) -> None:
+        super().__init__()
+        self.model = nn.Sequential(ConvBnReLU3d(in_channels=in_channels, out_channels=1, kernel_size=3, stride=2,qconfig = torch.quantization.get_default_qconfig('fbgemm')),
+            ConvBnReLU3d(in_channels=1, out_channels=1, kernel_size=3, stride=2,qconfig = torch.quantization.get_default_qconfig('fbgemm')),
+            ConvBnReLU3d(in_channels=1, out_channels=1, kernel_size=3, stride=2,qconfig = torch.quantization.get_default_qconfig('fbgemm')),
+            nn.AdaptiveMaxPool3d((8,8,2)),#ensuring such dimension 
+            nn.Flatten(),
+            #nn.BatchNorm3d(8*8*4),
+            nn.Linear(in_features=8*8*2, out_features=100),
+            #nn.BatchNorm3d(100),
+            nn.ReLU(inplace=True),
+            nn.Linear(in_features=100, out_features=1)
+        )
+    def forward(self, x):
+        return self.model(x)
+
+
+
+
+# torch.autograd.set_detect_anomaly(True)
 
 def divide_chunks(l, n):
      
