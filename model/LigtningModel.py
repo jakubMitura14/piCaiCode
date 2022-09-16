@@ -254,7 +254,7 @@ class Model(pl.LightningModule):
         y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
         regress_res_cpu=torch.flatten(regress_res).cpu().detach().numpy()
 
-
+        print(f"range {list(range(0,len(y_true)))} len y true {len(y_true)} len y det {len(y_det)}  ")
         tupless=[]
         with mp.Pool(processes = mp.cpu_count()) as pool:
             tupless=y_det=pool.map(partial(saveToValidate,y_det=y_det,regress_res_cpu=regress_res_cpu 
