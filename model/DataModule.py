@@ -232,7 +232,7 @@ class PiCaiDataModule(pl.LightningDataModule):
 
 
         self.train_ds_all =  Dataset(data=train_set_all, transform=train_transforms)
-        self.val_ds=     Dataset(data=valid_set_pos+onlyNegatives, transform=val_transforms)
+        self.val_ds=     Dataset(data=valid_set_pos+onlyNegatives[0: int(round(len(valid_set_pos)/2)) ], transform=val_transforms)
         self.train_ds_pos =  Dataset(data=train_set_pos, transform=train_transforms)
         #self.test_ds=    Dataset(data=self.test_subjects, transform=val_transforms)
         
