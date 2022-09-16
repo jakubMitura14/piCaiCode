@@ -258,7 +258,7 @@ class Model(pl.LightningModule):
 
         regress_res_cpu=torch.flatten(regress_res).cpu().detach().numpy()
 
-        print(f"range {list(range(0,len(y_true)))} len y true {len(y_true)} len y det {len(y_det)}  ")
+        # print(f"range {list(range(0,len(y_true)))} len y true {len(y_true)} len y det {len(y_det)}  ")
         tupless=[]
         with mp.Pool(processes = mp.cpu_count()) as pool:
             tupless=y_det=pool.map(partial(saveToValidate,y_det=y_det,regress_res_cpu=regress_res_cpu 
@@ -295,6 +295,7 @@ class Model(pl.LightningModule):
 
             valid_metrics = evaluate(y_det=self.list_yHat_val,
                                 y_true=self.list_gold_val,
+                                num_parallel_calls=os.cpu_count()
                                 #y_true=iter(y_true),
                                 #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
                                 )
