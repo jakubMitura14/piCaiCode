@@ -138,7 +138,10 @@ def padToSize(image1,targetSize, paddValue):
     rest_to_crop= list(map(lambda dim : (-1)*min(dim,0) ,rest ))
 
     padded= sitk.ConstantPad(image1, halfDiffSize_to_pad, rest_to_pad, paddValue)
-    return sitk.Crop(padded, halfDiffSize_to_crop,rest_to_crop )
+    res= sitk.Crop(padded, halfDiffSize_to_crop,rest_to_crop )
+    print(f"result size {res.GetSize()} target size {targetSize}")
+    
+    return res
     #return sitk.ConstantPad(image1, (1,1,1), (1,1,1), paddValue)
 
 
@@ -160,7 +163,7 @@ def padToAndSaveLabel(row,colname,targetSize, paddValue,keyword,isTobeDiv):
     if(path!=" "):
         outPath = path.replace('.nii.gz',keyword+ '.nii.gz')
         image=sitk.ReadImage(str(path))
-        print(f"resize label too {targetSize}")
+        # print(f"resize label too {targetSize}")
         # data= sitk.GetArrayFromImage(image)
 
         #print(f"unique in label {np.unique(data)}")
@@ -175,7 +178,7 @@ def padToAndSaveLabel(row,colname,targetSize, paddValue,keyword,isTobeDiv):
         writer.KeepOriginalImageUIDOn()
         writer.SetFileName(outPath)
         writer.Execute(image)
-        print(f"result label size {image.GetSize()}")
+        print(f"result label size {image.GetSize()}  target size {targetSize}")
         return outPath 
     return " "                     
                 
