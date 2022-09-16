@@ -324,7 +324,8 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     sizzY= physical_size[1]/targetSpacingg[1]
     sizzZ= physical_size[2]/targetSpacingg[2]
     sizz=(sizzX,sizzY,sizzZ)
-    targetSize=(math.ceil(sizz[0]/32)*32, math.ceil(sizz[1]/32)*32,math.ceil(sizz[2]/32)*32  )
+    multNum=16#32
+    targetSize=(math.ceil(sizz[0]/multNum)*multNum, math.ceil(sizz[1]/multNum)*multNum,math.ceil(sizz[2]/multNum)*multNum  )
     
     sizeWord="_maxSize_"
     resList=[]
