@@ -233,7 +233,6 @@ class Model(pl.LightningModule):
             self.list_yHat_val.append(tupl[1])
         #now we need to save files in temporary direcory and save outputs to the appripriate lists wit paths
         
-        loss = self.criterion(y_det, y_true)
         self.log('val_loss', regressLoss)
 
         return regressLoss
