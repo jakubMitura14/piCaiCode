@@ -140,6 +140,12 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId):
     return(gold_im_path,yHat_im_path)
 
 
+def saveToValidate(i,y_det,regress_res_cpu,temp_val_dir):
+    y_det_curr=y_det[i]
+    if(np.rint(regress_res_cpu[i])==0):
+        y_det_curr=np.zeros_like(y_det_curr)
+    return saveFilesInDir(y_true[i],y_det_curr, self.temp_val_dir, patIds[i])
+
 def getArrayFromPath(path):
     image1=sitk.ReadImage(path)
     return sitk.GetArrayFromImage(image1)
@@ -248,11 +254,7 @@ class Model(pl.LightningModule):
         y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
         regress_res_cpu=torch.flatten(regress_res).cpu().detach().numpy()
 
-        def saveToValidate(i,y_det,regress_res_cpu,temp_val_dir):
-            y_det_curr=y_det[i]
-            if(np.rint(regress_res_cpu[i])==0):
-                y_det_curr=np.zeros_like(y_det_curr)
-            return saveFilesInDir(y_true[i],y_det_curr, self.temp_val_dir, patIds[i])
+
         tupless=[]
         with mp.Pool(processes = mp.cpu_count()) as pool:
             tupless=y_det=pool.map(partial(saveToValidate,y_det=y_det,regress_res_cpu=regress_res_cpu ,temp_val_dir= self.temp_val_dir),list(range(0,len(y_true))))
