@@ -1,6 +1,5 @@
 ### Define Data Handling
 
-from comet_ml import Experiment
 import time
 from pathlib import Path
 from datetime import datetime
@@ -27,15 +26,10 @@ from monai.data import CacheDataset,Dataset,PersistentDataset, list_data_collate
 from monai.config import print_config
 from monai.apps import download_and_extract
 
-sns.set()
-plt.rcParams['figure.figsize'] = 12, 8
-monai.utils.set_determinism()
-
 from datetime import datetime
 import os
 import tempfile
 from glob import glob
-
 from monai.handlers.utils import from_engine
 from monai.networks.nets import UNet
 from monai.networks.layers import Norm
@@ -134,25 +128,10 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId):
     """
     saves arrays in given directory and return paths to them
     """
-    # gold_im = sitk.GetImageFromArray(gold_arr)
-    # y_hat_im = sitk.GetImageFromArray(y_hat_arr)
-    # gold_im_path = join(directory, patId+ "_gold.nii.gz" )
-    # yHat_im_path = join(directory, patId+ "_hat.nii.gz" )
-    
     gold_im_path = join(directory, patId+ "_gold.npy" )
     yHat_im_path = join(directory, patId+ "_hat.npy" )
     np.save(gold_im_path, gold_arr)
     np.save(yHat_im_path, y_hat_arr)
-
-
-
-    # writer = sitk.ImageFileWriter()
-    # writer.SetFileName(gold_im_path)
-    # writer.Execute(gold_im)
-
-    # writer = sitk.ImageFileWriter()
-    # writer.SetFileName(yHat_im_path)
-    # writer.Execute(y_hat_im)
 
     return(gold_im_path,yHat_im_path)
 
@@ -167,7 +146,6 @@ class Model(pl.LightningModule):
     , criterion
     , learning_rate
     , optimizer_class
-    ,experiment
     ,picaiLossArr_auroc_final
     ,picaiLossArr_AP_final
     ,picaiLossArr_score_final
@@ -181,7 +159,6 @@ class Model(pl.LightningModule):
         self.best_val_dice = 0
         self.best_val_epoch = 0
         self.dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
-        self.experiment=experiment
         self.picaiLossArr=[]
         self.post_pred = Compose([ AsDiscrete( to_onehot=2)])
         self.picaiLossArr_auroc=[]
@@ -299,9 +276,9 @@ class Model(pl.LightningModule):
             self.log('val_mean_AP', meanPiecaiMetr_AP)
             self.log('val_mean_score', meanPiecaiMetr_score)
 
-            self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
-            self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
-            self.experiment.log_metric('val_mean_score', meanPiecaiMetr_score)
+            # self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
+            # self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
+            # self.experiment.log_metric('val_mean_score', meanPiecaiMetr_score)
 
 
             self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)

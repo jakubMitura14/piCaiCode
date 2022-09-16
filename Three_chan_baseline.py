@@ -49,6 +49,7 @@ from functools import partial
 
 import importlib.util
 import sys
+import ThreeChanNoExperiment
 
 percentSplit=0.8
 
@@ -59,9 +60,9 @@ def loadLib(name,path):
     spec.loader.exec_module(res)
     return res
 
-transformsForMain =loadLib("transformsForMain", "/home/sliceruser/data/piCaiCode/preprocessing/transformsForMain.py")
-manageMetaData =loadLib("ManageMetadata", "/home/sliceruser/data/piCaiCode/preprocessing/ManageMetadata.py")
-dataUtils =loadLib("dataUtils", "/home/sliceruser/data/piCaiCode/dataManag/utils/dataUtils.py")
+# transformsForMain =loadLib("transformsForMain", "/home/sliceruser/data/piCaiCode/preprocessing/transformsForMain.py")
+# manageMetaData =loadLib("ManageMetadata", "/home/sliceruser/data/piCaiCode/preprocessing/ManageMetadata.py")
+# dataUtils =loadLib("dataUtils", "/home/sliceruser/data/piCaiCode/dataManag/utils/dataUtils.py")
 
 unets =loadLib("unets", "/home/sliceruser/data/piCaiCode/model/unets.py")
 DataModule =loadLib("DataModule", "/home/sliceruser/data/piCaiCode/model/DataModule.py")
@@ -80,24 +81,7 @@ def getParam(experiment,options,key,df):
     # print(options[key])
     return options[key][integerr]
 
-def isAnnytingInAnnotatedInner(row,colName):
-    row=row[1]
-    path=row[colName]
-    image1 = sitk.ReadImage(path)
-    #image1 = sitk.Cast(image1, sitk.sitkFloat32)
-    data = sitk.GetArrayFromImage(image1)
-    return np.sum(data)
 
-
-def addDummyLabelPath(row, labelName, dummyLabelPath):
-    """
-    adds dummy label to the given column in every spot it is empty
-    """
-    row = row[1]
-    if(row[labelName]==' '):
-        return dummyLabelPath
-    else:
-        return row[labelName]    
 
 
 
@@ -105,38 +89,15 @@ def mainTrain(experiment,options,df):
     picaiLossArr_auroc_final=[]
     picaiLossArr_AP_final=[]
     picaiLossArr_score_final=[]
-    print("mmmmmmmmmmmmmmmmmm")
-    #TODO(remove)
-    # comet_logger = CometLogger(
-    #     api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
-    #     #workspace="OPI", # Optional
-    #     project_name="picai_base_3Channels", # Optional
-    #     #experiment_name="baseline" # Optional
-    # )
-    #############loading meta data 
-    #maxSize=manageMetaData.getMaxSize(getParam(experiment,options,"dirs")["chan3_col_name"],df)
-    # print(f"************    maxSize {maxSize}   ***************")
+    
     spacing_keyword=experiment.get_parameter("spacing_keyword")
     sizeWord= experiment.get_parameter("sizeWord")
     chan3_col_name=f"t2w{spacing_keyword}_3Chan{sizeWord}" 
     chan3_col_name_val=chan3_col_name 
-    #chan3_col_name_val=f"t2w{spacing_keyword}_3Chan_maxSize_" 
-    # chan3_col_name_val=f"t2w{spacing_keyword}_3Chan_div32_" 
     df=df.loc[df[chan3_col_name] != ' ']
     label_name=f"label{spacing_keyword}{sizeWord}" 
     label_name_val=label_name
-    #label_name_val=f"label{spacing_keyword}_maxSize_"
-    #label_name_val=f"label{spacing_keyword}_div32_"
-
     cacheDir =  f"/home/sliceruser/preprocess/monai_persistent_Dataset/{spacing_keyword}/{sizeWord}"
-
-    ##filtering out some pathological cases
-    # resList=[]     
-    # with mp.Pool(processes = mp.cpu_count()) as pool:
-    #     resList=pool.map(partial(isAnnytingInAnnotatedInner,colName=label_name),list(df.iterrows()))    
-    # df['locIsInAnnot']= resList
-    # df = df.loc[df['locIsInAnnot']>0]
-    ##setting dummy zero filled label for the images without labels
     centerCropSize=getParam(experiment,options,'centerCropSize',df)
     dim_x,dim_y,dim_z=centerCropSize
 
@@ -144,105 +105,48 @@ def mainTrain(experiment,options,df):
     dummyLabelPath='/home/sliceruser/data/dummyData/zeroLabel.nii.gz'
     
     semisuperPreprosess.writeDummyLabels(dummyLabelPath,imageRef_path)
-    
-    with mp.Pool(processes = mp.cpu_count()) as pool:
-        resList=pool.map(partial(addDummyLabelPath,labelName=label_name ,dummyLabelPath= dummyLabelPath ) ,list(df.iterrows())) 
-    df[label_name]=resList
+
+    RandGaussianNoised_prob=experiment.get_parameter("RandGaussianNoised_prob")
+    RandAdjustContrastd_prob=experiment.get_parameter("RandAdjustContrastd_prob")
+    RandGaussianSmoothd_prob=experiment.get_parameter("RandGaussianSmoothd_prob")
+    RandRicianNoised_prob=experiment.get_parameter("RandRicianNoised_prob")
+    RandFlipd_prob=experiment.get_parameter("RandFlipd_prob")
+    RandAffined_prob=experiment.get_parameter("RandAffined_prob")
+    RandCoarseDropoutd_prob=experiment.get_parameter("RandCoarseDropoutd_prob")
+    is_whole_to_train= (sizeWord=="_maxSize_")
+    centerCropSize=getParam(experiment,options,"centerCropSize",df)
+    strides=getParam(experiment,options,"stridesAndChannels",df)["strides"]
+    channels=getParam(experiment,options,"stridesAndChannels",df)["channels"]
+    num_res_units= experiment.get_parameter("num_res_units")
+    act = getParam(experiment,options,"act",df)
+    norm= getParam(experiment,options,"norm",df)
+    dropout= experiment.get_parameter("dropout")
+    criterion=  getParam(experiment,options,"lossF",df)# Our seg labels are single channel images indicating class index, rather than one-hot
+    optimizer_class= getParam(experiment,options,"optimizer_class",df)
+    max_epochs=experiment.get_parameter("max_epochs")
+    accumulate_grad_batches=experiment.get_parameter("accumulate_grad_batches")
+    gradient_clip_val=experiment.get_parameter("gradient_clip_val")# 0.5,2.0
 
 
-    data = DataModule.PiCaiDataModule(
-        df= df,
-        batch_size=2,#
-        trainSizePercent=percentSplit,# TODO(change to 0.7 or 0.8
-        num_workers=os.cpu_count(),
-        drop_last=False,#True,
-        #we need to use diffrent cache folders depending on weather we are dividing data or not
-        cache_dir=cacheDir,
-        chan3_col_name =chan3_col_name,
-        chan3_col_name_val=chan3_col_name_val,
-        label_name_val=label_name_val,
-        label_name=label_name
-        #maxSize=maxSize
-        ,RandGaussianNoised_prob=experiment.get_parameter("RandGaussianNoised_prob")
-        ,RandAdjustContrastd_prob=experiment.get_parameter("RandAdjustContrastd_prob")
-        ,RandGaussianSmoothd_prob=experiment.get_parameter("RandGaussianSmoothd_prob")
-        ,RandRicianNoised_prob=experiment.get_parameter("RandRicianNoised_prob")
-        ,RandFlipd_prob=experiment.get_parameter("RandFlipd_prob")
-        ,RandAffined_prob=experiment.get_parameter("RandAffined_prob")
-        ,RandCoarseDropoutd_prob=experiment.get_parameter("RandCoarseDropoutd_prob")
-        ,is_whole_to_train= (sizeWord=="_maxSize_")
-        ,centerCropSize=getParam(experiment,options,"centerCropSize",df)
-    )
-
-
-    data.prepare_data()
-    data.setup()
-    # definition described in model folder
-    # from https://github.com/DIAGNijmegen/picai_baseline/blob/main/src/picai_baseline/unet/training_setup/neural_networks/unets.py
-    unet= unets.UNet(
-        spatial_dims=3,
-        in_channels=3,
-        out_channels=2,
-        strides=getParam(experiment,options,"stridesAndChannels",df)["strides"],
-        channels=getParam(experiment,options,"stridesAndChannels",df)["channels"],
-        num_res_units= experiment.get_parameter("num_res_units"),
-        act = getParam(experiment,options,"act",df),
-        norm= getParam(experiment,options,"norm",df),
-        dropout= experiment.get_parameter("dropout")
-    )
-
-
-
-
-    model = LigtningModel.Model(
-        net=unet,
-        criterion=  getParam(experiment,options,"lossF",df),# Our seg labels are single channel images indicating class index, rather than one-hot
-        learning_rate=1e-2,
-        optimizer_class= getParam(experiment,options,"optimizer_class",df) ,
-        experiment=experiment,
-        picaiLossArr_auroc_final=picaiLossArr_auroc_final,
-        picaiLossArr_AP_final=picaiLossArr_AP_final,
-        picaiLossArr_score_final=picaiLossArr_score_final
-    )
-    early_stopping = pl.callbacks.early_stopping.EarlyStopping(
-        monitor='val_mean_score',
-        patience=4,
-        mode="max",
-        divergence_threshold=(-0.1)
-    )
-    #stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging()
-    trainer = pl.Trainer(
-        #accelerator="cpu", #TODO(remove)
-        max_epochs=experiment.get_parameter("max_epochs"),
-        #gpus=1,
-        #precision=experiment.get_parameter("precision"), 
-        callbacks=[ early_stopping ],
-        #logger=comet_logger,
-        accelerator='auto',
-        devices='auto',       
-        default_root_dir= "/home/sliceruser/data/lightning_logs",
-        auto_scale_batch_size="binsearch",
-        auto_lr_find=True,
-        check_val_every_n_epoch=10,
-        accumulate_grad_batches=experiment.get_parameter("accumulate_grad_batches"),
-        gradient_clip_val=experiment.get_parameter("gradient_clip_val"),# 0.5,2.0
-        log_every_n_steps=30
-    )
-    trainer.logger._default_hp_metric = False
-    start = datetime.now()
-    print('Training started at', start)
-    trainer.fit(model=model, datamodule=data)
-    print('Training duration:', datetime.now() - start)
-
+    ThreeChanNoExperiment.train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
+         ,chan3_col_name,chan3_col_name_val,label_name_val
+         ,RandGaussianNoised_prob,RandAdjustContrastd_prob,RandGaussianSmoothd_prob,
+         RandRicianNoised_prob,RandFlipd_prob, RandAffined_prob,RandCoarseDropoutd_prob
+         ,is_whole_to_train,centerCropSize,
+         strides,channels,num_res_units,act,norm,dropout
+         ,criterion, optimizer_class,max_epochs,accumulate_grad_batches,gradient_clip_val
+         ,picaiLossArr_auroc_final,picaiLossArr_AP_final,picaiLossArr_score_final
+           )
 
     experiment.log_metric("last_val_loss_auroc",np.nanmax(picaiLossArr_auroc_final))
     experiment.log_metric("last_val_loss_Ap",np.nanmax(picaiLossArr_AP_final))
     experiment.log_metric("last_val_loss_score",np.nanmax(picaiLossArr_score_final))
-    #removing dummy label 
-    os.remove(dummyLabelPath)
-    
+
     #experiment.log_parameters(parameters)  
     experiment.end()
+    #removing dummy label 
+    os.remove(dummyLabelPath)   
+
     # #evaluating on test dataset
     # with torch.no_grad():   
     # for batch in data.test_dataloader():
