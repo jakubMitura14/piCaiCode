@@ -49,7 +49,7 @@ import importlib.util
 import sys
 
 
-freeze_support()
+torch.multiprocessing.freeze_support()
 
 def loadLib(name,path):
     spec = importlib.util.spec_from_file_location(name, path)
