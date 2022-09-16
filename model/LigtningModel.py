@@ -151,7 +151,7 @@ def getArrayFromPath(path):
     return sitk.GetArrayFromImage(image1)
 
 def extractLesions_my(x):
-    return extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0]
+    return extract_lesion_candidates(x)[0]
 
 class Model(pl.LightningModule):
     def __init__(self
@@ -250,9 +250,12 @@ class Model(pl.LightningModule):
             y_det_out=pool.map(extractLesions_my,y_det)
         y_det=y_det_out
 
-        # y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
+        y_det=[ x.cpu().detach().numpy()[1,:,:,:] for x in y_det]
         # y_det=[extract_lesion_candidates( torch.permute(x,(2,1,0,3) ).cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
         y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
+
+#  x.cpu().detach().numpy()[1,:,:,:]
+
         regress_res_cpu=torch.flatten(regress_res).cpu().detach().numpy()
 
         print(f"range {list(range(0,len(y_true)))} len y true {len(y_true)} len y det {len(y_det)}  ")
