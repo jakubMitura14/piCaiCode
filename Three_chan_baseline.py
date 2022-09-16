@@ -143,7 +143,8 @@ def mainTrain(experiment,options,df):
 
     imageRef_path=list(filter(lambda it: it!= '', df[label_name].to_numpy()))[0]
     dummyLabelPath='/home/sliceruser/data/dummyData/zeroLabel.nii.gz'
-    semisuperPreprosess.writeDummyLabels(dummyLabelPath,dim_x,dim_y,dim_z,imageRef_path)
+    
+    semisuperPreprosess.writeDummyLabels(dummyLabelPath,imageRef_path)
     
     with mp.Pool(processes = mp.cpu_count()) as pool:
         resList=pool.map(partial(addDummyLabelPath,labelName=label_name ,dummyLabelPath= dummyLabelPath ) ,list(df.iterrows())) 

@@ -101,10 +101,13 @@ outPath - full directory together with file name and extension
 dim_ x,y,z dimensions of the label we want
 imageRef_path - reference image from which we will take metadata
 """
-def writeDummyLabels(outPath,dim_x,dim_y,dim_z,imageRef_path):
+def writeDummyLabels(outPath,imageRef_path):
     origImage = sitk.ReadImage(imageRef_path)
     #intentionally inverting order as it is expected by simple itk
-    arr= np.zeros((dim_z,dim_y,dim_x)).astype('int32')
+    data= sitk.GetArrayFromImage(origImage)
+    sizz= data.size
+
+    arr= np.zeros((sizz[0],sizz[1],sizz[2])).astype('int32')
     image = sitk.GetImageFromArray(arr)
     image.SetSpacing(origImage.GetSpacing())
     image.SetOrigin(origImage.GetOrigin())
