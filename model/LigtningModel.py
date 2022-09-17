@@ -248,6 +248,8 @@ class Model(pl.LightningModule):
         lossb=F.smooth_l1_loss(torch.flatten(regress_res), torch.flatten(numLesions) )
 
         self.log('train_loss', torch.add(lossa,lossb), prog_bar=True)
+        self.log('train_image_loss', lossa, prog_bar=True)
+        self.log('train_reg_loss', lossb, prog_bar=True)
         return torch.add(lossa,lossb)
     # def validation_step(self, batch, batch_idx):
     #     return 0.5
