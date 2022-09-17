@@ -264,10 +264,14 @@ class PiCaiDataModule(pl.LightningDataModule):
 
 
 
-        return {"all": DataLoader(self.train_ds_all, batch_size=self.batch_size, drop_last=self.drop_last
+        return {"all": DataLoader(self.train_ds_pos, batch_size=self.batch_size, drop_last=self.drop_last
                           ,num_workers=self.num_workers)#,collate_fn=list_data_collate
         , "pos": DataLoader(self.train_ds_pos, batch_size=self.batch_size, drop_last=self.drop_last
                           ,num_workers=self.num_workers)}#,collate_fn=list_data_collate
+        # return {"all": DataLoader(self.train_ds_all, batch_size=self.batch_size, drop_last=self.drop_last
+        #                   ,num_workers=self.num_workers)#,collate_fn=list_data_collate
+        # , "pos": DataLoader(self.train_ds_pos, batch_size=self.batch_size, drop_last=self.drop_last
+        #                   ,num_workers=self.num_workers)}#,collate_fn=list_data_collate
         # return DataLoader(self.train_ds, batch_size=self.batch_size, drop_last=self.drop_last
         #                   ,num_workers=self.num_workers,collate_fn=list_data_collate)#,collate_fn=list_data_collate , shuffle=True
 

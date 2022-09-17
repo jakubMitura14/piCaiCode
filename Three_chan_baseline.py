@@ -130,6 +130,9 @@ def mainTrain(experiment,options,df,experiment_name):
     net=net(dropout,img_size,in_channels,out_channels)
 
 
+
+
+
     RandomElasticDeformation_prob=experiment.get_parameter("RandomElasticDeformation_prob")
     RandomAnisotropy_prob=experiment.get_parameter("RandomAnisotropy_prob")
     RandomMotion_prob=experiment.get_parameter("RandomMotion_prob")
@@ -156,20 +159,30 @@ def mainTrain(experiment,options,df,experiment_name):
     #     experiment.log_metric("last_val_loss_Ap",np.nanmax(picaiLossArr_AP_final))
     experiment.log_metric("last_val_loss_score",np.nanmax(picaiLossArr_score_final))
 
-
-    # series= {chan3_col_name,chan3_col_name_val
-    #      ,RandGaussianNoised_prob,RandAdjustContrastd_prob,RandGaussianSmoothd_prob,
-    #      RandRicianNoised_prob,RandFlipd_prob, RandAffined_prob,RandCoarseDropoutd_prob
-    #     num_res_units,dropout
-    #      ,criterion, optimizer_class,max_epochs,accumulate_grad_batches,gradient_clip_val
-    #      ,picaiLossArr_auroc_final,picaiLossArr_AP_final,picaiLossArr_score_final
-    #       ,experiment_name ,net    ,RandomElasticDeformation_prob
-    # ,RandomAnisotropy_prob
-    # ,RandomMotion_prob
-    # ,RandomGhosting_prob
-    # ,RandomSpike_prob
-    # ,RandomBiasField_prob,regression_channels  }
-
+    
+    series= {"chan3_col_name" :chan3_col_name
+            ,"RandGaussianNoised_prob" :RandGaussianNoised_prob
+            ,"RandAdjustContrastd_prob" :RandAdjustContrastd_prob
+            ,"RandGaussianSmoothd_prob":RandGaussianSmoothd_prob
+            ,"RandRicianNoised_prob" :RandRicianNoised_prob
+            ,"RandFlipd_prob" :RandFlipd_prob
+            , "RandAffined_prob" :RandAffined_prob
+            ,"RandCoarseDropoutd_prob" :RandCoarseDropoutd_prob
+            ,"dropout" :dropout
+            ,"accumulate_grad_batches" :accumulate_grad_batches
+            ,"gradient_clip_val" :gradient_clip_val
+            ,"RandomElasticDeformation_prob" :RandomElasticDeformation_prob
+            ,"RandomAnisotropy_prob" :RandomAnisotropy_prob
+            ,"RandomMotion_prob" :RandomMotion_prob
+            ,"RandomGhosting_prob" :RandomGhosting_prob
+            ,"RandomSpike_prob" :RandomSpike_prob
+            ,"RandomBiasField_prob" :RandomBiasField_prob
+            ,"models" : experiment.get_parameter("models")
+            ,"criterion": experiment.get_parameter("criterion")
+            ,"optimizer_class" : experiment.get_parameter("optimizer_class")
+            ,"regression_channels" :experiment.get_parameter("regression_channels")
+            ,"last_val_loss_score":np.nanmax(picaiLossArr_score_final)   }
+    dfOut=dfOut.append(series, ignore_index = True)
 
 
     #experiment.log_parameters(parameters)  
