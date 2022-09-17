@@ -266,7 +266,7 @@ class Model(pl.LightningModule):
         
         total_loss= 0.0
 
-        regress_res=self.modelRegression(images)
+        regress_res=self.modelRegression(y_det)
         regress_res_round= round(regress_res.item())
         sd = SurfaceDistanceMetric(symmetric=True)
         if(regress_res_round==0):
