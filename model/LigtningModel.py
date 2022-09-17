@@ -144,6 +144,17 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId):
     np.save(gold_im_path, gold_arr)
     np.save(yHat_im_path, y_hat_arr)
 
+    image = sitk.GetImageFromArray(gold_arr)
+    writer = sitk.ImageFileWriter()
+    writer.SetFileName(join(directory, patId+ "_gold.nii.gz" ))
+    writer.Execute(image)
+
+
+    image = sitk.GetImageFromArray(y_hat_arr)
+    writer = sitk.ImageFileWriter()
+    writer.SetFileName(join(directory, patId+ "_hat.nii.gz" ))
+    writer.Execute(image)
+
     return(gold_im_path,yHat_im_path)
 
 
@@ -200,23 +211,32 @@ class Model(pl.LightningModule):
         optimizer = self.optimizer_class(self.parameters(), lr=self.lr)
         return optimizer
     
-    def prepare_batch(self, batch):
-        return batch['chan3_col_name'], batch['label'], batch['num_lesions_to_retain']
+
     
-    def infer_batch(self, batch):
-        x, y, numLesions = self.prepare_batch(batch)
+    def infer_batch_pos(self, batch):
+        x, y, numLesions = batch["pos"]['chan3_col_name'], batch["pos"]['label'], batch["pos"]['num_lesions_to_retain']
         y_hat = self.net(x)
         return y_hat, y, numLesions
 
+
+
+    def infer_batch_all(self, batch):
+        x, y, numLesions =batch["all"]['chan3_col_name'], batch["all"]['label'], batch["all"]['num_lesions_to_retain']
+        y_hat = self.net(x)
+        return y_hat, y, numLesions
+
+
     def training_step(self, batch, batch_idx):
         # every second iteration we will do the training for segmentation
-        y_hat, y , numLesions= self.infer_batch(batch)
+        
         if self.global_step%2==0:
+            y_hat, y , numLesions= self.infer_batch_pos(batch)
             loss = self.criterion(y_hat, y)
             self.log('train_loss', loss, prog_bar=True)
             return loss
         # in case we have odd iteration we get access only to number of lesions present in the image not where they are (if they are present at all)    
         else:
+            y_hat, y , numLesions= self.infer_batch_all(batch)
             regress_res=self.modelRegression(y_hat)
             numLesions=list(map(lambda entry : int(entry), numLesions ))
             numLesions=torch.Tensor(numLesions).to(self.device)
