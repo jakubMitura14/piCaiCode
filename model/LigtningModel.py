@@ -226,7 +226,7 @@ class Model(pl.LightningModule):
 
         patIds=batch['patient_id']
         y_det = self.net(images)         
-        
+        print(f"validation y_det {type(y_det)} ")
         regress_res=self.modelRegression(y_det)
         numLesions=list(map(lambda entry : int(entry), numLesions ))
         numLesions=torch.Tensor(numLesions).to(self.device)
