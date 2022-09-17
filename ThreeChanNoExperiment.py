@@ -97,7 +97,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
 
     data = DataModule.PiCaiDataModule(
         df= df,
-        batch_size=2,#
+        batch_size=6,#
         trainSizePercent=percentSplit,# TODO(change to 0.7 or 0.8
         num_workers=os.cpu_count(),
         drop_last=False,#True,
@@ -166,10 +166,10 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         default_root_dir= "/home/sliceruser/data/lightning_logs",
         auto_scale_batch_size="binsearch",
         auto_lr_find=True,
-        check_val_every_n_epoch=1,
+        check_val_every_n_epoch=4,
         accumulate_grad_batches=accumulate_grad_batches,
         gradient_clip_val=gradient_clip_val,# 0.5,2.0
-        log_every_n_steps=10,
+        log_every_n_steps=2,
         #strategy='ddp' # for multi gpu training
     )
 
