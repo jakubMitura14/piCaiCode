@@ -269,6 +269,7 @@ class Model(pl.LightningModule):
         regress_res=self.modelRegression(y_det)
         y_det = decollate_batch(y_det)
         y_true = decollate_batch(y_true)
+        #TODO probably this [1,:,:,:] could break the evaluation ...
         # y_det=[x.cpu().detach().numpy()[1,:,:,:][0] for x in y_det]
         # y_true=[x.cpu().detach().numpy() for x in y_true]
         # y_det= list(map(self.postProcess  , y_det))
@@ -284,8 +285,8 @@ class Model(pl.LightningModule):
             else:
                 index+=1
                 print(f"pre  y_det[i] {y_det[i].size()} y_true_i {y_true[i].size()} ")
-                y_det_i=self.postProcess(y_det[i])
-                y_true_i=self.postTrue(y_true[i])
+                y_det_i=self.postProcess(y_det[i])[0,:,:,:]
+                y_true_i=self.postTrue(y_true[i])[1,:,:,:]
                 print(f"post  y_det[i] {y_det_i.size()} y_true_i {y_true_i.size()} ")
 
                 sd(y_pred=y_det_i, y=y_true_i) 
@@ -297,6 +298,7 @@ class Model(pl.LightningModule):
             total_loss+=sd.aggregate().item()
         
         self.picaiLossArr_score_final.append(total_loss)
+        print(f" validation_loss {total_loss} ")
         self.log("validation_loss", total_loss, on_epoch=True, on_step=False, sync_dist=True, prog_bar=True, logger=True)
         return {'val_loss': total_loss}
 
@@ -305,6 +307,7 @@ class Model(pl.LightningModule):
         avg_loss = torch.stack([torch.as_tensor(x['val_loss']) for x in outputs]).mean()
         self.log('avg_val_loss', avg_loss, on_epoch=True, sync_dist=True, prog_bar=True)
 
+#43
 
 
 
