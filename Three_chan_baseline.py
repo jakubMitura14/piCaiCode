@@ -156,6 +156,22 @@ def mainTrain(experiment,options,df,experiment_name):
     #     experiment.log_metric("last_val_loss_Ap",np.nanmax(picaiLossArr_AP_final))
     experiment.log_metric("last_val_loss_score",np.nanmax(picaiLossArr_score_final))
 
+
+    # series= {chan3_col_name,chan3_col_name_val
+    #      ,RandGaussianNoised_prob,RandAdjustContrastd_prob,RandGaussianSmoothd_prob,
+    #      RandRicianNoised_prob,RandFlipd_prob, RandAffined_prob,RandCoarseDropoutd_prob
+    #     num_res_units,dropout
+    #      ,criterion, optimizer_class,max_epochs,accumulate_grad_batches,gradient_clip_val
+    #      ,picaiLossArr_auroc_final,picaiLossArr_AP_final,picaiLossArr_score_final
+    #       ,experiment_name ,net    ,RandomElasticDeformation_prob
+    # ,RandomAnisotropy_prob
+    # ,RandomMotion_prob
+    # ,RandomGhosting_prob
+    # ,RandomSpike_prob
+    # ,RandomBiasField_prob,regression_channels  }
+
+
+
     #experiment.log_parameters(parameters)  
     experiment.end()
     #removing dummy label 

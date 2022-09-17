@@ -178,7 +178,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         default_root_dir= "/home/sliceruser/data/lightning_logs",
         auto_scale_batch_size="binsearch",
         auto_lr_find=True,
-        check_val_every_n_epoch=4,
+        check_val_every_n_epoch=1,
         accumulate_grad_batches=accumulate_grad_batches,
         gradient_clip_val=gradient_clip_val,# 0.5,2.0
         log_every_n_steps=2,
