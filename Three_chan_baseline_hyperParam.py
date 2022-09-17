@@ -70,11 +70,11 @@ detectSemiSupervised =loadLib("detectSemiSupervised", "/home/sliceruser/data/piC
 
 #dirs=[]
 #def getPossibleColNames(spacing_keyword,sizeWord ):
-for spacing_keyword in ["_med_spac", "_one_spac","_one_and_half_spac", "_two_spac" ]:     
-    for sizeWord in ["_maxSize_","_div32_" ]: 
-        cacheDir =  "/home/r/preprocess/monai_persistent_Dataset/{spacing_keyword}/{sizeWord}"
-        #creating directory if not yet present
-        os.makedirs(cacheDir, exist_ok = True)
+# for spacing_keyword in ["_med_spac", "_one_spac","_one_and_half_spac", "_two_spac" ]:     
+#     for sizeWord in ["_maxSize_","_div32_" ]: 
+#         cacheDir =  "/home/r/preprocess/monai_persistent_Dataset/{spacing_keyword}/{sizeWord}"
+#         #creating directory if not yet present
+#         os.makedirs(cacheDir, exist_ok = True)
 
 
 
