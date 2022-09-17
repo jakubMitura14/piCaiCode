@@ -97,7 +97,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
 
     data = DataModule.PiCaiDataModule(
         df= df,
-        batch_size=2,#
+        batch_size=3,#
         trainSizePercent=percentSplit,# TODO(change to 0.7 or 0.8
         num_workers=os.cpu_count(),
         drop_last=False,#True,
@@ -174,7 +174,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     )
     #setting batch size automatically
     #TODO(unhash)
-    trainer.tune(model, datamodule=data)
+    #trainer.tune(model, datamodule=data)
 
     trainer.logger._default_hp_metric = False
     start = datetime.now()
