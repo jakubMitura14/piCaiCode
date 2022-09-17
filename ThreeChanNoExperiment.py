@@ -164,7 +164,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         accelerator='auto',
         devices='auto',       
         default_root_dir= "/home/sliceruser/data/lightning_logs",
-        auto_scale_batch_size=True,#"binsearch",
+        auto_scale_batch_size="binsearch",
         auto_lr_find=True,
         check_val_every_n_epoch=4,
         accumulate_grad_batches=accumulate_grad_batches,
@@ -173,7 +173,8 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         #strategy='ddp' # for multi gpu training
     )
     #setting batch size automatically
-    trainer.tune(model, datamodule=data)
+    #TODO(unhash)
+    #trainer.tune(model, datamodule=data)
 
     trainer.logger._default_hp_metric = False
     start = datetime.now()

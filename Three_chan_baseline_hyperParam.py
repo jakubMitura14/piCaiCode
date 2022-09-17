@@ -245,6 +245,7 @@ config = {
     "metric": "last_val_loss_score",
         "objective": "maximize",
     },
+    "trials": 100,
 }
 
 df = pd.read_csv("/home/sliceruser/data/metadata/processedMetaData_current_b.csv")
