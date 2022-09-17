@@ -87,8 +87,8 @@ def mainTrain(experiment,options,df,experiment_name):
     picaiLossArr_AP_final=[]
     picaiLossArr_score_final=[]
     
-    in_channels=4,
-    out_channels=2,
+    in_channels=4
+    out_channels=2
 
     spacing_keyword=experiment.get_parameter("spacing_keyword")
     sizeWord= "_maxSize_" #experiment.get_parameter("sizeWord")
