@@ -205,6 +205,7 @@ class Model(pl.LightningModule):
         self.list_gold_val=[]
         self.list_yHat_val=[]
         self.isAnyNan=False
+        os.makedirs('/home/sliceruser/data/temp')
         #shutil.rmtree(self.temp_val_dir) 
 
     def configure_optimizers(self):
