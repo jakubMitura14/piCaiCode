@@ -141,7 +141,7 @@ def getAttentionUnet(dropout,input_image_size,in_channels,out_channels):
         spatial_dims=3,
         in_channels=in_channels,
         out_channels=out_channels,
-        img_size=input_image_size,
+        # img_size=input_image_size,
         strides=[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)],
         channels=[32, 64, 128, 256, 512],
         dropout=dropout
