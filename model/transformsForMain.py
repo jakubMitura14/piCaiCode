@@ -92,6 +92,7 @@ def decide_if_whole_image_train(is_whole_to_train, chan3Name,labelName):
 #https://github.com/DIAGNijmegen/picai_prep/blob/19a0ef2d095471648a60e45e30b218b7a81b2641/src/picai_prep/preprocessing.py
 
 
+
 def get_train_transforms(RandGaussianNoised_prob
     ,RandAdjustContrastd_prob
     ,RandGaussianSmoothd_prob
@@ -100,7 +101,13 @@ def get_train_transforms(RandGaussianNoised_prob
     ,RandAffined_prob
     ,RandCoarseDropoutd_prob
     ,is_whole_to_train
-    ,centerCropSize ):
+    ,centerCropSize 
+    ,RandomElasticDeformation_prob
+    ,RandomAnisotropy_prob
+    ,RandomMotion_prob
+    ,RandomGhosting_prob
+    ,RandomSpike_prob
+    ,RandomBiasField_prob):
     
     train_transforms = Compose(
         [
@@ -130,7 +137,12 @@ def get_train_transforms(RandGaussianNoised_prob
             RandFlipd(keys=["chan3_col_name","label"], prob=RandFlipd_prob),
             RandAffined(keys=["chan3_col_name","label"], prob=RandAffined_prob),
             RandCoarseDropoutd(keys=["chan3_col_name"], prob=RandCoarseDropoutd_prob,holes=6, spatial_size=5),
-            
+            torchio.transforms.RandomElasticDeformation(include=["chan3_col_name","label"],p=RandomElasticDeformation_prob),
+            torchio.transforms.RandomAnisotropy(include=["chan3_col_name","label"],p=RandomAnisotropy_prob),
+            torchio.transforms.RandomMotion(include=["chan3_col_name"],p=RandomMotion_prob),
+            torchio.transforms.RandomGhosting(include=["chan3_col_name"],p=RandomGhosting_prob),
+            torchio.transforms.RandomSpike(include=["chan3_col_name"],p=RandomSpike_prob),
+            torchio.transforms.RandomBiasField(include=["chan3_col_name"],p=RandomBiasField_prob)
         ]
     )
     return train_transforms

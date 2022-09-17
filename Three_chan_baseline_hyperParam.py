@@ -238,6 +238,13 @@ config = {
         "spacing_keyword": {"type": "categorical", "values": ["_one_spac_c" ,"_med_spac_b"  ]},#    #"_med_spac","_one_and_half_spac", "_two_spac"
         #"sizeWord": {"type": "categorical", "values": ["_maxSize_"]},#,"_maxSize_"# ,"_div32_"
         #"dirs": {"type": "discrete", "values": list(range(0,len(options["dirs"])))},
+        "RandomElasticDeformation_prob": {"type": "float", "min": 0.0, "max": 0.3},
+        "RandomAnisotropy_prob": {"type": "float", "min": 0.0, "max": 0.3},
+        "RandomMotion_prob": {"type": "float", "min": 0.0, "max": 0.3},
+        "RandomGhosting_prob": {"type": "float", "min": 0.0, "max": 0.3},
+        "RandomSpike_prob": {"type": "float", "min": 0.0, "max": 0.3},
+        "RandomBiasField_prob": {"type": "float", "min": 0.0, "max": 0.3},
+  
     },
 
     # Declare what we will be optimizing, and how:

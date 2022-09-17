@@ -325,23 +325,31 @@ class Model(pl.LightningModule):
 
         if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
             chunkLen=8
-            print(f"self.list_yHat_val {self.list_yHat_val} self.list_gold_val {self.list_gold_val}")
-            valid_metrics = evaluate(y_det=self.list_yHat_val,
-                                y_true=self.list_gold_val,
-                                num_parallel_calls=os.cpu_count()
-                                #y_true=iter(y_true),
-                                #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
-                                )
+            #print(f"self.list_yHat_val {self.list_yHat_val} self.list_gold_val {self.list_gold_val}")
+            
+            
+            for i in range(0,len(self.list_yHat_val)):
+                valid_metrics = evaluate(y_det=[self.list_yHat_val[i]],
+                                    y_true=[self.list_gold_val[i]],
+                                    num_parallel_calls=1
+                                    #y_true=iter(y_true),
+                                    #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+                                    )
+                # valid_metrics = evaluate(y_det=self.list_yHat_val,
+                #                     y_true=self.list_gold_val,
+                #                     num_parallel_calls=os.cpu_count()
+                #                     #y_true=iter(y_true),
+                #                     #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+                #                     )                      
+                meanPiecaiMetr_auroc=valid_metrics.auroc
+                meanPiecaiMetr_AP=valid_metrics.AP
+                meanPiecaiMetr_score=valid_metrics.score
 
-            meanPiecaiMetr_auroc=valid_metrics.auroc
-            meanPiecaiMetr_AP=valid_metrics.AP
-            meanPiecaiMetr_score=valid_metrics.score
+                print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score}  \n"  )
 
-            print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
-
-            self.log('val_mean_auroc', meanPiecaiMetr_auroc)
-            self.log('val_mean_AP', meanPiecaiMetr_AP)
-            self.log('val_mean_score', meanPiecaiMetr_score)
+                self.log('val_mean_auroc', meanPiecaiMetr_auroc)
+                self.log('val_mean_AP', meanPiecaiMetr_AP)
+                self.log('val_mean_score', meanPiecaiMetr_score)
 
             # self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
             # self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)

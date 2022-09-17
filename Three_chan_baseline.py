@@ -128,6 +128,14 @@ def mainTrain(experiment,options,df,experiment_name):
     gradient_clip_val=experiment.get_parameter("gradient_clip_val")# 0.5,2.0
     net=net(dropout,img_size,in_channels,out_channels)
 
+
+    RandomElasticDeformation_prob=experiment.get_parameter("RandomElasticDeformation_prob")
+    RandomAnisotropy_prob=experiment.get_parameter("RandomAnisotropy_prob")
+    RandomMotion_prob=experiment.get_parameter("RandomMotion_prob")
+    RandomGhosting_prob=experiment.get_parameter("RandomGhosting_prob")
+    RandomSpike_prob=experiment.get_parameter("RandomSpike_prob")
+    RandomBiasField_prob=experiment.get_parameter("RandomBiasField_prob")
+
     ThreeChanNoExperiment.train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
          ,chan3_col_name,chan3_col_name_val,label_name_val
          ,RandGaussianNoised_prob,RandAdjustContrastd_prob,RandGaussianSmoothd_prob,
@@ -136,7 +144,12 @@ def mainTrain(experiment,options,df,experiment_name):
         num_res_units,act,norm,dropout
          ,criterion, optimizer_class,max_epochs,accumulate_grad_batches,gradient_clip_val
          ,picaiLossArr_auroc_final,picaiLossArr_AP_final,picaiLossArr_score_final
-          ,experiment_name ,net)
+          ,experiment_name ,net    ,RandomElasticDeformation_prob
+    ,RandomAnisotropy_prob
+    ,RandomMotion_prob
+    ,RandomGhosting_prob
+    ,RandomSpike_prob
+    ,RandomBiasField_prob)
     if(len(picaiLossArr_auroc_final)>0):
         experiment.log_metric("last_val_loss_auroc",np.nanmax(picaiLossArr_auroc_final))
         experiment.log_metric("last_val_loss_Ap",np.nanmax(picaiLossArr_AP_final))

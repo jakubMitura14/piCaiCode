@@ -125,7 +125,13 @@ class PiCaiDataModule(pl.LightningDataModule):
     ,RandAffined_prob
     ,RandCoarseDropoutd_prob
     ,is_whole_to_train
-    ,centerCropSize ):
+    ,centerCropSize
+    ,RandomElasticDeformation_prob
+    ,RandomAnisotropy_prob
+    ,RandomMotion_prob
+    ,RandomGhosting_prob
+    ,RandomSpike_prob
+    ,RandomBiasField_prob ):
         super().__init__()
         self.cache_dir=cache_dir
         self.batch_size = batch_size
@@ -157,7 +163,12 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.RandCoarseDropoutd_prob=RandCoarseDropoutd_prob
         self.is_whole_to_train=is_whole_to_train 
         self.centerCropSize=centerCropSize
-
+        self.RandomElasticDeformation_prob=RandomElasticDeformation_prob
+        self.RandomAnisotropy_prob=RandomAnisotropy_prob
+        self.RandomMotion_prob=RandomMotion_prob
+        self.RandomGhosting_prob=RandomGhosting_prob
+        self.RandomSpike_prob=RandomSpike_prob
+        self.RandomBiasField_prob=RandomBiasField_prob
 
         self.dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
 
@@ -223,7 +234,13 @@ class PiCaiDataModule(pl.LightningDataModule):
             ,self.RandAffined_prob
             ,self.RandCoarseDropoutd_prob
             ,self.is_whole_to_train 
-            ,self.centerCropSize)
+            ,self.centerCropSize
+            ,self.RandomElasticDeformation_prob
+            ,self.RandomAnisotropy_prob
+            ,self.RandomMotion_prob
+            ,self.RandomGhosting_prob
+            ,self.RandomSpike_prob
+            ,self.RandomBiasField_prob )
         val_transforms= transformsForMain.get_val_transforms(self.is_whole_to_train,self.centerCropSize )
         #todo - unhash
         # self.train_ds =  PersistentDataset(data=self.train_subjects, transform=train_transforms,cache_dir=self.cache_dir)

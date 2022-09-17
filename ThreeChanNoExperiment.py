@@ -80,7 +80,12 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
          num_res_units,act,norm,dropout
          ,criterion, optimizer_class,max_epochs,accumulate_grad_batches,gradient_clip_val
          ,picaiLossArr_auroc_final,picaiLossArr_AP_final,picaiLossArr_score_final
-          ,experiment_name,net ):        
+          ,experiment_name,net    ,RandomElasticDeformation_prob
+    ,RandomAnisotropy_prob
+    ,RandomMotion_prob
+    ,RandomGhosting_prob
+    ,RandomSpike_prob
+    ,RandomBiasField_prob ):        
 
     #TODO(remove)
     comet_logger = CometLogger(
@@ -117,6 +122,12 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         ,RandCoarseDropoutd_prob=RandCoarseDropoutd_prob
         ,is_whole_to_train=is_whole_to_train
         ,centerCropSize=centerCropSize
+        ,RandomElasticDeformation_prob=RandomElasticDeformation_prob
+        ,RandomAnisotropy_prob=RandomAnisotropy_prob
+        ,RandomMotion_prob=RandomMotion_prob
+        ,RandomGhosting_prob=RandomGhosting_prob
+        ,RandomSpike_prob=RandomSpike_prob
+        ,RandomBiasField_prob=RandomBiasField_prob
     )
 
 
