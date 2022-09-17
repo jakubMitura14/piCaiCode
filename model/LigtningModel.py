@@ -281,7 +281,7 @@ class Model(pl.LightningModule):
             regress_res_round= round(torch.flatten(regress_res)[i].item())
             if(regress_res_round==0):
                 if(numLesions==0):
-                    total_loss=0.0
+                    pass
             else:
                 index+=1
                 print(f"pre  y_det[i] {y_det[i].size()} y_true_i {y_true[i].size()} ")
