@@ -238,7 +238,8 @@ class PiCaiDataModule(pl.LightningDataModule):
         #self.test_ds=    Dataset(data=self.test_subjects, transform=val_transforms)
         
     def train_dataloader(self):
-        if self.trainer.current_epoch % 2 == 0:
+        # if self.trainer.current_epoch % 2 == 0:
+        if True:
             return DataLoader(self.train_ds_pos, batch_size=self.batch_size, drop_last=self.drop_last
                           ,num_workers=self.num_workers,collate_fn=list_data_collate)
         return DataLoader(self.train_ds_all, batch_size=self.batch_size, drop_last=self.drop_last
