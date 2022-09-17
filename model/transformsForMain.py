@@ -136,7 +136,6 @@ def get_train_transforms(RandGaussianNoised_prob
             RandFlipd(keys=["chan3_col_name","label"], prob=RandFlipd_prob),
             RandAffined(keys=["chan3_col_name","label"], prob=RandAffined_prob),
             RandCoarseDropoutd(keys=["chan3_col_name"], prob=RandCoarseDropoutd_prob,holes=6, spatial_size=5),
-            DivisiblePadd(keys=["chan3_col_name","label"],k=32) , 
 
         #     torchio.transforms.RandomElasticDeformation(include=["chan3_col_name","label"],p=RandomElasticDeformation_prob),
         #     torchio.transforms.RandomAnisotropy(include=["chan3_col_name","label"],p=RandomAnisotropy_prob),
@@ -144,6 +143,8 @@ def get_train_transforms(RandGaussianNoised_prob
         #     torchio.transforms.RandomGhosting(include=["chan3_col_name"],p=RandomGhosting_prob),
         #     torchio.transforms.RandomSpike(include=["chan3_col_name"],p=RandomSpike_prob),
         #     torchio.transforms.RandomBiasField(include=["chan3_col_name"],p=RandomBiasField_prob)
+            DivisiblePadd(keys=["chan3_col_name","label"],k=32) , 
+
          ]
     )
     return train_transforms
