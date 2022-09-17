@@ -284,7 +284,7 @@ class Model(pl.LightningModule):
             else:
                 index+=1
                 print(f"pre  y_det[i] {y_det[i].size()} y_true_i {y_true[i].size()} ")
-                y_det_i=self.postProcess(y_det[i][1,:,:,:])
+                y_det_i=self.postProcess(y_det[i])
                 y_true_i=self.postTrue(y_true[i])
                 print(f"post  y_det[i] {y_det_i.size()} y_true_i {y_true_i.size()} ")
 
