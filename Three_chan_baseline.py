@@ -137,10 +137,10 @@ def mainTrain(experiment,options,df,experiment_name):
          ,criterion, optimizer_class,max_epochs,accumulate_grad_batches,gradient_clip_val
          ,picaiLossArr_auroc_final,picaiLossArr_AP_final,picaiLossArr_score_final
           ,experiment_name ,net)
-
-    experiment.log_metric("last_val_loss_auroc",np.nanmax(picaiLossArr_auroc_final))
-    experiment.log_metric("last_val_loss_Ap",np.nanmax(picaiLossArr_AP_final))
-    experiment.log_metric("last_val_loss_score",np.nanmax(picaiLossArr_score_final))
+    if(len(picaiLossArr_auroc_final)>0):
+        experiment.log_metric("last_val_loss_auroc",np.nanmax(picaiLossArr_auroc_final))
+        experiment.log_metric("last_val_loss_Ap",np.nanmax(picaiLossArr_AP_final))
+        experiment.log_metric("last_val_loss_score",np.nanmax(picaiLossArr_score_final))
 
     #experiment.log_parameters(parameters)  
     experiment.end()

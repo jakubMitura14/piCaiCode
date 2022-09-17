@@ -238,15 +238,11 @@ class PiCaiDataModule(pl.LightningDataModule):
         #self.test_ds=    Dataset(data=self.test_subjects, transform=val_transforms)
         
     def train_dataloader(self):
-        return DataLoader(self.train_ds_pos, drop_last=self.drop_last #, batch_size=self.batch_size
-                        ,num_workers=self.num_workers,collate_fn=list_data_collate)
-        # if self.trainer.current_epoch % 2 == 0:
-        #     print(f" get pos data loader  {self.trainer.current_epoch } ")
-        #     return DataLoader(self.train_ds_pos, drop_last=self.drop_last #, batch_size=self.batch_size
-        #                   ,num_workers=self.num_workers,collate_fn=list_data_collate)
-        # print(f" get all data loader {self.trainer.current_epoch } ")
-        # return DataLoader(self.train_ds_all, drop_last=self.drop_last#, batch_size=self.batch_size
-        #                   ,num_workers=self.num_workers,collate_fn=list_data_collate)
+        if self.trainer.current_epoch % 2 == 0:
+            return DataLoader(self.train_ds_pos, batch_size=self.batch_size, drop_last=self.drop_last
+                          ,num_workers=self.num_workers,collate_fn=list_data_collate)
+        return DataLoader(self.train_ds_all, batch_size=self.batch_size, drop_last=self.drop_last
+                          ,num_workers=self.num_workers,collate_fn=list_data_collate)
 
 
 
@@ -262,8 +258,7 @@ class PiCaiDataModule(pl.LightningDataModule):
         #        ,"pos": DataLoader(self.val_ds_pos, batch_size=1, drop_last=self.drop_last,num_workers=self.num_workers,collate_fn=list_data_collate)#,collate_fn=pad_list_data_collate
         #        }
 
-        return DataLoader(self.val_ds#, batch_size=self.batch_size
-        , drop_last=self.drop_last,num_workers=self.num_workers,collate_fn=list_data_collate)#,collate_fn=pad_list_data_collate
+        return DataLoader(self.val_ds, batch_size=self.batch_size, drop_last=self.drop_last,num_workers=self.num_workers,collate_fn=list_data_collate)#,collate_fn=pad_list_data_collate
 
     # def test_dataloader(self):
     #     return DataLoader(self.test_ds, batch_size= 1, drop_last=False,num_workers=self.num_workers,collate_fn=list_data_collate)#num_workers=self.num_workers,
