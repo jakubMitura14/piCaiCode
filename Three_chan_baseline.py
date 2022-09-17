@@ -151,10 +151,10 @@ def mainTrain(experiment,options,df,experiment_name):
     ,RandomGhosting_prob
     ,RandomSpike_prob
     ,RandomBiasField_prob,regression_channels)
-    if(len(picaiLossArr_auroc_final)>0):
-        experiment.log_metric("last_val_loss_auroc",np.nanmax(picaiLossArr_auroc_final))
-        experiment.log_metric("last_val_loss_Ap",np.nanmax(picaiLossArr_AP_final))
-        experiment.log_metric("last_val_loss_score",np.nanmax(picaiLossArr_score_final))
+    # if(len(picaiLossArr_auroc_final)>0):
+    #     experiment.log_metric("last_val_loss_auroc",np.nanmax(picaiLossArr_auroc_final))
+    #     experiment.log_metric("last_val_loss_Ap",np.nanmax(picaiLossArr_AP_final))
+    experiment.log_metric("last_val_loss_score",np.nanmax(picaiLossArr_score_final))
 
     #experiment.log_parameters(parameters)  
     experiment.end()

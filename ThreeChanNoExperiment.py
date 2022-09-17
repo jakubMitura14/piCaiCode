@@ -102,7 +102,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
 
     data = DataModule.PiCaiDataModule(
         df= df,
-        batch_size=6,#
+        batch_size=5,#
         trainSizePercent=percentSplit,# TODO(change to 0.7 or 0.8
         num_workers=os.cpu_count(),
         drop_last=False,#True,
@@ -158,7 +158,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         regression_channels=regression_channels
     )
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
-        monitor='val_mean_score',
+        monitor='avg_val_loss',
         patience=4,
         mode="max",
         divergence_threshold=(-0.1)
@@ -171,7 +171,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         max_epochs=max_epochs,
         #gpus=1,
         #precision=experiment.get_parameter("precision"), 
-        #callbacks=[ early_stopping ],# TODO unhash
+        callbacks=[ early_stopping ],# TODO unhash
         logger=comet_logger,
         accelerator='auto',
         devices='auto',       

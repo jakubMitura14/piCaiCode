@@ -56,6 +56,9 @@ from os.path import basename, dirname, exists, isdir, join, split
 import torch.nn as nn
 import torch.nn.functional as F
 
+from monai.metrics import (DiceMetric, HausdorffDistanceMetric,
+                           SurfaceDistanceMetric)
+
 from monai.transforms import (
     AsDiscrete,
     AddChanneld,
@@ -205,7 +208,11 @@ class Model(pl.LightningModule):
         self.list_gold_val=[]
         self.list_yHat_val=[]
         self.isAnyNan=False
-        os.makedirs('/home/sliceruser/data/temp')
+        #os.makedirs('/home/sliceruser/data/temp')
+        self.postProcess=monai.transforms.Compose([monai.transforms.ForegroundMask(),
+        monai.transforms.KeepLargestConnectedComponent()])
+        self.postTrue = Compose([EnsureType(), AsDiscrete(argmax=True, to_onehot=2)])
+
         #shutil.rmtree(self.temp_val_dir) 
 
     def configure_optimizers(self):
@@ -248,7 +255,7 @@ class Model(pl.LightningModule):
     #     return 0.5
 
     def validation_step(self, batch, batch_idx):
-        images, y_true = batch['chan3_col_name_val'], batch["label_name_val"]
+        images, y_true,numLesions= batch['chan3_col_name_val'], batch["label_name_val"], batch['num_lesions_to_retain']
         #print(f" in validation images {images} labels {labels} "  )
   
         patIds=batch['patient_id']
@@ -257,34 +264,68 @@ class Model(pl.LightningModule):
         if(torch.sum(torch.isnan( y_det))>0):
             self.isAnyNan=True
         
-        loss = self.criterion(y_det, y_true)
-        y_det=torch.sigmoid(y_det)
-        # print( f"before extract lesion  sum a {torch.sum(y_hat)  } " )
+        total_loss= 0.0
 
-        y_det = decollate_batch(y_det)
-        y_true = decollate_batch(y_true)
-        patIds = decollate_batch(patIds)
-        print(f" y_det 0 {y_det[0].size()} ")
-        #Todo check is the order of dimensions as expected by the library
+        regress_res=self.modelRegression(images)
+        regress_res_round= round(regress_res.item())
+        sd = SurfaceDistanceMetric(symmetric=True)
+        if(regress_res_round==0):
+            if(numLesions==0):
+                total_loss=0.0
+        else:
+            y_det = decollate_batch(y_det)
+            y_true = decollate_batch(y_true)
+            y_det=[x.cpu().detach().numpy()[1,:,:,:][0] for x in y_det]
+            y_true=[x.cpu().detach().numpy() for x in y_true]
+            y_det= list(map(self.postProcess  , y_det))
+            y_true= list(map(self.postTrue , y_det))
+            for i in range(0,len( y_det)):
+                sd(y_pred=y_det[i], y=y_true[i]) 
+            
+            total_loss+=sd.aggregate().item()
 
-        y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
-        y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
+        if(regress_res_round!=0):
+                total_loss+=20.0 * abs(regress_res_round-numLesions )#arbitrary number
+        self.picaiLossArr_score_final.append(total_loss)
+        self.log("validation_loss", total_loss, on_epoch=True, on_step=False, sync_dist=True, prog_bar=True, logger=True)
+        return {'val_loss': total_loss}
 
 
-        lenghtss=list(map(lambda en: np.sum(en)  ,y_det))
-        maximums=list(map(lambda en: np.max(en)  ,y_det))
-        medians=list(map(lambda en: np.min(en)  ,y_det))
-        minimums=list(map(lambda en: np.min(en)  ,y_det))
-        print(f" lenghtss {lenghtss} maximums {maximums} medians {medians} minimums {minimums}")
+    def validation_epoch_end(self, outputs):
+        avg_loss = torch.stack([torch.as_tensor(x['val_loss']) for x in outputs]).mean()
+        self.log('avg_val_loss', avg_loss, on_epoch=True, sync_dist=True, prog_bar=True)
 
-        for i in range(0,len(y_true)):
-            tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
-            self.list_gold_val.append(tupl[0])
-            self.list_yHat_val.append(tupl[1])
-        #now we need to save files in temporary direcory and save outputs to the appripriate lists wit paths
+
+
+
+        # loss = self.criterion(y_det, y_true)
+        # y_det=torch.sigmoid(y_det)
+        # # print( f"before extract lesion  sum a {torch.sum(y_hat)  } " )
+
+        # y_det = decollate_batch(y_det)
+        # y_true = decollate_batch(y_true)
+        # patIds = decollate_batch(patIds)
+        # print(f" y_det 0 {y_det[0].size()} ")
+        # #Todo check is the order of dimensions as expected by the library
+
+        # y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
+        # y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
+
+
+        # lenghtss=list(map(lambda en: np.sum(en)  ,y_det))
+        # maximums=list(map(lambda en: np.max(en)  ,y_det))
+        # medians=list(map(lambda en: np.min(en)  ,y_det))
+        # minimums=list(map(lambda en: np.min(en)  ,y_det))
+        # print(f" lenghtss {lenghtss} maximums {maximums} medians {medians} minimums {minimums}")
+
+        # for i in range(0,len(y_true)):
+        #     tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
+        #     self.list_gold_val.append(tupl[0])
+        #     self.list_yHat_val.append(tupl[1])
+        # #now we need to save files in temporary direcory and save outputs to the appripriate lists wit paths
         
 
-        self.log('val_loss', loss)
+        # self.log('val_loss', loss)
 
 #         # with torch. no_grad():
 #         images, y_true,numLesions = batch['chan3_col_name_val'], batch["label_name_val"], batch['num_lesions_to_retain']
@@ -352,73 +393,73 @@ class Model(pl.LightningModule):
 
 
 
-    def validation_epoch_end(self, outputs):
-        """
-        just in order to log the dice metric on validation data 
-        """
-        print("******* validation_epoch_end *****")
-        try:
-            if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
-                chunkLen=8
-                #print(f"self.list_yHat_val {self.list_yHat_val} self.list_gold_val {self.list_gold_val}")
+    # def validation_epoch_end(self, outputs):
+    #     """
+    #     just in order to log the dice metric on validation data 
+    #     """
+    #     print("******* validation_epoch_end *****")
+    #     try:
+    #         if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
+    #             chunkLen=8
+    #             #print(f"self.list_yHat_val {self.list_yHat_val} self.list_gold_val {self.list_gold_val}")
                 
                 
-                # for i in range(0,len(self.list_yHat_val)):
-                #     valid_metrics = evaluate(y_det=[self.list_yHat_val[i]],
-                #                         y_true=[self.list_gold_val[i]],
-                #                         num_parallel_calls=1
-                #                         #y_true=iter(y_true),
-                #                         #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
-                #                         )
-                valid_metrics = evaluate(y_det=self.list_yHat_val,
-                                    y_true=self.list_gold_val,
-                                    num_parallel_calls=os.cpu_count()
-                                    #y_true=iter(y_true),
-                                    #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
-                                    )                      
-                meanPiecaiMetr_auroc=valid_metrics.auroc
-                meanPiecaiMetr_AP=valid_metrics.AP
-                meanPiecaiMetr_score=valid_metrics.score
+    #             # for i in range(0,len(self.list_yHat_val)):
+    #             #     valid_metrics = evaluate(y_det=[self.list_yHat_val[i]],
+    #             #                         y_true=[self.list_gold_val[i]],
+    #             #                         num_parallel_calls=1
+    #             #                         #y_true=iter(y_true),
+    #             #                         #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+    #             #                         )
+    #             valid_metrics = evaluate(y_det=self.list_yHat_val,
+    #                                 y_true=self.list_gold_val,
+    #                                 num_parallel_calls=os.cpu_count()
+    #                                 #y_true=iter(y_true),
+    #                                 #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+    #                                 )                      
+    #             meanPiecaiMetr_auroc=valid_metrics.auroc
+    #             meanPiecaiMetr_AP=valid_metrics.AP
+    #             meanPiecaiMetr_score=valid_metrics.score
 
-                print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score}  \n"  )
+    #             print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score}  \n"  )
 
-                self.log('val_mean_auroc', meanPiecaiMetr_auroc)
-                self.log('val_mean_AP', meanPiecaiMetr_AP)
-                self.log('val_mean_score', meanPiecaiMetr_score)
+    #             self.log('val_mean_auroc', meanPiecaiMetr_auroc)
+    #             self.log('val_mean_AP', meanPiecaiMetr_AP)
+    #             self.log('val_mean_score', meanPiecaiMetr_score)
 
-                # self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
-                # self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
-                # self.experiment.log_metric('val_mean_score', meanPiecaiMetr_score)
-
-
-                self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
-                self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
-                self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
-
-                #resetting to 0 
-                self.picaiLossArr_auroc=[]
-                self.picaiLossArr_AP=[]
-                self.picaiLossArr_score=[]
+    #             # self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
+    #             # self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
+    #             # self.experiment.log_metric('val_mean_score', meanPiecaiMetr_score)
 
 
-                #clearing and recreatin temporary directory
-                shutil.rmtree(self.temp_val_dir)    
-                self.temp_val_dir=tempfile.mkdtemp()
-                self.list_gold_val=[]
-                self.list_yHat_val=[]
-                print("validation_epoch_end ** finished")
-            #in case we have Nan values training is unstable and we want to terminate it     
-            if(self.isAnyNan):
-                self.log('val_mean_score', -0.2)
-                self.picaiLossArr_score_final=[-0.2]
-                self.picaiLossArr_AP_final=[-0.2]
-                self.picaiLossArr_auroc_final=[-0.2]
-                print(" naans in outputt  ")
+    #             self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
+    #             self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
+    #             self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
 
-            # #self.isAnyNan=False
-            return {"log": self.log}
-        except :    
-            return {"log": -1.0}
+    #             #resetting to 0 
+    #             self.picaiLossArr_auroc=[]
+    #             self.picaiLossArr_AP=[]
+    #             self.picaiLossArr_score=[]
+
+
+    #             #clearing and recreatin temporary directory
+    #             shutil.rmtree(self.temp_val_dir)    
+    #             self.temp_val_dir=tempfile.mkdtemp()
+    #             self.list_gold_val=[]
+    #             self.list_yHat_val=[]
+    #             print("validation_epoch_end ** finished")
+    #         #in case we have Nan values training is unstable and we want to terminate it     
+    #         if(self.isAnyNan):
+    #             self.log('val_mean_score', -0.2)
+    #             self.picaiLossArr_score_final=[-0.2]
+    #             self.picaiLossArr_AP_final=[-0.2]
+    #             self.picaiLossArr_auroc_final=[-0.2]
+    #             print(" naans in outputt  ")
+
+    #         # #self.isAnyNan=False
+    #         return {"log": self.log}
+    #     except :    
+    #         return {"log": -0.2}
 
     # def validation_step(self, batch, batch_idx):
     #     y_hat, y = self.infer_batch(batch)
