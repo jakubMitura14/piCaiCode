@@ -246,6 +246,9 @@ class Model(pl.LightningModule):
         y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
 
 
+        lenghtss=list(map(lambda en: np.sum(en)  ,y_det))
+        print(f" lenghtss {lenghtss}")
+
         for i in range(0,len(y_true)):
             tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
             self.list_gold_val.append(tupl[0])
