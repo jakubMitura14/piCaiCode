@@ -46,6 +46,7 @@ import os
 import os.path
 monai.utils.set_determinism()
 from functools import partial
+from os import path as pathOs
 
 import importlib.util
 import sys
@@ -98,6 +99,7 @@ def mainTrain(experiment,options,df,experiment_name):
     label_name=f"label{spacing_keyword}{sizeWord}" 
     label_name_val=label_name
     cacheDir =  f"/home/sliceruser/preprocess/monai_persistent_Dataset/{spacing_keyword}/{sizeWord}"
+    csvPath = "/home/sliceruser/data/csvResC.csv"
 
     imageRef_path=list(filter(lambda it: it!= '', df[label_name].to_numpy()))[0]
     dummyLabelPath='/home/sliceruser/data/dummyData/zeroLabel.nii.gz'
@@ -158,8 +160,14 @@ def mainTrain(experiment,options,df,experiment_name):
     #     experiment.log_metric("last_val_loss_auroc",np.nanmax(picaiLossArr_auroc_final))
     #     experiment.log_metric("last_val_loss_Ap",np.nanmax(picaiLossArr_AP_final))
     experiment.log_metric("last_val_loss_score",np.nanmax(picaiLossArr_score_final))
-
     
+
+
+    ###### backup save the optimizer data  #######
+    dfOut = pd.DataFrame()
+    if(pathOs.exists(csvPath)):
+        dfOut=pd.read_csv(csvPath)
+
     series= {"chan3_col_name" :chan3_col_name
             ,"RandGaussianNoised_prob" :RandGaussianNoised_prob
             ,"RandAdjustContrastd_prob" :RandAdjustContrastd_prob
@@ -183,7 +191,7 @@ def mainTrain(experiment,options,df,experiment_name):
             ,"regression_channels" :experiment.get_parameter("regression_channels")
             ,"last_val_loss_score":np.nanmax(picaiLossArr_score_final)   }
     dfOut=dfOut.append(series, ignore_index = True)
-
+    dfOut.to_csv(csvPath)
 
     #experiment.log_parameters(parameters)  
     experiment.end()
