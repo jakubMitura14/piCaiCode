@@ -274,7 +274,7 @@ class Model(pl.LightningModule):
         # y_det= list(map(self.postProcess  , y_det))
         # y_true= list(map(self.postTrue , y_det))
         sd = SurfaceDistanceMetric(symmetric=True)
-
+        index=0
         for i in range(0,len( y_det)):
             print(f"torch.flatten(regress_res)[i] {torch.flatten(regress_res)[i]}")
             regress_res_round= round(torch.flatten(regress_res)[i].item())
@@ -282,13 +282,17 @@ class Model(pl.LightningModule):
                 if(numLesions==0):
                     total_loss=0.0
             else:
-                y_det_i=self.postProcess(y_det[i])
+                index+=1
+                y_det_i=self.postProcess(y_det[i][1,:,:,:])
                 y_true_i=self.postTrue(y_true[i])
                 sd(y_pred=y_det_i, y=y_true_i) 
             if(regress_res_round!=0):
                     total_loss+=20.0 * abs(regress_res_round-numLesions )#arbitrary number
         
-        total_loss+=sd.aggregate().item()
+        if(index>0):
+            print(f"sd.aggregate() {sd.aggregate()}")
+            total_loss+=sd.aggregate().item()
+        
         self.picaiLossArr_score_final.append(total_loss)
         self.log("validation_loss", total_loss, on_epoch=True, on_step=False, sync_dist=True, prog_bar=True, logger=True)
         return {'val_loss': total_loss}
