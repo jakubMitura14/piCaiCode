@@ -90,7 +90,7 @@ from functools import partial
 
 from torch.utils.cpp_extension import load
 
-lltm_cuda = load('lltm_cuda', ['lltm_cuda.cpp', 'lltm_cuda_kernel.cu'], verbose=True)
+# lltm_cuda = load('lltm_cuda', ['lltm_cuda.cpp', 'lltm_cuda_kernel.cu'], verbose=True)
 
 # def loadLib(name,path):
 #     spec = importlib.util.spec_from_file_location(name, path)
