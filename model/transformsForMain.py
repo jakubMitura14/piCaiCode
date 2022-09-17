@@ -161,7 +161,7 @@ def get_train_transforms(RandGaussianNoised_prob
             wrapTorchio(torchio.transforms.RandomMotion(include=["chan3_col_name"],p=RandomMotion_prob)),
             wrapTorchio(torchio.transforms.RandomGhosting(include=["chan3_col_name"],p=RandomGhosting_prob)),
             wrapTorchio(torchio.transforms.RandomSpike(include=["chan3_col_name"],p=RandomSpike_prob)),
-            wrapTorchio(torchio.transforms.RandomBiasField(include=["chan3_col_name"],p=RandomBiasField_prob))
+            wrapTorchio(torchio.transforms.RandomBiasField(include=["chan3_col_name"],p=RandomBiasField_prob)),
             DivisiblePadd(keys=["chan3_col_name","label"],k=32) , 
 
          ]
