@@ -85,7 +85,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     ,RandomMotion_prob
     ,RandomGhosting_prob
     ,RandomSpike_prob
-    ,RandomBiasField_prob ):        
+    ,RandomBiasField_prob,regression_channels ):        
 
     #TODO(remove)
     comet_logger = CometLogger(
@@ -154,7 +154,8 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         optimizer_class= optimizer_class,
         picaiLossArr_auroc_final=picaiLossArr_auroc_final,
         picaiLossArr_AP_final=picaiLossArr_AP_final,
-        picaiLossArr_score_final=picaiLossArr_score_final
+        picaiLossArr_score_final=picaiLossArr_score_final,
+        regression_channels=regression_channels
     )
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
         monitor='val_mean_score',
@@ -170,7 +171,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         max_epochs=max_epochs,
         #gpus=1,
         #precision=experiment.get_parameter("precision"), 
-        #callbacks=[ early_stopping ], TODO unhash
+        callbacks=[ early_stopping ],# TODO unhash
         #logger=comet_logger,
         accelerator='auto',
         devices='auto',       

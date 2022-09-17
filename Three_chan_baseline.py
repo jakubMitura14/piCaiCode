@@ -123,6 +123,7 @@ def mainTrain(experiment,options,df,experiment_name):
     dropout= experiment.get_parameter("dropout")
     criterion=  getParam(experiment,options,"lossF",df)# Our seg labels are single channel images indicating class index, rather than one-hot
     optimizer_class= getParam(experiment,options,"optimizer_class",df)
+    regression_channels= getParam(experiment,options,"regression_channels",df)
     max_epochs=30#100#experiment.get_parameter("max_epochs")
     accumulate_grad_batches=experiment.get_parameter("accumulate_grad_batches")
     gradient_clip_val=experiment.get_parameter("gradient_clip_val")# 0.5,2.0
@@ -149,7 +150,7 @@ def mainTrain(experiment,options,df,experiment_name):
     ,RandomMotion_prob
     ,RandomGhosting_prob
     ,RandomSpike_prob
-    ,RandomBiasField_prob)
+    ,RandomBiasField_prob,regression_channels)
     if(len(picaiLossArr_auroc_final)>0):
         experiment.log_metric("last_val_loss_auroc",np.nanmax(picaiLossArr_auroc_final))
         experiment.log_metric("last_val_loss_Ap",np.nanmax(picaiLossArr_AP_final))

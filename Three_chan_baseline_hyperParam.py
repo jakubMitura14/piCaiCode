@@ -176,7 +176,7 @@ def getViTAutoEnc(dropout,input_image_size,in_channels,out_channels):
 options={
 
 "models":[getUnetA, getUnetB,getVNet,getSegResNet,getSwinUNETR ],
-
+"regression_channels":[[1,1,1],[2,4,8],[10,16,32]],
 
 "lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
         # ,SamplesLoss(loss="sinkhorn",p=3)
@@ -216,6 +216,7 @@ config = {
     # Declare  hyperparameters in 
 "parameters": {
         "lossF": {"type": "discrete", "values": list(range(0,len(options["lossF"])))},
+        "regression_channels": {"type": "discrete", "values": list(range(0,len(options["regression_channels"])))},
         #"stridesAndChannels": {"type": "discrete", "values":  list(range(0,len(options["stridesAndChannels"])))  },
         "optimizer_class": {"type": "discrete", "values":list(range(0,len(options["optimizer_class"])))  },
         "models": {"type": "discrete", "values":list(range(0,len(options["models"])))  },

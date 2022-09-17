@@ -101,11 +101,14 @@ from functools import partial
 class UNetToRegresion(nn.Module):
     def __init__(self,
         in_channels,
+        regression_channels
     ) -> None:
         super().__init__()
-        self.model = nn.Sequential(ConvBnReLU3d(in_channels=in_channels, out_channels=1, kernel_size=3, stride=2,qconfig = torch.quantization.get_default_qconfig('fbgemm')),
-            ConvBnReLU3d(in_channels=1, out_channels=1, kernel_size=3, stride=2,qconfig = torch.quantization.get_default_qconfig('fbgemm')),
-            ConvBnReLU3d(in_channels=1, out_channels=1, kernel_size=3, stride=2,qconfig = torch.quantization.get_default_qconfig('fbgemm')),
+        self.model = nn.Sequential(
+            ConvBnReLU3d(in_channels=in_channels, out_channels=regression_channels[0], kernel_size=3, stride=2,qconfig = torch.quantization.get_default_qconfig('fbgemm')),
+            ConvBnReLU3d(in_channels=regression_channels[0], out_channels=regression_channels[1], kernel_size=3, stride=2,qconfig = torch.quantization.get_default_qconfig('fbgemm')),
+            ConvBnReLU3d(in_channels=regression_channels[1], out_channels=regression_channels[2], kernel_size=3, stride=1,qconfig = torch.quantization.get_default_qconfig('fbgemm')),
+            ConvBnReLU3d(in_channels=regression_channels[2], out_channels=1, kernel_size=3, stride=2,qconfig = torch.quantization.get_default_qconfig('fbgemm')),
             nn.AdaptiveMaxPool3d((8,8,2)),#ensuring such dimension 
             nn.Flatten(),
             #nn.BatchNorm3d(8*8*4),
@@ -163,11 +166,12 @@ class Model(pl.LightningModule):
     ,picaiLossArr_auroc_final
     ,picaiLossArr_AP_final
     ,picaiLossArr_score_final
+    ,regression_channels
     ):
         super().__init__()
         self.lr = learning_rate
         self.net = net
-        self.modelRegression = UNetToRegresion(2)
+        self.modelRegression = UNetToRegresion(2,regression_channels)
         self.criterion = criterion
         self.optimizer_class = optimizer_class
         self.best_val_dice = 0

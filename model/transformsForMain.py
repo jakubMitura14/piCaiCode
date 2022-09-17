@@ -44,7 +44,7 @@ from monai.transforms import (
     
 )
 from monai.config import KeysCollection
-
+from monai.data import MetaTensor
 import torchio
 import numpy as np
 
@@ -137,13 +137,13 @@ def get_train_transforms(RandGaussianNoised_prob
             RandFlipd(keys=["chan3_col_name","label"], prob=RandFlipd_prob),
             RandAffined(keys=["chan3_col_name","label"], prob=RandAffined_prob),
             RandCoarseDropoutd(keys=["chan3_col_name"], prob=RandCoarseDropoutd_prob,holes=6, spatial_size=5),
-            torchio.transforms.RandomElasticDeformation(include=["chan3_col_name","label"],p=RandomElasticDeformation_prob),
-            torchio.transforms.RandomAnisotropy(include=["chan3_col_name","label"],p=RandomAnisotropy_prob),
-            torchio.transforms.RandomMotion(include=["chan3_col_name"],p=RandomMotion_prob),
-            torchio.transforms.RandomGhosting(include=["chan3_col_name"],p=RandomGhosting_prob),
-            torchio.transforms.RandomSpike(include=["chan3_col_name"],p=RandomSpike_prob),
-            torchio.transforms.RandomBiasField(include=["chan3_col_name"],p=RandomBiasField_prob)
-        ]
+        #     torchio.transforms.RandomElasticDeformation(include=["chan3_col_name","label"],p=RandomElasticDeformation_prob),
+        #     torchio.transforms.RandomAnisotropy(include=["chan3_col_name","label"],p=RandomAnisotropy_prob),
+        #     torchio.transforms.RandomMotion(include=["chan3_col_name"],p=RandomMotion_prob),
+        #     torchio.transforms.RandomGhosting(include=["chan3_col_name"],p=RandomGhosting_prob),
+        #     torchio.transforms.RandomSpike(include=["chan3_col_name"],p=RandomSpike_prob),
+        #     torchio.transforms.RandomBiasField(include=["chan3_col_name"],p=RandomBiasField_prob)
+        # ]
     )
     return train_transforms
 def get_val_transforms(is_whole_to_train,centerCropSize):
