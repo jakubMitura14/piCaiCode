@@ -267,25 +267,26 @@ class Model(pl.LightningModule):
         total_loss= 0.0
 
         regress_res=self.modelRegression(y_det)
-        regress_res_round= round(regress_res.item())
+        y_det = decollate_batch(y_det)
+        y_true = decollate_batch(y_true)
+        # y_det=[x.cpu().detach().numpy()[1,:,:,:][0] for x in y_det]
+        # y_true=[x.cpu().detach().numpy() for x in y_true]
+        # y_det= list(map(self.postProcess  , y_det))
+        # y_true= list(map(self.postTrue , y_det))
         sd = SurfaceDistanceMetric(symmetric=True)
-        if(regress_res_round==0):
-            if(numLesions==0):
-                total_loss=0.0
-        else:
-            y_det = decollate_batch(y_det)
-            y_true = decollate_batch(y_true)
-            y_det=[x.cpu().detach().numpy()[1,:,:,:][0] for x in y_det]
-            y_true=[x.cpu().detach().numpy() for x in y_true]
-            y_det= list(map(self.postProcess  , y_det))
-            y_true= list(map(self.postTrue , y_det))
-            for i in range(0,len( y_det)):
-                sd(y_pred=y_det[i], y=y_true[i]) 
-            
-            total_loss+=sd.aggregate().item()
 
-        if(regress_res_round!=0):
-                total_loss+=20.0 * abs(regress_res_round-numLesions )#arbitrary number
+        for i in range(0,len( y_det)):
+            regress_res_round= round(torch.flatten(regress_res)[i])
+            if(regress_res_round==0):
+                if(numLesions==0):
+                    total_loss=0.0
+            else:
+                y_det_i=self.postProcess(y_det[i])
+                y_true_i=self.postTrue(y_true[i])
+                sd(y_pred=y_det_i, y=y_true_i) 
+            if(regress_res_round!=0):
+                    total_loss+=20.0 * abs(regress_res_round-numLesions )#arbitrary number
+        total_loss+=sd.aggregate().item()
         self.picaiLossArr_score_final.append(total_loss)
         self.log("validation_loss", total_loss, on_epoch=True, on_step=False, sync_dist=True, prog_bar=True, logger=True)
         return {'val_loss': total_loss}
