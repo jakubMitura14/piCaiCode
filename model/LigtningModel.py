@@ -211,7 +211,7 @@ class Model(pl.LightningModule):
         #os.makedirs('/home/sliceruser/data/temp')
         self.postProcess=monai.transforms.Compose([monai.transforms.ForegroundMask(),
         monai.transforms.KeepLargestConnectedComponent()])
-        self.postTrue = Compose([EnsureType(), AsDiscrete(argmax=True, to_onehot=2)])
+        self.postTrue = Compose([EnsureType()])
 
         #shutil.rmtree(self.temp_val_dir) 
 
@@ -283,8 +283,11 @@ class Model(pl.LightningModule):
                     total_loss=0.0
             else:
                 index+=1
+                print(f"pre  y_det[i] {y_det[i].size()} y_true_i {y_true[i].size()} ")
                 y_det_i=self.postProcess(y_det[i][1,:,:,:])
                 y_true_i=self.postTrue(y_true[i])
+                print(f"post  y_det[i] {y_det_i.size()} y_true_i {y_true_i.size()} ")
+
                 sd(y_pred=y_det_i, y=y_true_i) 
             if(regress_res_round!=0):
                     total_loss+=20.0 * abs(regress_res_round-numLesions )#arbitrary number
