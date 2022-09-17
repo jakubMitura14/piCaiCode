@@ -334,6 +334,7 @@ class Model(pl.LightningModule):
                 self.temp_val_dir=tempfile.mkdtemp()
                 self.list_gold_val=[]
                 self.list_yHat_val=[]
+                print("validation_epoch_end ** finished")
             #in case we have Nan values training is unstable and we want to terminate it     
             if(self.isAnyNan):
                 self.log('val_mean_score', -0.2)
