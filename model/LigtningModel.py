@@ -236,21 +236,19 @@ class Model(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         # every second iteration we will do the training for segmentation
+        y_hat, y , numLesions= self.infer_batch_pos(batch)
+        lossa = self.criterion(y_hat, y)
         
-        if self.global_step%2==0:
-            y_hat, y , numLesions= self.infer_batch_pos(batch)
-            loss = self.criterion(y_hat, y)
-            self.log('train_loss', loss, prog_bar=True)
-            return loss
         # in case we have odd iteration we get access only to number of lesions present in the image not where they are (if they are present at all)    
-        else:
-            y_hat, y , numLesions= self.infer_batch_all(batch)
-            regress_res=self.modelRegression(y_hat)
-            numLesions=list(map(lambda entry : int(entry), numLesions ))
-            numLesions=torch.Tensor(numLesions).to(self.device)
-            # print(f" regress res {torch.flatten(regress_res).size()}  orig {torch.flatten(numLesions).size() } ")
-            return F.smooth_l1_loss(torch.flatten(regress_res), torch.flatten(numLesions) )
+        y_hat, y , numLesions= self.infer_batch_all(batch)
+        regress_res=self.modelRegression(y_hat)
+        numLesions=list(map(lambda entry : int(entry), numLesions ))
+        numLesions=torch.Tensor(numLesions).to(self.device)
+        # print(f" regress res {torch.flatten(regress_res).size()}  orig {torch.flatten(numLesions).size() } ")
+        lossb=F.smooth_l1_loss(torch.flatten(regress_res), torch.flatten(numLesions) )
 
+        self.log('train_loss', torch.add(lossa,lossb), prog_bar=True)
+        return torch.add(lossa,lossb)
     # def validation_step(self, batch, batch_idx):
     #     return 0.5
 
