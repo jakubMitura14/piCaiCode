@@ -150,8 +150,8 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId):
 def saveToValidate(i,y_det,regress_res_cpu,temp_val_dir,y_true,patIds):
     y_det_curr=y_det[i]
     #TODO unhash
-    # if(np.rint(regress_res_cpu[i])==0):
-    #     y_det_curr=np.zeros_like(y_det_curr)
+    if(np.rint(regress_res_cpu[i])==0):
+        y_det_curr=np.zeros_like(y_det_curr)
     return saveFilesInDir(y_true[i],y_det_curr, temp_val_dir, patIds[i])
 
 def getArrayFromPath(path):
@@ -190,7 +190,7 @@ class Model(pl.LightningModule):
         self.picaiLossArr_AP_final=picaiLossArr_AP_final
         self.picaiLossArr_score_final=picaiLossArr_score_final
         #temporary directory for validation images and their labels
-        self.temp_val_dir=tempfile.mkdtemp()
+        self.temp_val_dir= '/home/sliceruser/data/temp' #tempfile.mkdtemp()
         self.list_gold_val=[]
         self.list_yHat_val=[]
         self.isAnyNan=False
@@ -253,7 +253,7 @@ class Model(pl.LightningModule):
         lenghtss=list(map(lambda en: np.sum(en)  ,y_det))
         maximums=list(map(lambda en: np.max(en)  ,y_det))
         medians=list(map(lambda en: np.min(en)  ,y_det))
-        minimums=list(map(lambda en: np.median(en)  ,y_det))
+        minimums=list(map(lambda en: np.min(en)  ,y_det))
         print(f" lenghtss {lenghtss} maximums {maximums} medians {medians} minimums {minimums}")
 
         for i in range(0,len(y_true)):
@@ -336,67 +336,68 @@ class Model(pl.LightningModule):
         just in order to log the dice metric on validation data 
         """
         print("******* validation_epoch_end *****")
+        try:
+            if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
+                chunkLen=8
+                #print(f"self.list_yHat_val {self.list_yHat_val} self.list_gold_val {self.list_gold_val}")
+                
+                
+                # for i in range(0,len(self.list_yHat_val)):
+                #     valid_metrics = evaluate(y_det=[self.list_yHat_val[i]],
+                #                         y_true=[self.list_gold_val[i]],
+                #                         num_parallel_calls=1
+                #                         #y_true=iter(y_true),
+                #                         #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+                #                         )
+                valid_metrics = evaluate(y_det=self.list_yHat_val,
+                                    y_true=self.list_gold_val,
+                                    num_parallel_calls=os.cpu_count()
+                                    #y_true=iter(y_true),
+                                    #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+                                    )                      
+                meanPiecaiMetr_auroc=valid_metrics.auroc
+                meanPiecaiMetr_AP=valid_metrics.AP
+                meanPiecaiMetr_score=valid_metrics.score
 
-        if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
-            chunkLen=8
-            #print(f"self.list_yHat_val {self.list_yHat_val} self.list_gold_val {self.list_gold_val}")
-            
-            
-        #     for i in range(0,len(self.list_yHat_val)):
-        #         valid_metrics = evaluate(y_det=[self.list_yHat_val[i]],
-        #                             y_true=[self.list_gold_val[i]],
-        #                             num_parallel_calls=1
-        #                             #y_true=iter(y_true),
-        #                             #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
-        #                             )
-        #         # valid_metrics = evaluate(y_det=self.list_yHat_val,
-        #         #                     y_true=self.list_gold_val,
-        #         #                     num_parallel_calls=os.cpu_count()
-        #         #                     #y_true=iter(y_true),
-        #         #                     #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
-        #         #                     )                      
-        #         meanPiecaiMetr_auroc=valid_metrics.auroc
-        #         meanPiecaiMetr_AP=valid_metrics.AP
-        #         meanPiecaiMetr_score=valid_metrics.score
+                print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score}  \n"  )
 
-        #         print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score}  \n"  )
+                self.log('val_mean_auroc', meanPiecaiMetr_auroc)
+                self.log('val_mean_AP', meanPiecaiMetr_AP)
+                self.log('val_mean_score', meanPiecaiMetr_score)
 
-        #         self.log('val_mean_auroc', meanPiecaiMetr_auroc)
-        #         self.log('val_mean_AP', meanPiecaiMetr_AP)
-        #         self.log('val_mean_score', meanPiecaiMetr_score)
-
-        #     # self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
-        #     # self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
-        #     # self.experiment.log_metric('val_mean_score', meanPiecaiMetr_score)
-
-
-        #     self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
-        #     self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
-        #     self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
-
-        #     #resetting to 0 
-        #     self.picaiLossArr_auroc=[]
-        #     self.picaiLossArr_AP=[]
-        #     self.picaiLossArr_score=[]
+                # self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
+                # self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
+                # self.experiment.log_metric('val_mean_score', meanPiecaiMetr_score)
 
 
-        #     #clearing and recreatin temporary directory
-        #     shutil.rmtree(self.temp_val_dir)    
-        #     self.temp_val_dir=tempfile.mkdtemp()
-        #     self.list_gold_val=[]
-        #     self.list_yHat_val=[]
-        #     print("validation_epoch_end ** finished")
-        # #in case we have Nan values training is unstable and we want to terminate it     
-        # if(self.isAnyNan):
-        #     self.log('val_mean_score', -0.2)
-        #     self.picaiLossArr_score_final=[-0.2]
-        #     self.picaiLossArr_AP_final=[-0.2]
-        #     self.picaiLossArr_auroc_final=[-0.2]
-        #     print(" naans in outputt  ")
+                self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
+                self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
+                self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
 
-        # #self.isAnyNan=False
-        # return {"log": self.log}
-        return {"log": 2.0}
+                #resetting to 0 
+                self.picaiLossArr_auroc=[]
+                self.picaiLossArr_AP=[]
+                self.picaiLossArr_score=[]
+
+
+                #clearing and recreatin temporary directory
+                shutil.rmtree(self.temp_val_dir)    
+                self.temp_val_dir=tempfile.mkdtemp()
+                self.list_gold_val=[]
+                self.list_yHat_val=[]
+                print("validation_epoch_end ** finished")
+            #in case we have Nan values training is unstable and we want to terminate it     
+            if(self.isAnyNan):
+                self.log('val_mean_score', -0.2)
+                self.picaiLossArr_score_final=[-0.2]
+                self.picaiLossArr_AP_final=[-0.2]
+                self.picaiLossArr_auroc_final=[-0.2]
+                print(" naans in outputt  ")
+
+            # #self.isAnyNan=False
+            return {"log": self.log}
+        except :    
+            return {"log": -1.0}
 
     # def validation_step(self, batch, batch_idx):
     #     y_hat, y = self.infer_batch(batch)
