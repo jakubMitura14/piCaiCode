@@ -171,8 +171,8 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         max_epochs=max_epochs,
         #gpus=1,
         #precision=experiment.get_parameter("precision"), 
-        callbacks=[ early_stopping ],# TODO unhash
-        #logger=comet_logger,
+        #callbacks=[ early_stopping ],# TODO unhash
+        logger=comet_logger,
         accelerator='auto',
         devices='auto',       
         default_root_dir= "/home/sliceruser/data/lightning_logs",
