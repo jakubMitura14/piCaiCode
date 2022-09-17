@@ -281,17 +281,16 @@ class Model(pl.LightningModule):
             regress_res_round= round(torch.flatten(regress_res)[i].item())
             if(regress_res_round==0):
                 if(numLesions==0):
-                    pass
+                    pass # it is ok we do not icrease loss
             else:
                 index+=1
-                print(f"pre  y_det[i] {y_det[i].size()} y_true_i {y_true[i].size()} ")
+                #print(f"pre  y_det[i] {y_det[i].size()} y_true_i {y_true[i].size()} ")
                 y_det_i=self.postProcess(y_det[i])[0,:,:,:]
                 y_true_i=self.postTrue(y_true[i])[1,:,:,:]
-                print(f"post  y_det[i] {y_det_i.size()} y_true_i {y_true_i.size()} ")
-
-                sd(y_pred=y_det_i, y=y_true_i) 
-            if(regress_res_round!=0):
-                    total_loss+=20.0 * abs(regress_res_round-numLesions )#arbitrary number
+                #print(f"post  y_det[i] {y_det_i.size()} y_true_i {y_true_i.size()} ")
+                if(torch.sum(y_det_i).item()>0 and torch.sum(y_true_i).item()>0 ):
+                    sd(y_pred=y_det_i, y=y_true_i) 
+            total_loss+=20.0 * abs(regress_res_round-numLesions[i] )#arbitrary number
         
         if(index>0):
             print(f"sd.aggregate() {sd.aggregate()}")
@@ -304,7 +303,9 @@ class Model(pl.LightningModule):
 
 
     def validation_epoch_end(self, outputs):
+        
         avg_loss = torch.stack([torch.as_tensor(x['val_loss']) for x in outputs]).mean()
+        print(f"avg_val_loss { avg_loss}")
         self.log('avg_val_loss', avg_loss, on_epoch=True, sync_dist=True, prog_bar=True)
 
 #43
