@@ -113,7 +113,8 @@ def getAhnet(dropout,input_image_size):
     return monai.networks.nets.AHNet(
         spatial_dims=3,
         in_channels=3,
-        out_channels=2
+        out_channels=2,
+        blocks_down=(1, 2, 2, 2)
     )
 
 def getSegResNet(dropout,input_image_size):
