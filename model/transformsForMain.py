@@ -124,7 +124,6 @@ def get_train_transforms(RandGaussianNoised_prob
             #CropForegroundd(keys=["t2w","adc", "hbv","label"], source_key="image"),
             EnsureTyped(keys=["chan3_col_name","label"]),
             # SelectItemsd(keys=["chan3_col_name","label"]),
-            DivisiblePadd(keys=["chan3_col_name","label"],k=32) , 
             #AddChanneld( keys=["chan3_col_name","label"]) ,          
             #ResizeWithPadOrCropd(keys=["chan3_col_name","label"],spatial_size=centerCropSize ),
           
@@ -137,6 +136,8 @@ def get_train_transforms(RandGaussianNoised_prob
             RandFlipd(keys=["chan3_col_name","label"], prob=RandFlipd_prob),
             RandAffined(keys=["chan3_col_name","label"], prob=RandAffined_prob),
             RandCoarseDropoutd(keys=["chan3_col_name"], prob=RandCoarseDropoutd_prob,holes=6, spatial_size=5),
+            DivisiblePadd(keys=["chan3_col_name","label"],k=32) , 
+
         #     torchio.transforms.RandomElasticDeformation(include=["chan3_col_name","label"],p=RandomElasticDeformation_prob),
         #     torchio.transforms.RandomAnisotropy(include=["chan3_col_name","label"],p=RandomAnisotropy_prob),
         #     torchio.transforms.RandomMotion(include=["chan3_col_name"],p=RandomMotion_prob),
