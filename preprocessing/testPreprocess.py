@@ -252,7 +252,7 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
             print(f"hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
 
             join = sitk.JoinSeriesImageFilter()
-            joined_image = join.Execute(imgT2w, imgAdc,imgHbv)
+            joined_image = join.Execute(imgT2w, imgAdc,imgHbv,imgAdc)
             writer = sitk.ImageFileWriter()
             writer.KeepOriginalImageUIDOn()
             writer.SetFileName(outPath)
