@@ -286,6 +286,7 @@ class Model(pl.LightningModule):
                 sd(y_pred=y_det_i, y=y_true_i) 
             if(regress_res_round!=0):
                     total_loss+=20.0 * abs(regress_res_round-numLesions )#arbitrary number
+        
         total_loss+=sd.aggregate().item()
         self.picaiLossArr_score_final.append(total_loss)
         self.log("validation_loss", total_loss, on_epoch=True, on_step=False, sync_dist=True, prog_bar=True, logger=True)
