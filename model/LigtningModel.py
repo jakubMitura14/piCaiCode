@@ -229,9 +229,9 @@ class Model(pl.LightningModule):
 
 
     def infer_batch_all(self, batch):
-        x, y, numLesions =batch["all"]['chan3_col_name'], batch["all"]['label'], batch["all"]['num_lesions_to_retain']
+        x, y, numLesions =batch["all"]['chan3_col_name'], batch["all"]['num_lesions_to_retain']
         y_hat = self.net(x)
-        return y_hat, y, numLesions
+        return y_hat, numLesions
 
 
     def training_step(self, batch, batch_idx):
@@ -240,8 +240,8 @@ class Model(pl.LightningModule):
         lossa = self.criterion(y_hat, y)
         
         # in case we have odd iteration we get access only to number of lesions present in the image not where they are (if they are present at all)    
-        y_hat, y , numLesions= self.infer_batch_all(batch)
-        regress_res=self.modelRegression(y_hat)
+        y_hat_all, numLesions= self.infer_batch_all(batch)
+        regress_res=self.modelRegression(y_hat_all)
         numLesions=list(map(lambda entry : int(entry), numLesions ))
         numLesions=torch.Tensor(numLesions).to(self.device)
         # print(f" regress res {torch.flatten(regress_res).size()}  orig {torch.flatten(numLesions).size() } ")
