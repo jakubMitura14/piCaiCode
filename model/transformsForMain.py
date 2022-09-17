@@ -143,7 +143,7 @@ def get_train_transforms(RandGaussianNoised_prob
         #     torchio.transforms.RandomGhosting(include=["chan3_col_name"],p=RandomGhosting_prob),
         #     torchio.transforms.RandomSpike(include=["chan3_col_name"],p=RandomSpike_prob),
         #     torchio.transforms.RandomBiasField(include=["chan3_col_name"],p=RandomBiasField_prob)
-        # ]
+         ]
     )
     return train_transforms
 def get_val_transforms(is_whole_to_train,centerCropSize):
