@@ -163,7 +163,6 @@ class Model(pl.LightningModule):
     ,picaiLossArr_auroc_final
     ,picaiLossArr_AP_final
     ,picaiLossArr_score_final
-    ,batch_size=1
     ):
         super().__init__()
         self.lr = learning_rate
@@ -179,7 +178,6 @@ class Model(pl.LightningModule):
         self.picaiLossArr_auroc=[]
         self.picaiLossArr_AP=[]
         self.picaiLossArr_score=[]
-        self.batch_size=batch_size
         self.picaiLossArr_auroc_final=picaiLossArr_auroc_final
         self.picaiLossArr_AP_final=picaiLossArr_AP_final
         self.picaiLossArr_score_final=picaiLossArr_score_final
