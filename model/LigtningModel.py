@@ -229,7 +229,7 @@ class Model(pl.LightningModule):
 
 
     def infer_batch_all(self, batch):
-        x, y, numLesions =batch["all"]['chan3_col_name'], batch["all"]['num_lesions_to_retain']
+        x, numLesions =batch["all"]['chan3_col_name'], batch["all"]['num_lesions_to_retain']
         y_hat = self.net(x)
         return y_hat, numLesions
 
