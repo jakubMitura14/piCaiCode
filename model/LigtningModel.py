@@ -224,7 +224,7 @@ class Model(pl.LightningModule):
             #print(f" in validation images {images.size()} labels {y_true.size()} "  )
 
             patIds=batch['patient_id']
-            y_det = sliding_window_inference(images, (32,32,32), 1, self.net)
+            y_det = self.net(images)
             
             
             regress_res=self.modelRegression(y_det)
