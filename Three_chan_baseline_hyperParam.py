@@ -85,11 +85,13 @@ for spacing_keyword in ["_med_spac", "_one_spac","_one_and_half_spac", "_two_spa
 ##options
 to_onehot_y_loss= False
 
-def getUnetA(dropout,input_image_size):
+
+
+def getUnetA(dropout,input_image_size,in_channels,out_channels ):
     return unets.UNet(
         spatial_dims=3,
-        in_channels=3,
-        out_channels=2,
+        in_channels=in_channels,
+        out_channels=out_channels,
         strides=[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)],
         channels=[32, 64, 128, 256, 512, 1024],
         num_res_units= 0,
@@ -97,11 +99,11 @@ def getUnetA(dropout,input_image_size):
         norm= (Norm.BATCH, {}),
         dropout= dropout
     )
-def getUnetB(dropout,input_image_size):
+def getUnetB(dropout,input_image_size,in_channels,out_channels):
     return unets.UNet(
         spatial_dims=3,
-        in_channels=3,
-        out_channels=2,
+        in_channels=in_channels,
+        out_channels=out_channels,
         strides=[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)],
         channels=[32, 64, 128, 256, 512],
         num_res_units= 0,
@@ -109,60 +111,60 @@ def getUnetB(dropout,input_image_size):
         norm= (Norm.BATCH, {}),
         dropout= dropout
     )
-def getAhnet(dropout,input_image_size):
+def getAhnet(dropout,input_image_size,in_channels,out_channels):
     return monai.networks.nets.AHNet(
         spatial_dims=3,
-        in_channels=3,
-        out_channels=2,
+        in_channels=in_channels,
+        out_channels=out_channels,
         psp_block_num=3   )
 
-def getSegResNet(dropout,input_image_size):
+def getSegResNet(dropout,input_image_size,in_channels,out_channels):
     return monai.networks.nets.SegResNet(
         spatial_dims=3,
-        in_channels=3,
-        out_channels=2,
+        in_channels=in_channels,
+        out_channels=out_channels,
         dropout_prob=dropout,
     )
-def getSegResNetVAE(dropout,input_image_size):
+def getSegResNetVAE(dropout,input_image_size,in_channels,out_channels):
     return monai.networks.nets.SegResNetVAE(
         spatial_dims=3,
-        in_channels=3,
-        out_channels=2,
+        in_channels=in_channels,
+        out_channels=out_channels,
         dropout_prob=dropout,
         input_image_size=torch.Tensor(input_image_size)
 
     )
 
 
-def getAttentionUnet(dropout,input_image_size):
+def getAttentionUnet(dropout,input_image_size,in_channels,out_channels):
     return monai.networks.nets.AttentionUnet(
         spatial_dims=3,
-        in_channels=3,
-        out_channels=2,
+        in_channels=in_channels,
+        out_channels=out_channels,
         img_size=input_image_size,
         strides=[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)],
         channels=[32, 64, 128, 256, 512],
         dropout=dropout
     )
-def getSwinUNETR(dropout,input_image_size):
+def getSwinUNETR(dropout,input_image_size,in_channels,out_channels):
     return monai.networks.nets.SwinUNETR(
         spatial_dims=3,
-        in_channels=3,
-        out_channels=2,
+        in_channels=in_channels,
+        out_channels=out_channels,
         img_size=input_image_size
     )
-def getVNet(dropout,input_image_size):
+def getVNet(dropout,input_image_size,in_channels,out_channels):
     return monai.networks.nets.VNet(
         spatial_dims=3,
-        in_channels=3,
-        out_channels=2,
+        in_channels=in_channels,
+        out_channels=out_channels,
         dropout_prob=dropout
     )
-def getViTAutoEnc(dropout,input_image_size):
+def getViTAutoEnc(dropout,input_image_size,in_channels,out_channels):
     return monai.networks.nets.ViTAutoEnc(
         spatial_dims=3,
-        in_channels=3,
-        out_channels=2,
+        in_channels=in_channels,
+        out_channels=out_channels,
         img_size=input_image_size,
         patch_size=(16,16,16)
     )
@@ -170,10 +172,10 @@ def getViTAutoEnc(dropout,input_image_size):
 
 
     
-#getAttentionUnet,getViTAutoEnc,getSegResNet,getSwinUNETR
+#
 options={
 
-"models":[getUnetA, getUnetB,getAhnet,getSegResNetVAE,getVNet ],
+"models":[getUnetA, getUnetB,getAhnet,getVNet,getAttentionUnet,getViTAutoEnc,getSegResNet,getSwinUNETR,getSegResNetVAE ],
 
 
 "lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)

@@ -39,7 +39,8 @@ from monai.transforms import (
     RandCoarseDropoutd,
     AsDiscreted,
     MapTransform,
-    ResizeWithPadOrCropd
+    ResizeWithPadOrCropd,
+    RepeatChanneld
     
 )
 from monai.config import KeysCollection
@@ -116,7 +117,8 @@ def get_train_transforms(RandGaussianNoised_prob
             #CropForegroundd(keys=["t2w","adc", "hbv","label"], source_key="image"),
             EnsureTyped(keys=["chan3_col_name","label"]),
             # SelectItemsd(keys=["chan3_col_name","label"]),
-            DivisiblePadd(keys=["chan3_col_name","label"],k=32) ,            
+            DivisiblePadd(keys=["chan3_col_name","label"],k=32) , 
+            AddChanneld( keys=["chan3_col_name","label"]) ,          
             #ResizeWithPadOrCropd(keys=["chan3_col_name","label"],spatial_size=centerCropSize ),
           
             #*decide_if_whole_image_train(is_whole_to_train,"chan3_col_name","label"),
@@ -139,7 +141,7 @@ def get_val_transforms(is_whole_to_train,centerCropSize):
             EnsureChannelFirstd(keys=["chan3_col_name_val","label_name_val"]),
             standardizeLabels(keys=["label_name_val"]),
             AsDiscreted(keys=["label_name_val"], to_onehot=2),
-
+            AddChanneld( keys=["chan3_col_name","label"]) ,  
             #torchio.transforms.OneHot(include=["label"] ),#num_classes=3
             #AsDiscreted(keys=["label"],to_onehot=2,threshold=0.5),
             #AsChannelFirstd(keys=["chan3_col_name","label"]]),

@@ -87,6 +87,9 @@ def mainTrain(experiment,options,df,experiment_name):
     picaiLossArr_AP_final=[]
     picaiLossArr_score_final=[]
     
+    in_channels=4,
+    out_channels=2,
+
     spacing_keyword=experiment.get_parameter("spacing_keyword")
     sizeWord= "_maxSize_" #experiment.get_parameter("sizeWord")
     chan3_col_name=f"t2w{spacing_keyword}_3Chan{sizeWord}" 
@@ -123,7 +126,7 @@ def mainTrain(experiment,options,df,experiment_name):
     max_epochs=3#100#experiment.get_parameter("max_epochs")
     accumulate_grad_batches=experiment.get_parameter("accumulate_grad_batches")
     gradient_clip_val=experiment.get_parameter("gradient_clip_val")# 0.5,2.0
-    net=net(dropout,img_size)
+    net=net(dropout,img_size,in_channels,out_channels)
 
     ThreeChanNoExperiment.train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
          ,chan3_col_name,chan3_col_name_val,label_name_val
