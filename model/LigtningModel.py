@@ -290,7 +290,8 @@ class Model(pl.LightningModule):
                 #print(f"post  y_det[i] {y_det_i.size()} y_true_i {y_true_i.size()} ")
                 if(torch.sum(y_det_i).item()>0 and torch.sum(y_true_i).item()>0 ):
                     sd(y_pred=y_det_i, y=y_true_i) 
-            total_loss+=20.0 * abs(regress_res_round-numLesions[i] )#arbitrary number
+                print(f"numLesions[i] {numLesions[i]}")    
+            total_loss+=20.0 * abs(regress_res_round-int(numLesions[i]) )#arbitrary number
         
         if(index>0):
             print(f"sd.aggregate() {sd.aggregate()}")
