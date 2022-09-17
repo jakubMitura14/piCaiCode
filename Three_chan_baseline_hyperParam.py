@@ -172,10 +172,10 @@ def getViTAutoEnc(dropout,input_image_size,in_channels,out_channels):
 
 
     
-#
+#getViTAutoEnc
 options={
 
-"models":[getUnetA, getUnetB,getAhnet,getVNet,getAttentionUnet,getViTAutoEnc,getSegResNet,getSwinUNETR,getSegResNetVAE ],
+"models":[getUnetA, getUnetB,getAhnet,getVNet,getAttentionUnet,getSegResNet,getSwinUNETR,getSegResNetVAE ],
 
 
 "lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
