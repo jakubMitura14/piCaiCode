@@ -276,7 +276,8 @@ class Model(pl.LightningModule):
         sd = SurfaceDistanceMetric(symmetric=True)
 
         for i in range(0,len( y_det)):
-            regress_res_round= round(torch.flatten(regress_res)[i])
+            print(f"torch.flatten(regress_res)[i] {torch.flatten(regress_res)[i]}")
+            regress_res_round= round(torch.flatten(regress_res)[i].item())
             if(regress_res_round==0):
                 if(numLesions==0):
                     total_loss=0.0
