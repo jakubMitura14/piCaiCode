@@ -102,7 +102,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
 
     data = DataModule.PiCaiDataModule(
         df= df,
-        batch_size=12,#
+        batch_size=7,#
         trainSizePercent=percentSplit,# TODO(change to 0.7 or 0.8
         num_workers=os.cpu_count(),
         drop_last=False,#True,
