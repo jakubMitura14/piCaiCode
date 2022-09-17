@@ -87,6 +87,7 @@ def mainTrain(experiment,options,df,experiment_name):
     picaiLossArr_auroc_final=[]
     picaiLossArr_AP_final=[]
     picaiLossArr_score_final=[]
+    max_epochs=50#100#experiment.get_parameter("max_epochs")
     
     in_channels=4
     out_channels=2
@@ -126,7 +127,6 @@ def mainTrain(experiment,options,df,experiment_name):
     criterion=  getParam(experiment,options,"lossF",df)# Our seg labels are single channel images indicating class index, rather than one-hot
     optimizer_class= getParam(experiment,options,"optimizer_class",df)
     regression_channels= getParam(experiment,options,"regression_channels",df)
-    max_epochs=100#100#experiment.get_parameter("max_epochs")
     accumulate_grad_batches=experiment.get_parameter("accumulate_grad_batches")
     gradient_clip_val=experiment.get_parameter("gradient_clip_val")# 0.5,2.0
     net=net(dropout,img_size,in_channels,out_channels)
