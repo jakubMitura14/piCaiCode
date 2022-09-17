@@ -159,7 +159,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         max_epochs=max_epochs,
         #gpus=1,
         #precision=experiment.get_parameter("precision"), 
-        callbacks=[ early_stopping ],
+        #callbacks=[ early_stopping ], TODO unhash
         #logger=comet_logger,
         accelerator='auto',
         devices='auto',       
