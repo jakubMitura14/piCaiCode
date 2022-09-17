@@ -129,7 +129,7 @@ def getSegResNetVAE(dropout,input_image_size):
         in_channels=3,
         out_channels=2,
         dropout_prob=dropout,
-        input_image_size=input_image_size
+        input_image_size=torch.Tensor(input_image_size)
 
     )
 
