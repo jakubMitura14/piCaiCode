@@ -223,7 +223,7 @@ class Model(pl.LightningModule):
         #print(f" in validation images {images} labels {labels} "  )
   
         patIds=batch['patient_id']
-        y_det = sliding_window_inference(images, (32,32,32), 1, self.net)
+        y_det = self.net(images)# sliding_window_inference(images, (32,32,32), 1, self.net)
         #marking that we had some Nan numbers in the tensor
         if(torch.sum(torch.isnan( y_det))>0):
             self.isAnyNan=True
