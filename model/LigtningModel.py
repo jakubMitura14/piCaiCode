@@ -284,13 +284,14 @@ class Model(pl.LightningModule):
             #print(f"post  y_det[i] {y_det_i.size()} y_true_i {y_true_i.size()} ")
             if(torch.sum(y_det_i).item()>0 and torch.sum(y_true_i).item()>0 ):
                 total_loss+= monai.metrics.compute_generalized_dice(y_det_i,y_true_i)/len( y_det)
+                print(f" monai.metrics.compute_generalized_dice(y_det_i,y_true_i)/len( y_det) {monai.metrics.compute_generalized_dice(y_det_i,y_true_i)/len( y_det)} ")
                 #sd(y_pred=y_det_i, y=y_true_i) 
             # print(f"numLesions[i] {numLesions[i]}")    
             # total_loss+= (abs(regress_res_round-int(numLesions[i]) ) /len( y_det) )#arbitrary number
         
         numLesions= list(map(int, numLesions ))
         regress_res= list(map(lambda el:round(el) ,torch.flatten(regress_res).cpu().detach().numpy() ))
-
+        print( f"torch.Tensor(numLesions).cpu() {torch.Tensor(numLesions).cpu()}  torch.Tensor(regress_res).cpu() {torch.Tensor(regress_res).cpu()}   ")
         total_loss+=torchmetrics.functional.average_precision(torch.Tensor(numLesions).cpu(), torch.Tensor(regress_res).cpu())        
 
         #print(f"sd.aggregate() {sd.aggregate().item()}")
@@ -304,7 +305,7 @@ class Model(pl.LightningModule):
 
     def validation_epoch_end(self, outputs):
         
-        avg_loss = torch.stack([torch.as_tensor(x['val_loss']) for x in outputs]).mean()
+        avg_loss = np.nanmean(torch.stack([torch.as_tensor(x['val_loss']) for x in outputs]).cpu().detach().numpy())
         print(f"avg_val_loss { avg_loss}")
         self.log('avg_val_loss', avg_loss, on_epoch=True, sync_dist=True, prog_bar=True)
 
