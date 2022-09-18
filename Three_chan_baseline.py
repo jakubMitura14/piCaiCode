@@ -142,7 +142,7 @@ def mainTrain(experiment,options,df,experiment_name):
     RandomSpike_prob=experiment.get_parameter("RandomSpike_prob")
     RandomBiasField_prob=experiment.get_parameter("RandomBiasField_prob")
 
-    os.makedirs('/home/sliceruser/data/temp')
+    os.makedirs('/home/sliceruser/data/temp', exist_ok = True)
     ThreeChanNoExperiment.train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
          ,chan3_col_name,chan3_col_name_val,label_name_val
          ,RandGaussianNoised_prob,RandAdjustContrastd_prob,RandGaussianSmoothd_prob,
