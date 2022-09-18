@@ -142,6 +142,7 @@ def mainTrain(experiment,options,df,experiment_name):
     RandomSpike_prob=experiment.get_parameter("RandomSpike_prob")
     RandomBiasField_prob=experiment.get_parameter("RandomBiasField_prob")
 
+    os.makedirs('/home/sliceruser/data/temp')
     ThreeChanNoExperiment.train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
          ,chan3_col_name,chan3_col_name_val,label_name_val
          ,RandGaussianNoised_prob,RandAdjustContrastd_prob,RandGaussianSmoothd_prob,
@@ -197,6 +198,7 @@ def mainTrain(experiment,options,df,experiment_name):
     experiment.end()
     #removing dummy label 
     os.remove(dummyLabelPath)   
+    shutil.rmtree('/home/sliceruser/data/temp') 
 
     # #evaluating on test dataset
     # with torch.no_grad():   

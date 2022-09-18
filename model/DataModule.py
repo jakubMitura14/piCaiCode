@@ -173,6 +173,7 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.RandomBiasField_prob=RandomBiasField_prob
         self.forTrainingSamplesNum=100
         self.dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
+        self.persistent_cache='/home/sliceruser/data/persistentDataset'
 
     """
     splitting for test and validation and separately in case of examples with some label inside 
@@ -249,11 +250,13 @@ class PiCaiDataModule(pl.LightningDataModule):
         # self.val_ds=     PersistentDataset(data=self.val_subjects, transform=val_transforms,cache_dir=self.cache_dir)
         # self.test_ds=    PersistentDataset(data=self.test_subjects, transform=val_transforms,cache_dir=self.cache_dir)    
 
+# 
 
-        self.train_ds_all =  Dataset(data=train_set_all, transform=train_transforms)
-        self.val_ds=     Dataset(data=valid_set_pos+onlyNegatives[0: int(round(len(valid_set_pos)/2)) ], transform=val_transforms)
+
+        self.train_ds_all =  PersistentDataset(data=train_set_all, transform=train_transforms,cache_dir=self.persistent_cache)
+        self.val_ds=     PersistentDataset(data=valid_set_pos+onlyNegatives[0: int(round(len(valid_set_pos)/2)) ], transform=val_transforms,cache_dir=self.persistent_cache)
         #self.val_ds=     Dataset(data=valid_set_pos, transform=val_transforms)
-        self.train_ds_pos =  Dataset(data=train_set_pos, transform=train_transforms)
+        self.train_ds_pos =  PersistentDataset(data=train_set_pos, transform=train_transforms,cache_dir=self.persistent_cache)
         #self.test_ds=    Dataset(data=self.test_subjects, transform=val_transforms)
         
     def train_dataloader(self):
