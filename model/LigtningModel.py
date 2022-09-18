@@ -300,7 +300,7 @@ class Model(pl.LightningModule):
         total_loss= torchmetrics.functional.average_precision(torch.Tensor(numLesions2).cpu(), torch.Tensor(regress_res2).cpu())    
         print(f" total loss a {total_loss}")
         total_loss2= torch.add(total_loss,dice.aggregate())
-        print(f" total loss b {total_loss2}")
+        print(f" total loss b {total_loss2}  total_loss,dice.aggregate() {total_loss,dice.aggregate()}")
 
         #print(f"sd.aggregate() {sd.aggregate().item()}")
         
