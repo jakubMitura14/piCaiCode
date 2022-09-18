@@ -280,8 +280,8 @@ class Model(pl.LightningModule):
             #print(f"torch.flatten(regress_res)[i] {torch.flatten(regress_res)[i]}")
             regress_res_round= round(torch.flatten(regress_res)[i].item())
             #print(f"pre  y_det[i] {y_det[i].size()} y_true_i {y_true[i].size()} ")
-            y_det_i=self.postProcess(y_det[i])[0,:,:,:]
-            y_true_i=self.postTrue(y_true[i])[1,:,:,:]
+            y_det_i=self.postProcess(y_det[i])[0,:,:,:].cpu()
+            y_true_i=self.postTrue(y_true[i])[1,:,:,:].cpu()
             #print(f"post  y_det[i] {y_det_i.size()} y_true_i {y_true_i.size()} ")
             
             
