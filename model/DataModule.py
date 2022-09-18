@@ -24,7 +24,7 @@ from monai.networks.layers import Norm
 from monai.metrics import DiceMetric
 from monai.losses import DiceLoss
 from monai.inferers import sliding_window_inference
-from monai.data import CacheDataset,Dataset,PersistentDataset, pad_list_data_collate, decollate_batch,list_data_collate
+from monai.data import CacheDataset,Dataset,PersistentDataset,LMDBDataset, pad_list_data_collate, decollate_batch,list_data_collate
 from monai.config import print_config
 from monai.apps import download_and_extract
 
@@ -251,12 +251,12 @@ class PiCaiDataModule(pl.LightningDataModule):
         # self.test_ds=    PersistentDataset(data=self.test_subjects, transform=val_transforms,cache_dir=self.cache_dir)    
 
 # 
+# PersistentDataset
 
-
-        self.train_ds_all =  PersistentDataset(data=train_set_all, transform=train_transforms,cache_dir=self.persistent_cache)
-        self.val_ds=     PersistentDataset(data=valid_set_pos+onlyNegatives[0: int(round(len(valid_set_pos)/2)) ], transform=val_transforms,cache_dir=self.persistent_cache)
+        self.train_ds_all =  LMDBDataset(data=train_set_all, transform=train_transforms,cache_dir=self.persistent_cache)
+        self.val_ds=     LMDBDataset(data=valid_set_pos+onlyNegatives[0: int(round(len(valid_set_pos)/2)) ], transform=val_transforms,cache_dir=self.persistent_cache)
         #self.val_ds=     Dataset(data=valid_set_pos, transform=val_transforms)
-        self.train_ds_pos =  PersistentDataset(data=train_set_pos, transform=train_transforms,cache_dir=self.persistent_cache)
+        self.train_ds_pos =  LMDBDataset(data=train_set_pos, transform=train_transforms,cache_dir=self.persistent_cache)
         #self.test_ds=    Dataset(data=self.test_subjects, transform=val_transforms)
         
     def train_dataloader(self):
