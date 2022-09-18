@@ -279,18 +279,13 @@ class Model(pl.LightningModule):
         for i in range(0,len( y_det)):
             #print(f"torch.flatten(regress_res)[i] {torch.flatten(regress_res)[i]}")
             regress_res_round= round(torch.flatten(regress_res)[i].item())
-            if(regress_res_round==0):
-                if(numLesions==0):
-                    pass # it is ok we do not icrease loss
-            else:
-                index+=1
-                #print(f"pre  y_det[i] {y_det[i].size()} y_true_i {y_true[i].size()} ")
-                y_det_i=self.postProcess(y_det[i])[0,:,:,:]
-                y_true_i=self.postTrue(y_true[i])[1,:,:,:]
-                #print(f"post  y_det[i] {y_det_i.size()} y_true_i {y_true_i.size()} ")
-                if(torch.sum(y_det_i).item()>0 and torch.sum(y_true_i).item()>0 ):
-                    sd(y_pred=y_det_i, y=y_true_i) 
-                # print(f"numLesions[i] {numLesions[i]}")    
+            #print(f"pre  y_det[i] {y_det[i].size()} y_true_i {y_true[i].size()} ")
+            y_det_i=self.postProcess(y_det[i])[0,:,:,:]
+            y_true_i=self.postTrue(y_true[i])[1,:,:,:]
+            #print(f"post  y_det[i] {y_det_i.size()} y_true_i {y_true_i.size()} ")
+            if(torch.sum(y_det_i).item()>0 and torch.sum(y_true_i).item()>0 ):
+                sd(y_pred=y_det_i, y=y_true_i) 
+            # print(f"numLesions[i] {numLesions[i]}")    
             total_loss+= (abs(regress_res_round-int(numLesions[i]) ) /len( y_det) )#arbitrary number
         
         if(index>0):
