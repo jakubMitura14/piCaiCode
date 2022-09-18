@@ -90,7 +90,7 @@ from torch.nn.intrinsic.qat import ConvBnReLU3d
 import multiprocessing as mp
 import time
 from functools import partial
-
+from torchmetrics.functional import precision_recall
 from torch.utils.cpp_extension import load
 import torchmetrics
 # lltm_cuda = load('lltm_cuda', ['lltm_cuda.cpp', 'lltm_cuda_kernel.cu'], verbose=True)
@@ -295,12 +295,13 @@ class Model(pl.LightningModule):
             # total_loss+= (abs(regress_res_round-int(numLesions[i]) ) /len( y_det) )#arbitrary number
         
         numLesions2= list(map(int, numLesions ))
-        regress_res2= torch.flatten(regress_res) #list(map(lambda el:round(el) ,torch.flatten(regress_res).cpu().detach().numpy() ))
+        regress_res2= torch.flatten(regress_res) 
+        regress_res3=list(map(lambda el:round(el) ,torch.flatten(regress_res2).cpu().detach().numpy() ))
         #print( f"torch.Tensor(numLesions).cpu() {torch.Tensor(numLesions).cpu()}  torch.Tensor(regress_res).cpu() {torch.Tensor(regress_res).cpu()}   ")
-        total_loss= torchmetrics.functional.average_precision(torch.Tensor(numLesions2).cpu(), torch.Tensor(regress_res2).cpu())    
+        total_loss=precision_recall(torch.Tensor(regress_res3), torch.Tensor(numLesions2).cpu(), average='micro', num_classes=4)
         print(f" total loss a {total_loss}")
         total_loss2= torch.add(total_loss,dice.aggregate())
-        print(f" total loss b {total_loss2}  total_loss,dice.aggregate() {total_loss,dice.aggregate()}")
+        print(f" total loss b {total_loss2}  total_loss,dice.aggregate() {dice.aggregate()}")
 
         #print(f"sd.aggregate() {sd.aggregate().item()}")
         
