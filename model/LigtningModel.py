@@ -283,13 +283,17 @@ class Model(pl.LightningModule):
             y_det_i=self.postProcess(y_det[i])[0,:,:,:]
             y_true_i=self.postTrue(y_true[i])[1,:,:,:]
             #print(f"post  y_det[i] {y_det_i.size()} y_true_i {y_true_i.size()} ")
+            
+            
+            
             if(torch.sum(y_det_i).item()>0 and torch.sum(y_true_i).item()>0 ):
-                sd(y_pred=y_det_i, y=y_true_i) 
+                total_loss+= monai.metrics.compute_generalized_dice(y_det_i,y_true_i)
+                #sd(y_pred=y_det_i, y=y_true_i) 
             # print(f"numLesions[i] {numLesions[i]}")    
             total_loss+= (abs(regress_res_round-int(numLesions[i]) ) /len( y_det) )#arbitrary number
         
-        print(f"sd.aggregate() {sd.aggregate().item()}")
-        total_loss+=sd.aggregate().item()
+        #print(f"sd.aggregate() {sd.aggregate().item()}")
+        #total_loss+=sd.aggregate().item()
         
         self.picaiLossArr_score_final.append(total_loss)
         print(f" validation_loss {total_loss} ")
