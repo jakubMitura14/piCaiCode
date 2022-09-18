@@ -253,7 +253,7 @@ config = {
     "metric": "last_val_loss_score",
         "objective": "maximize",
     },
-    "trials": 100,
+    "trials": 500
 }
 
 df = pd.read_csv("/home/sliceruser/data/metadata/processedMetaData_current_b.csv")
@@ -281,11 +281,10 @@ df = pd.read_csv("/home/sliceruser/data/metadata/processedMetaData_current_b.csv
 
 # Next, create an optimizer, passing in the config:
 # (You can leave out API_KEY if you already set it)
-#opt = Optimizer("c451d8f0ea634050b831533946fdbdcc", api_key="yB0irIjdk9t7gbpTlSUPnXBd4"
-#,trials=500)
+opt = Optimizer("fd4b41f75a0a489481bad44b51b08de6", api_key="yB0irIjdk9t7gbpTlSUPnXBd4",trials=500)
 
 
-opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4",trials=500)
+#opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4",trials=500)
 # print("zzzzzzzzz")
 #  print(opt.get_experiments(
 #          api_key="yB0irIjdk9t7gbpTlSUPnXBd4",

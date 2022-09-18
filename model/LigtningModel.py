@@ -291,9 +291,8 @@ class Model(pl.LightningModule):
         numLesions= list(map(int, numLesions ))
         regress_res= list(map(lambda el:round(el) ,torch.flatten(regress_res).cpu().detach().numpy() ))
 
-        total_loss+=torchmetrics.functional.average_precision(numLesions, regress_res)        
+        total_loss+=torchmetrics.functional.average_precision(np.array(numLesions), regress_res)        
 
-        krowa
         #print(f"sd.aggregate() {sd.aggregate().item()}")
         #total_loss+=sd.aggregate().item()
         
