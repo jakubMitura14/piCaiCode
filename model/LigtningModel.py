@@ -288,9 +288,8 @@ class Model(pl.LightningModule):
             # print(f"numLesions[i] {numLesions[i]}")    
             total_loss+= (abs(regress_res_round-int(numLesions[i]) ) /len( y_det) )#arbitrary number
         
-        if(index>0):
-            print(f"sd.aggregate() {sd.aggregate().item()}")
-            total_loss+=sd.aggregate().item()
+        print(f"sd.aggregate() {sd.aggregate().item()}")
+        total_loss+=sd.aggregate().item()
         
         self.picaiLossArr_score_final.append(total_loss)
         print(f" validation_loss {total_loss} ")
