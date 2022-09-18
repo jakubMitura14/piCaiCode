@@ -298,7 +298,7 @@ class Model(pl.LightningModule):
         regress_res2= torch.flatten(regress_res) 
         regress_res3=list(map(lambda el:round(el) ,torch.flatten(regress_res2).cpu().detach().numpy() ))
         #print( f"torch.Tensor(numLesions).cpu() {torch.Tensor(numLesions).cpu()}  torch.Tensor(regress_res).cpu() {torch.Tensor(regress_res).cpu()}   ")
-        total_loss=precision_recall(torch.Tensor(regress_res3), torch.Tensor(numLesions2).cpu(), average='micro', num_classes=4)
+        total_loss=precision_recall(torch.Tensor(regress_res3).int(), torch.Tensor(numLesions2).cpu().int(), average='micro', num_classes=4)
         print(f" total loss a {total_loss}")
         total_loss2= torch.add(total_loss,dice.aggregate())
         print(f" total loss b {total_loss2}  total_loss,dice.aggregate() {dice.aggregate()}")
