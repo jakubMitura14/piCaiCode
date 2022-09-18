@@ -255,7 +255,6 @@ class Model(pl.LightningModule):
         self.log('train_reg_loss', lossb, prog_bar=True)
         return torch.add(torch.add(lossa,lossb),lossab)
     # def validation_step(self, batch, batch_idx):
-    #     return 0.5
 
     def validation_step(self, batch, batch_idx):
         images, y_true,numLesions= batch['chan3_col_name_val'], batch["label_name_val"], batch['num_lesions_to_retain']
