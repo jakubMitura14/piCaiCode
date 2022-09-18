@@ -217,8 +217,15 @@ class PiCaiDataModule(pl.LightningDataModule):
         set_determinism(seed=0)
         allSubj,onlyPositve=  self.getSubjects()
 
-        self.allSubjects= allSubj[400:500]
-        self.onlyPositiveSubjects= onlyPositve[0:100]
+        allSubjects= allSubj[400:500]
+        onlyPositiveSubjects= onlyPositve[0:100]
+        random.shuffle(allSubjects)
+        random.shuffle(onlyPositiveSubjects)
+
+
+        self.allSubjects= allSubjects
+        self.onlyPositiveSubjects=onlyPositiveSubjects
+
         print(f"self.allSubjects {len(self.allSubjects)}  self.onlyPositiveSubjects {len(self.onlyPositiveSubjects)}")
         train_set_all, valid_set_all,test_set_all = self.splitDataSet(self.allSubjects , self.trainSizePercent,True)
         train_set_pos, valid_set_pos,test_set_pos = self.splitDataSet(self.onlyPositiveSubjects , self.trainSizePercent,True)

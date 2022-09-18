@@ -102,8 +102,8 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
 
     data = DataModule.PiCaiDataModule(
         df= df,
-        batch_size=7,#
-        trainSizePercent=percentSplit,# TODO(change to 0.7 or 0.8
+        batch_size=6,#
+        trainSizePercent=percentSplit,# 
         num_workers=os.cpu_count(),
         drop_last=False,#True,
         #we need to use diffrent cache folders depending on weather we are dividing data or not

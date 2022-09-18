@@ -58,7 +58,7 @@ import torch.nn.functional as F
 
 from monai.metrics import (DiceMetric, HausdorffDistanceMetric,
                            SurfaceDistanceMetric)
-
+from torchmetrics import Precision
 from monai.transforms import (
     AsDiscrete,
     AddChanneld,
@@ -92,7 +92,7 @@ import time
 from functools import partial
 
 from torch.utils.cpp_extension import load
-
+import torchmetrics
 # lltm_cuda = load('lltm_cuda', ['lltm_cuda.cpp', 'lltm_cuda_kernel.cu'], verbose=True)
 
 # def loadLib(name,path):
@@ -209,8 +209,7 @@ class Model(pl.LightningModule):
         self.list_yHat_val=[]
         self.isAnyNan=False
         #os.makedirs('/home/sliceruser/data/temp')
-        self.postProcess=monai.transforms.Compose([monai.transforms.ForegroundMask(),
-        monai.transforms.KeepLargestConnectedComponent()])
+        self.postProcess=monai.transforms.Compose([monai.transforms.ForegroundMask()])#, monai.transforms.KeepLargestConnectedComponent()
         self.postTrue = Compose([EnsureType()])
 
         #shutil.rmtree(self.temp_val_dir) 
@@ -283,15 +282,18 @@ class Model(pl.LightningModule):
             y_det_i=self.postProcess(y_det[i])[0,:,:,:].cpu()
             y_true_i=self.postTrue(y_true[i])[1,:,:,:].cpu()
             #print(f"post  y_det[i] {y_det_i.size()} y_true_i {y_true_i.size()} ")
-            
-            
-            
             if(torch.sum(y_det_i).item()>0 and torch.sum(y_true_i).item()>0 ):
-                total_loss+= monai.metrics.compute_generalized_dice(y_det_i,y_true_i)
+                total_loss+= monai.metrics.compute_generalized_dice(y_det_i,y_true_i)/len( y_det)
                 #sd(y_pred=y_det_i, y=y_true_i) 
             # print(f"numLesions[i] {numLesions[i]}")    
-            total_loss+= (abs(regress_res_round-int(numLesions[i]) ) /len( y_det) )#arbitrary number
+            # total_loss+= (abs(regress_res_round-int(numLesions[i]) ) /len( y_det) )#arbitrary number
         
+        numLesions= list(map(int, numLesions ))
+        regress_res= list(map(lambda el:round(el) ,torch.flatten(regress_res).cpu().detach().numpy() ))
+
+        total_loss+=torchmetrics.functional.average_precision(numLesions, regress_res)        
+
+        krowa
         #print(f"sd.aggregate() {sd.aggregate().item()}")
         #total_loss+=sd.aggregate().item()
         

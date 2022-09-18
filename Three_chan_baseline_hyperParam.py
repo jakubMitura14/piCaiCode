@@ -291,9 +291,9 @@ opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4",trials=500)
 #          api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
 #          project_name="picai-hyperparam-search-01"))
 
-experiment_name="picai-hyperparam-search-28"
+experiment_name="picai-hyperparam-search-29"
 for experiment in opt.get_experiments(
-        project_name="picai-hyperparam-search-28"):
+        project_name=experiment_name):
     print("******* new experiment *****")    
     Three_chan_baseline.mainTrain(experiment,options,df,experiment_name)
 
