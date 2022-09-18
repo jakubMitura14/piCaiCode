@@ -217,9 +217,9 @@ class PiCaiDataModule(pl.LightningDataModule):
         set_determinism(seed=0)
         allSubj,onlyPositve=  self.getSubjects()
 
-        self.allSubjects= allSubj[0:100]
-        self.onlyPositiveSubjects= onlyPositve[400:500]
-
+        self.allSubjects= allSubj[0:150]
+        self.onlyPositiveSubjects= onlyPositve[400:550]
+        print(f"self.allSubjects {len(self.allSubjects)}  self.onlyPositiveSubjects {len(self.onlyPositiveSubjects)}")
         train_set_all, valid_set_all,test_set_all = self.splitDataSet(self.allSubjects , self.trainSizePercent,True)
         train_set_pos, valid_set_pos,test_set_pos = self.splitDataSet(self.onlyPositiveSubjects , self.trainSizePercent,True)
         #so we get just the example where we should not detect a thing 
