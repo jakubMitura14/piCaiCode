@@ -252,9 +252,9 @@ class PiCaiDataModule(pl.LightningDataModule):
 
 # 
 # PersistentDataset
-        self.train_ds_all =  CacheDataset(data=train_set_all, transform=train_transforms,cache_dir=self.persistent_cache)
-        self.val_ds=     CacheDataset(data=valid_set_pos+onlyNegatives[0: int(round(len(valid_set_pos)/2)) ], transform=val_transforms,cache_dir=self.persistent_cache)
-        self.train_ds_pos =  CacheDataset(data=train_set_pos, transform=train_transforms,cache_dir=self.persistent_cache)
+        self.train_ds_all =  CacheDataset(data=train_set_all, transform=train_transforms)
+        self.val_ds=     CacheDataset(data=valid_set_pos+onlyNegatives[0: int(round(len(valid_set_pos)/2)) ], transform=val_transforms)
+        self.train_ds_pos =  CacheDataset(data=train_set_pos, transform=train_transforms)
         # self.train_ds_all =  LMDBDataset(data=train_set_all, transform=train_transforms,cache_dir=self.persistent_cache)
         # self.val_ds=     LMDBDataset(data=valid_set_pos+onlyNegatives[0: int(round(len(valid_set_pos)/2)) ], transform=val_transforms,cache_dir=self.persistent_cache)
         # self.train_ds_pos =  LMDBDataset(data=train_set_pos, transform=train_transforms,cache_dir=self.persistent_cache)
