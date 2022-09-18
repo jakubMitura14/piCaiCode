@@ -217,8 +217,8 @@ class PiCaiDataModule(pl.LightningDataModule):
         set_determinism(seed=0)
         allSubj,onlyPositve=  self.getSubjects()
 
-        self.allSubjects= allSubj
-        self.onlyPositiveSubjects= onlyPositve
+        self.allSubjects= allSubj[0:200]
+        self.onlyPositiveSubjects= onlyPositve[400:600]
 
         train_set_all, valid_set_all,test_set_all = self.splitDataSet(self.allSubjects , self.trainSizePercent,True)
         train_set_pos, valid_set_pos,test_set_pos = self.splitDataSet(self.onlyPositiveSubjects , self.trainSizePercent,True)
