@@ -295,14 +295,14 @@ class Model(pl.LightningModule):
         regress_res= torch.flatten(regress_res) #list(map(lambda el:round(el) ,torch.flatten(regress_res).cpu().detach().numpy() ))
         print( f"torch.Tensor(numLesions).cpu() {torch.Tensor(numLesions).cpu()}  torch.Tensor(regress_res).cpu() {torch.Tensor(regress_res).cpu()}   ")
         total_loss= torch.add(total_loss,torchmetrics.functional.average_precision(torch.Tensor(numLesions).cpu(), torch.Tensor(regress_res).cpu())    )    
-        total_loss= torch.add(total_loss,dice.aggregate().item())
+        total_loss= torch.add(total_loss,dice.aggregate())
         #print(f"sd.aggregate() {sd.aggregate().item()}")
         #total_loss+=sd.aggregate().item()
         
-        self.picaiLossArr_score_final.append(total_loss)
+        self.picaiLossArr_score_final.append(total_loss.item())
         print(f" validation_loss {total_loss} ")
-        self.log("validation_loss", total_loss, on_epoch=True, on_step=False, sync_dist=True, prog_bar=True, logger=True)
-        return {'val_loss': total_loss}
+        self.log("validation_loss", total_loss.item(), on_epoch=True, on_step=False, sync_dist=True, prog_bar=True, logger=True)
+        return {'val_loss': total_loss.item()}
 
 
     def validation_epoch_end(self, outputs):
