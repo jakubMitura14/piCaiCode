@@ -29,7 +29,7 @@ from monai.config import print_config
 from monai.apps import download_and_extract
 
 from torch.utils.data import DataLoader, BatchSampler, RandomSampler
-
+import random
 sns.set()
 plt.rcParams['figure.figsize'] = 12, 8
 monai.utils.set_determinism()
