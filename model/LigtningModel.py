@@ -288,23 +288,26 @@ class Model(pl.LightningModule):
             #print(f"post  y_det[i] {y_det_i.size()} y_true_i {y_true_i.size()} ")
             if(torch.sum(y_det_i).item()>0 and torch.sum(y_true_i).item()>0 ):
                 # total_loss+= monai.metrics.compute_generalized_dice(y_det_i,y_true_i)/len( y_det)
-                print(f" monai.metrics.compute_generalized_dice(y_det_i,y_true_i)/len( y_det) {monai.metrics.compute_generalized_dice(y_det_i,y_true_i)/len( y_det)} ")
+                #print(f" monai.metrics.compute_generalized_dice(y_det_i,y_true_i)/len( y_det) {monai.metrics.compute_generalized_dice(y_det_i,y_true_i)/len( y_det)} ")
                 dice(y_det_i,y_true_i)
                 #sd(y_pred=y_det_i, y=y_true_i) 
             # print(f"numLesions[i] {numLesions[i]}")    
             # total_loss+= (abs(regress_res_round-int(numLesions[i]) ) /len( y_det) )#arbitrary number
         
-        numLesions= list(map(int, numLesions ))
-        regress_res= torch.flatten(regress_res) #list(map(lambda el:round(el) ,torch.flatten(regress_res).cpu().detach().numpy() ))
-        print( f"torch.Tensor(numLesions).cpu() {torch.Tensor(numLesions).cpu()}  torch.Tensor(regress_res).cpu() {torch.Tensor(regress_res).cpu()}   ")
-        total_loss= torch.add(total_loss,torchmetrics.functional.average_precision(torch.Tensor(numLesions).cpu(), torch.Tensor(regress_res).cpu())    )    
-        total_loss= torch.add(total_loss,dice.aggregate())
+        numLesions2= list(map(int, numLesions ))
+        regress_res2= torch.flatten(regress_res) #list(map(lambda el:round(el) ,torch.flatten(regress_res).cpu().detach().numpy() ))
+        #print( f"torch.Tensor(numLesions).cpu() {torch.Tensor(numLesions).cpu()}  torch.Tensor(regress_res).cpu() {torch.Tensor(regress_res).cpu()}   ")
+        total_loss= torch.add(total_loss,torchmetrics.functional.average_precision(torch.Tensor(numLesions2).cpu(), torch.Tensor(regress_res2).cpu())    )    
+        print(f" total loss a {total_loss}")
+        total_loss2= torch.add(total_loss,dice.aggregate())
+        print(f" total loss b {total_loss2}")
+
         #print(f"sd.aggregate() {sd.aggregate().item()}")
         
-        self.picaiLossArr_score_final.append(total_loss.item())
-        print(f" validation_loss {total_loss} ")
-        self.log("validation_loss", total_loss.item(), on_epoch=True, on_step=False, sync_dist=True, prog_bar=True, logger=True)
-        return {'val_loss': total_loss.item()}
+        self.picaiLossArr_score_final.append(total_loss2.item())
+        print(f" validation_loss {total_loss2.item()} ")
+        self.log("validation_loss", total_loss2.item(), on_epoch=True, on_step=False, sync_dist=True, prog_bar=True, logger=True)
+        return {'val_loss': total_loss2.item()}
 
 
     def validation_epoch_end(self, outputs):
