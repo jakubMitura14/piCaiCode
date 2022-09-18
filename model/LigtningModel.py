@@ -297,7 +297,6 @@ class Model(pl.LightningModule):
         total_loss= torch.add(total_loss,torchmetrics.functional.average_precision(torch.Tensor(numLesions).cpu(), torch.Tensor(regress_res).cpu())    )    
         total_loss= torch.add(total_loss,dice.aggregate())
         #print(f"sd.aggregate() {sd.aggregate().item()}")
-        #total_loss+=sd.aggregate().item()
         
         self.picaiLossArr_score_final.append(total_loss.item())
         print(f" validation_loss {total_loss} ")
