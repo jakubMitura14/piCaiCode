@@ -274,6 +274,7 @@ class Model(pl.LightningModule):
         # y_det= list(map(self.postProcess  , y_det))
         # y_true= list(map(self.postTrue , y_det))
         sd = SurfaceDistanceMetric(symmetric=True)
+        dice = DiceMetric()
         index=0
         for i in range(0,len( y_det)):
             #print(f"torch.flatten(regress_res)[i] {torch.flatten(regress_res)[i]}")
@@ -283,17 +284,18 @@ class Model(pl.LightningModule):
             y_true_i=self.postTrue(y_true[i])[1,:,:,:].cpu()
             #print(f"post  y_det[i] {y_det_i.size()} y_true_i {y_true_i.size()} ")
             if(torch.sum(y_det_i).item()>0 and torch.sum(y_true_i).item()>0 ):
-                total_loss+= monai.metrics.compute_generalized_dice(y_det_i,y_true_i)/len( y_det)
+                # total_loss+= monai.metrics.compute_generalized_dice(y_det_i,y_true_i)/len( y_det)
                 print(f" monai.metrics.compute_generalized_dice(y_det_i,y_true_i)/len( y_det) {monai.metrics.compute_generalized_dice(y_det_i,y_true_i)/len( y_det)} ")
+                dice(y_det_i,y_true_i)
                 #sd(y_pred=y_det_i, y=y_true_i) 
             # print(f"numLesions[i] {numLesions[i]}")    
             # total_loss+= (abs(regress_res_round-int(numLesions[i]) ) /len( y_det) )#arbitrary number
         
         numLesions= list(map(int, numLesions ))
-        regress_res= list(map(lambda el:round(el) ,torch.flatten(regress_res).cpu().detach().numpy() ))
+        regress_res= torch.flatten(regress_res) #list(map(lambda el:round(el) ,torch.flatten(regress_res).cpu().detach().numpy() ))
         print( f"torch.Tensor(numLesions).cpu() {torch.Tensor(numLesions).cpu()}  torch.Tensor(regress_res).cpu() {torch.Tensor(regress_res).cpu()}   ")
-        total_loss+=torchmetrics.functional.average_precision(torch.Tensor(numLesions).cpu(), torch.Tensor(regress_res).cpu())        
-
+        total_loss= torch.add(total_loss,torchmetrics.functional.average_precision(torch.Tensor(numLesions).cpu(), torch.Tensor(regress_res).cpu())    )    
+        total_loss= torch.add(total_loss,dice.aggregate().item())
         #print(f"sd.aggregate() {sd.aggregate().item()}")
         #total_loss+=sd.aggregate().item()
         
