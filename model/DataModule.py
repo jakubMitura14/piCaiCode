@@ -28,6 +28,8 @@ from monai.data import CacheDataset,Dataset,PersistentDataset, pad_list_data_col
 from monai.config import print_config
 from monai.apps import download_and_extract
 
+from torch.utils.data import DataLoader, BatchSampler, RandomSampler
+
 sns.set()
 plt.rcParams['figure.figsize'] = 12, 8
 monai.utils.set_determinism()
@@ -169,7 +171,7 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.RandomGhosting_prob=RandomGhosting_prob
         self.RandomSpike_prob=RandomSpike_prob
         self.RandomBiasField_prob=RandomBiasField_prob
-
+        self.forTrainingSamplesNum=100
         self.dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
 
     """
@@ -265,9 +267,9 @@ class PiCaiDataModule(pl.LightningDataModule):
 
 
         return {"all": DataLoader(self.train_ds_all, batch_size=self.batch_size, drop_last=self.drop_last
-                          ,num_workers=self.num_workers)#,collate_fn=list_data_collate
+                          ,num_workers=self.num_workers,sampler=RandomSampler(self.train_ds_all,num_samples=self.forTrainingSamplesNum))#,collate_fn=list_data_collate
         , "pos": DataLoader(self.train_ds_pos, batch_size=self.batch_size, drop_last=self.drop_last
-                          ,num_workers=self.num_workers)}#,collate_fn=list_data_collate
+                          ,num_workers=self.num_workers,sampler=RandomSampler(self.train_ds_pos,num_samples=self.forTrainingSamplesNum))}#,collate_fn=list_data_collate
         # return {"all": DataLoader(self.train_ds_all, batch_size=self.batch_size, drop_last=self.drop_last
         #                   ,num_workers=self.num_workers)#,collate_fn=list_data_collate
         # , "pos": DataLoader(self.train_ds_pos, batch_size=self.batch_size, drop_last=self.drop_last
