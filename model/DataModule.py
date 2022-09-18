@@ -217,8 +217,8 @@ class PiCaiDataModule(pl.LightningDataModule):
         set_determinism(seed=0)
         allSubj,onlyPositve=  self.getSubjects()
 
-        self.allSubjects= allSubj[0:200]
-        self.onlyPositiveSubjects= onlyPositve[400:600]
+        self.allSubjects= allSubj[0:100]
+        self.onlyPositiveSubjects= onlyPositve[400:500]
 
         train_set_all, valid_set_all,test_set_all = self.splitDataSet(self.allSubjects , self.trainSizePercent,True)
         train_set_pos, valid_set_pos,test_set_pos = self.splitDataSet(self.onlyPositiveSubjects , self.trainSizePercent,True)
@@ -271,14 +271,14 @@ class PiCaiDataModule(pl.LightningDataModule):
 
 
 
-        return {"all": DataLoader(self.train_ds_all, batch_size=self.batch_size, drop_last=self.drop_last
-                          ,num_workers=self.num_workers,sampler=RandomSampler(self.train_ds_all,num_samples=self.forTrainingSamplesNum))#,collate_fn=list_data_collate
-        , "pos": DataLoader(self.train_ds_pos, batch_size=self.batch_size, drop_last=self.drop_last
-                          ,num_workers=self.num_workers,sampler=RandomSampler(self.train_ds_pos,num_samples=self.forTrainingSamplesNum))}#,collate_fn=list_data_collate
         # return {"all": DataLoader(self.train_ds_all, batch_size=self.batch_size, drop_last=self.drop_last
-        #                   ,num_workers=self.num_workers)#,collate_fn=list_data_collate
+        #                   ,num_workers=self.num_workers,sampler=RandomSampler(self.train_ds_all,num_samples=self.forTrainingSamplesNum))#,collate_fn=list_data_collate
         # , "pos": DataLoader(self.train_ds_pos, batch_size=self.batch_size, drop_last=self.drop_last
-        #                   ,num_workers=self.num_workers)}#,collate_fn=list_data_collate
+        #                   ,num_workers=self.num_workers,sampler=RandomSampler(self.train_ds_pos,num_samples=self.forTrainingSamplesNum))}#,collate_fn=list_data_collate
+        return {"all": DataLoader(self.train_ds_all, batch_size=self.batch_size, drop_last=self.drop_last
+                          ,num_workers=self.num_workers)#,collate_fn=list_data_collate
+        , "pos": DataLoader(self.train_ds_pos, batch_size=self.batch_size, drop_last=self.drop_last
+                          ,num_workers=self.num_workers)}#,collate_fn=list_data_collate
         # return DataLoader(self.train_ds, batch_size=self.batch_size, drop_last=self.drop_last
         #                   ,num_workers=self.num_workers,collate_fn=list_data_collate)#,collate_fn=list_data_collate , shuffle=True
 
