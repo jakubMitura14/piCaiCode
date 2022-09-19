@@ -186,7 +186,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     )
     #setting batch size automatically
     #TODO(unhash)
-    #trainer.tune(model, datamodule=data)
+    trainer.tune(model, datamodule=data)
 
     trainer.logger._default_hp_metric = False
     start = datetime.now()
