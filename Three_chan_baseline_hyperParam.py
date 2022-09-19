@@ -276,7 +276,7 @@ def getDummy(spac):
 
 
 aa=list(map(getDummy  ,spacings  ))
-dummyDict=dict("_one_spac_c" :aa[0],"_med_spac_b":aa[1]   )
+dummyDict={"_one_spac_c" :aa[0],"_med_spac_b":aa[1]   }
 
 
 
