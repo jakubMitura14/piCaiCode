@@ -264,7 +264,7 @@ config = {
 
 
 df = pd.read_csv("/home/sliceruser/data/metadata/processedMetaData_current_b.csv")
-spacings = config['parameters']['spacing_keyword']
+spacings = config['parameters']['spacing_keyword']["values"]
 
 def getDummy(spac):
     label_name=f"label{spac}_maxSize_" 
