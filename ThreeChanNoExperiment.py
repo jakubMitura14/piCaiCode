@@ -105,7 +105,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         batch_size=7,#
         trainSizePercent=percentSplit,# 
         num_workers=os.cpu_count(),
-        drop_last=False,#True,
+        drop_last=True,#True,
         #we need to use diffrent cache folders depending on weather we are dividing data or not
         cache_dir=cacheDir,
         chan3_col_name =chan3_col_name,
