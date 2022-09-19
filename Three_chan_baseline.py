@@ -87,7 +87,7 @@ def mainTrain(experiment,options,df,experiment_name):
     picaiLossArr_auroc_final=[]
     picaiLossArr_AP_final=[]
     picaiLossArr_score_final=[]
-    max_epochs=50#100#experiment.get_parameter("max_epochs")
+    max_epochs=6#100#experiment.get_parameter("max_epochs")
     
     in_channels=4
     out_channels=2
@@ -100,7 +100,7 @@ def mainTrain(experiment,options,df,experiment_name):
     label_name=f"label{spacing_keyword}{sizeWord}" 
     label_name_val=label_name
     cacheDir =  f"/home/sliceruser/preprocess/monai_persistent_Dataset/{spacing_keyword}/{sizeWord}"
-    csvPath = "/home/sliceruser/data/csvResC.csv"
+    csvPath = "/home/sliceruser/data/csvResD.csv"
 
     imageRef_path=list(filter(lambda it: it!= '', df[label_name].to_numpy()))[0]
     dummyLabelPath='/home/sliceruser/data/dummyData/zeroLabel.nii.gz'
@@ -165,8 +165,15 @@ def mainTrain(experiment,options,df,experiment_name):
 
 
     ###### backup save the optimizer data  #######
-    dfOut = pd.DataFrame()
+    dfOut = pd.DataFrame( columns = ["chan3_col_name","RandGaussianNoised_prob","RandAdjustContrastd_prob",
+      "RandGaussianSmoothd_prob","RandRicianNoised_prob", "RandFlipd_prob",
+       "RandAffined_prob","RandCoarseDropoutd_prob","dropout", "accumulate_grad_batches"
+        "gradient_clip_val","RandomElasticDeformation_prob", 
+         "RandomAnisotropy_prob","RandomMotion_prob","RandomGhosting_prob","RandomSpike_prob"
+         ,"RandomBiasField_prob","models","criterion","optimizer_class", "regression_channels","last_val_loss_score"       ])
     if(pathOs.exists(csvPath)):
+
+
         dfOut=pd.read_csv(csvPath)
 
     series= {"chan3_col_name" :chan3_col_name
@@ -187,7 +194,7 @@ def mainTrain(experiment,options,df,experiment_name):
             ,"RandomSpike_prob" :RandomSpike_prob
             ,"RandomBiasField_prob" :RandomBiasField_prob
             ,"models" : experiment.get_parameter("models")
-            ,"criterion": experiment.get_parameter("criterion")
+            ,"criterion": experiment.get_parameter("lossF")
             ,"optimizer_class" : experiment.get_parameter("optimizer_class")
             ,"regression_channels" :experiment.get_parameter("regression_channels")
             ,"last_val_loss_score":np.nanmax(picaiLossArr_score_final)   }
