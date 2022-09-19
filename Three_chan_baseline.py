@@ -106,7 +106,7 @@ def mainTrain(experiment,options,df,experiment_name,dummyDict):
     # dummyLabelPath='/home/sliceruser/data/dummyData/zeroLabel.nii.gz'
     # sizz=semisuperPreprosess.writeDummyLabels(dummyLabelPath,imageRef_path)
     # img_size = sizz#(sizz[2],sizz[1],sizz[0])
-    dummyLabelPath,img_size=dummyDict[sizeWord]
+    dummyLabelPath,img_size=dummyDict[spacing_keyword]
     print(f"aaaaaa  img_size {img_size}  {type(img_size)}")
     RandGaussianNoised_prob=experiment.get_parameter("RandGaussianNoised_prob")
     RandAdjustContrastd_prob=experiment.get_parameter("RandAdjustContrastd_prob")
