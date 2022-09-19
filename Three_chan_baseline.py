@@ -205,7 +205,7 @@ def mainTrain(experiment,options,df,experiment_name,dummyDict):
     #experiment.log_parameters(parameters)  
     experiment.end()
     #removing dummy label 
-    shutil.rmtree('/home/sliceruser/data/temp') 
+    #shutil.rmtree('/home/sliceruser/data/temp') 
 
     # #evaluating on test dataset
     # with torch.no_grad():   
