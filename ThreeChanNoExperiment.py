@@ -169,7 +169,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     trainer = pl.Trainer(
         #accelerator="cpu", #TODO(remove)
         max_epochs=max_epochs,
-        #gpus=1,
+        gpus=1,
         #precision=experiment.get_parameter("precision"), 
         callbacks=[ early_stopping ],# TODO unhash
         logger=comet_logger,
