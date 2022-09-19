@@ -83,7 +83,7 @@ def getParam(experiment,options,key,df):
     return options[key][integerr]
 
 
-def mainTrain(experiment,options,df,experiment_name):
+def mainTrain(experiment,options,df,experiment_name,dummyDict):
     picaiLossArr_auroc_final=[]
     picaiLossArr_AP_final=[]
     picaiLossArr_score_final=[]
@@ -102,10 +102,11 @@ def mainTrain(experiment,options,df,experiment_name):
     cacheDir =  f"/home/sliceruser/preprocess/monai_persistent_Dataset/{spacing_keyword}/{sizeWord}"
     csvPath = "/home/sliceruser/data/csvResD.csv"
 
-    imageRef_path=list(filter(lambda it: it!= '', df[label_name].to_numpy()))[0]
-    dummyLabelPath='/home/sliceruser/data/dummyData/zeroLabel.nii.gz'
-    sizz=semisuperPreprosess.writeDummyLabels(dummyLabelPath,imageRef_path)
-    img_size = sizz#(sizz[2],sizz[1],sizz[0])
+    # imageRef_path=list(filter(lambda it: it!= '', df[label_name].to_numpy()))[0]
+    # dummyLabelPath='/home/sliceruser/data/dummyData/zeroLabel.nii.gz'
+    # sizz=semisuperPreprosess.writeDummyLabels(dummyLabelPath,imageRef_path)
+    # img_size = sizz#(sizz[2],sizz[1],sizz[0])
+    dummyLabelPath,img_size=dummyDict[sizeWord]
     print(f"aaaaaa  img_size {img_size}  {type(img_size)}")
     RandGaussianNoised_prob=experiment.get_parameter("RandGaussianNoised_prob")
     RandAdjustContrastd_prob=experiment.get_parameter("RandAdjustContrastd_prob")
@@ -204,7 +205,6 @@ def mainTrain(experiment,options,df,experiment_name):
     #experiment.log_parameters(parameters)  
     experiment.end()
     #removing dummy label 
-    os.remove(dummyLabelPath)   
     shutil.rmtree('/home/sliceruser/data/temp') 
 
     # #evaluating on test dataset

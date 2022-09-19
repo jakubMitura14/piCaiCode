@@ -65,6 +65,7 @@ DataModule =loadLib("DataModule", "/home/sliceruser/data/piCaiCode/model/DataMod
 LigtningModel =loadLib("LigtningModel", "/home/sliceruser/data/piCaiCode/model/LigtningModel.py")
 Three_chan_baseline =loadLib("Three_chan_baseline", "/home/sliceruser/data/piCaiCode/Three_chan_baseline.py")
 detectSemiSupervised =loadLib("detectSemiSupervised", "/home/sliceruser/data/piCaiCode/model/detectSemiSupervised.py")
+semisuperPreprosess =loadLib("semisuperPreprosess", "/home/sliceruser/data/piCaiCode/preprocessing/semisuperPreprosess.py")
 
 
 
@@ -261,7 +262,26 @@ config = {
     "trials": 500
 }
 
+
 df = pd.read_csv("/home/sliceruser/data/metadata/processedMetaData_current_b.csv")
+spacings = config['parameters']['spacing_keyword']
+
+def getDummy(spac):
+    label_name=f"label{spac}_maxSize_" 
+    imageRef_path=list(filter(lambda it: it!= '', df[label_name].to_numpy()))[0]
+    dummyLabelPath=f"/home/sliceruser/data/dummyData/zeroLabel{spac}.nii.gz"
+    sizz=semisuperPreprosess.writeDummyLabels(dummyLabelPath,imageRef_path)
+    img_size = sizz#(sizz[2],sizz[1],sizz[0])
+    return("spac", (dummyLabelPath,img_size))
+
+dummyDict=[ dict([i]) for i in list(map(getDummy  ,spacings  )) ]
+
+
+
+
+
+
+
 # maxSize=manageMetaData.getMaxSize("t2w_med_spac_b",df)
 
 # exampleSpacing="_med_spac_b"
@@ -299,6 +319,7 @@ experiment_name="picai-hyperparam-search-29"
 for experiment in opt.get_experiments(
         project_name=experiment_name):
     print("******* new experiment *****")    
-    Three_chan_baseline.mainTrain(experiment,options,df,experiment_name)
+    Three_chan_baseline.mainTrain(experiment,options,df,experiment_name,dummyDict)
 
+# os.remove(dummyLabelPath)   
 
