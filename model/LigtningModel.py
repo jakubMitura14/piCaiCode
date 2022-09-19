@@ -211,7 +211,7 @@ class Model(pl.LightningModule):
         #os.makedirs('/home/sliceruser/data/temp')
         self.postProcess=monai.transforms.Compose([monai.transforms.ForegroundMask()])#, monai.transforms.KeepLargestConnectedComponent()
         self.postTrue = Compose([EnsureType()])
-
+        self.accuracy = torchmetrics.Accuracy()
         #shutil.rmtree(self.temp_val_dir) 
 
     def configure_optimizers(self):
