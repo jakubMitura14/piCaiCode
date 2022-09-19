@@ -169,7 +169,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     trainer = pl.Trainer(
         #accelerator="cpu", #TODO(remove)
         max_epochs=max_epochs,
-        gpus=1,
+        #gpus=1,
         #precision=experiment.get_parameter("precision"), 
         callbacks=[ early_stopping ],# TODO unhash
         logger=comet_logger,
@@ -182,7 +182,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         accumulate_grad_batches=accumulate_grad_batches,
         gradient_clip_val=gradient_clip_val,# 0.5,2.0
         log_every_n_steps=2,
-        #strategy='ddp' # for multi gpu training
+        strategy='ddp' # for multi gpu training
     )
     #setting batch size automatically
     #TODO(unhash)
