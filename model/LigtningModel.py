@@ -257,60 +257,61 @@ class Model(pl.LightningModule):
     # def validation_step(self, batch, batch_idx):
 
     def validation_step(self, batch, batch_idx):
-        images, y_true,numLesions= batch['chan3_col_name_val'], batch["label_name_val"], batch['num_lesions_to_retain']
-        #print(f" in validation images {images} labels {labels} "  )
+        # images, y_true,numLesions= batch['chan3_col_name_val'], batch["label_name_val"], batch['num_lesions_to_retain']
+        # #print(f" in validation images {images} labels {labels} "  )
   
-        patIds=batch['patient_id']
-        y_det = self.net(images)# sliding_window_inference(images, (32,32,32), 1, self.net)
-        #marking that we had some Nan numbers in the tensor
-        if(torch.sum(torch.isnan( y_det))>0):
-            self.isAnyNan=True
+        # patIds=batch['patient_id']
+        # y_det = self.net(images)# sliding_window_inference(images, (32,32,32), 1, self.net)
+        # #marking that we had some Nan numbers in the tensor
+        # if(torch.sum(torch.isnan( y_det))>0):
+        #     self.isAnyNan=True
         
-        total_loss= 0.0
+        # total_loss= 0.0
 
-        regress_res=self.modelRegression(y_det)
-        y_det = decollate_batch(y_det)
-        y_true = decollate_batch(y_true)
-        #TODO probably this [1,:,:,:] could break the evaluation ...
-        # y_det=[x.cpu().detach().numpy()[1,:,:,:][0] for x in y_det]
-        # y_true=[x.cpu().detach().numpy() for x in y_true]
-        # y_det= list(map(self.postProcess  , y_det))
-        # y_true= list(map(self.postTrue , y_det))
-        sd = SurfaceDistanceMetric(symmetric=True)
-        dice = DiceMetric()
-        index=0
-        for i in range(0,len( y_det)):
-            #print(f"torch.flatten(regress_res)[i] {torch.flatten(regress_res)[i]}")
-            # regress_res_round= round(torch.flatten(regress_res)[i].item())
-            #print(f"pre  y_det[i] {y_det[i].size()} y_true_i {y_true[i].size()} ")
-            y_det_i=self.postProcess(y_det[i])[0,:,:,:].cpu()
-            y_true_i=self.postTrue(y_true[i])[1,:,:,:].cpu()
-            #print(f"post  y_det[i] {y_det_i.size()} y_true_i {y_true_i.size()} ")
-            if(torch.sum(y_det_i).item()>0 and torch.sum(y_true_i).item()>0 ):
-                # total_loss+= monai.metrics.compute_generalized_dice(y_det_i,y_true_i)/len( y_det)
-                #print(f" monai.metrics.compute_generalized_dice(y_det_i,y_true_i)/len( y_det) {monai.metrics.compute_generalized_dice(y_det_i,y_true_i)/len( y_det)} ")
-                dice(y_det_i,y_true_i)
-                #sd(y_pred=y_det_i, y=y_true_i) 
-            # print(f"numLesions[i] {numLesions[i]}")    
-            # total_loss+= (abs(regress_res_round-int(numLesions[i]) ) /len( y_det) )#arbitrary number
+        # regress_res=self.modelRegression(y_det)
+        # y_det = decollate_batch(y_det)
+        # y_true = decollate_batch(y_true)
+        # #TODO probably this [1,:,:,:] could break the evaluation ...
+        # # y_det=[x.cpu().detach().numpy()[1,:,:,:][0] for x in y_det]
+        # # y_true=[x.cpu().detach().numpy() for x in y_true]
+        # # y_det= list(map(self.postProcess  , y_det))
+        # # y_true= list(map(self.postTrue , y_det))
+        # sd = SurfaceDistanceMetric(symmetric=True)
+        # dice = DiceMetric()
+        # index=0
+        # for i in range(0,len( y_det)):
+        #     #print(f"torch.flatten(regress_res)[i] {torch.flatten(regress_res)[i]}")
+        #     # regress_res_round= round(torch.flatten(regress_res)[i].item())
+        #     #print(f"pre  y_det[i] {y_det[i].size()} y_true_i {y_true[i].size()} ")
+        #     y_det_i=self.postProcess(y_det[i])[0,:,:,:].cpu()
+        #     y_true_i=self.postTrue(y_true[i])[1,:,:,:].cpu()
+        #     #print(f"post  y_det[i] {y_det_i.size()} y_true_i {y_true_i.size()} ")
+        #     if(torch.sum(y_det_i).item()>0 and torch.sum(y_true_i).item()>0 ):
+        #         # total_loss+= monai.metrics.compute_generalized_dice(y_det_i,y_true_i)/len( y_det)
+        #         #print(f" monai.metrics.compute_generalized_dice(y_det_i,y_true_i)/len( y_det) {monai.metrics.compute_generalized_dice(y_det_i,y_true_i)/len( y_det)} ")
+        #         dice(y_det_i,y_true_i)
+        #         #sd(y_pred=y_det_i, y=y_true_i) 
+        #     # print(f"numLesions[i] {numLesions[i]}")    
+        #     # total_loss+= (abs(regress_res_round-int(numLesions[i]) ) /len( y_det) )#arbitrary number
         
-        numLesions2= list(map(int, numLesions ))
-        regress_res2= torch.flatten(regress_res) 
-        regress_res3=list(map(lambda el:round(el) ,torch.flatten(regress_res2).cpu().detach().numpy() ))
-        #print( f"torch.Tensor(numLesions).cpu() {torch.Tensor(numLesions).cpu()}  torch.Tensor(regress_res).cpu() {torch.Tensor(regress_res).cpu()}   ")
-        #self.F1Score(torch.Tensor(regress_res3).int(), torch.Tensor(numLesions2).cpu().int())
-        total_loss=precision_recall(torch.Tensor(regress_res3).int(), torch.Tensor(numLesions2).cpu().int(), average='macro', num_classes=4)
-        total_loss1=torch.mean(torch.stack([total_loss[0],total_loss[1]] ))#self.F1Score
-        print(f" total loss a {total_loss1}")
-        total_loss2= torch.add(total_loss1,dice.aggregate())
-        print(f" total loss b {total_loss2}  total_loss,dice.aggregate() {dice.aggregate()}")
+        # numLesions2= list(map(int, numLesions ))
+        # regress_res2= torch.flatten(regress_res) 
+        # regress_res3=list(map(lambda el:round(el) ,torch.flatten(regress_res2).cpu().detach().numpy() ))
+        # #print( f"torch.Tensor(numLesions).cpu() {torch.Tensor(numLesions).cpu()}  torch.Tensor(regress_res).cpu() {torch.Tensor(regress_res).cpu()}   ")
+        # #self.F1Score(torch.Tensor(regress_res3).int(), torch.Tensor(numLesions2).cpu().int())
+        # total_loss=precision_recall(torch.Tensor(regress_res3).int(), torch.Tensor(numLesions2).cpu().int(), average='macro', num_classes=4)
+        # total_loss1=torch.mean(torch.stack([total_loss[0],total_loss[1]] ))#self.F1Score
+        # print(f" total loss a {total_loss1}")
+        # total_loss2= torch.add(total_loss1,dice.aggregate())
+        # print(f" total loss b {total_loss2}  total_loss,dice.aggregate() {dice.aggregate()}")
 
-        #print(f"sd.aggregate() {sd.aggregate().item()}")
+        # #print(f"sd.aggregate() {sd.aggregate().item()}")
         
-        self.picaiLossArr_score_final.append(total_loss2.item())
-        print(f" validation_loss {total_loss2.item()} ")
-        self.log("validation_loss", total_loss2.item(), on_epoch=True, on_step=False, sync_dist=True, prog_bar=True, logger=True)
-        return {'val_loss': total_loss2.item()}
+        # self.picaiLossArr_score_final.append(total_loss2.item())
+        # print(f" validation_loss {total_loss2.item()} ")
+        # self.log("validation_loss", total_loss2.item(), on_epoch=True, on_step=False, sync_dist=True, prog_bar=True, logger=True)
+        # return {'val_loss': total_loss2.item()}
+        return {'val_loss': 1.0}
 
 
     def validation_epoch_end(self, outputs):
