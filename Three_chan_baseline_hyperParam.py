@@ -177,10 +177,10 @@ def getViTAutoEnc(dropout,input_image_size,in_channels,out_channels):
 
 
 
-#getViTAutoEnc,getAhnet,getSegResNetVAE,getAttentionUnet,getSwinUNETR,getSegResNet,getVNet
+#getViTAutoEnc,getAhnet,getSegResNetVAE,getAttentionUnet,getSwinUNETR,getSegResNet,getVNet,getUnetB
 options={
 
-"models":[getUnetA, getUnetB],
+"models":[getUnetA],
 # "models":[getSegResNet],
 # "regression_channels":[[1,1,1],[2,4,8],[10,16,32]],
 "regression_channels":[[2,4,8]],
