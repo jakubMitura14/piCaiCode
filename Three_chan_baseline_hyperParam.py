@@ -243,7 +243,7 @@ config = {
         "RandFlipd_prob": {"type": "float", "min": 0.3, "max": 0.7},
         "RandAffined_prob": {"type": "float", "min": 0.0, "max": 0.5},
         "RandCoarseDropoutd_prob":{"type": "discrete", "values": [0.0]},
-        "spacing_keyword": {"type": "categorical", "values": ["_one_spac_c" ]},# ,"_med_spac_b"     #"_med_spac","_one_and_half_spac", "_two_spac"
+        "spacing_keyword": {"type": "categorical", "values": ["_one_spac_c","_med_spac_b" ]},#      #"_med_spac","_one_and_half_spac", "_two_spac"
         #"sizeWord": {"type": "categorical", "values": ["_maxSize_"]},#,"_maxSize_"# ,"_div32_"
         #"dirs": {"type": "discrete", "values": list(range(0,len(options["dirs"])))},
         "RandomElasticDeformation_prob": {"type": "float", "min": 0.0, "max": 0.3},
@@ -318,7 +318,7 @@ opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4",trials=500)
 #          api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
 #          project_name="picai-hyperparam-search-01"))
 
-experiment_name="picai-hyperparam-search-29"
+experiment_name="picai-hyperparam-search-30"
 for experiment in opt.get_experiments(
         project_name=experiment_name):
     print("******* new experiment *****")    
