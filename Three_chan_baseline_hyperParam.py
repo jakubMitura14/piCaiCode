@@ -272,7 +272,7 @@ def getDummy(spac):
     dummyLabelPath=f"/home/sliceruser/data/dummyData/zeroLabel{spac}.nii.gz"
     sizz=semisuperPreprosess.writeDummyLabels(dummyLabelPath,imageRef_path)
     img_size = sizz#(sizz[2],sizz[1],sizz[0])
-    return("spac", (dummyLabelPath,img_size))
+    return(dummyLabelPath,img_size)
 
 
 aa=list(map(getDummy  ,spacings  ))
