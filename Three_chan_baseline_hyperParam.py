@@ -175,7 +175,8 @@ def getViTAutoEnc(dropout,input_image_size,in_channels,out_channels):
 #getViTAutoEnc,getAhnet,getSegResNetVAE,getAttentionUnet,getSwinUNETR,getSegResNet
 options={
 
-"models":[getUnetA, getUnetB,getVNet,getSegResNet],
+# "models":[getUnetA, getUnetB,getVNet,getSegResNet],
+"models":[getUnetA],
 "regression_channels":[[1,1,1],[2,4,8],[10,16,32]],
 
 "lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
@@ -236,7 +237,7 @@ config = {
         "RandFlipd_prob": {"type": "float", "min": 0.3, "max": 0.7},
         "RandAffined_prob": {"type": "float", "min": 0.0, "max": 0.5},
         "RandCoarseDropoutd_prob":{"type": "discrete", "values": [0.0]},
-        "spacing_keyword": {"type": "categorical", "values": ["_one_spac_c","_med_spac_b" ]},#      #"_med_spac","_one_and_half_spac", "_two_spac"
+        "spacing_keyword": {"type": "categorical", "values": ["_one_spac_c" ]},# ,"_med_spac_b"     #"_med_spac","_one_and_half_spac", "_two_spac"
         #"sizeWord": {"type": "categorical", "values": ["_maxSize_"]},#,"_maxSize_"# ,"_div32_"
         #"dirs": {"type": "discrete", "values": list(range(0,len(options["dirs"])))},
         "RandomElasticDeformation_prob": {"type": "float", "min": 0.0, "max": 0.3},
