@@ -274,7 +274,7 @@ def getDummy(spac):
     img_size = sizz#(sizz[2],sizz[1],sizz[0])
     return("spac", (dummyLabelPath,img_size))
 
-dummyDict=[ dict([i]) for i in list(map(getDummy  ,spacings  )) ]
+dummyDict=dict(list(map(getDummy  ,spacings  )) )
 
 
 
