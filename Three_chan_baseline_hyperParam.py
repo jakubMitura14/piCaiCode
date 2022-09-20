@@ -219,7 +219,6 @@ dummyDict={"_one_spac_c" :aa[0],"_med_spac_b":aa[1]   }
 
 ################## TUNE definitions
 
-resources_per_trial = {"cpu": 6, "gpu": 1}
 
 
 config = {
@@ -314,14 +313,14 @@ tuner = tune.Tuner(
         #     "gpu": 1
         # },
         resources=tune.PlacementGroupFactory(
-                [{'CPU': num_cpus_per_worker, 'GPU': 0.9}] + [{'CPU': num_cpus_per_worker, 'GPU': 0.9}]
+                [{'CPU': num_cpus_per_worker, 'GPU': 1.0}] + [{'CPU': num_cpus_per_worker, 'GPU': 1.0}]
             )
     ),
     tune_config=tune.TuneConfig(
         # metric="avg_val_acc",
         # mode="max",
         scheduler=pb2_scheduler,
-        num_samples=num_gpu,
+        #num_samples=1#num_gpu,
     ),
     run_config=air.RunConfig(
         name=experiment_name,
