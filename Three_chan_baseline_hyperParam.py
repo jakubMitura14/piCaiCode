@@ -276,7 +276,7 @@ pb2_scheduler = PB2(
             #"lossF":list(range(0,len(options["lossF"]))),
             #"regression_channels":   list(range(0,len(options["regression_channels"]))),
             #"optimizer_class":  list(range(0,len(options["optimizer_class"]))),
-            "models":  list(range(0,len(options["models"]))) ,
+            #"models":  list(range(0,len(options["models"]))) ,
 
         })
 
