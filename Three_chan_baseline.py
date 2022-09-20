@@ -119,7 +119,7 @@ def mainTrain(config,df,experiment_name,dummyDict,num_gpu,cpu_num ,default_root_
     RandCoarseDropoutd_prob=config["RandCoarseDropoutd_prob"]
     is_whole_to_train= (sizeWord=="_maxSize_")
     centerCropSize=(81.0, 160.0, 192.0)#=getParam(experiment,options,"centerCropSize",df)
-    net=getParam(config,options,"models",df)
+    net= options["models"][2]#   getParam(config,options,"models",df)
     
     # strides=getParam(config,options,"stridesAndChannels",df)["strides"]
     # channels=getParam(config,options,"stridesAndChannels",df)["channels"]
@@ -134,7 +134,7 @@ def mainTrain(config,df,experiment_name,dummyDict,num_gpu,cpu_num ,default_root_
 
     criterion= monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)# Our seg labels are single channel images indicating class index, rather than one-hot
     optimizer_class= torch.optim.NAdam(lr=config["lr"])#getParam(config,options,"optimizer_class",df)(config["lr"])
-    regression_channels= getParam(config,options,"regression_channels",df)
+    regression_channels= options["regression_channels"][1] #getParam(config,options,"regression_channels",df)
     accumulate_grad_batches=config["accumulate_grad_batches"]
     gradient_clip_val=config["gradient_clip_val"]# 0.5,2.0
     net=net(dropout,img_size,in_channels,out_channels)
