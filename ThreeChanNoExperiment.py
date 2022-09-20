@@ -201,7 +201,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     kwargs = {
         "max_epochs": max_epochs,
         "callbacks" :callbacks,
-       # "logger" : comet_logger,
+        "logger" : comet_logger,
         "default_root_dir" : default_root_dir,
         "auto_lr_find" : False,
         "check_val_every_n_epoch" : 10,
