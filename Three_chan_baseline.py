@@ -135,6 +135,7 @@ def mainTrain(config,df,experiment_name,dummyDict,num_gpu,cpu_num ,default_root_
     act = (Act.PRELU, {"init": 0.2}) #getParam(config,options,"act",df)
     norm= (Norm.BATCH, {}) #getParam(config,options,"norm",df)
     dropout= config["dropout"]
+    print(f"aaaaaaaaaaaaaaaaaaa dropout {dropout}")
     to_onehot_y_loss= False
     monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
 
