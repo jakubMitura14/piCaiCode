@@ -159,7 +159,7 @@ def mainTrain(config,df,experiment_name,dummyDict,num_gpu,cpu_num ,default_root_
     ,RandomMotion_prob
     ,RandomGhosting_prob
     ,RandomSpike_prob
-    ,RandomBiasField_prob,regression_channels)
+    ,RandomBiasField_prob,regression_channels,num_gpu,cpu_num ,default_root_dir,checkpoint_dir)
     # if(len(picaiLossArr_auroc_final)>0):
     #     experiment.log_metric("last_val_loss_auroc",np.nanmax(picaiLossArr_auroc_final))
     #     experiment.log_metric("last_val_loss_Ap",np.nanmax(picaiLossArr_AP_final))

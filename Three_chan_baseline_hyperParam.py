@@ -292,7 +292,6 @@ tuner = tune.Tuner(
     tune.with_resources(
         tune.with_parameters(
             Three_chan_baseline.mainTrain,
-            options=options,
             df=df,
             experiment_name=experiment_name
             ,dummyDict=dummyDict
