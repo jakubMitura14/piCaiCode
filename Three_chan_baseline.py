@@ -196,10 +196,10 @@ def mainTrain(config,df,experiment_name,dummyDict,num_gpu,cpu_num ,default_root_
             ,"RandomGhosting_prob" :RandomGhosting_prob
             ,"RandomSpike_prob" :RandomSpike_prob
             ,"RandomBiasField_prob" :RandomBiasField_prob
-            ,"models" : config["models")
-            ,"criterion": config["lossF")
-            ,"optimizer_class" : config["optimizer_class")
-            ,"regression_channels" :config["regression_channels")
+            ,"models" : config["models"]
+            ,"criterion": config["lossF"]
+            ,"optimizer_class" : config["optimizer_class"]
+            ,"regression_channels" :config["regression_channels"]
             ,"last_val_loss_score":np.nanmax(picaiLossArr_score_final)   }
     dfOut=dfOut.append(series, ignore_index = True)
     dfOut.to_csv(csvPath)
