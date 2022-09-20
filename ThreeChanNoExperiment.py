@@ -95,12 +95,12 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     ,RandomBiasField_prob,regression_channels,num_gpu,cpu_num ,default_root_dir,checkpoint_dir):        
 
     #TODO(remove)
-    comet_logger = CometLogger(
-        api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
-        #workspace="OPI", # Optional
-        project_name=experiment_name, # Optional
-        #experiment_name="baseline" # Optional
-    )
+    # comet_logger = CometLogger(
+    #     api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
+    #     #workspace="OPI", # Optional
+    #     project_name=experiment_name, # Optional
+    #     #experiment_name="baseline" # Optional
+    # )
     
     with mp.Pool(processes = mp.cpu_count()) as pool:
         resList=pool.map(partial(addDummyLabelPath,labelName=label_name ,dummyLabelPath= dummyLabelPath ) ,list(df.iterrows())) 
@@ -211,7 +211,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     kwargs = {
         "max_epochs": max_epochs,
         "callbacks" :callbacks,
-        "logger" : comet_logger,
+       # "logger" : comet_logger,
         "default_root_dir" : default_root_dir,
         "auto_lr_find" : False,
         "check_val_every_n_epoch" : 10,
