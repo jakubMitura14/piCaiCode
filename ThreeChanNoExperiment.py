@@ -84,7 +84,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     ,RandomGhosting_prob
     ,RandomSpike_prob
     ,RandomBiasField_prob,regression_channels,num_gpu,cpu_num ,default_root_dir,checkpoint_dir):        
-
+    pass
     #TODO(remove)
     # comet_logger = CometLogger(
     #     api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
