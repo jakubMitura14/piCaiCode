@@ -84,169 +84,168 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     ,RandomGhosting_prob
     ,RandomSpike_prob
     ,RandomBiasField_prob,regression_channels,num_gpu,cpu_num ,default_root_dir,checkpoint_dir,lr):        
-    pass
     #TODO(remove)
-    # comet_logger = CometLogger(
-    #     api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
-    #     #workspace="OPI", # Optional
-    #     project_name=experiment_name, # Optional
-    #     #experiment_name="baseline" # Optional
-    # )
+    comet_logger = CometLogger(
+        api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
+        #workspace="OPI", # Optional
+        project_name=experiment_name, # Optional
+        #experiment_name="baseline" # Optional
+    )
     
     # with mp.Pool(processes = mp.cpu_count()) as pool:
     #     resList=pool.map(partial(addDummyLabelPath,labelName=label_name ,dummyLabelPath= dummyLabelPath ) ,list(df.iterrows())) 
 
 
-    # data = DataModule.PiCaiDataModule(
-    #     df= df,
-    #     batch_size=6,#
-    #     trainSizePercent=percentSplit,# 
-    #     num_workers=cpu_num,#os.cpu_count(),
-    #     drop_last=False,#True,
-    #     #we need to use diffrent cache folders depending on weather we are dividing data or not
-    #     cache_dir=cacheDir,
-    #     chan3_col_name =chan3_col_name,
-    #     chan3_col_name_val=chan3_col_name_val,
-    #     label_name_val=label_name_val,
-    #     label_name=label_name
-    #     #maxSize=maxSize
-    #     ,RandGaussianNoised_prob=RandGaussianNoised_prob
-    #     ,RandAdjustContrastd_prob=RandAdjustContrastd_prob
-    #     ,RandGaussianSmoothd_prob=RandGaussianSmoothd_prob
-    #     ,RandRicianNoised_prob=RandRicianNoised_prob
-    #     ,RandFlipd_prob=RandFlipd_prob
-    #     ,RandAffined_prob=RandAffined_prob
-    #     ,RandCoarseDropoutd_prob=RandCoarseDropoutd_prob
-    #     ,is_whole_to_train=is_whole_to_train
-    #     ,centerCropSize=centerCropSize
-    #     ,RandomElasticDeformation_prob=RandomElasticDeformation_prob
-    #     ,RandomAnisotropy_prob=RandomAnisotropy_prob
-    #     ,RandomMotion_prob=RandomMotion_prob
-    #     ,RandomGhosting_prob=RandomGhosting_prob
-    #     ,RandomSpike_prob=RandomSpike_prob
-    #     ,RandomBiasField_prob=RandomBiasField_prob
-    # )
+    data = DataModule.PiCaiDataModule(
+        df= df,
+        batch_size=6,#
+        trainSizePercent=percentSplit,# 
+        num_workers=cpu_num,#os.cpu_count(),
+        drop_last=False,#True,
+        #we need to use diffrent cache folders depending on weather we are dividing data or not
+        cache_dir=cacheDir,
+        chan3_col_name =chan3_col_name,
+        chan3_col_name_val=chan3_col_name_val,
+        label_name_val=label_name_val,
+        label_name=label_name
+        #maxSize=maxSize
+        ,RandGaussianNoised_prob=RandGaussianNoised_prob
+        ,RandAdjustContrastd_prob=RandAdjustContrastd_prob
+        ,RandGaussianSmoothd_prob=RandGaussianSmoothd_prob
+        ,RandRicianNoised_prob=RandRicianNoised_prob
+        ,RandFlipd_prob=RandFlipd_prob
+        ,RandAffined_prob=RandAffined_prob
+        ,RandCoarseDropoutd_prob=RandCoarseDropoutd_prob
+        ,is_whole_to_train=is_whole_to_train
+        ,centerCropSize=centerCropSize
+        ,RandomElasticDeformation_prob=RandomElasticDeformation_prob
+        ,RandomAnisotropy_prob=RandomAnisotropy_prob
+        ,RandomMotion_prob=RandomMotion_prob
+        ,RandomGhosting_prob=RandomGhosting_prob
+        ,RandomSpike_prob=RandomSpike_prob
+        ,RandomBiasField_prob=RandomBiasField_prob
+    )
 
 
-    # data.prepare_data()
-    # data.setup()
-    # # definition described in model folder
-    # # from https://github.com/DIAGNijmegen/picai_baseline/blob/main/src/picai_baseline/unet/training_setup/neural_networks/unets.py
-    # # unet= unets.UNet(
-    # #     spatial_dims=3,
-    # #     in_channels=3,
-    # #     out_channels=2,
-    # #     strides=strides,
-    # #     channels=channels,
-    # #     num_res_units= num_res_units,
-    # #     act = act,
-    # #     norm= norm,
-    # #     dropout= dropout
-    # # )
+    data.prepare_data()
+    data.setup()
+    # definition described in model folder
+    # from https://github.com/DIAGNijmegen/picai_baseline/blob/main/src/picai_baseline/unet/training_setup/neural_networks/unets.py
+    # unet= unets.UNet(
+    #     spatial_dims=3,
+    #     in_channels=3,
+    #     out_channels=2,
+    #     strides=strides,
+    #     channels=channels,
+    #     num_res_units= num_res_units,
+    #     act = act,
+    #     norm= norm,
+    #     dropout= dropout
+    # )
 
-    # model = LigtningModel.Model(
-    #     net=net,
-    #     criterion=  criterion,# Our seg labels are single channel images indicating class index, rather than one-hot
-    #     learning_rate=1e-2,
-    #     optimizer_class= optimizer_class,
-    #     picaiLossArr_auroc_final=picaiLossArr_auroc_final,
-    #     picaiLossArr_AP_final=picaiLossArr_AP_final,
-    #     picaiLossArr_score_final=picaiLossArr_score_final,
-    #     regression_channels=regression_channels,
-    #     lr=self.lr
-    # )
-    # early_stopping = pl.callbacks.early_stopping.EarlyStopping(
-    #     monitor='avg_val_loss',
-    #     patience=4,
-    #     mode="max",
-    #     divergence_threshold=(-0.1)
-    # )
-    # checkPointCallback=TuneReportCheckpointCallback(
-    #     metrics={
+    model = LigtningModel.Model(
+        net=net,
+        criterion=  criterion,# Our seg labels are single channel images indicating class index, rather than one-hot
+        learning_rate=1e-2,
+        optimizer_class= optimizer_class,
+        picaiLossArr_auroc_final=picaiLossArr_auroc_final,
+        picaiLossArr_AP_final=picaiLossArr_AP_final,
+        picaiLossArr_score_final=picaiLossArr_score_final,
+        regression_channels=regression_channels,
+        lr=self.lr
+    )
+    early_stopping = pl.callbacks.early_stopping.EarlyStopping(
+        monitor='avg_val_loss',
+        patience=4,
+        mode="max",
+        divergence_threshold=(-0.1)
+    )
+    checkPointCallback=TuneReportCheckpointCallback(
+        metrics={
+            "loss": "avg_val_loss",
+            "mean_accuracy": "avg_val_acc"
+        },
+        filename="checkpoint",
+        on="validation_end")
+
+    # tuneCallBack=TuneReportCallback(
+    #     {
     #         "loss": "avg_val_loss",
     #         "mean_accuracy": "avg_val_acc"
     #     },
-    #     filename="checkpoint",
     #     on="validation_end")
 
-    # # tuneCallBack=TuneReportCallback(
-    # #     {
-    # #         "loss": "avg_val_loss",
-    # #         "mean_accuracy": "avg_val_acc"
-    # #     },
-    # #     on="validation_end")
-
-    # strategy = RayShardedStrategy(num_workers=num_gpu, num_cpus_per_worker=1, use_gpu=True)
+    strategy = RayShardedStrategy(num_workers=num_gpu, num_cpus_per_worker=1, use_gpu=True)
 
 
 
-    # # trainer = pl.Trainer(
-    # #     #accelerator="cpu", #TODO(remove)
-    # #     #max_epochs=max_epochs,
-    # #     #gpus=1,
-    # #     #precision=experiment.get_parameter("precision"), 
-    # #     callbacks=[ checkPointCallback ],# TODO unhash,#early_stopping
-    # #     logger=comet_logger,
-    # #     # accelerator='auto',
-    # #     # devices='auto',       
-    # #     default_root_dir= default_root_dir,
-    # #     #auto_scale_batch_size="binsearch",
-    # #     auto_lr_find=True,
-    # #     check_val_every_n_epoch=10,
-    # #     accumulate_grad_batches=accumulate_grad_batches,
-    # #     gradient_clip_val=gradient_clip_val,# 0.5,2.0
-    # #     log_every_n_steps=2,
-    # #     strategy=strategy#'ddp'#'ddp' # for multi gpu training
-    # # )
-    # callbacks=[checkPointCallback]
-    # kwargs = {
-    #     "max_epochs": max_epochs,
-    #     "callbacks" :callbacks,
-    #    # "logger" : comet_logger,
-    #     "default_root_dir" : default_root_dir,
-    #     "auto_lr_find" : False,
-    #     "check_val_every_n_epoch" : 10,
-    #     "accumulate_grad_batches" : accumulate_grad_batches,
-    #     "gradient_clip_val" :gradient_clip_val,
-    #     "log_every_n_steps" :2,
-    #     "strategy" :strategy
-    #     }
+    # trainer = pl.Trainer(
+    #     #accelerator="cpu", #TODO(remove)
+    #     #max_epochs=max_epochs,
+    #     #gpus=1,
+    #     #precision=experiment.get_parameter("precision"), 
+    #     callbacks=[ checkPointCallback ],# TODO unhash,#early_stopping
+    #     logger=comet_logger,
+    #     # accelerator='auto',
+    #     # devices='auto',       
+    #     default_root_dir= default_root_dir,
+    #     #auto_scale_batch_size="binsearch",
+    #     auto_lr_find=True,
+    #     check_val_every_n_epoch=10,
+    #     accumulate_grad_batches=accumulate_grad_batches,
+    #     gradient_clip_val=gradient_clip_val,# 0.5,2.0
+    #     log_every_n_steps=2,
+    #     strategy=strategy#'ddp'#'ddp' # for multi gpu training
+    # )
+    callbacks=[checkPointCallback]
+    kwargs = {
+        "max_epochs": max_epochs,
+        "callbacks" :callbacks,
+       # "logger" : comet_logger,
+        "default_root_dir" : default_root_dir,
+        "auto_lr_find" : False,
+        "check_val_every_n_epoch" : 10,
+        "accumulate_grad_batches" : accumulate_grad_batches,
+        "gradient_clip_val" :gradient_clip_val,
+        "log_every_n_steps" :2,
+        "strategy" :strategy
+        }
 
-    # if checkpoint_dir:
-    #     kwargs["resume_from_checkpoint"] = os.path.join(
-    #         checkpoint_dir, "checkpoint")
+    if checkpoint_dir:
+        kwargs["resume_from_checkpoint"] = os.path.join(
+            checkpoint_dir, "checkpoint")
 
-    # trainer = pl.Trainer(**kwargs)
+    trainer = pl.Trainer(**kwargs)
 
 
-    # #stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging()
-    # # trainer = pl.Trainer(
-    # #     #accelerator="cpu", #TODO(remove)
-    # #     #max_epochs=max_epochs,
-    # #     #gpus=1,
-    # #     #precision=experiment.get_parameter("precision"), 
-    # #     callbacks=[ checkPointCallback ],# TODO unhash,#early_stopping
-    # #     logger=comet_logger,
-    # #     # accelerator='auto',
-    # #     # devices='auto',       
-    # #     default_root_dir= "/home/sliceruser/data/lightning_logs",
-    # #     #auto_scale_batch_size="binsearch",
-    # #     auto_lr_find=True,
-    # #     check_val_every_n_epoch=10,
-    # #     accumulate_grad_batches=accumulate_grad_batches,
-    # #     gradient_clip_val=gradient_clip_val,# 0.5,2.0
-    # #     log_every_n_steps=2,
-    # #     strategy=strategy#'ddp'#'ddp' # for multi gpu training
-    # # )
-    # #setting batch size automatically
-    # #TODO(unhash)
-    # #trainer.tune(model, datamodule=data)
+    #stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging()
+    # trainer = pl.Trainer(
+    #     #accelerator="cpu", #TODO(remove)
+    #     #max_epochs=max_epochs,
+    #     #gpus=1,
+    #     #precision=experiment.get_parameter("precision"), 
+    #     callbacks=[ checkPointCallback ],# TODO unhash,#early_stopping
+    #     logger=comet_logger,
+    #     # accelerator='auto',
+    #     # devices='auto',       
+    #     default_root_dir= "/home/sliceruser/data/lightning_logs",
+    #     #auto_scale_batch_size="binsearch",
+    #     auto_lr_find=True,
+    #     check_val_every_n_epoch=10,
+    #     accumulate_grad_batches=accumulate_grad_batches,
+    #     gradient_clip_val=gradient_clip_val,# 0.5,2.0
+    #     log_every_n_steps=2,
+    #     strategy=strategy#'ddp'#'ddp' # for multi gpu training
+    # )
+    #setting batch size automatically
+    #TODO(unhash)
+    #trainer.tune(model, datamodule=data)
 
-    # trainer.logger._default_hp_metric = False
-    # start = datetime.now()
-    # print('Training started at', start)
-    # trainer.fit(model=model, datamodule=data)
-    # print('Training duration:', datetime.now() - start)
+    trainer.logger._default_hp_metric = False
+    start = datetime.now()
+    print('Training started at', start)
+    trainer.fit(model=model, datamodule=data)
+    print('Training duration:', datetime.now() - start)
 
 
 
