@@ -152,7 +152,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         picaiLossArr_AP_final=picaiLossArr_AP_final,
         picaiLossArr_score_final=picaiLossArr_score_final,
         regression_channels=regression_channels,
-        lr=self.lr
+        lr=lr
     )
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
         monitor='avg_val_loss',
