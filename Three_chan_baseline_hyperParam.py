@@ -309,11 +309,11 @@ tuner = tune.Tuner(
              ,options=options
              ,num_cpus_per_worker=num_cpus_per_worker            
             ),
-        resources={
-            "cpu": cpu_num,
-            "gpu": 1
-        },
-        resources_per_trial=tune.PlacementGroupFactory(
+        # resources={
+        #     "cpu": cpu_num,
+        #     "gpu": 1
+        # },
+        resources=tune.PlacementGroupFactory(
                 [{'CPU': num_cpus_per_worker, 'GPU': 1.0}] + [{'CPU': num_cpus_per_worker, 'GPU': 1.0}]
             )
     ),
