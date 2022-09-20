@@ -68,15 +68,6 @@ def isAnnytingInAnnotatedInner(row,colName):
     return np.sum(data)
 
 
-def addDummyLabelPath(row, labelName, dummyLabelPath):
-    """
-    adds dummy label to the given column in every spot it is empty
-    """
-    row = row[1]
-    if(row[labelName]==' '):
-        return dummyLabelPath
-    else:
-        return row[labelName]    
 
 
 def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
@@ -102,9 +93,8 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     #     #experiment_name="baseline" # Optional
     # )
     
-    with mp.Pool(processes = mp.cpu_count()) as pool:
-        resList=pool.map(partial(addDummyLabelPath,labelName=label_name ,dummyLabelPath= dummyLabelPath ) ,list(df.iterrows())) 
-    df[label_name]=resList
+    # with mp.Pool(processes = mp.cpu_count()) as pool:
+    #     resList=pool.map(partial(addDummyLabelPath,labelName=label_name ,dummyLabelPath= dummyLabelPath ) ,list(df.iterrows())) 
 
 
     data = DataModule.PiCaiDataModule(

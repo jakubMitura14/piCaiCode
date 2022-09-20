@@ -82,6 +82,15 @@ def getParam(config,options,key):
     # print(options[key])
     return options[key][integerr]
 
+def addDummyLabelPath(row, labelName, dummyLabelPath):
+    """
+    adds dummy label to the given column in every spot it is empty
+    """
+    row = row[1]
+    if(row[labelName]==' '):
+        return dummyLabelPath
+    else:
+        return row[labelName]    
 
 def mainTrain(config,df,experiment_name,dummyDict,num_gpu,cpu_num ,default_root_dir,checkpoint_dir,options):
     picaiLossArr_auroc_final=[]
@@ -151,6 +160,8 @@ def mainTrain(config,df,experiment_name,dummyDict,num_gpu,cpu_num ,default_root_
     RandomBiasField_prob=config["RandomBiasField_prob"]
 
     os.makedirs('/home/sliceruser/data/temp', exist_ok = True)
+    df[label_name]=list(map(partial(addDummyLabelPath,labelName=label_name ,dummyLabelPath= dummyLabelPath ) ,list(df.iterrows())) )
+
     ThreeChanNoExperiment.train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
          ,chan3_col_name,chan3_col_name_val,label_name_val
          ,RandGaussianNoised_prob,RandAdjustContrastd_prob,RandGaussianSmoothd_prob,
@@ -201,7 +212,7 @@ def mainTrain(config,df,experiment_name,dummyDict,num_gpu,cpu_num ,default_root_
             ,"RandomGhosting_prob" :RandomGhosting_prob
             ,"RandomSpike_prob" :RandomSpike_prob
             ,"RandomBiasField_prob" :RandomBiasField_prob
-            ,"models" : config["models"]
+            #,"models" : config["models"]
            # ,"criterion": config["lossF"]
            # ,"optimizer_class" : config["optimizer_class"]
             ,"regression_channels" :config["regression_channels"]
