@@ -328,6 +328,7 @@ tuner = tune.Tuner(
         # progress_reporter=reporter,
     ),
     param_space=config,
+    reuse_actors=True
 )
 results = tuner.fit()
 
