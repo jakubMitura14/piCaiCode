@@ -218,9 +218,9 @@ resources_per_trial = {"cpu": 6, "gpu": 1}
 config = {
     "lr": 1e-3,
         #"lossF":list(range(0,len(options["lossF"])))[0],
-        "regression_channels":   list(range(0,len(options["regression_channels"])))[0],
+        "regression_channels":  tune.choice( list(range(0,len(options["regression_channels"])))),
         #"optimizer_class":  list(range(0,len(options["optimizer_class"])))[0],
-        "models":  list(range(0,len(options["models"])))[0] ,
+        "models":  tune.choice(list(range(0,len(options["models"])))) ,
         "dropout": 5.0,
         "accumulate_grad_batches":  3,
         "spacing_keyword":  "_one_spac_c" ,#,"_med_spac_b"
@@ -274,9 +274,9 @@ pb2_scheduler = PB2(
             "RandomBiasField_prob": [0.0,1.0],# {"type": "float", "min": 0.0, "max": 0.3},
             "dropout": [0.0,1.0],# {"type": "float", "min": 0.0, "max": 0.3},
             #"lossF":list(range(0,len(options["lossF"]))),
-            "regression_channels":   list(range(0,len(options["regression_channels"]))),
+            #"regression_channels":   list(range(0,len(options["regression_channels"]))),
             #"optimizer_class":  list(range(0,len(options["optimizer_class"]))),
-            "models":  list(range(0,len(options["models"]))) ,
+            #"models":  list(range(0,len(options["models"]))) ,
 
         })
 
