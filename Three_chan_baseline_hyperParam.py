@@ -307,8 +307,8 @@ tuner = tune.Tuner(
         }
     ),
     tune_config=tune.TuneConfig(
-        metric="avg_val_acc",
-        mode="max",
+        # metric="avg_val_acc",
+        # mode="max",
         scheduler=pb2_scheduler,
         num_samples=num_gpu,
     ),
