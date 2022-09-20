@@ -255,7 +255,7 @@ pb2_scheduler = PB2(
         time_attr="training_iteration",
         metric='avg_val_acc',
         mode='max',
-        perturbation_interval=90.0,
+        perturbation_interval=10.0,
         hyperparam_bounds={
             "lr": [1e-2, 1e-5],
             "gradient_clip_val": [0.0,100.0] ,#{"type": "discrete", "values": [0.0, 0.2,0.5,2.0,100.0]},#,2.0, 0.2,0.5
@@ -276,7 +276,7 @@ pb2_scheduler = PB2(
             #"lossF":list(range(0,len(options["lossF"]))),
             #"regression_channels":   list(range(0,len(options["regression_channels"]))),
             #"optimizer_class":  list(range(0,len(options["optimizer_class"]))),
-            #"models":  list(range(0,len(options["models"]))) ,
+            "models":  list(range(0,len(options["models"]))) ,
 
         })
 
