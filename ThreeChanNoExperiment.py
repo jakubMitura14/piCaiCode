@@ -43,6 +43,7 @@ import os.path
 monai.utils.set_determinism()
 from functools import partial
 from pytorch_lightning.loggers import CometLogger
+from ray_lightning import RayStrategy
 
 # import preprocessing.transformsForMain
 # import preprocessing.ManageMetadata
@@ -50,8 +51,13 @@ import model.unets as unets
 import model.DataModule as DataModule
 import model.LigtningModel as LigtningModel
 # import preprocessing.semisuperPreprosess
-# from ray.tune.integration.pytorch_lightning import TuneReportCallback
-
+from ray import air, tune
+from ray.air import session
+from ray.tune import CLIReporter
+from ray.tune.schedulers import ASHAScheduler, PopulationBasedTraining
+from ray.tune.integration.pytorch_lightning import TuneReportCallback, \
+    TuneReportCheckpointCallback
+from ray_lightning import RayShardedStrategy
 
 def isAnnytingInAnnotatedInner(row,colName):
     row=row[1]
@@ -86,7 +92,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     ,RandomMotion_prob
     ,RandomGhosting_prob
     ,RandomSpike_prob
-    ,RandomBiasField_prob,regression_channels ):        
+    ,RandomBiasField_prob,regression_channels,num_gpu,cpu_num ,default_root_dir,checkpoint_dir):        
 
     #TODO(remove)
     comet_logger = CometLogger(
@@ -105,7 +111,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         df= df,
         batch_size=6,#
         trainSizePercent=percentSplit,# 
-        num_workers=os.cpu_count(),
+        num_workers=cpu_num,#os.cpu_count(),
         drop_last=False,#True,
         #we need to use diffrent cache folders depending on weather we are dividing data or not
         cache_dir=cacheDir,
@@ -164,27 +170,83 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         mode="max",
         divergence_threshold=(-0.1)
     )
+    checkPointCallback=TuneReportCheckpointCallback(
+        metrics={
+            "loss": "avg_val_loss",
+            "mean_accuracy": "avg_val_acc"
+        },
+        filename="checkpoint",
+        on="validation_end")
+
+    # tuneCallBack=TuneReportCallback(
+    #     {
+    #         "loss": "avg_val_loss",
+    #         "mean_accuracy": "avg_val_acc"
+    #     },
+    #     on="validation_end")
+
+    strategy = RayShardedStrategy(num_workers=num_gpu, num_cpus_per_worker=1, use_gpu=True)
+
+
+
+    # trainer = pl.Trainer(
+    #     #accelerator="cpu", #TODO(remove)
+    #     #max_epochs=max_epochs,
+    #     #gpus=1,
+    #     #precision=experiment.get_parameter("precision"), 
+    #     callbacks=[ checkPointCallback ],# TODO unhash,#early_stopping
+    #     logger=comet_logger,
+    #     # accelerator='auto',
+    #     # devices='auto',       
+    #     default_root_dir= default_root_dir,
+    #     #auto_scale_batch_size="binsearch",
+    #     auto_lr_find=True,
+    #     check_val_every_n_epoch=10,
+    #     accumulate_grad_batches=accumulate_grad_batches,
+    #     gradient_clip_val=gradient_clip_val,# 0.5,2.0
+    #     log_every_n_steps=2,
+    #     strategy=strategy#'ddp'#'ddp' # for multi gpu training
+    # )
+    callbacks=[checkPointCallback]
+    kwargs = {
+        "max_epochs": max_epochs,
+        "callbacks" :callbacks,
+        "logger" : comet_logger,
+        "default_root_dir" : default_root_dir,
+        "auto_lr_find" : False,
+        "check_val_every_n_epoch" : 10,
+        "accumulate_grad_batches" : accumulate_grad_batches,
+        "gradient_clip_val" :gradient_clip_val,
+        "log_every_n_steps" :2,
+        "strategy" :strategy
+        }
+
+    if checkpoint_dir:
+        kwargs["resume_from_checkpoint"] = os.path.join(
+            checkpoint_dir, "checkpoint")
+
+    trainer = pl.Trainer(**kwargs)
 
 
     #stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging()
-    trainer = pl.Trainer(
-        #accelerator="cpu", #TODO(remove)
-        max_epochs=max_epochs,
-        #gpus=1,
-        #precision=experiment.get_parameter("precision"), 
-        callbacks=[ early_stopping ],# TODO unhash
-        logger=comet_logger,
-        accelerator='auto',
-        devices='auto',       
-        default_root_dir= "/home/sliceruser/data/lightning_logs",
-        auto_scale_batch_size="binsearch",
-        auto_lr_find=True,
-        check_val_every_n_epoch=10,
-        accumulate_grad_batches=accumulate_grad_batches,
-        gradient_clip_val=gradient_clip_val,# 0.5,2.0
-        log_every_n_steps=2,
-        #strategy='ddp'#'ddp' # for multi gpu training
-    )
+    # trainer = pl.Trainer(
+    #     #accelerator="cpu", #TODO(remove)
+    #     #max_epochs=max_epochs,
+    #     #gpus=1,
+    #     #precision=experiment.get_parameter("precision"), 
+    #     callbacks=[ checkPointCallback ],# TODO unhash,#early_stopping
+    #     logger=comet_logger,
+    #     # accelerator='auto',
+    #     # devices='auto',       
+    #     default_root_dir= "/home/sliceruser/data/lightning_logs",
+    #     #auto_scale_batch_size="binsearch",
+    #     auto_lr_find=True,
+    #     check_val_every_n_epoch=10,
+    #     accumulate_grad_batches=accumulate_grad_batches,
+    #     gradient_clip_val=gradient_clip_val,# 0.5,2.0
+    #     log_every_n_steps=2,
+    #     strategy=strategy#'ddp'#'ddp' # for multi gpu training
+    # )
     #setting batch size automatically
     #TODO(unhash)
     #trainer.tune(model, datamodule=data)

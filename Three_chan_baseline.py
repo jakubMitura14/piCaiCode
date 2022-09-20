@@ -72,18 +72,18 @@ semisuperPreprosess =loadLib("semisuperPreprosess", "/home/sliceruser/data/piCai
 
 
 
-def getParam(experiment,options,key,df):
+def getParam(config,options,key):
     """
     given integer returned from experiment 
     it will look into options dictionary and return required object
     """
-    integerr=experiment.get_parameter(key)
+    integerr=config[key]
     # print("keyy {key} ")
     # print(options[key])
     return options[key][integerr]
 
 
-def mainTrain(experiment,options,df,experiment_name,dummyDict):
+def mainTrain(config,df,experiment_name,dummyDict,num_gpu,cpu_num ,default_root_dir,checkpoint_dir,options):
     picaiLossArr_auroc_final=[]
     picaiLossArr_AP_final=[]
     picaiLossArr_score_final=[]
@@ -92,8 +92,10 @@ def mainTrain(experiment,options,df,experiment_name,dummyDict):
     in_channels=4
     out_channels=2
 
-    spacing_keyword=experiment.get_parameter("spacing_keyword")
-    sizeWord= "_maxSize_" #experiment.get_parameter("sizeWord")
+
+
+    spacing_keyword=config["spacing_keyword"]
+    sizeWord= "_maxSize_" #config["sizeWord")
     chan3_col_name=f"t2w{spacing_keyword}_3Chan{sizeWord}" 
     chan3_col_name_val=chan3_col_name 
     df=df.loc[df[chan3_col_name] != ' ']
@@ -108,40 +110,40 @@ def mainTrain(experiment,options,df,experiment_name,dummyDict):
     # img_size = sizz#(sizz[2],sizz[1],sizz[0])
     dummyLabelPath,img_size=dummyDict[spacing_keyword]
     print(f"aaaaaa  img_size {img_size}  {type(img_size)}")
-    RandGaussianNoised_prob=experiment.get_parameter("RandGaussianNoised_prob")
-    RandAdjustContrastd_prob=experiment.get_parameter("RandAdjustContrastd_prob")
-    RandGaussianSmoothd_prob=experiment.get_parameter("RandGaussianSmoothd_prob")
-    RandRicianNoised_prob=experiment.get_parameter("RandRicianNoised_prob")
-    RandFlipd_prob=experiment.get_parameter("RandFlipd_prob")
-    RandAffined_prob=experiment.get_parameter("RandAffined_prob")
-    RandCoarseDropoutd_prob=experiment.get_parameter("RandCoarseDropoutd_prob")
+    RandGaussianNoised_prob=config["RandGaussianNoised_prob"]
+    RandAdjustContrastd_prob=config["RandAdjustContrastd_prob"]
+    RandGaussianSmoothd_prob=config["RandGaussianSmoothd_prob"]
+    RandRicianNoised_prob=config["RandRicianNoised_prob"]
+    RandFlipd_prob=config["RandFlipd_prob"]
+    RandAffined_prob=config["RandAffined_prob"]
+    RandCoarseDropoutd_prob=config["RandCoarseDropoutd_prob"]
     is_whole_to_train= (sizeWord=="_maxSize_")
     centerCropSize=(81.0, 160.0, 192.0)#=getParam(experiment,options,"centerCropSize",df)
-    net=getParam(experiment,options,"models",df)
+    net=getParam(config,options,"models",df)
     
-    # strides=getParam(experiment,options,"stridesAndChannels",df)["strides"]
-    # channels=getParam(experiment,options,"stridesAndChannels",df)["channels"]
-    num_res_units= 0#experiment.get_parameter("num_res_units")
-    act = (Act.PRELU, {"init": 0.2}) #getParam(experiment,options,"act",df)
-    norm= (Norm.BATCH, {}) #getParam(experiment,options,"norm",df)
-    dropout= experiment.get_parameter("dropout")
-    criterion=  getParam(experiment,options,"lossF",df)# Our seg labels are single channel images indicating class index, rather than one-hot
-    optimizer_class= getParam(experiment,options,"optimizer_class",df)
-    regression_channels= getParam(experiment,options,"regression_channels",df)
-    accumulate_grad_batches=experiment.get_parameter("accumulate_grad_batches")
-    gradient_clip_val=experiment.get_parameter("gradient_clip_val")# 0.5,2.0
+    # strides=getParam(config,options,"stridesAndChannels",df)["strides"]
+    # channels=getParam(config,options,"stridesAndChannels",df)["channels"]
+    num_res_units= 0#config["num_res_units")
+    act = (Act.PRELU, {"init": 0.2}) #getParam(config,options,"act",df)
+    norm= (Norm.BATCH, {}) #getParam(config,options,"norm",df)
+    dropout= config["dropout"]
+    criterion=  getParam(config,options,"lossF",df)# Our seg labels are single channel images indicating class index, rather than one-hot
+    optimizer_class= getParam(config,options,"optimizer_class",df)
+    regression_channels= getParam(config,options,"regression_channels",df)
+    accumulate_grad_batches=config["accumulate_grad_batches")
+    gradient_clip_val=config["gradient_clip_val"]# 0.5,2.0
     net=net(dropout,img_size,in_channels,out_channels)
 
 
 
 
 
-    RandomElasticDeformation_prob=experiment.get_parameter("RandomElasticDeformation_prob")
-    RandomAnisotropy_prob=experiment.get_parameter("RandomAnisotropy_prob")
-    RandomMotion_prob=experiment.get_parameter("RandomMotion_prob")
-    RandomGhosting_prob=experiment.get_parameter("RandomGhosting_prob")
-    RandomSpike_prob=experiment.get_parameter("RandomSpike_prob")
-    RandomBiasField_prob=experiment.get_parameter("RandomBiasField_prob")
+    RandomElasticDeformation_prob=config["RandomElasticDeformation_prob"]
+    RandomAnisotropy_prob=config["RandomAnisotropy_prob"]
+    RandomMotion_prob=config["RandomMotion_prob"]
+    RandomGhosting_prob=config["RandomGhosting_prob"]
+    RandomSpike_prob=config["RandomSpike_prob"]
+    RandomBiasField_prob=config["RandomBiasField_prob"]
 
     os.makedirs('/home/sliceruser/data/temp', exist_ok = True)
     ThreeChanNoExperiment.train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
@@ -161,7 +163,7 @@ def mainTrain(experiment,options,df,experiment_name,dummyDict):
     # if(len(picaiLossArr_auroc_final)>0):
     #     experiment.log_metric("last_val_loss_auroc",np.nanmax(picaiLossArr_auroc_final))
     #     experiment.log_metric("last_val_loss_Ap",np.nanmax(picaiLossArr_AP_final))
-    experiment.log_metric("last_val_loss_score",np.nanmax(picaiLossArr_score_final))
+    # experiment.log_metric("last_val_loss_score",np.nanmax(picaiLossArr_score_final))
     
 
 
@@ -194,16 +196,16 @@ def mainTrain(experiment,options,df,experiment_name,dummyDict):
             ,"RandomGhosting_prob" :RandomGhosting_prob
             ,"RandomSpike_prob" :RandomSpike_prob
             ,"RandomBiasField_prob" :RandomBiasField_prob
-            ,"models" : experiment.get_parameter("models")
-            ,"criterion": experiment.get_parameter("lossF")
-            ,"optimizer_class" : experiment.get_parameter("optimizer_class")
-            ,"regression_channels" :experiment.get_parameter("regression_channels")
+            ,"models" : config["models")
+            ,"criterion": config["lossF")
+            ,"optimizer_class" : config["optimizer_class")
+            ,"regression_channels" :config["regression_channels")
             ,"last_val_loss_score":np.nanmax(picaiLossArr_score_final)   }
     dfOut=dfOut.append(series, ignore_index = True)
     dfOut.to_csv(csvPath)
 
     #experiment.log_parameters(parameters)  
-    experiment.end()
+    # experiment.end()
     #removing dummy label 
     #shutil.rmtree('/home/sliceruser/data/temp') 
 

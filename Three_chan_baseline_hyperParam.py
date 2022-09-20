@@ -47,9 +47,16 @@ from geomloss import SamplesLoss  # See also ImagesLoss, VolumesLoss
 
 import importlib.util
 import sys
+from pytorch_lightning.loggers import TensorBoardLogger
+from ray import air, tune
+from ray.air import session
+from ray.tune import CLIReporter
+from ray.tune.schedulers import ASHAScheduler, PopulationBasedTraining
+from ray.tune.integration.pytorch_lightning import TuneReportCallback, \
+    TuneReportCheckpointCallback
+from ray.tune.schedulers.pb2 import PB2
 
-
-torch.multiprocessing.freeze_support()
+# torch.multiprocessing.freeze_support()
 
 def loadLib(name,path):
     spec = importlib.util.spec_from_file_location(name, path)
@@ -67,21 +74,6 @@ Three_chan_baseline =loadLib("Three_chan_baseline", "/home/sliceruser/data/piCai
 detectSemiSupervised =loadLib("detectSemiSupervised", "/home/sliceruser/data/piCaiCode/model/detectSemiSupervised.py")
 semisuperPreprosess =loadLib("semisuperPreprosess", "/home/sliceruser/data/piCaiCode/preprocessing/semisuperPreprosess.py")
 
-
-
-#dirs=[]
-#def getPossibleColNames(spacing_keyword,sizeWord ):
-# for spacing_keyword in ["_med_spac", "_one_spac","_one_and_half_spac", "_two_spac" ]:     
-#     for sizeWord in ["_maxSize_","_div32_" ]: 
-#         cacheDir =  "/home/r/preprocess/monai_persistent_Dataset/{spacing_keyword}/{sizeWord}"
-#         #creating directory if not yet present
-#         os.makedirs(cacheDir, exist_ok = True)
-
-
-
-
-# Define a Sinkhorn (~Wasserstein) loss between sampled measures
-#loss = SamplesLoss(loss="sinkhorn")
 
 ##options
 to_onehot_y_loss= False
@@ -175,93 +167,31 @@ def getViTAutoEnc(dropout,input_image_size,in_channels,out_channels):
 #unet one spac sth like 16
 
 
-
+def getOptNAdam(lr):
+    return torch.optim.NAdam(lr=lr)
 
 #getViTAutoEnc,getAhnet,getSegResNetVAE,getAttentionUnet,getSwinUNETR,getSegResNet,getVNet,getUnetB
 options={
 
 "models":[getUnetA,getUnetB,getVNet,getSegResNet],
-# "models":[getSegResNet],
 "regression_channels":[[1,1,1],[2,4,8],[10,16,32]],
-#"regression_channels":[[2,4,8]],
 
 "lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
         # ,SamplesLoss(loss="sinkhorn",p=3)
         # ,SamplesLoss(loss="hausdorff",p=3)
         # ,SamplesLoss(loss="energy",p=3)
-        #,monai.losses.DiceLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
-        #,monai.losses.DiceLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
-        #,monai.losses.DiceFocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
         
 ],
-# "stridesAndChannels":  [ {
-#                                                             "strides":[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
-#                                                             ,"channels":[32, 64, 128, 256, 512, 1024]
-#                                                             },
-#                                                             #  {
-#                                                             # "strides":[(2, 2, 2), (1, 2, 2),(1, 1, 1), (1, 2, 2), (1, 2, 2), (2, 2, 2)]
-#                                                             # ,"channels":[32, 64, 128, 256, 512, 1024, 2048]
-#                                                             # },
-#                                                             {
-#                                                             "strides":[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2)]
-#                                                             ,"channels":[32, 64, 128, 256, 512]
-#                                                             }  ],
-"optimizer_class": [torch.optim.NAdam] ,#torch.optim.LBFGS ,torch.optim.LBFGS optim.AggMo,   look in https://pytorch-optimizer.readthedocs.io/en/latest/api.html
+
+"optimizer_class": [getOptNAdam] ,#torch.optim.LBFGS ,torch.optim.LBFGS optim.AggMo,   look in https://pytorch-optimizer.readthedocs.io/en/latest/api.html
 "act":[(Act.PRELU, {"init": 0.2})],#,(Act.LEAKYRELU, {})                                         
 "norm":[(Norm.BATCH, {}) ],
 "centerCropSize":[(256, 256,32)],
 #TODO() learning rate schedulers https://medium.com/mlearning-ai/make-powerful-deep-learning-models-quickly-using-pytorch-lightning-29f040158ef3
 }
 
-#####hyperparameters
-# based on https://www.comet.com/docs/python-sdk/introduction-optimizer/
-# We only need to specify the algorithm and hyperparameters to use:
-config = {
-    # We pick the Bayes algorithm:
-    "algorithm": "bayes",
 
-    # Declare  hyperparameters in 
-"parameters": {
-        "lossF": {"type": "discrete", "values": list(range(0,len(options["lossF"])))},
-        "regression_channels": {"type": "discrete", "values": list(range(0,len(options["regression_channels"])))},
-        #"stridesAndChannels": {"type": "discrete", "values":  list(range(0,len(options["stridesAndChannels"])))  },
-        "optimizer_class": {"type": "discrete", "values":list(range(0,len(options["optimizer_class"])))  },
-        "models": {"type": "discrete", "values":list(range(0,len(options["models"])))  },
-        # "num_res_units": {"type": "discrete", "values": [0]},#,1,2
-        # "act": {"type": "discrete", "values":list(range(0,len(options["act"])))  },#,(Act.LeakyReLU,{"negative_slope":0.1, "inplace":True} )
-        # "norm": {"type": "discrete", "values": list(range(0,len(options["norm"])))},
-        # "centerCropSize": {"type": "discrete", "values": list(range(0,len(options["centerCropSize"])))},
-        "dropout": {"type": "float", "min": 0.0, "max": 0.5},
-        #"precision": {"type": "discrete", "values": [16]},
-        #"max_epochs": {"type": "discrete", "values": [100]},#900
-        "accumulate_grad_batches": {"type": "discrete", "values": [1,3,10]},
-        "gradient_clip_val": {"type": "discrete", "values": [0.0, 0.2,0.5,2.0,100.0]},#,2.0, 0.2,0.5
-        "RandGaussianNoised_prob": {"type": "float", "min": 0.0, "max": 0.5},
-        "RandAdjustContrastd_prob": {"type": "float", "min": 0.3, "max": 0.8},
-        "RandGaussianSmoothd_prob": {"type": "discrete", "values": [0.0]},
-        "RandRicianNoised_prob": {"type": "float", "min": 0.2, "max": 0.7},
-        "RandFlipd_prob": {"type": "float", "min": 0.3, "max": 0.7},
-        "RandAffined_prob": {"type": "float", "min": 0.0, "max": 0.5},
-        "RandCoarseDropoutd_prob":{"type": "discrete", "values": [0.0]},
-        "spacing_keyword": {"type": "categorical", "values": ["_one_spac_c","_med_spac_b" ]},#      #"_med_spac","_one_and_half_spac", "_two_spac"
-        #"sizeWord": {"type": "categorical", "values": ["_maxSize_"]},#,"_maxSize_"# ,"_div32_"
-        #"dirs": {"type": "discrete", "values": list(range(0,len(options["dirs"])))},
-        "RandomElasticDeformation_prob": {"type": "float", "min": 0.0, "max": 0.3},
-        "RandomAnisotropy_prob": {"type": "float", "min": 0.0, "max": 0.3},
-        "RandomMotion_prob": {"type": "float", "min": 0.0, "max": 0.3},
-        "RandomGhosting_prob": {"type": "float", "min": 0.0, "max": 0.3},
-        "RandomSpike_prob": {"type": "float", "min": 0.0, "max": 0.3},
-        "RandomBiasField_prob": {"type": "float", "min": 0.0, "max": 0.3},
-  
-    },
 
-    # Declare what we will be optimizing, and how:
-    "spec": {
-    "metric": "last_val_loss_score",
-        "objective": "maximize",
-    },
-    "trials": 500
-}
 
 
 df = pd.read_csv("/home/sliceruser/data/metadata/processedMetaData_current_b.csv")
@@ -280,49 +210,234 @@ aa=list(map(getDummy  ,spacings  ))
 dummyDict={"_one_spac_c" :aa[0],"_med_spac_b":aa[1]   }
 
 
+################## TUNE definitions
+
+resources_per_trial = {"cpu": 6, "gpu": 1}
 
 
+config = {
+    "lr": 1e-3,
+        "lossF":tune.choice(list(range(0,len(options["lossF"])))),
+        "regression_channels": tune.choice( list(range(0,len(options["regression_channels"])))),
+        "optimizer_class": tune.choice(list(range(0,len(options["optimizer_class"])))),
+        "models": tune.choice(list(range(0,len(options["models"]))) ),
+        "dropout": {"type": "float", "min": 0.0, "max": 0.5},
+        "accumulate_grad_batches": tune.choice([1,3,10]),
+        "spacing_keyword": tune.choice(["_one_spac_c" ]),#,"_med_spac_b"
+
+        "gradient_clip_val": 10.0 ,#{"type": "discrete", "values": [0.0, 0.2,0.5,2.0,100.0]},#,2.0, 0.2,0.5
+        "RandGaussianNoised_prob": 0.01,#{"type": "float", "min": 0.0, "max": 0.5},
+        "RandAdjustContrastd_prob": 0.4,#{"type": "float", "min": 0.3, "max": 0.8},
+        "RandGaussianSmoothd_prob": 0.01,#{"type": "discrete", "values": [0.0]},
+        "RandRicianNoised_prob": 0.4,#{"type": "float", "min": 0.2, "max": 0.7},
+        "RandFlipd_prob": 0.4,#{"type": "float", "min": 0.3, "max": 0.7},
+        "RandAffined_prob": 0.2,#{"type": "float", "min": 0.0, "max": 0.5},
+        "RandCoarseDropoutd_prob": 0.01,# {"type": "discrete", "values": [0.0]},
+        "RandomElasticDeformation_prob": 0.1,#{"type": "float", "min": 0.0, "max": 0.3},
+        "RandomAnisotropy_prob": 0.1,# {"type": "float", "min": 0.0, "max": 0.3},
+        "RandomMotion_prob":  0.1,#{"type": "float", "min": 0.0, "max": 0.3},
+        "RandomGhosting_prob": 0.1,# {"type": "float", "min": 0.0, "max": 0.3},
+        "RandomSpike_prob": 0.1,# {"type": "float", "min": 0.0, "max": 0.3},
+        "RandomBiasField_prob": 0.1,# {"type": "float", "min": 0.0, "max": 0.3},
+
+    
+}
 
 
+    # config = {
+    #     "layer_1_size": tune.choice([32, 64, 128]),
+    #     "layer_2_size": tune.choice([64, 128, 256]),
+    #     "lr": 1e-3,
+    #     "batch_size": 64,
+    # }
 
-# maxSize=manageMetaData.getMaxSize("t2w_med_spac_b",df)
+pb2_scheduler = PB2(
+        time_attr="training_iteration",
+        metric='avg_val_acc',
+        mode='max',
+        perturbation_interval=20.0,
+        hyperparam_bounds={
+        "lr": [1e-2, 1e-5],
+            "gradient_clip_val": [0.0,100.0] ,#{"type": "discrete", "values": [0.0, 0.2,0.5,2.0,100.0]},#,2.0, 0.2,0.5
+            "RandGaussianNoised_prob": [0.0,1.0],#{"type": "float", "min": 0.0, "max": 0.5},
+            "RandAdjustContrastd_prob": [0.0,1.0],#{"type": "float", "min": 0.3, "max": 0.8},
+            "RandGaussianSmoothd_prob": [0.0,1.0],#{"type": "discrete", "values": [0.0]},
+            "RandRicianNoised_prob": [0.0,1.0],#{"type": "float", "min": 0.2, "max": 0.7},
+            "RandFlipd_prob":[0.0,1.0],#{"type": "float", "min": 0.3, "max": 0.7},
+            "RandAffined_prob": [0.0,1.0],#{"type": "float", "min": 0.0, "max": 0.5},
+            "RandCoarseDropoutd_prob": [0.0,1.0],# {"type": "discrete", "values": [0.0]},
+            "RandomElasticDeformation_prob":[0.0,1.0],#{"type": "float", "min": 0.0, "max": 0.3},
+            "RandomAnisotropy_prob": [0.0,1.0],# {"type": "float", "min": 0.0, "max": 0.3},
+            "RandomMotion_prob":  [0.0,1.0],#{"type": "float", "min": 0.0, "max": 0.3},
+            "RandomGhosting_prob":[0.0,1.0],# {"type": "float", "min": 0.0, "max": 0.3},
+            "RandomSpike_prob": [0.0,1.0],# {"type": "float", "min": 0.0, "max": 0.3},
+            "RandomBiasField_prob": [0.0,1.0],# {"type": "float", "min": 0.0, "max": 0.3},
+        })
 
-# exampleSpacing="_med_spac_b"
-# exampleSpacingB="_med_spac_b"
-# t2www=f"t2w{exampleSpacing}_3Chan_div32_"
-# labb=f"label{exampleSpacing}_div32_"
-
-# df= manageMetaData.load_df_only_full(
-#     df
-#     ,t2www
-#     ,labb
-#     ,True ,transformsForMain,t2www,labb )
-# df= manageMetaData.load_df_only_full(
-#     df
-#     ,f"t2w{exampleSpacingB}_3Chan_div32_"
-#     ,f"label{exampleSpacingB}_div32_"
-#     ,False,transformsForMain,t2www,labb )
-
-
-
-#COMET INFO: COMET_OPTIMIZER_ID=bfa44ecc70f348f1b05ecefcf8f7cd29
-
-# Next, create an optimizer, passing in the config:
-# (You can leave out API_KEY if you already set it)
-# opt = Optimizer("b30cda392d1691665aff2222691d720481c60f92", api_key="yB0irIjdk9t7gbpTlSUPnXBd4",trials=500)
-
-
-opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4",trials=500)
-# print("zzzzzzzzz")
-#  print(opt.get_experiments(
-#          api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
-#          project_name="picai-hyperparam-search-01"))
 
 experiment_name="picai-hyperparam-search-30"
-for experiment in opt.get_experiments(
-        project_name=experiment_name):
-    print("******* new experiment *****")    
-    Three_chan_baseline.mainTrain(experiment,options,df,experiment_name,dummyDict)
+# Three_chan_baseline.mainTrain(options,df,experiment_name,dummyDict)
+num_gpu=2
+cpu_num=12
+default_root_dir='/home/sliceruser/data/lightning'
+checkpoint_dir='/home/sliceruser/data/tuneCheckpoints'
+
+
+tuner = tune.Tuner(
+    tune.with_resources(
+        tune.with_parameters(
+            Three_chan_baseline.mainTrain,
+            options=options,
+            df=df,
+            experiment_name=experiment_name
+            ,dummyDict=dummyDict
+            ,num_gpu=num_gpu
+            ,cpu_num=cpu_num
+             ,default_root_dir=default_root_dir
+             ,checkpoint_dir=checkpoint_dir
+             ,options=options            
+            ),
+        resources={
+            "cpu": 6,
+            "gpu": 1
+        }
+    ),
+    tune_config=tune.TuneConfig(
+        metric="avg_val_acc",
+        mode="max",
+        scheduler=pb2_scheduler,
+        num_samples=num_gpu,
+    ),
+    run_config=air.RunConfig(
+        name=experiment_name,
+        # progress_reporter=reporter,
+    ),
+    param_space=config,
+)
+results = tuner.fit()
+
+# experiment_name="picai-hyperparam-search-30"
+# for experiment in opt.get_experiments(
+#         project_name=experiment_name):
+#     print("******* new experiment *****")    
+#     Three_chan_baseline.mainTrain(experiment,options,df,experiment_name,dummyDict)
 
 # os.remove(dummyLabelPath)   
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def train_mnist_tune(config, num_epochs=10, num_gpus=0, data_dir="~/data"):
+    data_dir = os.path.expanduser(data_dir)
+    model = LightningMNISTClassifier(config, data_dir)
+    trainer = pl.Trainer(
+        max_epochs=num_epochs,
+        # If fractional GPUs passed in, convert to int.
+        gpus=math.ceil(num_gpus),
+        logger=TensorBoardLogger(
+            save_dir=os.getcwd(), name="", version="."),
+        enable_progress_bar=False,
+        callbacks=[
+            TuneReportCallback(
+                {
+                    "loss": "ptl/val_loss",
+                    "mean_accuracy": "ptl/val_accuracy"
+                },
+                on="validation_end")
+        ])
+    trainer.fit(model)
+
+
+def tune_mnist_asha(num_samples=10, num_epochs=10, gpus_per_trial=0, data_dir="~/data"):
+    config = {
+        "layer_1_size": tune.choice([32, 64, 128]),
+        "layer_2_size": tune.choice([64, 128, 256]),
+        "lr": tune.loguniform(1e-4, 1e-1),
+        "batch_size": tune.choice([32, 64, 128]),
+    }
+
+    scheduler = ASHAScheduler(
+        max_t=num_epochs,
+        grace_period=1,
+        reduction_factor=2)
+
+    reporter = CLIReporter(
+        parameter_columns=["layer_1_size", "layer_2_size", "lr", "batch_size"],
+        metric_columns=["loss", "mean_accuracy", "training_iteration"])
+
+    train_fn_with_parameters = tune.with_parameters(train_mnist_tune,
+                                                    num_epochs=num_epochs,
+                                                    num_gpus=gpus_per_trial,
+                                                    data_dir=data_dir)
+    resources_per_trial = {"cpu": 1, "gpu": gpus_per_trial}
+    
+    tuner = tune.Tuner(
+        tune.with_resources(
+            train_fn_with_parameters,
+            resources=resources_per_trial
+        ),
+        tune_config=tune.TuneConfig(
+            metric="loss",
+            mode="min",
+            scheduler=scheduler,
+            num_samples=num_samples,
+        ),
+        run_config=air.RunConfig(
+            name="tune_mnist_asha",
+            progress_reporter=reporter,
+        ),
+        param_space=config,
+    )
+    results = tuner.fit()
+
+    print("Best hyperparameters found were: ", results.get_best_result().config)
+
+
+    def train_mnist_tune_checkpoint(config,
+                                checkpoint_dir=None,
+                                num_epochs=10,
+                                num_gpus=0,
+                                data_dir="~/data"):
+    data_dir = os.path.expanduser(data_dir)
+    kwargs = {
+        "max_epochs": num_epochs,
+        # If fractional GPUs passed in, convert to int.
+        "gpus": math.ceil(num_gpus),
+        "logger": TensorBoardLogger(
+            save_dir=os.getcwd(), name="", version="."),
+        "enable_progress_bar": False,
+        "callbacks": [
+            TuneReportCheckpointCallback(
+                metrics={
+                    "loss": "ptl/val_loss",
+                    "mean_accuracy": "ptl/val_accuracy"
+                },
+                filename="checkpoint",
+                on="validation_end")
+        ]
+    }
+
+    if checkpoint_dir:
+        kwargs["resume_from_checkpoint"] = os.path.join(
+            checkpoint_dir, "checkpoint")
+
+    model = LightningMNISTClassifier(config=config, data_dir=data_dir)
+    trainer = pl.Trainer(**kwargs)
+
+    trainer.fit(model)

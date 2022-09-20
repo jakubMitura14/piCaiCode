@@ -212,6 +212,7 @@ class Model(pl.LightningModule):
         self.postProcess=monai.transforms.Compose([monai.transforms.ForegroundMask()])#, monai.transforms.KeepLargestConnectedComponent()
         self.postTrue = Compose([EnsureType()])
         self.F1Score = torchmetrics.F1Score()
+        
         #shutil.rmtree(self.temp_val_dir) 
 
     def configure_optimizers(self):
@@ -260,7 +261,7 @@ class Model(pl.LightningModule):
         images, y_true,numLesions= batch['chan3_col_name_val'], batch["label_name_val"], batch['num_lesions_to_retain']
         #print(f" in validation images {images} labels {labels} "  )
   
-        patIds=batch['patient_id']
+        #patIds=batch['patient_id']
         y_det = self.net(images)# sliding_window_inference(images, (32,32,32), 1, self.net)
         #marking that we had some Nan numbers in the tensor
         if(torch.sum(torch.isnan( y_det))>0):
@@ -269,6 +270,15 @@ class Model(pl.LightningModule):
         total_loss= 0.0
 
         regress_res=self.modelRegression(y_det)
+
+        lossa = self.criterion(y_det, y_true)
+        numLesions2= list(map(int, numLesions ))
+
+        lossb=F.smooth_l1_loss(torch.flatten(regress_res), torch.flatten(numLesions2) )
+
+        val_losss=torch.add(lossa,lossb)    
+
+
         y_det = decollate_batch(y_det)
         y_true = decollate_batch(y_true)
         #TODO probably this [1,:,:,:] could break the evaluation ...
@@ -294,30 +304,37 @@ class Model(pl.LightningModule):
             # print(f"numLesions[i] {numLesions[i]}")    
             # total_loss+= (abs(regress_res_round-int(numLesions[i]) ) /len( y_det) )#arbitrary number
         
-        numLesions2= list(map(int, numLesions ))
         regress_res2= torch.flatten(regress_res) 
         regress_res3=list(map(lambda el:round(el) ,torch.flatten(regress_res2).cpu().detach().numpy() ))
         #print( f"torch.Tensor(numLesions).cpu() {torch.Tensor(numLesions).cpu()}  torch.Tensor(regress_res).cpu() {torch.Tensor(regress_res).cpu()}   ")
         #self.F1Score(torch.Tensor(regress_res3).int(), torch.Tensor(numLesions2).cpu().int())
         total_loss=precision_recall(torch.Tensor(regress_res3).int(), torch.Tensor(numLesions2).cpu().int(), average='macro', num_classes=4)
         total_loss1=torch.mean(torch.stack([total_loss[0],total_loss[1]] ))#self.F1Score
-        print(f" total loss a {total_loss1}")
+        print(f" total loss a {total_loss1} val_loss {val_losss}")
         total_loss2= torch.add(total_loss1,dice.aggregate())
         print(f" total loss b {total_loss2}  total_loss,dice.aggregate() {dice.aggregate()}")
 
         #print(f"sd.aggregate() {sd.aggregate().item()}")
         
         self.picaiLossArr_score_final.append(total_loss2.item())
-        print(f" validation_loss {total_loss2.item()} ")
-        self.log("validation_loss", total_loss2.item(), on_epoch=True, on_step=False, sync_dist=True, prog_bar=True, logger=True)
-        return {'val_loss': total_loss2.item()}
+        print(f" validation_acc {total_loss2.item()}  ")
+        self.log("validation_acc", total_loss2.item(), on_epoch=True, on_step=False, sync_dist=True, prog_bar=True, logger=True)
+        self.log("val_loss", val_losss.item(), on_epoch=True, on_step=False, sync_dist=True, prog_bar=True, logger=True)
+       
+        return {'val_acc': total_loss2.item(), 'val_loss':val_losss}
 
 
     def validation_epoch_end(self, outputs):
         
         avg_loss = np.nanmean(torch.stack([torch.as_tensor(x['val_loss']) for x in outputs]).cpu().detach().numpy())
         print(f"avg_val_loss { avg_loss}")
+        avg_acc = np.nanmean(torch.stack([torch.as_tensor(x['val_acc']) for x in outputs]).cpu().detach().numpy())
+
         self.log('avg_val_loss', avg_loss, on_epoch=True, sync_dist=True, prog_bar=True)
+        self.log('avg_val_acc', avg_acc, on_epoch=True, sync_dist=True, prog_bar=True)
+        return {'avg_val_loss': avg_loss, 'avg_val_acc':avg_acc}
+
+
 
 #43
 
