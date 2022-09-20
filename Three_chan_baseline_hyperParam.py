@@ -217,13 +217,13 @@ resources_per_trial = {"cpu": 6, "gpu": 1}
 
 config = {
     "lr": 1e-3,
-        "lossF":tune.choice(list(range(0,len(options["lossF"])))),
-        "regression_channels": tune.choice( list(range(0,len(options["regression_channels"])))),
-        "optimizer_class": tune.choice(list(range(0,len(options["optimizer_class"])))),
-        "models": tune.choice(list(range(0,len(options["models"]))) ),
-        "dropout": {"type": "float", "min": 0.0, "max": 0.5},
-        "accumulate_grad_batches": tune.choice([1,3,10]),
-        "spacing_keyword": tune.choice(["_one_spac_c" ]),#,"_med_spac_b"
+        "lossF":list(range(0,len(options["lossF"])))[0],
+        "regression_channels":   list(range(0,len(options["regression_channels"])))[0],
+        "optimizer_class":  list(range(0,len(options["optimizer_class"])))[0],
+        "models":  list(range(0,len(options["models"])))[0] ,
+        "dropout": 5.0,
+        "accumulate_grad_batches":  3,
+        "spacing_keyword":  "_one_spac_c" ,#,"_med_spac_b"
 
         "gradient_clip_val": 10.0 ,#{"type": "discrete", "values": [0.0, 0.2,0.5,2.0,100.0]},#,2.0, 0.2,0.5
         "RandGaussianNoised_prob": 0.01,#{"type": "float", "min": 0.0, "max": 0.5},
@@ -272,8 +272,13 @@ pb2_scheduler = PB2(
             "RandomGhosting_prob":[0.0,1.0],# {"type": "float", "min": 0.0, "max": 0.3},
             "RandomSpike_prob": [0.0,1.0],# {"type": "float", "min": 0.0, "max": 0.3},
             "RandomBiasField_prob": [0.0,1.0],# {"type": "float", "min": 0.0, "max": 0.3},
-        })
+            "dropout": [0.0,1.0],# {"type": "float", "min": 0.0, "max": 0.3},
+            "lossF":list(range(0,len(options["lossF"]))),
+            "regression_channels":   list(range(0,len(options["regression_channels"]))),
+            "optimizer_class":  list(range(0,len(options["optimizer_class"]))),
+            "models":  list(range(0,len(options["models"]))) ,
 
+        })
 
 experiment_name="picai-hyperparam-search-30"
 # Three_chan_baseline.mainTrain(options,df,experiment_name,dummyDict)
