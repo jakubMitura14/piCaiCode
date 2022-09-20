@@ -290,7 +290,7 @@ pb2_scheduler = PB2(
 experiment_name="picai-hyperparam-search-30"
 # Three_chan_baseline.mainTrain(options,df,experiment_name,dummyDict)
 num_gpu=2
-cpu_num=4 #per gpu
+cpu_num=8 #per gpu
 default_root_dir='/home/sliceruser/data/lightning'
 checkpoint_dir='/home/sliceruser/data/tuneCheckpoints1'
 num_cpus_per_worker=cpu_num
@@ -314,7 +314,7 @@ tuner = tune.Tuner(
         #     "gpu": 1
         # },
         resources=tune.PlacementGroupFactory(
-                [{'CPU': num_cpus_per_worker, 'GPU': 1.0}] + [{'CPU': num_cpus_per_worker, 'GPU': 1.0}]
+                [{'CPU': num_cpus_per_worker, 'GPU': 0.9}] + [{'CPU': num_cpus_per_worker, 'GPU': 0.9}]
             )
     ),
     tune_config=tune.TuneConfig(
@@ -328,7 +328,7 @@ tuner = tune.Tuner(
         # progress_reporter=reporter,
     ),
     param_space=config,
-    reuse_actors=True
+    #reuse_actors=True
 )
 results = tuner.fit()
 
