@@ -204,6 +204,7 @@ def mainTrain(config,df,experiment_name,dummyDict,num_gpu,cpu_num ,default_root_
     dfOut=dfOut.append(series, ignore_index = True)
     dfOut.to_csv(csvPath)
 
+
     #experiment.log_parameters(parameters)  
     # experiment.end()
     #removing dummy label 
