@@ -199,6 +199,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     # )
     callbacks=[checkPointCallback]
     kwargs = {
+        "accelerator":'auto',
         "max_epochs": max_epochs,
         "callbacks" :callbacks,
         "logger" : comet_logger,
