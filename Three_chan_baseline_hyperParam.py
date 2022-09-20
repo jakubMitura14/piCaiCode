@@ -309,10 +309,10 @@ dummyDict={"_one_spac_c" :aa[0],"_med_spac_b":aa[1]   }
 
 # Next, create an optimizer, passing in the config:
 # (You can leave out API_KEY if you already set it)
-opt = Optimizer("b30cda392d1691665aff2222691d720481c60f92", api_key="yB0irIjdk9t7gbpTlSUPnXBd4",trials=500)
+# opt = Optimizer("b30cda392d1691665aff2222691d720481c60f92", api_key="yB0irIjdk9t7gbpTlSUPnXBd4",trials=500)
 
 
-# opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4",trials=500)
+opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4",trials=500)
 # print("zzzzzzzzz")
 #  print(opt.get_experiments(
 #          api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
