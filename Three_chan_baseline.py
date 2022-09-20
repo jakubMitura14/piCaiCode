@@ -127,8 +127,13 @@ def mainTrain(config,df,experiment_name,dummyDict,num_gpu,cpu_num ,default_root_
     act = (Act.PRELU, {"init": 0.2}) #getParam(config,options,"act",df)
     norm= (Norm.BATCH, {}) #getParam(config,options,"norm",df)
     dropout= config["dropout"]
-    criterion=  getParam(config,options,"lossF",df)# Our seg labels are single channel images indicating class index, rather than one-hot
-    optimizer_class= getParam(config,options,"optimizer_class",df)(config["lr"])
+    to_onehot_y_loss= False
+    monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
+
+
+
+    criterion= monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)# Our seg labels are single channel images indicating class index, rather than one-hot
+    optimizer_class= torch.optim.NAdam(lr=config["lr"])#getParam(config,options,"optimizer_class",df)(config["lr"])
     regression_channels= getParam(config,options,"regression_channels",df)
     accumulate_grad_batches=config["accumulate_grad_batches"]
     gradient_clip_val=config["gradient_clip_val"]# 0.5,2.0

@@ -76,7 +76,7 @@ semisuperPreprosess =loadLib("semisuperPreprosess", "/home/sliceruser/data/piCai
 
 
 ##options
-to_onehot_y_loss= False
+
 
 
 
@@ -217,9 +217,9 @@ resources_per_trial = {"cpu": 6, "gpu": 1}
 
 config = {
     "lr": 1e-3,
-        "lossF":list(range(0,len(options["lossF"])))[0],
+        #"lossF":list(range(0,len(options["lossF"])))[0],
         "regression_channels":   list(range(0,len(options["regression_channels"])))[0],
-        "optimizer_class":  list(range(0,len(options["optimizer_class"])))[0],
+        #"optimizer_class":  list(range(0,len(options["optimizer_class"])))[0],
         "models":  list(range(0,len(options["models"])))[0] ,
         "dropout": 5.0,
         "accumulate_grad_batches":  3,
