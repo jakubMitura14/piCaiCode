@@ -312,7 +312,10 @@ tuner = tune.Tuner(
         resources={
             "cpu": cpu_num,
             "gpu": 1
-        }
+        },
+        resources_per_trial=tune.PlacementGroupFactory(
+                [{'CPU': num_cpus_per_worker, 'GPU': 1.0}] + [{'CPU': num_cpus_per_worker, 'GPU': 1.0}]
+            )
     ),
     tune_config=tune.TuneConfig(
         # metric="avg_val_acc",
