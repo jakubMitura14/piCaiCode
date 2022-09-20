@@ -185,6 +185,7 @@ class Model(pl.LightningModule):
     ,picaiLossArr_AP_final
     ,picaiLossArr_score_final
     ,regression_channels
+    ,lr
     ):
         super().__init__()
         self.lr = learning_rate
@@ -212,7 +213,7 @@ class Model(pl.LightningModule):
         self.postProcess=monai.transforms.Compose([monai.transforms.ForegroundMask()])#, monai.transforms.KeepLargestConnectedComponent()
         self.postTrue = Compose([EnsureType()])
         self.F1Score = torchmetrics.F1Score()
-        
+        self.lr=lr
         #shutil.rmtree(self.temp_val_dir) 
 
     def configure_optimizers(self):

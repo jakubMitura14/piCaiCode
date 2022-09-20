@@ -101,7 +101,6 @@ def mainTrain(config,df,experiment_name,dummyDict,num_gpu,cpu_num ,default_root_
     in_channels=4
     out_channels=2
 
-    pass
 
     spacing_keyword=config["spacing_keyword"]
     sizeWord= "_maxSize_" #config["sizeWord")
@@ -142,7 +141,7 @@ def mainTrain(config,df,experiment_name,dummyDict,num_gpu,cpu_num ,default_root_
 
 
     criterion= monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)# Our seg labels are single channel images indicating class index, rather than one-hot
-    optimizer_class= torch.optim.NAdam(lr=config["lr"])#getParam(config,options,"optimizer_class",df)(config["lr"])
+    optimizer_class= torch.optim.NAdam#(lr=config["lr"])#getParam(config,options,"optimizer_class",df)(config["lr"])
     regression_channels= options["regression_channels"][1] #getParam(config,options,"regression_channels",df)
     accumulate_grad_batches=config["accumulate_grad_batches"]
     gradient_clip_val=config["gradient_clip_val"]# 0.5,2.0
@@ -175,7 +174,7 @@ def mainTrain(config,df,experiment_name,dummyDict,num_gpu,cpu_num ,default_root_
     ,RandomMotion_prob
     ,RandomGhosting_prob
     ,RandomSpike_prob
-    ,RandomBiasField_prob,regression_channels,num_gpu,cpu_num ,default_root_dir,checkpoint_dir)
+    ,RandomBiasField_prob,regression_channels,num_gpu,cpu_num ,default_root_dir,checkpoint_dir,config["lr"])
     # if(len(picaiLossArr_auroc_final)>0):
     #     experiment.log_metric("last_val_loss_auroc",np.nanmax(picaiLossArr_auroc_final))
     #     experiment.log_metric("last_val_loss_Ap",np.nanmax(picaiLossArr_AP_final))
