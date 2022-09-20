@@ -273,9 +273,9 @@ pb2_scheduler = PB2(
             "RandomSpike_prob": [0.0,1.0],# {"type": "float", "min": 0.0, "max": 0.3},
             "RandomBiasField_prob": [0.0,1.0],# {"type": "float", "min": 0.0, "max": 0.3},
             "dropout": [0.0,1.0],# {"type": "float", "min": 0.0, "max": 0.3},
-            "lossF":list(range(0,len(options["lossF"]))),
+            #"lossF":list(range(0,len(options["lossF"]))),
             "regression_channels":   list(range(0,len(options["regression_channels"]))),
-            "optimizer_class":  list(range(0,len(options["optimizer_class"]))),
+            #"optimizer_class":  list(range(0,len(options["optimizer_class"]))),
             "models":  list(range(0,len(options["models"]))) ,
 
         })
