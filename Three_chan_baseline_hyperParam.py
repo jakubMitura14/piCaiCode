@@ -55,6 +55,12 @@ from ray.tune.schedulers import ASHAScheduler, PopulationBasedTraining
 from ray.tune.integration.pytorch_lightning import TuneReportCallback, \
     TuneReportCheckpointCallback
 from ray.tune.schedulers.pb2 import PB2
+# Import placement group APIs.
+from ray.util.placement_group import (
+    placement_group,
+    placement_group_table,
+    remove_placement_group
+)
 
 # torch.multiprocessing.freeze_support()
 
@@ -284,10 +290,10 @@ pb2_scheduler = PB2(
 experiment_name="picai-hyperparam-search-30"
 # Three_chan_baseline.mainTrain(options,df,experiment_name,dummyDict)
 num_gpu=2
-cpu_num=12
+cpu_num=4 #per gpu
 default_root_dir='/home/sliceruser/data/lightning'
 checkpoint_dir='/home/sliceruser/data/tuneCheckpoints1'
-
+num_cpus_per_worker=cpu_num
 
 tuner = tune.Tuner(
     tune.with_resources(
@@ -300,10 +306,11 @@ tuner = tune.Tuner(
             ,cpu_num=cpu_num
              ,default_root_dir=default_root_dir
              ,checkpoint_dir=checkpoint_dir
-             ,options=options            
+             ,options=options
+             ,num_cpus_per_worker=num_cpus_per_worker            
             ),
         resources={
-            "cpu": 6,
+            "cpu": cpu_num,
             "gpu": 1
         }
     ),

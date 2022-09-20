@@ -83,7 +83,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     ,RandomMotion_prob
     ,RandomGhosting_prob
     ,RandomSpike_prob
-    ,RandomBiasField_prob,regression_channels,num_gpu,cpu_num ,default_root_dir,checkpoint_dir,lr):        
+    ,RandomBiasField_prob,regression_channels,num_gpu,cpu_num ,default_root_dir,checkpoint_dir,lr,num_cpus_per_worker):        
     #TODO(remove)
     comet_logger = CometLogger(
         api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
@@ -175,7 +175,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     #     },
     #     on="validation_end")
 
-    strategy = RayShardedStrategy(num_workers=num_gpu, num_cpus_per_worker=1, use_gpu=True)
+    strategy = RayShardedStrategy(num_workers=num_gpu, num_cpus_per_worker=num_cpus_per_worker, use_gpu=True)
 
 
 
