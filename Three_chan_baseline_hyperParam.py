@@ -255,9 +255,9 @@ pb2_scheduler = PB2(
         time_attr="training_iteration",
         metric='avg_val_acc',
         mode='max',
-        perturbation_interval=20.0,
+        perturbation_interval=90.0,
         hyperparam_bounds={
-        "lr": [1e-2, 1e-5],
+            "lr": [1e-2, 1e-5],
             "gradient_clip_val": [0.0,100.0] ,#{"type": "discrete", "values": [0.0, 0.2,0.5,2.0,100.0]},#,2.0, 0.2,0.5
             "RandGaussianNoised_prob": [0.0,1.0],#{"type": "float", "min": 0.0, "max": 0.5},
             "RandAdjustContrastd_prob": [0.0,1.0],#{"type": "float", "min": 0.3, "max": 0.8},

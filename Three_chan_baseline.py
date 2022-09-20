@@ -128,9 +128,9 @@ def mainTrain(config,df,experiment_name,dummyDict,num_gpu,cpu_num ,default_root_
     norm= (Norm.BATCH, {}) #getParam(config,options,"norm",df)
     dropout= config["dropout"]
     criterion=  getParam(config,options,"lossF",df)# Our seg labels are single channel images indicating class index, rather than one-hot
-    optimizer_class= getParam(config,options,"optimizer_class",df)
+    optimizer_class= getParam(config,options,"optimizer_class",df)(config["lr"])
     regression_channels= getParam(config,options,"regression_channels",df)
-    accumulate_grad_batches=config["accumulate_grad_batches")
+    accumulate_grad_batches=config["accumulate_grad_batches"]
     gradient_clip_val=config["gradient_clip_val"]# 0.5,2.0
     net=net(dropout,img_size,in_channels,out_channels)
 
