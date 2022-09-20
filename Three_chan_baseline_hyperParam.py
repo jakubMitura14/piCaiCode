@@ -176,12 +176,12 @@ options={
 "models":[getUnetA,getUnetB,getVNet,getSegResNet],
 "regression_channels":[[1,1,1],[2,4,8],[10,16,32]],
 
-"lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
-        # ,SamplesLoss(loss="sinkhorn",p=3)
-        # ,SamplesLoss(loss="hausdorff",p=3)
-        # ,SamplesLoss(loss="energy",p=3)
+# "lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
+#         # ,SamplesLoss(loss="sinkhorn",p=3)
+#         # ,SamplesLoss(loss="hausdorff",p=3)
+#         # ,SamplesLoss(loss="energy",p=3)
         
-],
+# ],
 
 "optimizer_class": [getOptNAdam] ,#torch.optim.LBFGS ,torch.optim.LBFGS optim.AggMo,   look in https://pytorch-optimizer.readthedocs.io/en/latest/api.html
 "act":[(Act.PRELU, {"init": 0.2})],#,(Act.LEAKYRELU, {})                                         
