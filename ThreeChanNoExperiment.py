@@ -165,7 +165,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
             "loss": "avg_val_loss",
             "mean_accuracy": "avg_val_acc"
         },
-        filename="checkpoint",
+        filename="checkpointtt",
         on="validation_end")
 
     # tuneCallBack=TuneReportCallback(
