@@ -82,7 +82,8 @@ Three_chan_baseline =loadLib("Three_chan_baseline", "/home/sliceruser/data/piCai
 detectSemiSupervised =loadLib("detectSemiSupervised", "/home/sliceruser/data/piCaiCode/model/detectSemiSupervised.py")
 semisuperPreprosess =loadLib("semisuperPreprosess", "/home/sliceruser/data/piCaiCode/preprocessing/semisuperPreprosess.py")
 
-
+import ray
+ray.init(runtime_env={"env_vars": {"PL_DISABLE_FORK": "1"}})
 ##options
 
 
