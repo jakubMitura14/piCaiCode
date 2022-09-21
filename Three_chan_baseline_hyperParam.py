@@ -203,6 +203,7 @@ options={
 
 
 
+
 df = pd.read_csv("/home/sliceruser/data/metadata/processedMetaData_current_b.csv")
 spacings =  ["_one_spac_c" ,"_med_spac_b" ]# ,"_med_spac_b" #config['parameters']['spacing_keyword']["values"]
 
@@ -294,6 +295,7 @@ num_gpu=2
 cpu_num=8 #per gpu
 default_root_dir='/home/sliceruser/data/lightning'
 checkpoint_dir='/home/sliceruser/data/tuneCheckpoints2'
+os.makedirs(checkpoint_dir,  exist_ok = False) 
 num_cpus_per_worker=cpu_num
 
 tuner = tune.Tuner(
