@@ -275,7 +275,7 @@ class Model(pl.LightningModule):
         lossa = self.criterion(y_det, y_true)
         numLesions2= list(map(int, numLesions ))
 
-        lossb=F.smooth_l1_loss(torch.flatten(regress_res), torch.flatten(torch.tensor(numLesions2)) )
+        lossb=F.smooth_l1_loss(torch.flatten(regress_res).cpu(), torch.flatten(torch.tensor(numLesions2)).cpu() )
 
         val_losss=torch.add(lossa,lossb)    
 
