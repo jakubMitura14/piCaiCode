@@ -175,7 +175,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     #     },
     #     on="validation_end")
 
-    strategy = RayShardedStrategy(num_workers=1, num_cpus_per_worker=num_cpus_per_worker, use_gpu=True)
+    strategy = RayShardedStrategy(num_workers=2, num_cpus_per_worker=num_cpus_per_worker, use_gpu=True)
 
 
 
@@ -199,7 +199,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     # )
     callbacks=[checkPointCallback]
     kwargs = {
-        #"accelerator":'auto',
+        "accelerator":'auto',
         "max_epochs": max_epochs,
         "callbacks" :callbacks,
         "logger" : comet_logger,
