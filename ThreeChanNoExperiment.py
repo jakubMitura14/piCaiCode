@@ -175,7 +175,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     #     },
     #     on="validation_end")
 
-    strategy = RayShardedStrategy(num_workers=2, num_cpus_per_worker=1, use_gpu=True)
+    strategy = RayShardedStrategy(num_workers=2,  use_gpu=True)#num_cpus_per_worker=1,
 
 
 
