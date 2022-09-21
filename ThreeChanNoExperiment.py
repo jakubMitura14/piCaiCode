@@ -199,7 +199,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     # )
     callbacks=[checkPointCallback]
     kwargs = {
-        #"accelerator":'auto',
+        "accelerator":'auto',
         "max_epochs": max_epochs,
         "callbacks" :callbacks,
         "logger" : comet_logger,
@@ -212,9 +212,9 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         #"strategy" :strategy
         }
 
-    if checkpoint_dir:
-        kwargs["resume_from_checkpoint"] = os.path.join(
-            checkpoint_dir, "checkpoint")
+    # if checkpoint_dir:
+    #     kwargs["resume_from_checkpoint"] = os.path.join(
+    #         checkpoint_dir, "checkpoint")
 
     trainer = pl.Trainer(**kwargs)
 

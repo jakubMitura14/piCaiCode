@@ -293,9 +293,10 @@ experiment_name="picai-hyperparam-search-30"
 # Three_chan_baseline.mainTrain(options,df,experiment_name,dummyDict)
 num_gpu=2
 cpu_num=8 #per gpu
-default_root_dir='/home/sliceruser/data/lightning'
+default_root_dir='/home/sliceruser/data/lightningB'
 checkpoint_dir='/home/sliceruser/data/tuneCheckpoints2'
 os.makedirs(checkpoint_dir,  exist_ok = False) 
+os.makedirs(default_root_dir,  exist_ok = False) 
 num_cpus_per_worker=cpu_num
 
 tuner = tune.Tuner(
