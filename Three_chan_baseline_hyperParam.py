@@ -294,9 +294,9 @@ experiment_name="picai-hyperparam-search-30"
 num_gpu=2
 cpu_num=8 #per gpu
 default_root_dir='/home/sliceruser/data/lightningB'
-checkpoint_dir='/home/sliceruser/data/tuneCheckpoints2'
-os.makedirs(checkpoint_dir,  exist_ok = True) 
-os.makedirs(default_root_dir,  exist_ok = True) 
+checkpoint_dir='/home/sliceruser/data/tuneCheckpoints3'
+# os.makedirs(checkpoint_dir,  exist_ok = True) 
+# os.makedirs(default_root_dir,  exist_ok = True) 
 num_cpus_per_worker=cpu_num
 
 tuner = tune.Tuner(
