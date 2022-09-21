@@ -293,7 +293,7 @@ experiment_name="picai-hyperparam-search-30"
 num_gpu=2
 cpu_num=8 #per gpu
 default_root_dir='/home/sliceruser/data/lightning'
-checkpoint_dir='/home/sliceruser/data/tuneCheckpoints1'
+checkpoint_dir='/home/sliceruser/data/tuneCheckpoints2'
 num_cpus_per_worker=cpu_num
 
 tuner = tune.Tuner(
