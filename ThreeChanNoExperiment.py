@@ -212,7 +212,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         #"strategy" :strategy
         }
 
-    if os.path.join(checkpoint_dir, "checkpointtt"):
+    if os.path.exists(os.path.join(checkpoint_dir, "checkpointtt")):
         kwargs["resume_from_checkpoint"] = os.path.join(
             checkpoint_dir, "checkpointtt")
 
