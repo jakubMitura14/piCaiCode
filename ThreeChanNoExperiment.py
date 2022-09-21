@@ -175,7 +175,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     #     },
     #     on="validation_end")
 
-    strategy = RayShardedStrategy(num_workers=num_gpu, num_cpus_per_worker=num_cpus_per_worker, use_gpu=True)
+    # strategy = RayShardedStrategy(num_workers=num_gpu, num_cpus_per_worker=num_cpus_per_worker, use_gpu=True)
 
 
 
@@ -209,7 +209,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         "accumulate_grad_batches" : accumulate_grad_batches,
         "gradient_clip_val" :gradient_clip_val,
         "log_every_n_steps" :2,
-        "strategy" :strategy
+        #"strategy" :strategy
         }
 
     if checkpoint_dir:

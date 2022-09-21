@@ -62,6 +62,8 @@ from ray.util.placement_group import (
     remove_placement_group
 )
 
+from ray_lightning.tune import TuneReportCallback, get_tune_resources
+
 # torch.multiprocessing.freeze_support()
 
 def loadLib(name,path):
@@ -312,9 +314,7 @@ tuner = tune.Tuner(
         #     "cpu": cpu_num,
         #     "gpu": 1
         # },
-        resources=tune.PlacementGroupFactory(
-                [{'CPU': num_cpus_per_worker, 'GPU': 1.0}] + [{'CPU': num_cpus_per_worker, 'GPU': 1.0}]
-            )
+        resources=get_tune_resources(num_workers=2, use_gpu=True)
     ),
     tune_config=tune.TuneConfig(
         # metric="avg_val_acc",
