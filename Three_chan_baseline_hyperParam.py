@@ -317,7 +317,7 @@ tuner = tune.Tuner(
         #     "cpu": cpu_num,
         #     "gpu": 1
         # },
-        resources=get_tune_resources(num_workers=2, use_gpu=True)
+        resources=get_tune_resources(num_workers=1, use_gpu=True)
     ),
     tune_config=tune.TuneConfig(
         # metric="avg_val_acc",
