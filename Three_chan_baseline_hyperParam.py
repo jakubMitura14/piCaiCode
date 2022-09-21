@@ -313,11 +313,11 @@ tuner = tune.Tuner(
              ,options=options
              ,num_cpus_per_worker=num_cpus_per_worker            
             ),
-        # resources={
-        #     "cpu": cpu_num,
-        #     "gpu": 1
-        # },
-        resources=get_tune_resources(num_workers=1, use_gpu=True)
+        resources={
+            "cpu": cpu_num,
+            "gpu": 2
+        },
+        # resources=get_tune_resources(num_workers=1, use_gpu=True)
     ),
     tune_config=tune.TuneConfig(
         # metric="avg_val_acc",
