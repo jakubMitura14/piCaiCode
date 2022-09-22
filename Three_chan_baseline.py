@@ -96,7 +96,7 @@ def mainTrain(config,df,experiment_name,dummyDict,num_workers,cpu_num ,default_r
     picaiLossArr_auroc_final=[]
     picaiLossArr_AP_final=[]
     picaiLossArr_score_final=[]
-    max_epochs=15#100#experiment.get_parameter("max_epochs")
+    max_epochs=3#100#experiment.get_parameter("max_epochs")
     
     in_channels=4
     out_channels=2
@@ -127,7 +127,7 @@ def mainTrain(config,df,experiment_name,dummyDict,num_workers,cpu_num ,default_r
     RandCoarseDropoutd_prob=config["RandCoarseDropoutd_prob"]
     is_whole_to_train= (sizeWord=="_maxSize_")
     centerCropSize=(81.0, 160.0, 192.0)#=getParam(experiment,options,"centerCropSize",df)
-    net= options["models"][0]#   getParam(config,options,"models",df)
+    net= getParam(config,options,"models") #options["models"][0]#   
     
     # strides=getParam(config,options,"stridesAndChannels",df)["strides"]
     # channels=getParam(config,options,"stridesAndChannels",df)["channels"]
@@ -143,7 +143,7 @@ def mainTrain(config,df,experiment_name,dummyDict,num_workers,cpu_num ,default_r
 
     criterion= monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)# Our seg labels are single channel images indicating class index, rather than one-hot
     optimizer_class= torch.optim.NAdam#(lr=config["lr"])#getParam(config,options,"optimizer_class",df)(config["lr"])
-    regression_channels= options["regression_channels"][1] #getParam(config,options,"regression_channels",df)
+    regression_channels= getParam(config,options,"regression_channels")#options["regression_channels"][1] #getParam(config,options,"regression_channels",df)
     accumulate_grad_batches=config["accumulate_grad_batches"]
     gradient_clip_val=config["gradient_clip_val"]# 0.5,2.0
     net=net(dropout,img_size,in_channels,out_channels)
