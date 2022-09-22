@@ -292,7 +292,7 @@ pb2_scheduler = PB2(
 
 experiment_name="picai-hyperparam-search-30"
 # Three_chan_baseline.mainTrain(options,df,experiment_name,dummyDict)
-num_gpu=2
+num_workers=2
 cpu_num=11 #per gpu
 default_root_dir='/home/sliceruser/data/lightningC'
 checkpoint_dir='/home/sliceruser/data/tuneCheckpoints4'
@@ -307,7 +307,7 @@ tuner = tune.Tuner(
             df=df,
             experiment_name=experiment_name
             ,dummyDict=dummyDict
-            ,num_gpu=num_gpu
+            ,num_workers=num_workers
             ,cpu_num=cpu_num
              ,default_root_dir=default_root_dir
              ,checkpoint_dir=checkpoint_dir
@@ -318,13 +318,13 @@ tuner = tune.Tuner(
         #     "cpu": cpu_num,
         #     "gpu": 2
         # },
-        resources=get_tune_resources(num_workers=2, use_gpu=True,num_cpus_per_worker=num_cpus_per_worker)
+        resources=get_tune_resources(num_workers=num_workers, use_gpu=True,num_cpus_per_worker=num_cpus_per_worker)
     ),
     tune_config=tune.TuneConfig(
         # metric="avg_val_acc",
         # mode="max",
         scheduler=pb2_scheduler,
-        #num_samples=1#num_gpu,
+        #num_samples=1#num_workers,
     ),
     run_config=air.RunConfig(
         name=experiment_name,
@@ -362,13 +362,13 @@ results = tuner.fit()
 
 
 
-# def train_mnist_tune(config, num_epochs=10, num_gpus=0, data_dir="~/data"):
+# def train_mnist_tune(config, num_epochs=10, num_workerss=0, data_dir="~/data"):
 #     data_dir = os.path.expanduser(data_dir)
 #     model = LightningMNISTClassifier(config, data_dir)
 #     trainer = pl.Trainer(
 #         max_epochs=num_epochs,
 #         # If fractional GPUs passed in, convert to int.
-#         gpus=math.ceil(num_gpus),
+#         gpus=math.ceil(num_workerss),
 #         logger=TensorBoardLogger(
 #             save_dir=os.getcwd(), name="", version="."),
 #         enable_progress_bar=False,
@@ -402,7 +402,7 @@ results = tuner.fit()
 
 #     train_fn_with_parameters = tune.with_parameters(train_mnist_tune,
 #                                                     num_epochs=num_epochs,
-#                                                     num_gpus=gpus_per_trial,
+#                                                     num_workerss=gpus_per_trial,
 #                                                     data_dir=data_dir)
 #     resources_per_trial = {"cpu": 1, "gpu": gpus_per_trial}
     
@@ -431,13 +431,13 @@ results = tuner.fit()
 #     def train_mnist_tune_checkpoint(config,
 #                                 checkpoint_dir=None,
 #                                 num_epochs=10,
-#                                 num_gpus=0,
+#                                 num_workerss=0,
 #                                 data_dir="~/data"):
 #     data_dir = os.path.expanduser(data_dir)
 #     kwargs = {
 #         "max_epochs": num_epochs,
 #         # If fractional GPUs passed in, convert to int.
-#         "gpus": math.ceil(num_gpus),
+#         "gpus": math.ceil(num_workerss),
 #         "logger": TensorBoardLogger(
 #             save_dir=os.getcwd(), name="", version="."),
 #         "enable_progress_bar": False,
