@@ -183,7 +183,7 @@ def getOptNAdam(lr):
 options={
 
 # "models":[getUnetA,getUnetB,getVNet,getSegResNet],
-"models":[getSegResNet,getVNet],
+"models":[getVNet],
 "regression_channels":[[1,1,1],[2,4,8],[10,16,32]],
 
 # "lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
@@ -294,8 +294,8 @@ experiment_name="picai-hyperparam-search-30"
 # Three_chan_baseline.mainTrain(options,df,experiment_name,dummyDict)
 num_workers=2
 cpu_num=11 #per gpu
-default_root_dir='/home/sliceruser/data/lightningd'
-checkpoint_dir='/home/sliceruser/data/tuneCheckpoints5'
+default_root_dir='/home/sliceruser/data/lightninge'
+checkpoint_dir='/home/sliceruser/data/tuneCheckpoints6'
 os.makedirs(checkpoint_dir,  exist_ok = True) 
 # os.makedirs(default_root_dir,  exist_ok = True) 
 num_cpus_per_worker=cpu_num
