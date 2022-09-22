@@ -336,7 +336,9 @@ num_cpus_per_worker=cpu_num
 # )
 # result_grid = tuner.fit()
 
-
+reporter = CLIReporter(
+        parameter_columns=["lr"],
+        metric_columns=["mean_accuracy"])
 
 result_grid=tune.run(
         tune.with_parameters(
