@@ -296,6 +296,7 @@ num_workers=2
 cpu_num=11 #per gpu
 default_root_dir='/home/sliceruser/data/lightninghj'
 checkpoint_dir='/home/sliceruser/data/tuneCheckpoints11'
+mainTuneDir='/home/sliceruser/data/mainTuneDir'
 os.makedirs(checkpoint_dir,  exist_ok = True) 
 # os.makedirs(default_root_dir,  exist_ok = True) 
 num_cpus_per_worker=cpu_num
@@ -356,7 +357,12 @@ result_grid=tune.run(
         num_samples=2,
         resources_per_trial=get_tune_resources(num_workers=num_workers, use_gpu=True,num_cpus_per_worker=num_cpus_per_worker),
         scheduler=pb2_scheduler,
-        name=experiment_name)
+        name=experiment_name,
+        local_dir=mainTuneDir,
+        log_to_file=True,
+        
+        
+        )
         
 
 
