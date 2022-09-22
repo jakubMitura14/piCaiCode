@@ -362,7 +362,7 @@ result_grid=tune.run(
         name=experiment_name,
         local_dir=mainTuneDir,
         log_to_file=True,
-        
+        reporter=reporter
         
         )
         
