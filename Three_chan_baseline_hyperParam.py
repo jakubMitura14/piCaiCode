@@ -350,8 +350,8 @@ result_grid=tune.run(
              ,options=options
              ,num_cpus_per_worker=num_cpus_per_worker            
             ),
-        metric="ptl/val_accuracy",
-        mode="max",
+        # metric="ptl/val_accuracy",
+        # mode="max",
         config=config,
         num_samples=2,
         resources_per_trial=get_tune_resources(num_workers=num_workers, use_gpu=True,num_cpus_per_worker=num_cpus_per_worker),
