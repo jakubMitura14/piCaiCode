@@ -195,30 +195,30 @@ def mainTrain(config,df,experiment_name,dummyDict,num_workers,cpu_num ,default_r
 
         dfOut=pd.read_csv(csvPath)
 
-    series= {"chan3_col_name" :chan3_col_name
-            ,"RandGaussianNoised_prob" :RandGaussianNoised_prob
-            ,"RandAdjustContrastd_prob" :RandAdjustContrastd_prob
-            ,"RandGaussianSmoothd_prob":RandGaussianSmoothd_prob
-            ,"RandRicianNoised_prob" :RandRicianNoised_prob
-            ,"RandFlipd_prob" :RandFlipd_prob
-            , "RandAffined_prob" :RandAffined_prob
-            ,"RandCoarseDropoutd_prob" :RandCoarseDropoutd_prob
-            ,"dropout" :dropout
-            ,"accumulate_grad_batches" :accumulate_grad_batches
-            ,"gradient_clip_val" :gradient_clip_val
-            ,"RandomElasticDeformation_prob" :RandomElasticDeformation_prob
-            ,"RandomAnisotropy_prob" :RandomAnisotropy_prob
-            ,"RandomMotion_prob" :RandomMotion_prob
-            ,"RandomGhosting_prob" :RandomGhosting_prob
-            ,"RandomSpike_prob" :RandomSpike_prob
-            ,"RandomBiasField_prob" :RandomBiasField_prob
-            #,"models" : config["models"]
-           # ,"criterion": config["lossF"]
-           # ,"optimizer_class" : config["optimizer_class"]
-            #,"regression_channels" :config["regression_channels"]
-            ,"last_val_loss_score":np.nanmax(picaiLossArr_score_final)   }
-    dfOut=dfOut.append(series, ignore_index = True)
-    dfOut.to_csv(csvPath)
+    # series= {"chan3_col_name" :chan3_col_name
+    #         ,"RandGaussianNoised_prob" :RandGaussianNoised_prob
+    #         ,"RandAdjustContrastd_prob" :RandAdjustContrastd_prob
+    #         ,"RandGaussianSmoothd_prob":RandGaussianSmoothd_prob
+    #         ,"RandRicianNoised_prob" :RandRicianNoised_prob
+    #         ,"RandFlipd_prob" :RandFlipd_prob
+    #         , "RandAffined_prob" :RandAffined_prob
+    #         ,"RandCoarseDropoutd_prob" :RandCoarseDropoutd_prob
+    #         ,"dropout" :dropout
+    #         ,"accumulate_grad_batches" :accumulate_grad_batches
+    #         ,"gradient_clip_val" :gradient_clip_val
+    #         ,"RandomElasticDeformation_prob" :RandomElasticDeformation_prob
+    #         ,"RandomAnisotropy_prob" :RandomAnisotropy_prob
+    #         ,"RandomMotion_prob" :RandomMotion_prob
+    #         ,"RandomGhosting_prob" :RandomGhosting_prob
+    #         ,"RandomSpike_prob" :RandomSpike_prob
+    #         ,"RandomBiasField_prob" :RandomBiasField_prob
+    #         #,"models" : config["models"]
+    #        # ,"criterion": config["lossF"]
+    #        # ,"optimizer_class" : config["optimizer_class"]
+    #         #,"regression_channels" :config["regression_channels"]
+    #         ,"last_val_loss_score":np.nanmax(picaiLossArr_score_final)   }
+    # dfOut=dfOut.append(series, ignore_index = True)
+    # dfOut.to_csv(csvPath)
 
 
     #experiment.log_parameters(parameters)  
