@@ -263,7 +263,7 @@ config = {
 
 pb2_scheduler = PB2(
         time_attr="training_iteration",
-        metric='avg_val_acc',
+        metric='ptl/val_accuracy',
         mode='max',
         perturbation_interval=10.0,
         hyperparam_bounds={
@@ -321,7 +321,7 @@ tuner = tune.Tuner(
         resources=get_tune_resources(num_workers=num_workers, use_gpu=True,num_cpus_per_worker=num_cpus_per_worker)
     ),
     tune_config=tune.TuneConfig(
-        # metric="avg_val_acc",
+        # metric="ptl/val_accuracy",
         # mode="max",
         scheduler=pb2_scheduler,
         #num_samples=1#num_workers,

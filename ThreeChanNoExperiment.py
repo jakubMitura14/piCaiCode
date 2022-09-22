@@ -155,7 +155,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         lr=lr
     )
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
-        monitor='avg_val_loss',
+        monitor='ptl/val_loss',
         patience=4,
         mode="max",
         divergence_threshold=(-0.1)
@@ -164,15 +164,15 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
 
     checkPointCallback=TuneReportCheckpointCallback(
         metrics={
-            "loss": "avg_val_loss",
-            "mean_accuracy": "avg_val_acc"
+            "loss": "ptl/val_loss",
+            "mean_accuracy": "ptl/val_accuracy"
         },
         filename="checkpointtt.ckpt",
         on="validation_end")
     # tuneCallBack=TuneReportCallback(
     #     {
-    #         "loss": "avg_val_loss",
-    #         "mean_accuracy": "avg_val_acc"
+    #         "loss": "ptl/val_loss",
+    #         "mean_accuracy": "ptl/val_accuracy"
     #     },
     #     on="validation_end")
 
