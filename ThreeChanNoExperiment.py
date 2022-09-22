@@ -98,7 +98,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
 
     data = DataModule.PiCaiDataModule(
         df= df,
-        batch_size=5,#
+        batch_size=2,#
         trainSizePercent=percentSplit,# 
         num_workers=cpu_num,#os.cpu_count(),
         drop_last=False,#True,
@@ -175,7 +175,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     #     },
     #     on="validation_end")
 
-    strategy = RayShardedStrategy(num_workers=1,num_cpus_per_worker=num_cpus_per_worker,  use_gpu=True)#num_cpus_per_worker=1, num_gpu
+    strategy = RayShardedStrategy(num_workers=2,num_cpus_per_worker=num_cpus_per_worker,  use_gpu=True)#num_cpus_per_worker=1, num_gpu
     #strategy = RayStrategy(num_workers=1, num_cpus_per_worker=num_cpus_per_worker, use_gpu=True)
 
 
