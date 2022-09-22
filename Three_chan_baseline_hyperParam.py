@@ -333,7 +333,34 @@ tuner = tune.Tuner(
     param_space=config,
     #reuse_actors=True
 )
-results = tuner.fit()
+result_grid = tuner.fit()
+
+
+
+## printing as defined here https://docs.ray.io/en/latest/ray-air/tuner.html
+num_results = len(result_grid)
+
+# Check if there have been errors
+if result_grid.errors:
+    print("At least one trial failed.")
+
+# Get the best result
+best_result = result_grid.get_best_result()
+
+# And the best checkpoint
+best_checkpoint = best_result.checkpoint
+
+# And the best metrics
+best_metric = best_result.metrics
+
+# Inspect all results
+for result in result_grid:
+    if result.error:
+        print("The trial had an error:", result.error)
+        continue
+
+    print("The trial finished successfully with the metrics:", result.metrics["loss"])
+
 
 # experiment_name="picai-hyperparam-search-30"
 # for experiment in opt.get_experiments(
