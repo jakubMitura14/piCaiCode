@@ -294,9 +294,9 @@ experiment_name="picai-hyperparam-search-30"
 # Three_chan_baseline.mainTrain(options,df,experiment_name,dummyDict)
 num_workers=2
 cpu_num=11 #per gpu
-default_root_dir='/home/sliceruser/data/lightningC'
-checkpoint_dir='/home/sliceruser/data/tuneCheckpoints4'
-# os.makedirs(checkpoint_dir,  exist_ok = True) 
+default_root_dir='/home/sliceruser/data/lightningd'
+checkpoint_dir='/home/sliceruser/data/tuneCheckpoints5'
+os.makedirs(checkpoint_dir,  exist_ok = True) 
 # os.makedirs(default_root_dir,  exist_ok = True) 
 num_cpus_per_worker=cpu_num
 
