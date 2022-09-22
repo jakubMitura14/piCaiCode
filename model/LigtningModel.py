@@ -328,12 +328,12 @@ class Model(pl.LightningModule):
 
     def validation_epoch_end(self, outputs):
         
-        avg_loss = np.nanmean(torch.stack([torch.as_tensor(x['val_loss']) for x in outputs]).cpu().detach().numpy())
+        avg_loss = torch.mean(torch.stack([torch.as_tensor(x['val_loss']) for x in outputs]))
         print(f"avg_val_loss { avg_loss}")
-        avg_acc = np.nanmean(torch.stack([torch.as_tensor(x['val_acc']) for x in outputs]).cpu().detach().numpy())
+        avg_acc = torch.mean(torch.stack([torch.as_tensor(x['val_acc']) for x in outputs]))
 
-        self.log('avg_val_loss', avg_loss, on_epoch=True, sync_dist=True, prog_bar=True)
-        self.log('avg_val_acc', avg_acc, on_epoch=True, sync_dist=True, prog_bar=True)
+        self.log('avg_val_loss', avg_loss)
+        self.log('avg_val_acc', avg_acc)
         return {'avg_val_loss': avg_loss, 'avg_val_acc':avg_acc}
 
 
