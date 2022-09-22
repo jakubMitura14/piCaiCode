@@ -300,47 +300,12 @@ mainTuneDir='/home/sliceruser/data/mainTuneDir'
 os.makedirs(checkpoint_dir,  exist_ok = True) 
 # os.makedirs(default_root_dir,  exist_ok = True) 
 num_cpus_per_worker=cpu_num
-
-# tuner = tune.Tuner(
-#     tune.with_resources(
-#         tune.with_parameters(
-#             Three_chan_baseline.mainTrain,
-#             df=df,
-#             experiment_name=experiment_name
-#             ,dummyDict=dummyDict
-#             ,num_workers=num_workers
-#             ,cpu_num=cpu_num
-#              ,default_root_dir=default_root_dir
-#              ,checkpoint_dir=checkpoint_dir
-#              ,options=options
-#              ,num_cpus_per_worker=num_cpus_per_worker            
-#             ),
-#         # resources={
-#         #     "cpu": cpu_num,
-#         #     "gpu": 2
-#         # },
-#         resources=get_tune_resources(num_workers=num_workers, use_gpu=True,num_cpus_per_worker=num_cpus_per_worker)
-#     ),
-#     tune_config=tune.TuneConfig(
-#         # metric="ptl/val_accuracy",
-#         # mode="max",
-#         scheduler=pb2_scheduler,
-#         #num_samples=1#num_workers,
-#     ),
-#     run_config=air.RunConfig(
-#         name=experiment_name,
-#         # progress_reporter=reporter,
-#     ),
-#     param_space=config,
-#     #reuse_actors=True
-# )
-# result_grid = tuner.fit()
-
 reporter = CLIReporter(
         parameter_columns=["lr"],
         metric_columns=["mean_accuracy"])
 
-result_grid=tune.run(
+tuner = tune.Tuner(
+    tune.with_resources(
         tune.with_parameters(
             Three_chan_baseline.mainTrain,
             df=df,
@@ -353,18 +318,53 @@ result_grid=tune.run(
              ,options=options
              ,num_cpus_per_worker=num_cpus_per_worker            
             ),
+        # resources={
+        #     "cpu": cpu_num,
+        #     "gpu": 2
+        # },
+        resources=get_tune_resources(num_workers=num_workers, use_gpu=True,num_cpus_per_worker=num_cpus_per_worker)
+    ),
+    tune_config=tune.TuneConfig(
         # metric="ptl/val_accuracy",
         # mode="max",
-        config=config,
-        num_samples=2,
-        resources_per_trial=get_tune_resources(num_workers=num_workers, use_gpu=True,num_cpus_per_worker=num_cpus_per_worker),
         scheduler=pb2_scheduler,
+        #num_samples=1#num_workers,
+    ),
+    run_config=air.RunConfig(
         name=experiment_name,
-        local_dir=mainTuneDir,
-        log_to_file=True,
-        reporter=reporter
+        # progress_reporter=reporter,
+    ),
+    param_space=config,
+    #reuse_actors=True
+)
+result_grid = tuner.fit()
+
+
+# result_grid=tune.run(
+#         tune.with_parameters(
+#             Three_chan_baseline.mainTrain,
+#             df=df,
+#             experiment_name=experiment_name
+#             ,dummyDict=dummyDict
+#             ,num_workers=num_workers
+#             ,cpu_num=cpu_num
+#              ,default_root_dir=default_root_dir
+#              ,checkpoint_dir=checkpoint_dir
+#              ,options=options
+#              ,num_cpus_per_worker=num_cpus_per_worker            
+#             ),
+#         # metric="ptl/val_accuracy",
+#         # mode="max",
+#         config=config,
+#         num_samples=2,
+#         resources_per_trial=get_tune_resources(num_workers=num_workers, use_gpu=True,num_cpus_per_worker=num_cpus_per_worker),
+#         scheduler=pb2_scheduler,
+#         name=experiment_name,
+#         local_dir=mainTuneDir,
+#         log_to_file=True,
+#         reporter=reporter
         
-        )
+#         )
         
 
 
