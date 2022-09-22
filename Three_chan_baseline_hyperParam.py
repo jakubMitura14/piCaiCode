@@ -228,7 +228,7 @@ dummyDict={"_one_spac_c" :aa[0],"_med_spac_b":aa[1]   }
 config = {
     "lr": 1e-3,
         #"lossF":list(range(0,len(options["lossF"])))[0],
-        "regression_channels":  tune.choice( list(range(0,len(options["regression_channels"])))),
+        #"regression_channels":  tune.choice( list(range(0,len(options["regression_channels"])))),
         #"optimizer_class":  list(range(0,len(options["optimizer_class"])))[0],
         "models":  tune.choice(list(range(0,len(options["models"])))) ,
         "dropout": 0.2,
