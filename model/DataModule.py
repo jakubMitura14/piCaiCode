@@ -218,7 +218,7 @@ class PiCaiDataModule(pl.LightningDataModule):
         allSubj,onlyPositve=  self.getSubjects()
 
         allSubjects= allSubj[400:500]
-        onlyPositiveSubjects= onlyPositve[0:100]
+        onlyPositiveSubjects= onlyPositve#[0:100]
         random.shuffle(allSubjects)
         random.shuffle(onlyPositiveSubjects)
 
@@ -226,7 +226,7 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.allSubjects= allSubjects
         self.onlyPositiveSubjects=onlyPositiveSubjects
 
-        print(f"self.allSubjects {len(self.allSubjects)}  self.onlyPositiveSubjects {len(self.onlyPositiveSubjects)}")
+        #print(f"self.allSubjects {len(self.allSubjects)}  self.onlyPositiveSubjects {len(self.onlyPositiveSubjects)}")
         train_set_all, valid_set_all,test_set_all = self.splitDataSet(self.allSubjects , self.trainSizePercent,True)
         train_set_pos, valid_set_pos,test_set_pos = self.splitDataSet(self.onlyPositiveSubjects , self.trainSizePercent,True)
         #so we get just the example where we should not detect a thing 
@@ -259,9 +259,13 @@ class PiCaiDataModule(pl.LightningDataModule):
 
 # 
 # PersistentDataset
-        self.train_ds_all =  CacheDataset(data=train_set_all, transform=train_transforms)
-        self.val_ds=     CacheDataset(data=valid_set_pos+onlyNegatives[0: int(round(len(valid_set_pos)/2)) ], transform=val_transforms)
+        # self.train_ds_all =  CacheDataset(data=train_set_all, transform=train_transforms)
+        self.val_ds=     CacheDataset(data=valid_set_pos, transform=val_transforms)
+        # self.val_ds=     CacheDataset(data=valid_set_pos+onlyNegatives[0: int(round(len(valid_set_pos)/2)) ], transform=val_transforms)
         self.train_ds_pos =  CacheDataset(data=train_set_pos, transform=train_transforms)
+
+
+
         # self.train_ds_all =  LMDBDataset(data=train_set_all, transform=train_transforms,cache_dir=self.persistent_cache)
         # self.val_ds=     LMDBDataset(data=valid_set_pos+onlyNegatives[0: int(round(len(valid_set_pos)/2)) ], transform=val_transforms,cache_dir=self.persistent_cache)
         # self.train_ds_pos =  LMDBDataset(data=train_set_pos, transform=train_transforms,cache_dir=self.persistent_cache)
@@ -282,10 +286,15 @@ class PiCaiDataModule(pl.LightningDataModule):
         #                   ,num_workers=self.num_workers,sampler=RandomSampler(self.train_ds_all,num_samples=self.forTrainingSamplesNum))#,collate_fn=list_data_collate
         # , "pos": DataLoader(self.train_ds_pos, batch_size=self.batch_size, drop_last=self.drop_last
         #                   ,num_workers=self.num_workers,sampler=RandomSampler(self.train_ds_pos,num_samples=self.forTrainingSamplesNum))}#,collate_fn=list_data_collate
-        return {"all": DataLoader(self.train_ds_all, batch_size=self.batch_size, drop_last=self.drop_last
-                          ,num_workers=self.num_workers)#,collate_fn=list_data_collate
-        , "pos": DataLoader(self.train_ds_pos, batch_size=self.batch_size, drop_last=self.drop_last
+        return {"pos": DataLoader(self.train_ds_pos, batch_size=self.batch_size, drop_last=self.drop_last
                           ,num_workers=self.num_workers)}#,collate_fn=list_data_collate
+        
+        # return {"all": DataLoader(self.train_ds_all, batch_size=self.batch_size, drop_last=self.drop_last
+        #                   ,num_workers=self.num_workers)#,collate_fn=list_data_collate
+        # , "pos": DataLoader(self.train_ds_pos, batch_size=self.batch_size, drop_last=self.drop_last
+        #                   ,num_workers=self.num_workers)}#,collate_fn=list_data_collate
+        
+        
         # return DataLoader(self.train_ds, batch_size=self.batch_size, drop_last=self.drop_last
         #                   ,num_workers=self.num_workers,collate_fn=list_data_collate)#,collate_fn=list_data_collate , shuffle=True
 

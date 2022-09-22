@@ -190,7 +190,7 @@ class Model(pl.LightningModule):
         super().__init__()
         self.lr = learning_rate
         self.net = net
-        self.modelRegression = UNetToRegresion(2,regression_channels)
+        #self.modelRegression = UNetToRegresion(2,regression_channels)
         self.criterion = criterion
         self.optimizer_class = optimizer_class
         self.best_val_dice = 0
@@ -239,45 +239,45 @@ class Model(pl.LightningModule):
         # every second iteration we will do the training for segmentation
         y_hat, y , numLesions_ab= self.infer_batch_pos(batch)
         lossa = self.criterion(y_hat, y)
-        regressab=  self.modelRegression(y_hat)
-        numLesions_ab2=list(map(lambda entry : int(entry), numLesions_ab ))
-        numLesions_ab3=torch.Tensor(numLesions_ab2).to(self.device)  
-        lossab=F.smooth_l1_loss(torch.flatten(regressab), torch.flatten(numLesions_ab3) )
+        # regressab=  self.modelRegression(y_hat)
+        # numLesions_ab2=list(map(lambda entry : int(entry), numLesions_ab ))
+        # numLesions_ab3=torch.Tensor(numLesions_ab2).to(self.device)  
+        # lossab=F.smooth_l1_loss(torch.flatten(regressab), torch.flatten(numLesions_ab3) )
       
-        # in case we have odd iteration we get access only to number of lesions present in the image not where they are (if they are present at all)    
-        y_hat_all, numLesions= self.infer_batch_all(batch)
-        regress_res=self.modelRegression(y_hat_all)
-        numLesions1=list(map(lambda entry : int(entry), numLesions ))
-        numLesions2=torch.Tensor(numLesions1).to(self.device)
-        # print(f" regress res {torch.flatten(regress_res).size()}  orig {torch.flatten(numLesions).size() } ")
-        lossb=F.smooth_l1_loss(torch.flatten(regress_res), torch.flatten(numLesions2) )
+        # # in case we have odd iteration we get access only to number of lesions present in the image not where they are (if they are present at all)    
+        # y_hat_all, numLesions= self.infer_batch_all(batch)
+        # regress_res=self.modelRegression(y_hat_all)
+        # numLesions1=list(map(lambda entry : int(entry), numLesions ))
+        # numLesions2=torch.Tensor(numLesions1).to(self.device)
+        # # print(f" regress res {torch.flatten(regress_res).size()}  orig {torch.flatten(numLesions).size() } ")
+        # lossb=F.smooth_l1_loss(torch.flatten(regress_res), torch.flatten(numLesions2) )
 
-        self.log('train_loss', torch.add(lossa,lossb), prog_bar=True)
-        self.log('train_image_loss', lossa, prog_bar=True)
-        self.log('train_reg_loss', lossb, prog_bar=True)
-        return torch.add(torch.add(lossa,lossb),lossab)
+        # self.log('train_loss', torch.add(lossa,lossb), prog_bar=True)
+        # self.log('train_image_loss', lossa, prog_bar=True)
+        # self.log('train_reg_loss', lossb, prog_bar=True)
+        # return torch.add(torch.add(lossa,lossb),lossab)
+        return lossa
     # def validation_step(self, batch, batch_idx):
 
     def validation_step(self, batch, batch_idx):
         images, y_true,numLesions= batch['chan3_col_name_val'], batch["label_name_val"], batch['num_lesions_to_retain']
         #print(f" in validation images {images} labels {labels} "  )
   
-        #patIds=batch['patient_id']
         y_det = self.net(images)# sliding_window_inference(images, (32,32,32), 1, self.net)
         #marking that we had some Nan numbers in the tensor
-        if(torch.sum(torch.isnan( y_det))>0):
-            self.isAnyNan=True
+        # if(torch.sum(torch.isnan( y_det))>0):
+        #     self.isAnyNan=True
         
-        total_loss= 0.0
+        # total_loss= 0.0
 
-        regress_res=self.modelRegression(y_det)
+        # regress_res=self.modelRegression(y_det)
 
         lossa = self.criterion(y_det, y_true)
-        numLesions2= list(map(int, numLesions ))
+        # numLesions2= list(map(int, numLesions ))
 
-        lossb=F.smooth_l1_loss(torch.flatten(regress_res).cpu(), torch.flatten(torch.tensor(numLesions2)).cpu() )
+        # lossb=F.smooth_l1_loss(torch.flatten(regress_res).cpu(), torch.flatten(torch.tensor(numLesions2)).cpu() )
 
-        val_losss=torch.add(lossa,lossb)    
+        # val_losss=torch.add(lossa,lossb)    
 
 
         y_det = decollate_batch(y_det)
@@ -287,7 +287,7 @@ class Model(pl.LightningModule):
         # y_true=[x.cpu().detach().numpy() for x in y_true]
         # y_det= list(map(self.postProcess  , y_det))
         # y_true= list(map(self.postTrue , y_det))
-        sd = SurfaceDistanceMetric(symmetric=True)
+
         dice = DiceMetric()
         index=0
         for i in range(0,len( y_det)):
@@ -305,24 +305,25 @@ class Model(pl.LightningModule):
             # print(f"numLesions[i] {numLesions[i]}")    
             # total_loss+= (abs(regress_res_round-int(numLesions[i]) ) /len( y_det) )#arbitrary number
         
-        regress_res2= torch.flatten(regress_res) 
-        regress_res3=list(map(lambda el:round(el) ,torch.flatten(regress_res2).cpu().detach().numpy() ))
-        #print( f"torch.Tensor(numLesions).cpu() {torch.Tensor(numLesions).cpu()}  torch.Tensor(regress_res).cpu() {torch.Tensor(regress_res).cpu()}   ")
-        #self.F1Score(torch.Tensor(regress_res3).int(), torch.Tensor(numLesions2).cpu().int())
-        total_loss=precision_recall(torch.Tensor(regress_res3).int(), torch.Tensor(numLesions2).cpu().int(), average='macro', num_classes=4)
-        total_loss1=torch.mean(torch.stack([total_loss[0],total_loss[1]] ))#self.F1Score
-        print(f" total loss a {total_loss1} val_loss {val_losss}")
-        total_loss2= torch.add(total_loss1,dice.aggregate())
-        print(f" total loss b {total_loss2}  total_loss,dice.aggregate() {dice.aggregate()}")
+        # regress_res2= torch.flatten(regress_res) 
+        # regress_res3=list(map(lambda el:round(el) ,torch.flatten(regress_res2).cpu().detach().numpy() ))
+        # #print( f"torch.Tensor(numLesions).cpu() {torch.Tensor(numLesions).cpu()}  torch.Tensor(regress_res).cpu() {torch.Tensor(regress_res).cpu()}   ")
+        # #self.F1Score(torch.Tensor(regress_res3).int(), torch.Tensor(numLesions2).cpu().int())
+        # total_loss=precision_recall(torch.Tensor(regress_res3).int(), torch.Tensor(numLesions2).cpu().int(), average='macro', num_classes=4)
+        # total_loss1=torch.mean(torch.stack([total_loss[0],total_loss[1]] ))#self.F1Score
+        # print(f" total loss a {total_loss1} val_loss {val_losss}")
+        # total_loss2= torch.add(total_loss1,dice.aggregate())
+        # print(f" total loss b {total_loss2}  total_loss,dice.aggregate() {dice.aggregate()}")
 
-        #print(f"sd.aggregate() {sd.aggregate().item()}")
+        # #print(f"sd.aggregate() {sd.aggregate().item()}")
         
-        self.picaiLossArr_score_final.append(total_loss2.item())
-        print(f" validation_acc {total_loss2.item()}  ")
-        self.log("validation_acc", total_loss2.item(), on_epoch=True, on_step=False, sync_dist=True, prog_bar=True, logger=True)
-        self.log("val_loss", val_losss.item(), on_epoch=True, on_step=False, sync_dist=True, prog_bar=True, logger=True)
+        # self.picaiLossArr_score_final.append(total_loss2.item())
+        # print(f" validation_acc {total_loss2.item()}  ")
+        # self.log("validation_acc", total_loss2.item(), on_epoch=True, on_step=False, sync_dist=True, prog_bar=True, logger=True)
+        # self.log("val_loss", val_losss.item(), on_epoch=True, on_step=False, sync_dist=True, prog_bar=True, logger=True)
        
-        return {'val_acc': total_loss2.item(), 'val_loss':val_losss}
+        # return {'val_acc': total_loss2.item(), 'val_loss':val_losss}
+        return {'val_acc': dice.aggregate().item(), 'val_loss':lossa}
 
 
     def validation_epoch_end(self, outputs):
