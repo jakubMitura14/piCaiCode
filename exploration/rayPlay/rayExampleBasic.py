@@ -24,6 +24,7 @@ from pytorch_lightning import LightningModule, Callback, Trainer, \
 import torchmetrics
 
 
+ray.init(num_cpus=24)
 
 class LightningMNISTClassifier(pl.LightningModule):
     def __init__(self, config, data_dir=None):
