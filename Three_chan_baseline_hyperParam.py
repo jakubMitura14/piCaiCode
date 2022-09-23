@@ -330,7 +330,6 @@ tuner = tune.Tuner(
              ,options=options
              ,num_cpus_per_worker=num_cpus_per_worker            
             ),
-
         resources=get_tune_resources(num_workers=num_workers, use_gpu=True,num_cpus_per_worker=num_cpus_per_worker)
     ),
     tune_config=tune.TuneConfig(
