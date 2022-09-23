@@ -61,7 +61,13 @@ from ray.util.placement_group import (
     placement_group_table,
     remove_placement_group
 )
-
+from pytorch_lightning.loggers import TensorBoardLogger
+from ray import air, tune
+from ray.air import session
+from ray.tune import CLIReporter
+from ray.tune.schedulers import ASHAScheduler, PopulationBasedTraining
+from ray.tune.integration.pytorch_lightning import TuneReportCallback, \
+    TuneReportCheckpointCallback
 from ray_lightning.tune import TuneReportCallback, get_tune_resources
 
 # torch.multiprocessing.freeze_support()
@@ -304,6 +310,12 @@ reporter = CLIReporter(
         parameter_columns=["lr"],
         metric_columns=["mean_accuracy"])
 
+scheduler = ASHAScheduler(
+    max_t=5,
+    grace_period=1,
+    reduction_factor=2)
+
+
 tuner = tune.Tuner(
     tune.with_resources(
         tune.with_parameters(
@@ -322,9 +334,10 @@ tuner = tune.Tuner(
         resources=get_tune_resources(num_workers=num_workers, use_gpu=True,num_cpus_per_worker=num_cpus_per_worker)
     ),
     tune_config=tune.TuneConfig(
-        # metric="ptl/val_accuracy",
-        # mode="max",
-        scheduler=pb2_scheduler,
+        metric="mean_accuracy",
+        mode="max",
+        #scheduler=pb2_scheduler,
+        scheduler=scheduler,
         #num_samples=1#num_workers,
     ),
     run_config=air.RunConfig(
