@@ -94,7 +94,7 @@ def train_mnist(config,
     model = LightningMNISTClassifier(config, data_dir)
 
     callbacks = callbacks or []
-
+    print(" aaaaaaaaaa  ")
     trainer = pl.Trainer(
         max_epochs=num_epochs,
         callbacks=callbacks,
@@ -102,14 +102,14 @@ def train_mnist(config,
         strategy=RayStrategy(
             num_workers=num_workers, use_gpu=use_gpu, init_hook=download_data))
     dm = MNISTDataModule(
-        data_dir=data_dir, num_workers=1, batch_size=config["batch_size"])
+        data_dir=data_dir, num_workers=2, batch_size=config["batch_size"])
     trainer.fit(model, dm)
 
 
 def tune_mnist(data_dir,
                num_samples=10,
                num_epochs=10,
-               num_workers=1,
+               num_workers=12,
                use_gpu=False):
     config = {
         "layer_1": tune.choice([32, 64, 128]),
