@@ -141,7 +141,7 @@ def tune_mnist(data_dir,
     print("Best hyperparameters found were: ", analysis.best_config)
 
 data_dir = os.path.join(tempfile.gettempdir(), "mnist_data_")
-tune_mnist(data_dir, 3, 4, 12, True)
+tune_mnist(data_dir, 3, 4, 12, False)
 
 
 # if __name__ == "__main__":
