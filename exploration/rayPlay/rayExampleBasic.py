@@ -127,7 +127,7 @@ ray.init(num_cpus=24)
 data_dir = '/home/sliceruser/mnist'
 test_l_dir = '/home/sliceruser/test_l_dir'
 # MNISTDataModule(data_dir=data_dir).prepare_data()
-
+num_cpus_per_worker=6
 
 class netaA(nn.Module):
     def __init__(self,
@@ -217,7 +217,7 @@ def train_mnist(config,
         callbacks=callbacks,
         progress_bar_refresh_rate=0,
         strategy=RayStrategy(
-            num_workers=num_workers, use_gpu=use_gpu),
+            num_workers=num_workers,num_cpus_per_worker=num_cpus_per_worker, use_gpu=use_gpu),
             default_root_dir=test_l_dir
             
             )#, init_hook=download_data
@@ -255,7 +255,7 @@ def tune_mnist(data_dir,
         config=config,
         num_samples=num_samples,
         resources_per_trial=get_tune_resources(
-            num_workers=num_workers, use_gpu=use_gpu),
+            num_workers=num_workers, num_cpus_per_worker=num_cpus_per_worker,use_gpu=use_gpu),
         name="tune_mnist")
 
     print("Best hyperparameters found were: ", analysis.best_config)
