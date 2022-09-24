@@ -115,29 +115,12 @@ from pytorch_lightning import LightningModule, Callback, Trainer, \
     LightningDataModule
 
 import torchmetrics
-import torch
-import torch.nn.functional as F
-from torch.utils.data import Dataset
 
-import pytorch_lightning as pl
-from pytorch_lightning.strategies import Strategy
-from pytorch_lightning import LightningModule, Callback, Trainer, \
-    LightningDataModule
-
-import torchmetrics
-from ray import air, tune
-from ray.air import session
-from ray.tune import CLIReporter
-from ray.tune.schedulers import ASHAScheduler, PopulationBasedTraining
-from ray.tune.integration.pytorch_lightning import TuneReportCallback, \
-    TuneReportCheckpointCallback
-from ray_lightning import RayShardedStrategy
 
 ray.init(num_cpus=24)
 data_dir = '/home/sliceruser/mnist'
 #MNISTDataModule(data_dir=data_dir).prepare_data()
 num_cpus_per_worker=6
-test_l_dir = '/home/sliceruser/test_l_dir'
 
 class netaA(nn.Module):
     def __init__(self,
@@ -246,7 +229,7 @@ def tune_mnist(data_dir,
 
     # Add Tune callback.
     metrics = {"loss": "ptl/val_loss", "acc": "ptl/val_accuracy"}
-    callbacks = [TuneReportCheckpointCallback(metrics, on="validation_end",filename="checkpointtt")]
+    callbacks = [TuneReportCallback(metrics, on="validation_end")]
     trainable = tune.with_parameters(
         train_mnist,
         data_dir=data_dir,
