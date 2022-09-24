@@ -56,6 +56,7 @@ from torch.utils.cpp_extension import load
 from torch.utils.data import DataLoader, Dataset, random_split
 from torchmetrics import Precision
 from torchmetrics.functional import precision_recall
+from ray.tune.schedulers.pb2 import PB2
 
 ray.init(num_cpus=24)
 data_dir = '/home/sliceruser/mnist'
@@ -147,6 +148,9 @@ def train_mnist(config,
 
     model = LightningMNISTClassifier(config, data_dir)
 
+
+
+
     callbacks = callbacks or []
     print(" aaaaaaaaaa  ")
     trainer = pl.Trainer(
@@ -154,7 +158,10 @@ def train_mnist(config,
         callbacks=callbacks,
         progress_bar_refresh_rate=0,
         strategy=RayStrategy(
-            num_workers=num_workers, use_gpu=use_gpu))#, init_hook=download_data
+            num_workers=num_workers, use_gpu=use_gpu)
+            
+            )#, init_hook=download_data
+
     dm = MNISTDataModule(
         data_dir=data_dir, num_workers=2, batch_size=config["batch_size"])
     trainer.fit(model, dm)
@@ -168,7 +175,7 @@ def tune_mnist(data_dir,
     config = {
         "layer_1": tune.choice([32, 64, 128]),
         "layer_2": tune.choice([64, 128, 256]),
-        "lr": tune.loguniform(1e-4, 1e-1),
+        "lr": 1e-3,
         "batch_size": tune.choice([32, 64, 128]),
     }
 
@@ -182,7 +189,14 @@ def tune_mnist(data_dir,
     callbacks = [TuneReportCallback(metrics, on="validation_end")]
  
     #***********************************************
-
+    pb2_scheduler = PB2(
+        time_attr="training_iteration",
+        metric='acc',
+        mode='max',
+        perturbation_interval=10.0,
+        hyperparam_bounds={
+            "lr": [1e-2, 1e-5],
+        })
  
  
     trainable = tune.with_parameters(
@@ -194,8 +208,9 @@ def tune_mnist(data_dir,
         callbacks=callbacks)
     analysis = tune.run(
         trainable,
-        metric="loss",
-        mode="min",
+        scheduler=pb2_scheduler,
+        # metric="loss",
+        mode="max",
         config=config,
         num_samples=num_samples,
         resources_per_trial=get_tune_resources(
