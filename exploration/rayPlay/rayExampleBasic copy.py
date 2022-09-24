@@ -115,12 +115,19 @@ from pytorch_lightning import LightningModule, Callback, Trainer, \
     LightningDataModule
 
 import torchmetrics
-
+from ray import air, tune
+from ray.air import session
+from ray.tune import CLIReporter
+from ray.tune.schedulers import ASHAScheduler, PopulationBasedTraining
+from ray.tune.integration.pytorch_lightning import TuneReportCallback, \
+    TuneReportCheckpointCallback
+from ray_lightning import RayShardedStrategy
 
 ray.init(num_cpus=24)
 data_dir = '/home/sliceruser/mnist'
-MNISTDataModule(data_dir=data_dir).prepare_data()
-
+test_l_dir = '/home/sliceruser/test_l_dir'
+# MNISTDataModule(data_dir=data_dir).prepare_data()
+num_cpus_per_worker=6
 
 class netaA(nn.Module):
     def __init__(self,
@@ -151,7 +158,7 @@ class LightningMNISTClassifier(pl.LightningModule):
         # self.layer_1 = torch.nn.Linear(28 * 28, layer_1)
         # self.layer_2 = torch.nn.Linear(layer_1, layer_2)
         # self.layer_3 = torch.nn.Linear(layer_2, 10)
-        # self.accuracy = torchmetrics.Accuracy()
+        self.accuracy = torchmetrics.Accuracy()
         self.netA= netaA(config)
 
     def forward(self, x):
@@ -210,16 +217,19 @@ def train_mnist(config,
         callbacks=callbacks,
         progress_bar_refresh_rate=0,
         strategy=RayStrategy(
-            num_workers=num_workers, use_gpu=use_gpu))#, init_hook=download_data
+            num_workers=num_workers,num_cpus_per_worker=num_cpus_per_worker, use_gpu=use_gpu),
+            default_root_dir=test_l_dir
+            
+            )#, init_hook=download_data
     dm = MNISTDataModule(
         data_dir=data_dir, num_workers=2, batch_size=config["batch_size"])
     trainer.fit(model, dm)
 
 
 def tune_mnist(data_dir,
-               num_samples=10,
+               num_samples=5,
                num_epochs=10,
-               num_workers=12,
+               num_workers=2,
                use_gpu=False):
     config = {
         "layer_1": tune.choice([32, 64, 128]),
@@ -230,6 +240,7 @@ def tune_mnist(data_dir,
 
     # Add Tune callback.
     metrics = {"loss": "ptl/val_loss", "acc": "ptl/val_accuracy"}
+    # callbacks = [TuneReportCheckpointCallback(metrics, on="validation_end",filename="checkpointtt")]
     callbacks = [TuneReportCallback(metrics, on="validation_end")]
     trainable = tune.with_parameters(
         train_mnist,
@@ -245,10 +256,54 @@ def tune_mnist(data_dir,
         config=config,
         num_samples=num_samples,
         resources_per_trial=get_tune_resources(
-            num_workers=num_workers, use_gpu=use_gpu),
+            num_workers=num_workers, num_cpus_per_worker=num_cpus_per_worker,use_gpu=use_gpu),
         name="tune_mnist")
 
     print("Best hyperparameters found were: ", analysis.best_config)
 
 data_dir = os.path.join(tempfile.gettempdir(), "mnist_data_")
-tune_mnist(data_dir, 3, 4, 12, False)
+tune_mnist(data_dir)
+
+
+# if __name__ == "__main__":
+#     import argparse
+
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument(
+#         "--num-workers",
+#         type=int,
+#         help="Number of training workers to use.",
+#         default=1)
+#     parser.add_argument(
+#         "--use-gpu", action="store_true", help="Use GPU for training.")
+#     parser.add_argument(
+#         "--num-samples",
+#         type=int,
+#         default=10,
+#         help="Number of samples to tune.")
+#     parser.add_argument(
+#         "--num-epochs",
+#         type=int,
+#         default=10,
+#         help="Number of epochs to train for.")
+#     parser.add_argument(
+#         "--smoke-test", action="store_true", help="Finish quickly for testing")
+#     parser.add_argument(
+#         "--address",
+#         required=False,
+#         type=str,
+#         help="the address to use for Ray")
+#     args, _ = parser.parse_known_args()
+
+#     num_epochs = 1 if args.smoke_test else args.num_epochs
+#     num_workers = 1 if args.smoke_test else args.num_workers
+#     use_gpu = False if args.smoke_test else args.use_gpu
+#     num_samples = 1 if args.smoke_test else args.num_samples
+
+#     if args.smoke_test:
+#         ray.init(num_cpus=2)
+#     else:
+#         ray.init(address=args.address)
+
+#     data_dir = os.path.join(tempfile.gettempdir(), "mnist_data_")
+#     tune_mnist(data_dir, num_samples, num_epochs, num_workers, use_gpu)
