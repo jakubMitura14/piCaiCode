@@ -210,7 +210,7 @@ def tune_mnist(data_dir,
         trainable,
         scheduler=pb2_scheduler,
         # metric="loss",
-        mode="max",
+        #mode="max",
         config=config,
         num_samples=num_samples,
         resources_per_trial=get_tune_resources(
