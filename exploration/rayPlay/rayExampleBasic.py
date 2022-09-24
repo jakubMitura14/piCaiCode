@@ -115,10 +115,17 @@ from pytorch_lightning import LightningModule, Callback, Trainer, \
     LightningDataModule
 
 import torchmetrics
-
+from ray import air, tune
+from ray.air import session
+from ray.tune import CLIReporter
+from ray.tune.schedulers import ASHAScheduler, PopulationBasedTraining
+from ray.tune.integration.pytorch_lightning import TuneReportCallback, \
+    TuneReportCheckpointCallback
+from ray_lightning import RayShardedStrategy
 
 ray.init(num_cpus=24)
 data_dir = '/home/sliceruser/mnist'
+test_l_dir = '/home/sliceruser/test_l_dir'
 # MNISTDataModule(data_dir=data_dir).prepare_data()
 
 
@@ -210,7 +217,10 @@ def train_mnist(config,
         callbacks=callbacks,
         progress_bar_refresh_rate=0,
         strategy=RayStrategy(
-            num_workers=num_workers, use_gpu=use_gpu))#, init_hook=download_data
+            num_workers=num_workers, use_gpu=use_gpu)
+            default_root_dir=test_l_dir
+            
+            )#, init_hook=download_data
     dm = MNISTDataModule(
         data_dir=data_dir, num_workers=2, batch_size=config["batch_size"])
     trainer.fit(model, dm)
@@ -230,7 +240,7 @@ def tune_mnist(data_dir,
 
     # Add Tune callback.
     metrics = {"loss": "ptl/val_loss", "acc": "ptl/val_accuracy"}
-    callbacks = [TuneReportCallback(metrics, on="validation_end")]
+    callbacks = [TuneReportCheckpointCallback(metrics, on="validation_end",filename="checkpointtt.ckpt")]
     trainable = tune.with_parameters(
         train_mnist,
         data_dir=data_dir,
@@ -251,7 +261,7 @@ def tune_mnist(data_dir,
     print("Best hyperparameters found were: ", analysis.best_config)
 
 data_dir = os.path.join(tempfile.gettempdir(), "mnist_data_")
-tune_mnist(data_dir, 3, 4, 12, False)
+tune_mnist(data_dir, 3, 4, 12, True)
 
 
 # if __name__ == "__main__":
