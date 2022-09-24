@@ -185,14 +185,14 @@ def tune_mnist(data_dir,
     callbacks = [TuneReportCallback(metrics, on="validation_end")]
  
     #***********************************************
-    # pb2_scheduler = PB2(
-    #     time_attr="training_iteration",
-    #     metric='acc',
-    #     mode='max',
-    #     perturbation_interval=10.0,
-    #     hyperparam_bounds={
-    #         "lr": [1e-2, 1e-5],
-    #     })
+    pb2_scheduler = PB2(
+        time_attr="training_iteration",
+        metric='acc',
+        mode='max',
+        perturbation_interval=10.0,
+        hyperparam_bounds={
+            "lr": [1e-2, 1e-5],
+        })
  
  
     trainable = tune.with_parameters(
@@ -204,9 +204,9 @@ def tune_mnist(data_dir,
         callbacks=callbacks)
     analysis = tune.run(
         trainable,
-        #scheduler=pb2_scheduler,
-        metric="acc",
-        mode="max",
+        scheduler=pb2_scheduler,
+        # metric="acc",
+        # mode="max",
         config=config,
         num_samples=num_samples,
         resources_per_trial=get_tune_resources(
