@@ -59,7 +59,7 @@ from torchmetrics.functional import precision_recall
 
 ray.init(num_cpus=24)
 data_dir = '/home/sliceruser/mnist'
-MNISTDataModule(data_dir=data_dir).prepare_data()
+#MNISTDataModule(data_dir=data_dir).prepare_data()
 num_cpus_per_worker=6
 test_l_dir = '/home/sliceruser/test_l_dir'
 
@@ -77,7 +77,18 @@ class netaA(nn.Module):
     def forward(self, x):
         return self.model(x)
 
-
+class netB(nn.Module):
+    def __init__(self,
+        config
+    ) -> None:
+        super().__init__()
+        self.model = nn.Sequential(
+        torch.nn.Linear(10, 24),
+        torch.nn.Linear(24, 100),    
+        torch.nn.Linear(100, 10)
+        )
+    def forward(self, x):
+        return self.model(x)
 
 class LightningMNISTClassifier(pl.LightningModule):
     def __init__(self, config, data_dir=None):
@@ -89,6 +100,7 @@ class LightningMNISTClassifier(pl.LightningModule):
 
         self.accuracy = torchmetrics.Accuracy()
         self.netA= netaA(config)
+        self.netB= netB(config)
 
     def forward(self, x):
         batch_size, channels, width, height = x.size()
@@ -159,9 +171,19 @@ def tune_mnist(data_dir,
         "batch_size": tune.choice([32, 64, 128]),
     }
 
-    # Add Tune callback.
     metrics = {"loss": "ptl/val_loss", "acc": "ptl/val_accuracy"}
-    callbacks = [TuneReportCheckpointCallback(metrics, on="validation_end",filename="checkpointtt")]
+   
+   #***********************************************
+    #do not work
+    #callbacks = [TuneReportCheckpointCallback(metrics, on="validation_end",filename="checkpointtt")]
+    
+    #works
+    callbacks = [TuneReportCallback(metrics, on="validation_end")]
+ 
+    #***********************************************
+
+ 
+ 
     trainable = tune.with_parameters(
         train_mnist,
         data_dir=data_dir,
