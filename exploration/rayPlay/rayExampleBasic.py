@@ -120,7 +120,7 @@ import torchmetrics
 ray.init(num_cpus=24)
 data_dir = '/home/sliceruser/mnist'
 #MNISTDataModule(data_dir=data_dir).prepare_data()
-
+num_cpus_per_worker=6
 
 class netaA(nn.Module):
     def __init__(self,
