@@ -56,11 +56,10 @@ from torch.utils.cpp_extension import load
 from torch.utils.data import DataLoader, Dataset, random_split
 from torchmetrics import Precision
 from torchmetrics.functional import precision_recall
-from ray.tune.schedulers.pb2 import PB2
 
 ray.init(num_cpus=24)
 data_dir = '/home/sliceruser/mnist'
-#MNISTDataModule(data_dir=data_dir).prepare_data()
+MNISTDataModule(data_dir=data_dir).prepare_data()
 num_cpus_per_worker=6
 test_l_dir = '/home/sliceruser/test_l_dir'
 
@@ -78,18 +77,7 @@ class netaA(nn.Module):
     def forward(self, x):
         return self.model(x)
 
-class netB(nn.Module):
-    def __init__(self,
-        config
-    ) -> None:
-        super().__init__()
-        self.model = nn.Sequential(
-        torch.nn.Linear(10, 24),
-        torch.nn.Linear(24, 100),    
-        torch.nn.Linear(100, 10)
-        )
-    def forward(self, x):
-        return self.model(x)
+
 
 class LightningMNISTClassifier(pl.LightningModule):
     def __init__(self, config, data_dir=None):
@@ -101,13 +89,11 @@ class LightningMNISTClassifier(pl.LightningModule):
 
         self.accuracy = torchmetrics.Accuracy()
         self.netA= netaA(config)
-        self.netB= netB(config)
 
     def forward(self, x):
         batch_size, channels, width, height = x.size()
         x = x.view(batch_size, -1)
         x= self.netA(x)
-        x= self.netB(x)
 
         x = F.log_softmax(x, dim=1)
         return x
@@ -148,9 +134,6 @@ def train_mnist(config,
 
     model = LightningMNISTClassifier(config, data_dir)
 
-
-
-
     callbacks = callbacks or []
     print(" aaaaaaaaaa  ")
     trainer = pl.Trainer(
@@ -158,10 +141,7 @@ def train_mnist(config,
         callbacks=callbacks,
         progress_bar_refresh_rate=0,
         strategy=RayStrategy(
-            num_workers=num_workers, use_gpu=use_gpu)
-            
-            )#, init_hook=download_data
-
+            num_workers=num_workers, use_gpu=use_gpu))#, init_hook=download_data
     dm = MNISTDataModule(
         data_dir=data_dir, num_workers=2, batch_size=config["batch_size"])
     trainer.fit(model, dm)
@@ -175,24 +155,21 @@ def tune_mnist(data_dir,
     config = {
         "layer_1": tune.choice([32, 64, 128]),
         "layer_2": tune.choice([64, 128, 256]),
-        "lr": 1e-3,
+        "lr": tune.loguniform(1e-4, 1e-1),
         "batch_size": tune.choice([32, 64, 128]),
     }
 
     metrics = {"loss": "ptl/val_loss", "acc": "ptl/val_accuracy"}
    
-
-    callbacks = [TuneReportCallback(metrics, on="validation_end")]
+   #***********************************************
+    #do not work
+    callbacks = [TuneReportCheckpointCallback(metrics, on="validation_end",filename="checkpointtt")]
+    
+    #works
+    #callbacks = [TuneReportCallback(metrics, on="validation_end")]
  
     #***********************************************
-    pb2_scheduler = PB2(
-        time_attr="training_iteration",
-        metric='acc',
-        mode='max',
-        perturbation_interval=10.0,
-        hyperparam_bounds={
-            "lr": [1e-2, 1e-5],
-        })
+
  
  
     trainable = tune.with_parameters(
@@ -204,15 +181,13 @@ def tune_mnist(data_dir,
         callbacks=callbacks)
     analysis = tune.run(
         trainable,
-        scheduler=pb2_scheduler,
-        # metric="acc",
-        # mode="max",
+        metric="loss",
+        mode="min",
         config=config,
         num_samples=num_samples,
         resources_per_trial=get_tune_resources(
             num_workers=num_workers, use_gpu=use_gpu),
         name="tune_mnist")
-   #***********************************************
 
     print("Best hyperparameters found were: ", analysis.best_config)
 
