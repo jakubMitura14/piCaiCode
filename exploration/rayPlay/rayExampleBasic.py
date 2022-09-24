@@ -25,6 +25,8 @@ import torchmetrics
 
 
 ray.init(num_cpus=24)
+data_dir = '/home/sliceruser/mnist'
+MNISTDataModule(data_dir=data_dir).prepare_data()
 
 class LightningMNISTClassifier(pl.LightningModule):
     def __init__(self, config, data_dir=None):
@@ -86,10 +88,10 @@ def train_mnist(config,
                 use_gpu=False,
                 callbacks=None):
     # Make sure data is downloaded on all nodes.
-    def download_data():
-        from filelock import FileLock
-        with FileLock(os.path.join(data_dir, ".lock")):
-            MNISTDataModule(data_dir=data_dir).prepare_data()
+    # def download_data():
+    #     from filelock import FileLock
+    #     with FileLock(os.path.join(data_dir, ".lock")):
+    #         MNISTDataModule(data_dir=data_dir).prepare_data()
 
     model = LightningMNISTClassifier(config, data_dir)
 
@@ -100,7 +102,7 @@ def train_mnist(config,
         callbacks=callbacks,
         progress_bar_refresh_rate=0,
         strategy=RayStrategy(
-            num_workers=num_workers, use_gpu=use_gpu, init_hook=download_data))
+            num_workers=num_workers, use_gpu=use_gpu))#, init_hook=download_data
     dm = MNISTDataModule(
         data_dir=data_dir, num_workers=2, batch_size=config["batch_size"])
     trainer.fit(model, dm)
