@@ -192,7 +192,7 @@ def train_mnist(config,
                 data_dir=None,
                 num_epochs=10,
                 num_workers=1,
-                use_gpu=False,
+                use_gpu=True,
                 callbacks=None):
     # Make sure data is downloaded on all nodes.
     # def download_data():
