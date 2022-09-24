@@ -240,7 +240,8 @@ def tune_mnist(data_dir,
 
     # Add Tune callback.
     metrics = {"loss": "ptl/val_loss", "acc": "ptl/val_accuracy"}
-    callbacks = [TuneReportCheckpointCallback(metrics, on="validation_end",filename="checkpointtt.ckpt")]
+    # callbacks = [TuneReportCheckpointCallback(metrics, on="validation_end",filename="checkpointtt")]
+    callbacks = [TuneReportCallback(metrics, on="validation_end")]
     trainable = tune.with_parameters(
         train_mnist,
         data_dir=data_dir,
