@@ -216,7 +216,7 @@ def train_mnist(config,
 
 
 def tune_mnist(data_dir,
-               num_samples=4,
+               num_samples=2,
                num_epochs=10,
                num_workers=2,
                use_gpu=False):
@@ -249,5 +249,4 @@ def tune_mnist(data_dir,
 
     print("Best hyperparameters found were: ", analysis.best_config)
 
-data_dir = os.path.join(tempfile.gettempdir(), "mnist_data_")
-tune_mnist( False)
+tune_mnist(data_dir)
