@@ -2,6 +2,99 @@
 import os
 import tempfile
 
+import time
+from pathlib import Path
+from datetime import datetime
+import SimpleITK as sitk
+from monai.utils import set_determinism
+import math
+import torch
+from torch.utils.data import random_split, DataLoader
+import monai
+import gdown
+import pandas as pd
+import torchio as tio
+import pytorch_lightning as pl
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+from sklearn.model_selection import train_test_split
+from monai.networks.nets import UNet
+from monai.networks.layers import Norm
+from monai.metrics import DiceMetric
+from monai.losses import DiceLoss
+from monai.inferers import sliding_window_inference
+from monai.data import CacheDataset,Dataset,PersistentDataset, list_data_collate, decollate_batch
+from monai.config import print_config
+from monai.apps import download_and_extract
+
+from datetime import datetime
+import os
+import tempfile
+from glob import glob
+from monai.handlers.utils import from_engine
+from monai.networks.nets import UNet
+from monai.networks.layers import Norm
+from monai.metrics import DiceMetric
+from monai.losses import DiceLoss
+from monai.inferers import sliding_window_inference
+from monai.config import print_config
+from monai.apps import download_and_extract
+import torch
+import matplotlib.pyplot as plt
+import tempfile
+import shutil
+import os
+import glob
+from picai_eval import evaluate
+#from picai_eval.picai_eval import evaluate_case
+from statistics import mean
+from report_guided_annotation import extract_lesion_candidates
+from scipy.ndimage import gaussian_filter
+import tempfile
+import shutil
+from os import path as pathOs
+from os.path import basename, dirname, exists, isdir, join, split
+import torch.nn as nn
+import torch.nn.functional as F
+
+from monai.metrics import (DiceMetric, HausdorffDistanceMetric,
+                           SurfaceDistanceMetric)
+from torchmetrics import Precision
+from monai.transforms import (
+    AsDiscrete,
+    AddChanneld,
+    Compose,
+    CropForegroundd,
+    LoadImaged,
+    Orientationd,
+    RandCropByPosNegLabeld,
+    ScaleIntensityRanged,
+    Spacingd,
+    EnsureTyped,
+    EnsureType,
+)
+import torchio
+import importlib.util
+import sys
+import warnings
+from typing import Optional, Sequence, Tuple, Union
+import torch
+import torch.nn as nn
+from monai.networks.blocks.convolutions import Convolution, ResidualUnit
+from monai.networks.layers.factories import Act, Norm
+from monai.networks.layers.simplelayers import SkipConnection
+from monai.utils import alias, deprecated_arg, export
+import functools
+import operator
+from torch.nn.intrinsic.qat import ConvBnReLU3d
+
+import multiprocessing as mp
+import time
+from functools import partial
+from torchmetrics.functional import precision_recall
+from torch.utils.cpp_extension import load
+import torchmetrics
 from pl_bolts.datamodules.mnist_datamodule import MNISTDataModule
 
 import pytorch_lightning as pl
@@ -28,6 +121,23 @@ ray.init(num_cpus=24)
 data_dir = '/home/sliceruser/mnist'
 MNISTDataModule(data_dir=data_dir).prepare_data()
 
+
+class netaA(nn.Module):
+    def __init__(self,
+        config
+    ) -> None:
+        super().__init__()
+        layer_1, layer_2 = config["layer_1"], config["layer_2"]
+        self.model = nn.Sequential(
+        torch.nn.Linear(28 * 28, layer_1),
+        torch.nn.Linear(layer_1, layer_2),    
+        torch.nn.Linear(layer_2, 10)
+        )
+    def forward(self, x):
+        return self.model(x)
+
+
+
 class LightningMNISTClassifier(pl.LightningModule):
     def __init__(self, config, data_dir=None):
         super(LightningMNISTClassifier, self).__init__()
@@ -38,19 +148,17 @@ class LightningMNISTClassifier(pl.LightningModule):
         self.batch_size = config["batch_size"]
 
         # mnist images are (1, 28, 28) (channels, width, height)
-        self.layer_1 = torch.nn.Linear(28 * 28, layer_1)
-        self.layer_2 = torch.nn.Linear(layer_1, layer_2)
-        self.layer_3 = torch.nn.Linear(layer_2, 10)
-        self.accuracy = torchmetrics.Accuracy()
+        # self.layer_1 = torch.nn.Linear(28 * 28, layer_1)
+        # self.layer_2 = torch.nn.Linear(layer_1, layer_2)
+        # self.layer_3 = torch.nn.Linear(layer_2, 10)
+        # self.accuracy = torchmetrics.Accuracy()
+        self.netA= netaA(config)
 
     def forward(self, x):
         batch_size, channels, width, height = x.size()
         x = x.view(batch_size, -1)
-        x = self.layer_1(x)
-        x = torch.relu(x)
-        x = self.layer_2(x)
-        x = torch.relu(x)
-        x = self.layer_3(x)
+        x= self.netA(x)
+
         x = F.log_softmax(x, dim=1)
         return x
 
