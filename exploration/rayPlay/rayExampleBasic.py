@@ -106,6 +106,7 @@ class LightningMNISTClassifier(pl.LightningModule):
         batch_size, channels, width, height = x.size()
         x = x.view(batch_size, -1)
         x= self.netA(x)
+        x= self.netB(x)
 
         x = F.log_softmax(x, dim=1)
         return x
