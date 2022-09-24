@@ -119,7 +119,7 @@ import torchmetrics
 
 ray.init(num_cpus=24)
 data_dir = '/home/sliceruser/mnist'
-MNISTDataModule(data_dir=data_dir).prepare_data()
+# MNISTDataModule(data_dir=data_dir).prepare_data()
 
 
 class netaA(nn.Module):
@@ -151,7 +151,7 @@ class LightningMNISTClassifier(pl.LightningModule):
         # self.layer_1 = torch.nn.Linear(28 * 28, layer_1)
         # self.layer_2 = torch.nn.Linear(layer_1, layer_2)
         # self.layer_3 = torch.nn.Linear(layer_2, 10)
-        # self.accuracy = torchmetrics.Accuracy()
+        self.accuracy = torchmetrics.Accuracy()
         self.netA= netaA(config)
 
     def forward(self, x):
