@@ -336,7 +336,7 @@ tuner = tune.Tuner(
         metric="mean_accuracy",
         mode="max",
         #scheduler=pb2_scheduler,
-        scheduler=scheduler,
+        #scheduler=scheduler,
         #num_samples=1#num_workers,
     ),
     run_config=air.RunConfig(

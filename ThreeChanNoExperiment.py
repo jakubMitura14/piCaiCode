@@ -162,19 +162,19 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     )
 
 
-    checkPointCallback=TuneReportCheckpointCallback(
-        metrics={
-            #"loss": "ptl/val_loss",
-            "mean_accuracy": "ptl/val_accuracy"
-        },
-        filename="checkpointtt.ckpt",
-        on="validation_end")
-    # tuneCallBack=TuneReportCallback(
-    #     {
-    #         "loss": "ptl/val_loss",
+    # tuneCallBack=TuneReportCheckpointCallback(
+    #     metrics={
+    #         #"loss": "ptl/val_loss",
     #         "mean_accuracy": "ptl/val_accuracy"
     #     },
+    #     filename="checkpointtt.ckpt",
     #     on="validation_end")
+    tuneCallBack=TuneReportCallback(
+        {
+            "loss": "ptl/val_loss",
+            "mean_accuracy": "ptl/val_accuracy"
+        },
+        on="validation_end")
 
     strategy = RayShardedStrategy(num_workers=num_workers,num_cpus_per_worker=num_cpus_per_worker,  use_gpu=True)#num_cpus_per_worker=1, num_workers
     #strategy = RayStrategy(num_workers=1, num_cpus_per_worker=num_cpus_per_worker, use_gpu=True)
@@ -198,7 +198,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     #     log_every_n_steps=2,
     #     strategy=strategy#'ddp'#'ddp' # for multi gpu training
     # )
-    callbacks=[checkPointCallback ]#checkPointCallback
+    callbacks=[tuneCallBack ]#checkPointCallback
     kwargs = {
         #"accelerator":'auto',
         "max_epochs": max_epochs,
