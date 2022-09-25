@@ -308,7 +308,7 @@ os.makedirs(checkpoint_dir,  exist_ok = True)
 num_cpus_per_worker=cpu_num
 reporter = CLIReporter(
         parameter_columns=["lr"],
-        metric_columns=["mean_accuracy"])
+        metric_columns=["mean_val_acc"])
 
 scheduler = ASHAScheduler(
     max_t=5,
@@ -333,7 +333,7 @@ tuner = tune.Tuner(
         resources=get_tune_resources(num_workers=num_workers, use_gpu=True,num_cpus_per_worker=num_cpus_per_worker)
     ),
     tune_config=tune.TuneConfig(
-        metric="mean_accuracy",
+        metric="mean_val_acc",
         mode="max",
         #scheduler=pb2_scheduler,
         #scheduler=scheduler,

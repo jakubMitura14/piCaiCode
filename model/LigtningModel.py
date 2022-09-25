@@ -329,15 +329,15 @@ class Model(pl.LightningModule):
     def validation_epoch_end(self, outputs):
         
         avg_loss = torch.mean(torch.stack([torch.as_tensor(x['val_loss']) for x in outputs]))
-        print(f"ptl/val_accuracy { avg_loss}")
+        print(f"mean_val_loss { avg_loss}")
         avg_acc = torch.mean(torch.stack([torch.as_tensor(x['val_acc']) for x in outputs]))
 
-        #self.log("ptl/val_loss", avg_loss)
-        self.log("ptl/val_accuracy", avg_acc)
+        self.log("mean_val_loss", avg_loss)
+        self.log("mean_val_acc", avg_acc)
 
         # self.log('ptl/val_loss', avg_loss)
         # self.log('ptl/val_accuracy', avg_acc)
-        # return {'ptl/val_loss': avg_loss, 'ptl/val_accuracy':avg_acc}
+        #return {'mean_val_loss': avg_loss, 'mean_val_acc':avg_acc}
 
 
 
