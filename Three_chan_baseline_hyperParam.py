@@ -341,7 +341,7 @@ tuner = tune.Tuner(
     ),
     run_config=air.RunConfig(
         name=experiment_name,
-        # progress_reporter=reporter,
+        progress_reporter=reporter,
     ),
     param_space=config,
     #reuse_actors=True
