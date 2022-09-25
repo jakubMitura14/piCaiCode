@@ -218,7 +218,7 @@ class PiCaiDataModule(pl.LightningDataModule):
         allSubj,onlyPositve=  self.getSubjects()
 
         allSubjects= allSubj[400:500]
-        onlyPositiveSubjects= onlyPositve#[0:100]
+        onlyPositiveSubjects= onlyPositve[0:20]
         random.shuffle(allSubjects)
         random.shuffle(onlyPositiveSubjects)
 
