@@ -271,6 +271,8 @@ class Model(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         x, y_true, numLesions,isAnythingInAnnotated = batch['chan3_col_name'], batch['label'], batch['num_lesions_to_retain'], batch['isAnythingInAnnotated']
+        print(f"validation_step x {x}")
+        
         seg_hat, reg_hat = self.modelRegression(x)
         
         val_losss= self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)
