@@ -48,27 +48,11 @@ from geomloss import SamplesLoss  # See also ImagesLoss, VolumesLoss
 import importlib.util
 import sys
 from pytorch_lightning.loggers import TensorBoardLogger
-from ray import air, tune
-from ray.air import session
-from ray.tune import CLIReporter
-from ray.tune.schedulers import ASHAScheduler, PopulationBasedTraining
-from ray.tune.integration.pytorch_lightning import TuneReportCallback, \
-    TuneReportCheckpointCallback
-from ray.tune.schedulers.pb2 import PB2
-# Import placement group APIs.
-from ray.util.placement_group import (
-    placement_group,
-    placement_group_table,
-    remove_placement_group
-)
-from pytorch_lightning.loggers import TensorBoardLogger
-from ray import air, tune
-from ray.air import session
-from ray.tune import CLIReporter
-from ray.tune.schedulers import ASHAScheduler, PopulationBasedTraining
-from ray.tune.integration.pytorch_lightning import TuneReportCallback, \
-    TuneReportCheckpointCallback
-from ray_lightning.tune import TuneReportCallback, get_tune_resources
+import optuna
+from optuna.integration import PyTorchLightningPruningCallback
+# from ray import air, tune
+# from ray.air import session
+# from ray.tune import CLIReporter
 
 # torch.multiprocessing.freeze_support()
 
@@ -88,8 +72,7 @@ Three_chan_baseline =loadLib("Three_chan_baseline", "/home/sliceruser/data/piCai
 detectSemiSupervised =loadLib("detectSemiSupervised", "/home/sliceruser/data/piCaiCode/model/detectSemiSupervised.py")
 semisuperPreprosess =loadLib("semisuperPreprosess", "/home/sliceruser/data/piCaiCode/preprocessing/semisuperPreprosess.py")
 
-import ray
-ray.init(runtime_env={"env_vars": {"PL_DISABLE_FORK": "1"}})
+# ray.init(runtime_env={"env_vars": {"PL_DISABLE_FORK": "1"}})
 ##options
 
 
@@ -306,109 +289,7 @@ mainTuneDir='/home/sliceruser/data/mainTuneDir'
 os.makedirs(checkpoint_dir,  exist_ok = True) 
 # os.makedirs(default_root_dir,  exist_ok = True) 
 num_cpus_per_worker=cpu_num
-reporter = CLIReporter(
-        parameter_columns=["lr"],
-        metric_columns=["mean_val_acc"])
 
-scheduler = ASHAScheduler(
-    max_t=5,
-    grace_period=1,
-    reduction_factor=2)
-
-
-tuner = tune.Tuner(
-    tune.with_resources(
-        tune.with_parameters(
-            Three_chan_baseline.mainTrain,
-            df=df,
-            experiment_name=experiment_name
-            ,dummyDict=dummyDict
-            ,num_workers=num_workers
-            ,cpu_num=cpu_num
-             ,default_root_dir=default_root_dir
-             ,checkpoint_dir=checkpoint_dir
-             ,options=options
-             ,num_cpus_per_worker=num_cpus_per_worker            
-            ),
-        resources=get_tune_resources(num_workers=num_workers, use_gpu=True,num_cpus_per_worker=num_cpus_per_worker)
-    ),
-    tune_config=tune.TuneConfig(
-        metric="mean_val_acc",
-        mode="max",
-        #scheduler=pb2_scheduler,
-        #scheduler=scheduler,
-        #num_samples=1#num_workers,
-    ),
-    run_config=air.RunConfig(
-        name=experiment_name,
-        progress_reporter=reporter,
-    ),
-    param_space=config,
-    #reuse_actors=True
-)
-result_grid = tuner.fit()
-
-
-# result_grid=tune.run(
-#         tune.with_parameters(
-#             Three_chan_baseline.mainTrain,
-#             df=df,
-#             experiment_name=experiment_name
-#             ,dummyDict=dummyDict
-#             ,num_workers=num_workers
-#             ,cpu_num=cpu_num
-#              ,default_root_dir=default_root_dir
-#              ,checkpoint_dir=checkpoint_dir
-#              ,options=options
-#              ,num_cpus_per_worker=num_cpus_per_worker            
-#             ),
-#         # metric="ptl/val_accuracy",
-#         # mode="max",
-#         config=config,
-#         num_samples=2,
-#         resources_per_trial=get_tune_resources(num_workers=num_workers, use_gpu=True,num_cpus_per_worker=num_cpus_per_worker),
-#         scheduler=pb2_scheduler,
-#         name=experiment_name,
-#         local_dir=mainTuneDir,
-#         log_to_file=True,
-#         reporter=reporter
-        
-#         )
-        
-
-
-## printing as defined here https://docs.ray.io/en/latest/ray-air/tuner.html
-num_results = len(result_grid)
-
-# Check if there have been errors
-if result_grid.errors:
-    print("At least one trial failed.")
-
-# Get the best result
-best_result = result_grid.get_best_result()
-
-# And the best checkpoint
-best_checkpoint = best_result.checkpoint
-
-# And the best metrics
-best_metric = best_result.metrics
-
-# Inspect all results
-for result in result_grid:
-    if result.error:
-        print("The trial had an error:", result.error)
-        continue
-
-    print("The trial finished successfully with the metrics:", result.metrics["loss"])
-
-
-# experiment_name="picai-hyperparam-search-30"
-# for experiment in opt.get_experiments(
-#         project_name=experiment_name):
-#     print("******* new experiment *****")    
-#     Three_chan_baseline.mainTrain(experiment,options,df,experiment_name,dummyDict)
-
-# os.remove(dummyLabelPath)   
 
 
 

@@ -43,7 +43,6 @@ import os.path
 monai.utils.set_determinism()
 from functools import partial
 from pytorch_lightning.loggers import CometLogger
-from ray_lightning import RayStrategy
 
 # import preprocessing.transformsForMain
 # import preprocessing.ManageMetadata
@@ -51,13 +50,7 @@ import model.unets as unets
 import model.DataModule as DataModule
 import model.LigtningModel as LigtningModel
 # import preprocessing.semisuperPreprosess
-from ray import air, tune
-from ray.air import session
-from ray.tune import CLIReporter
-from ray.tune.schedulers import ASHAScheduler, PopulationBasedTraining
-from ray.tune.integration.pytorch_lightning import TuneReportCallback, \
-    TuneReportCheckpointCallback
-from ray_lightning import RayShardedStrategy
+
 
 def isAnnytingInAnnotatedInner(row,colName):
     row=row[1]
@@ -155,20 +148,20 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         lr=lr
     )
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
-        monitor='ptl/val_loss',
+        monitor='val_acc',
         patience=4,
         mode="max",
         divergence_threshold=(-0.1)
     )
 
 
-    tuneCallBack=TuneReportCheckpointCallback(
-        metrics={
-            "mean_val_loss": "mean_val_loss",
-            "mean_val_acc": "mean_val_acc"
-        },
-        filename="checkpointtt.ckpt",
-        on="validation_end")
+    # tuneCallBack=TuneReportCheckpointCallback(
+    #     metrics={
+    #         "mean_val_loss": "mean_val_loss",
+    #         "mean_val_acc": "mean_val_acc"
+    #     },
+    #     filename="checkpointtt.ckpt",
+    #     on="validation_end")
     # tuneCallBack=TuneReportCallback(
     #     {
     #         "mean_val_loss": "mean_val_loss",
@@ -176,7 +169,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     #     },
     #     on="validation_end")
 
-    strategy = RayStrategy(num_workers=num_workers,num_cpus_per_worker=num_cpus_per_worker,  use_gpu=True)#num_cpus_per_worker=1, num_workers
+    #strategy = RayStrategy(num_workers=num_workers,num_cpus_per_worker=num_cpus_per_worker,  use_gpu=True)#num_cpus_per_worker=1, num_workers
     #strategy = RayShardedStrategy(num_workers=1, num_cpus_per_worker=num_cpus_per_worker, use_gpu=True)
 
 
@@ -198,7 +191,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     #     log_every_n_steps=2,
     #     strategy=strategy#'ddp'#'ddp' # for multi gpu training
     # )
-    callbacks=[tuneCallBack ]#checkPointCallback
+    callbacks=[early_stopping ]#checkPointCallback
     kwargs = {
         #"accelerator":'auto',
         "max_epochs": max_epochs,
@@ -210,7 +203,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         "accumulate_grad_batches" : accumulate_grad_batches,
         "gradient_clip_val" :gradient_clip_val,
         "log_every_n_steps" :2,
-        "strategy" :strategy#'ddp'
+        "strategy" :'ddp'
         }
 
     # if os.path.exists(os.path.join(checkpoint_dir, "checkpointtt")):
