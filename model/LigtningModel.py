@@ -243,9 +243,13 @@ class Model(pl.LightningModule):
         y_true_list = decollate_batch(y_true)
         toSum= list(map(lambda i:  self.calcLossHelp(isAnythingInAnnotated_list,seg_hat_list, y_true_list ,i) , list( range(0,len( seg_hat_list)) )))
         toSum= list(filter(lambda it: it!=' '  ,toSum))
-        segLoss= torch.sum(torch.stack(toSum))
-        lossReg=F.smooth_l1_loss(reg_hat,numLesions)
-        return torch.add(segLoss,lossReg)
+        if(len(toSum)>0):
+            segLoss= torch.sum(torch.stack(toSum))
+            lossReg=F.smooth_l1_loss(reg_hat,numLesions)
+            return torch.add(segLoss,lossReg)
+        else:
+            return F.smooth_l1_loss(reg_hat,numLesions)
+
         #for i in range(0,len( y_det)):
             # if(isAnythingInAnnotated[i]>0):
             #     lossSeg=self.criterion(seg_hat, y_true)
