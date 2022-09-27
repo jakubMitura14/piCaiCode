@@ -285,7 +285,7 @@ dummyDict={"_one_spac_c" :aa[0],"_med_spac_b":aa[1]   }
 
 #         })
 
-experiment_name="picai-hyperparam-search-30"
+experiment_name="picai_hp_31"
 # Three_chan_baseline.mainTrain(options,df,experiment_name,dummyDict)
 num_workers=2
 cpu_num=11 #per gpu
@@ -306,12 +306,16 @@ def objective(trial: optuna.trial.Trial) -> float:
 
 
 
-study = optuna.create_study(sampler=optuna.samplers.NSGAIISampler(),pruner=optuna.pruners.HyperbandPruner())
+study = optuna.create_study(
+        study_name=experiment_name
+        ,sampler=optuna.samplers.NSGAIISampler()    
+        ,pruner=optuna.pruners.HyperbandPruner()
+        ,storage="mysql://root@localhost/example")
 study.optimize(objective, n_trials=5)
 
 
 print("***********  study.best_trial *********")
-print(f"study.best_trial {study.best_trial }")
+print(f"study.best_trial {study.trials_dataframe() }")
 
 
 
