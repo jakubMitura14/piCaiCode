@@ -193,7 +193,8 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     #     log_every_n_steps=2,
     #     strategy=strategy#'ddp'#'ddp' # for multi gpu training
     # )
-    callbacks=[PyTorchLightningPruningCallback(trial, monitor="val_acc") ]#checkPointCallback
+    # callbacks=[PyTorchLightningPruningCallback(trial, monitor="val_acc") ]#checkPointCallback
+    callbacks=[early_stopping ]#checkPointCallback
     kwargs = {
         #"accelerator":'auto',
         "max_epochs": max_epochs,
@@ -205,7 +206,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         "accumulate_grad_batches" : accumulate_grad_batches,
         "gradient_clip_val" :gradient_clip_val,
         "log_every_n_steps" :2,
-        #"strategy" :'ddp'
+        "strategy" :'ddp'
         }
 
     # if os.path.exists(os.path.join(checkpoint_dir, "checkpointtt")):
