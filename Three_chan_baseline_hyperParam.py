@@ -312,7 +312,7 @@ study = optuna.create_study(
         ,sampler=optuna.samplers.NSGAIISampler()    
         ,pruner=optuna.pruners.HyperbandPruner()
         ,storage="mysql://root:6598@127.0.0.1:3306/picai_hp_31"
-        ,storage="mysql://root:pwd@127.0.0.1:88/picai_hp_31"
+        #,storage="mysql://root:pwd@127.0.0.1:88/picai_hp_31"
         )
 study.optimize(objective, n_trials=5)
 
@@ -346,83 +346,4 @@ print(f"study.best_trial {study.trials_dataframe() }")
 #                 },
 #                 on="validation_end")
 #         ])
-#     trainer.fit(model)
-
-
-# def tune_mnist_asha(num_samples=10, num_epochs=10, gpus_per_trial=0, data_dir="~/data"):
-#     config = {
-#         "layer_1_size": tune.choice([32, 64, 128]),
-#         "layer_2_size": tune.choice([64, 128, 256]),
-#         "lr": tune.loguniform(1e-4, 1e-1),
-#         "batch_size": tune.choice([32, 64, 128]),
-#     }
-
-#     scheduler = ASHAScheduler(
-#         max_t=num_epochs,
-#         grace_period=1,
-#         reduction_factor=2)
-
-#     reporter = CLIReporter(
-#         parameter_columns=["layer_1_size", "layer_2_size", "lr", "batch_size"],
-#         metric_columns=["loss", "mean_accuracy", "training_iteration"])
-
-#     train_fn_with_parameters = tune.with_parameters(train_mnist_tune,
-#                                                     num_epochs=num_epochs,
-#                                                     num_workerss=gpus_per_trial,
-#                                                     data_dir=data_dir)
-#     resources_per_trial = {"cpu": 1, "gpu": gpus_per_trial}
-    
-#     tuner = tune.Tuner(
-#         tune.with_resources(
-#             train_fn_with_parameters,
-#             resources=resources_per_trial
-#         ),
-#         tune_config=tune.TuneConfig(
-#             metric="loss",
-#             mode="min",
-#             scheduler=scheduler,
-#             num_samples=num_samples,
-#         ),
-#         run_config=air.RunConfig(
-#             name="tune_mnist_asha",
-#             progress_reporter=reporter,
-#         ),
-#         param_space=config,
-#     )
-#     results = tuner.fit()
-
-#     print("Best hyperparameters found were: ", results.get_best_result().config)
-
-
-#     def train_mnist_tune_checkpoint(config,
-#                                 checkpoint_dir=None,
-#                                 num_epochs=10,
-#                                 num_workerss=0,
-#                                 data_dir="~/data"):
-#     data_dir = os.path.expanduser(data_dir)
-#     kwargs = {
-#         "max_epochs": num_epochs,
-#         # If fractional GPUs passed in, convert to int.
-#         "gpus": math.ceil(num_workerss),
-#         "logger": TensorBoardLogger(
-#             save_dir=os.getcwd(), name="", version="."),
-#         "enable_progress_bar": False,
-#         "callbacks": [
-#             TuneReportCheckpointCallback(
-#                 metrics={
-#                     "loss": "ptl/val_loss",
-#                     "mean_accuracy": "ptl/val_accuracy"
-#                 },
-#                 filename="checkpoint",
-#                 on="validation_end")
-#         ]
-#     }
-
-#     if checkpoint_dir:
-#         kwargs["resume_from_checkpoint"] = os.path.join(
-#             checkpoint_dir, "checkpoint")
-
-#     model = LightningMNISTClassifier(config=config, data_dir=data_dir)
-#     trainer = pl.Trainer(**kwargs)
-
 #     trainer.fit(model)
