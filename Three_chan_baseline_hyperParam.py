@@ -289,7 +289,7 @@ experiment_name="picai_hp_32"
 # Three_chan_baseline.mainTrain(options,df,experiment_name,dummyDict)
 num_workers=2
 cpu_num=11 #per gpu
-default_root_dir='/home/sliceruser/data/lightninghj'
+default_root_dir='/home/sliceruser/data/lightninghk'
 checkpoint_dir='/home/sliceruser/data/tuneCheckpoints11'
 mainTuneDir='/home/sliceruser/data/mainTuneDir'
 os.makedirs(checkpoint_dir,  exist_ok = True) 
@@ -316,7 +316,7 @@ study = optuna.create_study(
         #,storage="mysql://root:pwd@127.0.0.1:88/picai_hp_32"
         )
         #mysql://root@localhost/example
-study.optimize(objective, n_trials=5)
+study.optimize(objective, n_trials=50)
 
 
 print("***********  study.best_trial *********")
