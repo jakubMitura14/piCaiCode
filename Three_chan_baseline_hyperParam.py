@@ -302,7 +302,7 @@ num_cpus_per_worker=cpu_num
 
 def objective(trial: optuna.trial.Trial) -> float:
 
-    return Three_chan_baseline.mainTrain(trial,df,experiment_name,dummyDict
+    return (-1)*Three_chan_baseline.mainTrain(trial,df,experiment_name,dummyDict
     ,num_workers,cpu_num ,default_root_dir,checkpoint_dir,options,num_cpus_per_worker)
 
 
