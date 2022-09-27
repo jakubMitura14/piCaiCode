@@ -358,7 +358,7 @@ class Model(pl.LightningModule):
         val_accs=list(map(lambda x : x['val_acc'].cpu().detach().numpy(),outputs))
         print(f" a  val_accs {val_accs} ")
         val_accs=np.mean(np.array( val_accs).flatten())
-        print(f" b  val_accs {val_accs} ")
+        print(f" b  val_accs {val_accs} mean {np.mean(val_accs)}")
 
         #avg_acc = np.mean(np.array(([x['val_acc'].cpu().detach().numpy() for x in outputs])).flatten() )
 
