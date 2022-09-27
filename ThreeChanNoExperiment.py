@@ -196,7 +196,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     # callbacks=[PyTorchLightningPruningCallback(trial, monitor="val_acc") ]#checkPointCallback
     callbacks=[early_stopping ]#checkPointCallback
     kwargs = {
-        #"accelerator":'auto',
+        "accelerator":'auto',
         "max_epochs": max_epochs,
         "callbacks" :callbacks,
         "logger" : comet_logger,
