@@ -92,7 +92,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
 
     data = DataModule.PiCaiDataModule(
         df= df,
-        batch_size=3,#
+        batch_size=7,#
         trainSizePercent=percentSplit,# 
         num_workers=cpu_num,#os.cpu_count(),
         drop_last=False,#True,
@@ -150,7 +150,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         trial=trial
     )
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
-        monitor='val_acc',
+        monitor='mean_val_acc',
         patience=4,
         mode="max",
         divergence_threshold=(-0.1)
@@ -206,7 +206,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         "accumulate_grad_batches" : accumulate_grad_batches,
         "gradient_clip_val" :gradient_clip_val,
         "log_every_n_steps" :2,
-        "strategy" :'ddp'
+        "strategy" :'dp'
         }
 
     # if os.path.exists(os.path.join(checkpoint_dir, "checkpointtt")):
