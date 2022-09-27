@@ -302,7 +302,8 @@ num_cpus_per_worker=cpu_num
 
 def objective(trial: optuna.trial.Trial) -> float:
 
-    return  Three_chan_baseline.mainTrain(trial,df,experiment_name,dummyDict,num_workers,cpu_num ,default_root_dir,checkpoint_dir,options,num_cpus_per_worker)
+    return  Three_chan_baseline.mainTrain(trial,df,experiment_name,dummyDict
+    ,num_workers,cpu_num ,default_root_dir,checkpoint_dir,options,num_cpus_per_worker)
 
 
 
@@ -310,7 +311,8 @@ study = optuna.create_study(
         study_name=experiment_name
         ,sampler=optuna.samplers.NSGAIISampler()    
         ,pruner=optuna.pruners.HyperbandPruner()
-        ,storage="mysql://root@localhost/example")
+        #,storage="mysql://root@localhost/example"
+        )
 study.optimize(objective, n_trials=5)
 
 
