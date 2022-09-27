@@ -53,7 +53,13 @@ from optuna.integration import PyTorchLightningPruningCallback
 # from ray import air, tune
 # from ray.air import session
 # from ray.tune import CLIReporter
-
+from optuna.visualization import plot_contour
+from optuna.visualization import plot_edf
+from optuna.visualization import plot_intermediate_values
+from optuna.visualization import plot_optimization_history
+from optuna.visualization import plot_parallel_coordinate
+from optuna.visualization import plot_param_importances
+from optuna.visualization import plot_slice
 # torch.multiprocessing.freeze_support()
 
 def loadLib(name,path):
@@ -214,70 +220,70 @@ dummyDict={"_one_spac_c" :aa[0],"_med_spac_b":aa[1]   }
 
 
 
-config = {
-    "lr": 1e-3,
-        #"lossF":list(range(0,len(options["lossF"])))[0],
-        #"regression_channels":  tune.choice( list(range(0,len(options["regression_channels"])))),
-        #"optimizer_class":  list(range(0,len(options["optimizer_class"])))[0],
-        "models":  tune.choice(list(range(0,len(options["models"])))) ,
-        "dropout": 0.2,
-        "accumulate_grad_batches":  3,
-        "spacing_keyword":  "_one_spac_c" ,#,"_med_spac_b"
+# config = {
+#     "lr": 1e-3,
+#         #"lossF":list(range(0,len(options["lossF"])))[0],
+#         #"regression_channels":  tune.choice( list(range(0,len(options["regression_channels"])))),
+#         #"optimizer_class":  list(range(0,len(options["optimizer_class"])))[0],
+#         "models":  tune.choice(list(range(0,len(options["models"])))) ,
+#         "dropout": 0.2,
+#         "accumulate_grad_batches":  3,
+#         "spacing_keyword":  "_one_spac_c" ,#,"_med_spac_b"
 
-        "gradient_clip_val": 10.0 ,#{"type": "discrete", "values": [0.0, 0.2,0.5,2.0,100.0]},#,2.0, 0.2,0.5
-        "RandGaussianNoised_prob": 0.01,#{"type": "float", "min": 0.0, "max": 0.5},
-        "RandAdjustContrastd_prob": 0.4,#{"type": "float", "min": 0.3, "max": 0.8},
-        "RandGaussianSmoothd_prob": 0.01,#{"type": "discrete", "values": [0.0]},
-        "RandRicianNoised_prob": 0.4,#{"type": "float", "min": 0.2, "max": 0.7},
-        "RandFlipd_prob": 0.4,#{"type": "float", "min": 0.3, "max": 0.7},
-        "RandAffined_prob": 0.2,#{"type": "float", "min": 0.0, "max": 0.5},
-        "RandCoarseDropoutd_prob": 0.01,# {"type": "discrete", "values": [0.0]},
-        "RandomElasticDeformation_prob": 0.1,#{"type": "float", "min": 0.0, "max": 0.3},
-        "RandomAnisotropy_prob": 0.1,# {"type": "float", "min": 0.0, "max": 0.3},
-        "RandomMotion_prob":  0.1,#{"type": "float", "min": 0.0, "max": 0.3},
-        "RandomGhosting_prob": 0.1,# {"type": "float", "min": 0.0, "max": 0.3},
-        "RandomSpike_prob": 0.1,# {"type": "float", "min": 0.0, "max": 0.3},
-        "RandomBiasField_prob": 0.1,# {"type": "float", "min": 0.0, "max": 0.3},
+#         "gradient_clip_val": 10.0 ,#{"type": "discrete", "values": [0.0, 0.2,0.5,2.0,100.0]},#,2.0, 0.2,0.5
+#         "RandGaussianNoised_prob": 0.01,#{"type": "float", "min": 0.0, "max": 0.5},
+#         "RandAdjustContrastd_prob": 0.4,#{"type": "float", "min": 0.3, "max": 0.8},
+#         "RandGaussianSmoothd_prob": 0.01,#{"type": "discrete", "values": [0.0]},
+#         "RandRicianNoised_prob": 0.4,#{"type": "float", "min": 0.2, "max": 0.7},
+#         "RandFlipd_prob": 0.4,#{"type": "float", "min": 0.3, "max": 0.7},
+#         "RandAffined_prob": 0.2,#{"type": "float", "min": 0.0, "max": 0.5},
+#         "RandCoarseDropoutd_prob": 0.01,# {"type": "discrete", "values": [0.0]},
+#         "RandomElasticDeformation_prob": 0.1,#{"type": "float", "min": 0.0, "max": 0.3},
+#         "RandomAnisotropy_prob": 0.1,# {"type": "float", "min": 0.0, "max": 0.3},
+#         "RandomMotion_prob":  0.1,#{"type": "float", "min": 0.0, "max": 0.3},
+#         "RandomGhosting_prob": 0.1,# {"type": "float", "min": 0.0, "max": 0.3},
+#         "RandomSpike_prob": 0.1,# {"type": "float", "min": 0.0, "max": 0.3},
+#         "RandomBiasField_prob": 0.1,# {"type": "float", "min": 0.0, "max": 0.3},
 
     
-}
+# }
 
 
-    # config = {
-    #     "layer_1_size": tune.choice([32, 64, 128]),
-    #     "layer_2_size": tune.choice([64, 128, 256]),
-    #     "lr": 1e-3,
-    #     "batch_size": 64,
-    # }
+#     # config = {
+#     #     "layer_1_size": tune.choice([32, 64, 128]),
+#     #     "layer_2_size": tune.choice([64, 128, 256]),
+#     #     "lr": 1e-3,
+#     #     "batch_size": 64,
+#     # }
 
-pb2_scheduler = PB2(
-        time_attr="training_iteration",
-        metric='mean_accuracy',
-        mode='max',
-        perturbation_interval=10.0,
-        hyperparam_bounds={
-            "lr": [1e-2, 1e-5],
-            "gradient_clip_val": [0.0,100.0] ,#{"type": "discrete", "values": [0.0, 0.2,0.5,2.0,100.0]},#,2.0, 0.2,0.5
-            "RandGaussianNoised_prob": [0.0,1.0],#{"type": "float", "min": 0.0, "max": 0.5},
-            "RandAdjustContrastd_prob": [0.0,1.0],#{"type": "float", "min": 0.3, "max": 0.8},
-            "RandGaussianSmoothd_prob": [0.0,1.0],#{"type": "discrete", "values": [0.0]},
-            "RandRicianNoised_prob": [0.0,1.0],#{"type": "float", "min": 0.2, "max": 0.7},
-            "RandFlipd_prob":[0.0,1.0],#{"type": "float", "min": 0.3, "max": 0.7},
-            "RandAffined_prob": [0.0,1.0],#{"type": "float", "min": 0.0, "max": 0.5},
-            "RandCoarseDropoutd_prob": [0.0,1.0],# {"type": "discrete", "values": [0.0]},
-            "RandomElasticDeformation_prob":[0.0,1.0],#{"type": "float", "min": 0.0, "max": 0.3},
-            "RandomAnisotropy_prob": [0.0,1.0],# {"type": "float", "min": 0.0, "max": 0.3},
-            "RandomMotion_prob":  [0.0,1.0],#{"type": "float", "min": 0.0, "max": 0.3},
-            "RandomGhosting_prob":[0.0,1.0],# {"type": "float", "min": 0.0, "max": 0.3},
-            "RandomSpike_prob": [0.0,1.0],# {"type": "float", "min": 0.0, "max": 0.3},
-            "RandomBiasField_prob": [0.0,1.0],# {"type": "float", "min": 0.0, "max": 0.3},
-            "dropout": [0.0,0.6],# {"type": "float", "min": 0.0, "max": 0.3},
-            #"lossF":list(range(0,len(options["lossF"]))),
-            #"regression_channels":   list(range(0,len(options["regression_channels"]))),
-            #"optimizer_class":  list(range(0,len(options["optimizer_class"]))),
-            #"models":  list(range(0,len(options["models"]))) ,
+# pb2_scheduler = PB2(
+#         time_attr="training_iteration",
+#         metric='mean_accuracy',
+#         mode='max',
+#         perturbation_interval=10.0,
+#         hyperparam_bounds={
+#             "lr": [1e-2, 1e-5],
+#             "gradient_clip_val": [0.0,100.0] ,#{"type": "discrete", "values": [0.0, 0.2,0.5,2.0,100.0]},#,2.0, 0.2,0.5
+#             "RandGaussianNoised_prob": [0.0,1.0],#{"type": "float", "min": 0.0, "max": 0.5},
+#             "RandAdjustContrastd_prob": [0.0,1.0],#{"type": "float", "min": 0.3, "max": 0.8},
+#             "RandGaussianSmoothd_prob": [0.0,1.0],#{"type": "discrete", "values": [0.0]},
+#             "RandRicianNoised_prob": [0.0,1.0],#{"type": "float", "min": 0.2, "max": 0.7},
+#             "RandFlipd_prob":[0.0,1.0],#{"type": "float", "min": 0.3, "max": 0.7},
+#             "RandAffined_prob": [0.0,1.0],#{"type": "float", "min": 0.0, "max": 0.5},
+#             "RandCoarseDropoutd_prob": [0.0,1.0],# {"type": "discrete", "values": [0.0]},
+#             "RandomElasticDeformation_prob":[0.0,1.0],#{"type": "float", "min": 0.0, "max": 0.3},
+#             "RandomAnisotropy_prob": [0.0,1.0],# {"type": "float", "min": 0.0, "max": 0.3},
+#             "RandomMotion_prob":  [0.0,1.0],#{"type": "float", "min": 0.0, "max": 0.3},
+#             "RandomGhosting_prob":[0.0,1.0],# {"type": "float", "min": 0.0, "max": 0.3},
+#             "RandomSpike_prob": [0.0,1.0],# {"type": "float", "min": 0.0, "max": 0.3},
+#             "RandomBiasField_prob": [0.0,1.0],# {"type": "float", "min": 0.0, "max": 0.3},
+#             "dropout": [0.0,0.6],# {"type": "float", "min": 0.0, "max": 0.3},
+#             #"lossF":list(range(0,len(options["lossF"]))),
+#             #"regression_channels":   list(range(0,len(options["regression_channels"]))),
+#             #"optimizer_class":  list(range(0,len(options["optimizer_class"]))),
+#             #"models":  list(range(0,len(options["models"]))) ,
 
-        })
+#         })
 
 experiment_name="picai-hyperparam-search-30"
 # Three_chan_baseline.mainTrain(options,df,experiment_name,dummyDict)
@@ -294,13 +300,18 @@ num_cpus_per_worker=cpu_num
 
 
 
+def objective(trial: optuna.trial.Trial) -> float:
+
+    return  Three_chan_baseline.mainTrain(trial,df,experiment_name,dummyDict,num_workers,cpu_num ,default_root_dir,checkpoint_dir,options,num_cpus_per_worker)
 
 
 
+study = optuna.create_study(sampler=optuna.samplers.NSGAIISampler(),pruner=optuna.pruners.HyperbandPruner())
+study.optimize(objective, n_trials=5)
 
 
-
-
+print("***********  study.best_trial *********")
+print(f"study.best_trial {study.best_trial }")
 
 
 

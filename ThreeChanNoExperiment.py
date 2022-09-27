@@ -43,6 +43,7 @@ import os.path
 monai.utils.set_determinism()
 from functools import partial
 from pytorch_lightning.loggers import CometLogger
+from optuna.integration import PyTorchLightningPruningCallback
 
 # import preprocessing.transformsForMain
 # import preprocessing.ManageMetadata
@@ -76,7 +77,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     ,RandomMotion_prob
     ,RandomGhosting_prob
     ,RandomSpike_prob
-    ,RandomBiasField_prob,regression_channels,num_workers,cpu_num ,default_root_dir,checkpoint_dir,lr,num_cpus_per_worker):        
+    ,RandomBiasField_prob,regression_channels,num_workers,cpu_num ,default_root_dir,checkpoint_dir,lr,num_cpus_per_worker,trial):        
     #TODO(remove)
     comet_logger = CometLogger(
         api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
@@ -145,7 +146,8 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         picaiLossArr_AP_final=picaiLossArr_AP_final,
         picaiLossArr_score_final=picaiLossArr_score_final,
         regression_channels=regression_channels,
-        lr=lr
+        lr=lr,
+        trial=trial
     )
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
         monitor='val_acc',
@@ -191,7 +193,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     #     log_every_n_steps=2,
     #     strategy=strategy#'ddp'#'ddp' # for multi gpu training
     # )
-    callbacks=[early_stopping ]#checkPointCallback
+    callbacks=[PyTorchLightningPruningCallback(trial, monitor="val_acc") ]#checkPointCallback
     kwargs = {
         #"accelerator":'auto',
         "max_epochs": max_epochs,

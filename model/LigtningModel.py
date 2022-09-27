@@ -180,6 +180,7 @@ class Model(pl.LightningModule):
     ,picaiLossArr_score_final
     ,regression_channels
     ,lr
+    ,trial
     ):
         super().__init__()
         self.lr = learning_rate
@@ -207,6 +208,7 @@ class Model(pl.LightningModule):
         self.postTrue = Compose([EnsureType()])
         self.F1Score = torchmetrics.F1Score()
         self.lr=lr
+        self.trial=trial
         #shutil.rmtree(self.temp_val_dir) 
 
     def configure_optimizers(self):
@@ -330,9 +332,11 @@ class Model(pl.LightningModule):
             print(f" total loss a {total_loss1} val_loss {val_losss}  dice.aggregate() {dice.aggregate()}")
             total_loss2= torch.add(total_loss1,dice.aggregate())
             print(f" total loss b {total_loss2}  total_loss,dice.aggregate() {dice.aggregate()}")
+            self.picaiLossArr_score_final.append(total_loss2.item())
             return {'val_acc': total_loss2.item(), 'val_loss':val_losss}
         
         #in case no positive segmentation information is available
+        self.picaiLossArr_score_final.append(total_loss1.item())
         return {'val_acc': total_loss1.item(), 'val_loss':val_losss}
 
 

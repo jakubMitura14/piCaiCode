@@ -72,14 +72,14 @@ semisuperPreprosess =loadLib("semisuperPreprosess", "/home/sliceruser/data/piCai
 
 
 
-def getParam(config,options,key):
+def getParam(trial,options,key):
     """
     given integer returned from experiment 
     it will look into options dictionary and return required object
     """
-    integerr=config[key]
-    # print("keyy {key} ")
-    # print(options[key])
+    lenn= len(options[key])
+    integerr=trial.suggest_int(key, 0, lenn)
+
     return options[key][integerr]
 
 def addDummyLabelPath(row, labelName, dummyLabelPath):
@@ -92,7 +92,7 @@ def addDummyLabelPath(row, labelName, dummyLabelPath):
     else:
         return row[labelName]    
 
-def mainTrain(config,df,experiment_name,dummyDict,num_workers,cpu_num ,default_root_dir,checkpoint_dir,options,num_cpus_per_worker):
+def mainTrain(trial,df,experiment_name,dummyDict,num_workers,cpu_num ,default_root_dir,checkpoint_dir,options,num_cpus_per_worker):
     picaiLossArr_auroc_final=[]
     picaiLossArr_AP_final=[]
     picaiLossArr_score_final=[]
@@ -102,7 +102,9 @@ def mainTrain(config,df,experiment_name,dummyDict,num_workers,cpu_num ,default_r
     out_channels=2
 
 
-    spacing_keyword=config["spacing_keyword"]
+
+
+    spacing_keyword="_one_spac_c" 
     sizeWord= "_maxSize_" #config["sizeWord")
     chan3_col_name=f"t2w{spacing_keyword}_3Chan{sizeWord}" 
     chan3_col_name_val=chan3_col_name 
@@ -118,23 +120,23 @@ def mainTrain(config,df,experiment_name,dummyDict,num_workers,cpu_num ,default_r
     # img_size = sizz#(sizz[2],sizz[1],sizz[0])
     dummyLabelPath,img_size=dummyDict[spacing_keyword]
     print(f"aaaaaa  img_size {img_size}  {type(img_size)}")
-    RandGaussianNoised_prob=config["RandGaussianNoised_prob"]
-    RandAdjustContrastd_prob=config["RandAdjustContrastd_prob"]
-    RandGaussianSmoothd_prob=config["RandGaussianSmoothd_prob"]
-    RandRicianNoised_prob=config["RandRicianNoised_prob"]
-    RandFlipd_prob=config["RandFlipd_prob"]
-    RandAffined_prob=config["RandAffined_prob"]
-    RandCoarseDropoutd_prob=config["RandCoarseDropoutd_prob"]
+    RandGaussianNoised_prob= trial.suggest_float("RandGaussianNoised_prob", 0.0, 1.0)
+    RandAdjustContrastd_prob=trial.suggest_float("RandAdjustContrastd_prob", 0.0, 1.0)
+    RandGaussianSmoothd_prob=trial.suggest_float("RandGaussianSmoothd_prob", 0.0, 1.0)
+    RandRicianNoised_prob=trial.suggest_float("RandRicianNoised_prob", 0.0, 1.0)
+    RandFlipd_prob=trial.suggest_float("RandFlipd_prob", 0.0, 1.0)
+    RandAffined_prob=trial.suggest_float("RandAffined_prob", 0.0, 1.0)
+    RandCoarseDropoutd_prob=trial.suggest_float("RandCoarseDropoutd_prob", 0.0, 1.0)
     is_whole_to_train= (sizeWord=="_maxSize_")
     centerCropSize=(81.0, 160.0, 192.0)#=getParam(experiment,options,"centerCropSize",df)
-    net= getParam(config,options,"models") #options["models"][0]#   
+    net= getParam(trial,options,"models") #options["models"][0]#   
     
     # strides=getParam(config,options,"stridesAndChannels",df)["strides"]
     # channels=getParam(config,options,"stridesAndChannels",df)["channels"]
     num_res_units= 0#config["num_res_units")
     act = (Act.PRELU, {"init": 0.2}) #getParam(config,options,"act",df)
     norm= (Norm.BATCH, {}) #getParam(config,options,"norm",df)
-    dropout= config["dropout"]
+    dropout= trial.suggest_float("RandCoarseDropoutd_prob", 0.0,0.6)
     print(f"aaaaaaaaaaaaaaaaaaa dropout {dropout}")
     to_onehot_y_loss= False
     monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
@@ -143,21 +145,22 @@ def mainTrain(config,df,experiment_name,dummyDict,num_workers,cpu_num ,default_r
 
     criterion= monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)# Our seg labels are single channel images indicating class index, rather than one-hot
     optimizer_class= torch.optim.NAdam#(lr=config["lr"])#getParam(config,options,"optimizer_class",df)(config["lr"])
-    regression_channels=options["regression_channels"][1] # getParam(config,options,"regression_channels")#options["regression_channels"][1] #getParam(config,options,"regression_channels",df)
-    accumulate_grad_batches=config["accumulate_grad_batches"]
-    gradient_clip_val=config["gradient_clip_val"]# 0.5,2.0
+    regression_channels=getParam(trial,options,"regression_channels") #options["regression_channels"][1] # getParam(config,options,"regression_channels")#options["regression_channels"][1] #getParam(config,options,"regression_channels",df)
+    accumulate_grad_batches=3#config["accumulate_grad_batches"]
+    gradient_clip_val= trial.suggest_float(0.0,100.0) #config["gradient_clip_val"]# 0.5,2.0
     net=net(dropout,img_size,in_channels,out_channels)
 
 
 
 
 
-    RandomElasticDeformation_prob=config["RandomElasticDeformation_prob"]
-    RandomAnisotropy_prob=config["RandomAnisotropy_prob"]
-    RandomMotion_prob=config["RandomMotion_prob"]
-    RandomGhosting_prob=config["RandomGhosting_prob"]
-    RandomSpike_prob=config["RandomSpike_prob"]
-    RandomBiasField_prob=config["RandomBiasField_prob"]
+    RandomElasticDeformation_prob=trial.suggest_float("RandRicianNoised_prob", 0.0, 1.0)
+    RandomAnisotropy_prob=trial.suggest_float("RandRicianNoised_prob", 0.0, 1.0)
+    RandomMotion_prob=trial.suggest_float("RandRicianNoised_prob", 0.0, 1.0)
+    RandomGhosting_prob=trial.suggest_float("RandRicianNoised_prob", 0.0, 1.0)
+    RandomSpike_prob=trial.suggest_float("RandRicianNoised_prob", 0.0, 1.0)
+    RandomBiasField_prob=trial.suggest_float("RandRicianNoised_prob", 0.0, 1.0)
+
 
     os.makedirs('/home/sliceruser/data/temp', exist_ok = True)
     df[label_name]=list(map(partial(addDummyLabelPath,labelName=label_name ,dummyLabelPath= dummyLabelPath ) ,list(df.iterrows())) )
@@ -175,7 +178,7 @@ def mainTrain(config,df,experiment_name,dummyDict,num_workers,cpu_num ,default_r
     ,RandomMotion_prob
     ,RandomGhosting_prob
     ,RandomSpike_prob
-    ,RandomBiasField_prob,regression_channels,num_workers,cpu_num ,default_root_dir,checkpoint_dir,config["lr"],num_cpus_per_worker)
+    ,RandomBiasField_prob,regression_channels,num_workers,cpu_num ,default_root_dir,checkpoint_dir,config["lr"],num_cpus_per_worker,trial)
     # if(len(picaiLossArr_auroc_final)>0):
     #     experiment.log_metric("last_val_loss_auroc",np.nanmax(picaiLossArr_auroc_final))
     #     experiment.log_metric("last_val_loss_Ap",np.nanmax(picaiLossArr_AP_final))
@@ -234,6 +237,6 @@ def mainTrain(config,df,experiment_name,dummyDict,num_workers,cpu_num ,default_r
     #     for i in range(len(inputs)):
     #         break
     #     break   
-    return {"mean_val_acc" :np.nanmax(picaiLossArr_score_final) }
+    return np.nanmax(picaiLossArr_score_final)
 
 #experiment.end()
