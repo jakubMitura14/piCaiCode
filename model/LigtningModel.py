@@ -270,7 +270,7 @@ class Model(pl.LightningModule):
     # def validation_step(self, batch, batch_idx):
 
     def validation_step(self, batch, batch_idx):
-        x, y_true, numLesions,isAnythingInAnnotated = batch['chan3_col_name'], batch['label'], batch['num_lesions_to_retain'], batch['isAnythingInAnnotated']
+        x, y_true, numLesions,isAnythingInAnnotated = batch['chan3_col_name_val'], batch['label_name_val'], batch['num_lesions_to_retain'], batch['isAnythingInAnnotated']
         print(f"validation_step x {x}  batch['chan3_col_name'] {batch['chan3_col_name']}")
         
         seg_hat, reg_hat = self.modelRegression(x)
