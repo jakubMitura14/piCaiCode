@@ -78,7 +78,8 @@ def getParam(trial,options,key):
     it will look into options dictionary and return required object
     """
     lenn= len(options[key])
-    integerr=trial.suggest_int(key, 0, lenn)
+    #print(f"  ")
+    integerr=trial.suggest_int(key, 0, lenn-1)
 
     return options[key][integerr]
 
