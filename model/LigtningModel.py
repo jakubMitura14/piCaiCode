@@ -240,7 +240,7 @@ class Model(pl.LightningModule):
         y_true_list = decollate_batch(y_true)
         reg_hat_list = decollate_batch(reg_hat)
         numLesions_list = decollate_batch(numLesions)
-        toSum= list(map(lambda i:  self.calcLossHelp(self,isAnythingInAnnotated_list,seg_hat_list, y_true_list,reg_hat_list,numLesions_list ,i) , list( range(0,len( y_det)) )))
+        toSum= list(map(lambda i:  self.calcLossHelp(self,isAnythingInAnnotated_list,seg_hat_list, y_true_list,reg_hat_list,numLesions_list ,i) , list( range(0,len( seg_hat_list)) )))
         return torch.sum(torch.stack(toSum))
         #for i in range(0,len( y_det)):
             # if(isAnythingInAnnotated[i]>0):
