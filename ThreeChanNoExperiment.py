@@ -164,8 +164,8 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
 
     tuneCallBack=TuneReportCheckpointCallback(
         metrics={
-            #"loss": "ptl/val_loss",
-            "mean_accuracy": "ptl/val_accuracy"
+            "mean_val_loss": "mean_val_loss",
+            "mean_val_acc": "mean_val_acc"
         },
         filename="checkpointtt.ckpt",
         on="validation_end")
