@@ -86,10 +86,6 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         #experiment_name="baseline" # Optional
     )
     
-    # with mp.Pool(processes = mp.cpu_count()) as pool:
-    #     resList=pool.map(partial(addDummyLabelPath,labelName=label_name ,dummyLabelPath= dummyLabelPath ) ,list(df.iterrows())) 
-
-
     data = DataModule.PiCaiDataModule(
         df= df,
         batch_size=4,#
