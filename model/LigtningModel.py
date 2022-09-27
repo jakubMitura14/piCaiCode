@@ -325,10 +325,11 @@ class Model(pl.LightningModule):
                     if(torch.sum(y_det_i).item()>0 and torch.sum(y_true_i).item()>0 ):
                         dice(y_det_i,y_true_i)
 
-
+            self.log("dice", dice.aggregate())
             #print(f" total loss a {total_loss1} val_loss {val_losss}  dice.aggregate() {dice.aggregate()}")
             total_loss2= torch.add(total_loss1,dice.aggregate())
             print(f" total loss b {total_loss2}  total_loss,dice.aggregate() {dice.aggregate()}")
+            
             self.picaiLossArr_score_final.append(total_loss2.item())
             return {'val_acc': total_loss2.item(), 'val_loss':val_losss}
         
