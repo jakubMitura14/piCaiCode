@@ -195,7 +195,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     # )
     callbacks=[PyTorchLightningPruningCallback(trial, monitor="val_acc") ]#checkPointCallback
     #callbacks=[early_stopping ]#checkPointCallback
-    cuda_now = os.environ['cuda_now']
+    cuda_now = int(os.environ['cuda_now'])
     
     kwargs = {
         "accelerator":'gpu',
