@@ -152,8 +152,8 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
         monitor='mean_val_acc',
         patience=4,
-        mode="max",
-        divergence_threshold=(-0.1)
+        mode="min",
+        #divergence_threshold=(-0.1)
     )
 
 
@@ -193,8 +193,8 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     #     log_every_n_steps=2,
     #     strategy=strategy#'ddp'#'ddp' # for multi gpu training
     # )
-    callbacks=[PyTorchLightningPruningCallback(trial, monitor="val_acc") ]#checkPointCallback
-    #callbacks=[early_stopping ]#checkPointCallback
+    #callbacks=[PyTorchLightningPruningCallback(trial, monitor="val_acc") ]#checkPointCallback
+    callbacks=[early_stopping ]#checkPointCallback
     cuda_now = int(os.environ['cuda_now'])
     
     kwargs = {
