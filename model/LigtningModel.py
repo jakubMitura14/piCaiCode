@@ -355,10 +355,15 @@ class Model(pl.LightningModule):
         # avg_loss = torch.mean(torch.stack([torch.as_tensor(x['val_loss']) for x in outputs]))
         # print(f"mean_val_loss { avg_loss}")
         # avg_acc = torch.mean(torch.stack([torch.as_tensor(x['val_acc']) for x in outputs]))
-        avg_acc = np.mean(np.array(([x['val_acc'].cpu().detach().numpy() for x in outputs])).flatten() )
+        val_accs=list(map(lambda x : x['val_acc'].cpu().detach().numpy(),outputs))
+        print(f" a  val_accs {val_accs} ")
+        val_accs=np.mean(np.array( val_accs ).flatten)
+        print(f" b  val_accs {val_accs} ")
+
+        #avg_acc = np.mean(np.array(([x['val_acc'].cpu().detach().numpy() for x in outputs])).flatten() )
 
         # self.log("mean_val_loss", avg_loss)
-        self.log("mean_val_acc", np.mean(avg_acc))
+        self.log("mean_val_acc", np.mean(val_accs))
 
         # self.log('ptl/val_loss', avg_loss)
         # self.log('ptl/val_accuracy', avg_acc)
