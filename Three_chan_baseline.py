@@ -148,7 +148,7 @@ def mainTrain(trial,df,experiment_name,dummyDict,num_workers,cpu_num ,default_ro
     optimizer_class= torch.optim.NAdam#(lr=config["lr"])#getParam(config,options,"optimizer_class",df)(config["lr"])
     regression_channels=getParam(trial,options,"regression_channels") #options["regression_channels"][1] # getParam(config,options,"regression_channels")#options["regression_channels"][1] #getParam(config,options,"regression_channels",df)
     accumulate_grad_batches=3#config["accumulate_grad_batches"]
-    gradient_clip_val= trial.suggest_float(0.0,100.0) #config["gradient_clip_val"]# 0.5,2.0
+    gradient_clip_val= trial.suggest_float("gradient_clip_val",0.0,100.0) #config["gradient_clip_val"]# 0.5,2.0
     net=net(dropout,img_size,in_channels,out_channels)
 
 
