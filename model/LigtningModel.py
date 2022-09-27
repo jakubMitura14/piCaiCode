@@ -118,6 +118,7 @@ class UNetToRegresion(nn.Module):
         )
     def forward(self, x):
         segmMap=self.segmModel(x)
+        print(f"segmMap  {segmMap}")
         return (segmMap,self.model(segmMap))
 
 
