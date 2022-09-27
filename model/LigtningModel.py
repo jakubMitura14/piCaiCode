@@ -245,10 +245,11 @@ class Model(pl.LightningModule):
         toSum= list(filter(lambda it: it!=' '  ,toSum))
         if(len(toSum)>0):
             segLoss= torch.sum(torch.stack(toSum))
-            lossReg=F.smooth_l1_loss(reg_hat,numLesions)
+            lossReg=F.smooth_l1_loss(reg_hat,torch.Tensor(numLesions).to(self.device))
             return torch.add(segLoss,lossReg)
-        else:
-            return F.smooth_l1_loss(reg_hat,numLesions)
+
+        print(f"reg_hat {reg_hat} numLesions{numLesions}  "  )        
+        return F.smooth_l1_loss(reg_hat,torch.Tensor(numLesions).to(self.device) )
 
         #for i in range(0,len( y_det)):
             # if(isAnythingInAnnotated[i]>0):

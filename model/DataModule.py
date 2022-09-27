@@ -98,7 +98,7 @@ def getMonaiSubjectDataFromDataFrame(row,chan3_col_name,label_name,chan3_col_nam
         #, "t2w":str(row[t2w_name])
         , "isAnythingInAnnotated":int(row['isAnythingInAnnotated'])
         , "patient_id":str(row['patient_id'])
-        , "num_lesions_to_retain":str(row['num_lesions_to_retain'])
+        , "num_lesions_to_retain":int(row['num_lesions_to_retain'])
         # , "study_id":row['study_id']
         # , "patient_age":row['patient_age']
         # , "psa":row['psa']
