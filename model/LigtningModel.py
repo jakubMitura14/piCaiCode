@@ -335,10 +335,7 @@ class Model(pl.LightningModule):
         #in case no positive segmentation information is available
         self.picaiLossArr_score_final.append(total_loss1.item())
         return {'val_acc': total_loss1.item(), 'val_loss':val_losss}
-
-
-        # #print(f"sd.aggregate() {sd.aggregate().item()}")
-        
+       
         # self.picaiLossArr_score_final.append(total_loss2.item())
         # print(f" validation_acc {total_loss2.item()}  ")
         # self.log("validation_acc", total_loss2.item(), on_epoch=True, on_step=False, sync_dist=True, prog_bar=True, logger=True)
