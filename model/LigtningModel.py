@@ -309,23 +309,6 @@ class Model(pl.LightningModule):
         # y_det= list(map(self.postProcess  , y_det))
         # y_true= list(map(self.postTrue , y_det))
 
-        dice = DiceMetric()
-        for i in range(0,len( y_det)):
-            if(isAnythingInAnnotated[i]>0):
-                #print(f"torch.flatten(regress_res)[i] {torch.flatten(regress_res)[i]}")
-                # regress_res_round= round(torch.flatten(regress_res)[i].item())
-                #print(f"pre  y_det[i] {y_det[i].size()} y_true_i {y_true[i].size()} ")
-                y_det_i=self.postProcess(y_det[i])[0,:,:,:].cpu()
-                y_true_i=self.postTrue(y_true[i])[1,:,:,:].cpu()
-                #print(f"post  y_det[i] {y_det_i.size()} y_true_i {y_true_i.size()} ")
-                if(torch.sum(y_det_i).item()>0 and torch.sum(y_true_i).item()>0 ):
-                    # total_loss+= monai.metrics.compute_generalized_dice(y_det_i,y_true_i)/len( y_det)
-                    #print(f" monai.metrics.compute_generalized_dice(y_det_i,y_true_i)/len( y_det) {monai.metrics.compute_generalized_dice(y_det_i,y_true_i)/len( y_det)} ")
-                    dice(y_det_i,y_true_i)
-                    #sd(y_pred=y_det_i, y=y_true_i) 
-                # print(f"numLesions[i] {numLesions[i]}")    
-                # total_loss+= (abs(regress_res_round-int(numLesions[i]) ) /len( y_det) )#arbitrary number
-                
         regress_res2= torch.flatten(reg_hat) 
         regress_res3=list(map(lambda el:round(el) ,torch.flatten(regress_res2).cpu().detach().numpy() ))
 
@@ -333,9 +316,25 @@ class Model(pl.LightningModule):
         # #self.F1Score(torch.Tensor(regress_res3).int(), torch.Tensor(numLesions2).cpu().int())
         total_loss=precision_recall(torch.Tensor(regress_res3).int(), torch.Tensor(numLesions).cpu().int(), average='macro', num_classes=4)
         total_loss1=torch.mean(torch.stack([total_loss[0],total_loss[1]] ))#self.F1Score
-        print(f" total loss a {total_loss1} val_loss {val_losss}  dice.aggregate() {dice.aggregate()}")
-        total_loss2= torch.add(total_loss1,dice.aggregate())
-        print(f" total loss b {total_loss2}  total_loss,dice.aggregate() {dice.aggregate()}")
+        
+        if(torch.sum(isAnythingInAnnotated)>0):
+            dice = DiceMetric()
+            for i in range(0,len( y_det)):
+                if(isAnythingInAnnotated[i]>0):
+                    y_det_i=self.postProcess(y_det[i])[0,:,:,:].cpu()
+                    y_true_i=self.postTrue(y_true[i])[1,:,:,:].cpu()
+                    if(torch.sum(y_det_i).item()>0 and torch.sum(y_true_i).item()>0 ):
+                        dice(y_det_i,y_true_i)
+
+
+            print(f" total loss a {total_loss1} val_loss {val_losss}  dice.aggregate() {dice.aggregate()}")
+            total_loss2= torch.add(total_loss1,dice.aggregate())
+            print(f" total loss b {total_loss2}  total_loss,dice.aggregate() {dice.aggregate()}")
+            return {'val_acc': total_loss2.item(), 'val_loss':val_losss}
+        
+        #in case no positive segmentation information is available
+        return {'val_acc': total_loss1.item(), 'val_loss':val_losss}
+
 
         # #print(f"sd.aggregate() {sd.aggregate().item()}")
         
@@ -344,7 +343,6 @@ class Model(pl.LightningModule):
         # self.log("validation_acc", total_loss2.item(), on_epoch=True, on_step=False, sync_dist=True, prog_bar=True, logger=True)
         # self.log("val_loss", val_losss.item(), on_epoch=True, on_step=False, sync_dist=True, prog_bar=True, logger=True)
        
-        return {'val_acc': total_loss2.item(), 'val_loss':val_losss}
         #return {'val_acc': dice.aggregate().item(), 'val_loss':val_losss}
 
 
