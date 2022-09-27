@@ -179,7 +179,7 @@ def mainTrain(trial,df,experiment_name,dummyDict,num_workers,cpu_num ,default_ro
     ,RandomMotion_prob
     ,RandomGhosting_prob
     ,RandomSpike_prob
-    ,RandomBiasField_prob,regression_channels,num_workers,cpu_num ,default_root_dir,checkpoint_dir,config["lr"],num_cpus_per_worker,trial)
+    ,RandomBiasField_prob,regression_channels,num_workers,cpu_num ,default_root_dir,checkpoint_dir,trial.suggest_float("lr", 1e-2, 1e-5),num_cpus_per_worker,trial)
     # if(len(picaiLossArr_auroc_final)>0):
     #     experiment.log_metric("last_val_loss_auroc",np.nanmax(picaiLossArr_auroc_final))
     #     experiment.log_metric("last_val_loss_Ap",np.nanmax(picaiLossArr_AP_final))
