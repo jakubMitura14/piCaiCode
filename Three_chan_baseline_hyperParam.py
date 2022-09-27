@@ -311,7 +311,7 @@ study = optuna.create_study(
         study_name=experiment_name
         ,sampler=optuna.samplers.NSGAIISampler()    
         ,pruner=optuna.pruners.HyperbandPruner()
-        #,storage="mysql://root@localhost/example"
+        ,storage="mysql://root:pwd@localhost:3306/picai_hp_31"
         )
 study.optimize(objective, n_trials=5)
 
