@@ -118,7 +118,7 @@ class UNetToRegresion(nn.Module):
         )
     def forward(self, x):
         segmMap=self.segmModel(x)
-        print(f"segmMap  {segmMap}")
+        #print(f"segmMap  {segmMap}")
         return (segmMap,self.model(segmMap))
 
 
@@ -228,7 +228,7 @@ class Model(pl.LightningModule):
     #     return y_hat, numLesions
 
     def calculateLoss(self,isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions):
-        if(isAnythingInAnnotated>0):
+        if(isAnythingInAnnotated.item()>0):
             lossSeg=self.criterion(seg_hat, y_true)
             lossReg=F.smooth_l1_loss(reg_hat,numLesions)
             return torch.add(lossSeg,lossReg)
@@ -271,7 +271,7 @@ class Model(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         x, y_true, numLesions,isAnythingInAnnotated = batch['chan3_col_name_val'], batch['label_name_val'], batch['num_lesions_to_retain'], batch['isAnythingInAnnotated']
-        print(f"validation_step x {x}  batch['chan3_col_name'] {batch['chan3_col_name']}")
+        #print(f"validation_step x {x}  batch['chan3_col_name'] {batch['chan3_col_name']}")
         
         seg_hat, reg_hat = self.modelRegression(x)
         
@@ -287,7 +287,7 @@ class Model(pl.LightningModule):
         # y_true= list(map(self.postTrue , y_det))
 
         dice = DiceMetric()
-        if(isAnythingInAnnotated>0):
+        if(isAnythingInAnnotated.item()>0):
             for i in range(0,len( y_det)):
                 #print(f"torch.flatten(regress_res)[i] {torch.flatten(regress_res)[i]}")
                 # regress_res_round= round(torch.flatten(regress_res)[i].item())
