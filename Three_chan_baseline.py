@@ -234,6 +234,6 @@ def mainTrain(config,df,experiment_name,dummyDict,num_workers,cpu_num ,default_r
     #     for i in range(len(inputs)):
     #         break
     #     break   
-
+    return {"mean_val_acc" :np.nanmax(picaiLossArr_score_final) }
 
 #experiment.end()
