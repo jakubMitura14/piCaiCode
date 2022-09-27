@@ -333,7 +333,7 @@ class Model(pl.LightningModule):
         # #self.F1Score(torch.Tensor(regress_res3).int(), torch.Tensor(numLesions2).cpu().int())
         total_loss=precision_recall(torch.Tensor(regress_res3).int(), torch.Tensor(numLesions).cpu().int(), average='macro', num_classes=4)
         total_loss1=torch.mean(torch.stack([total_loss[0],total_loss[1]] ))#self.F1Score
-        print(f" total loss a {total_loss1} val_loss {val_losss}")
+        print(f" total loss a {total_loss1} val_loss {val_losss}  dice.aggregate() {dice.aggregate()}")
         total_loss2= torch.add(total_loss1,dice.aggregate())
         print(f" total loss b {total_loss2}  total_loss,dice.aggregate() {dice.aggregate()}")
 
