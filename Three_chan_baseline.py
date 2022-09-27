@@ -52,7 +52,7 @@ import importlib.util
 import sys
 import ThreeChanNoExperiment
 
-percentSplit=0.9
+percentSplit=0.8
 
 def loadLib(name,path):
     spec = importlib.util.spec_from_file_location(name, path)
@@ -97,7 +97,7 @@ def mainTrain(trial,df,experiment_name,dummyDict,num_workers,cpu_num ,default_ro
     picaiLossArr_auroc_final=[]
     picaiLossArr_AP_final=[]
     picaiLossArr_score_final=[]
-    max_epochs=2#100#experiment.get_parameter("max_epochs")
+    max_epochs=60#100#experiment.get_parameter("max_epochs")
     
     in_channels=4
     out_channels=2

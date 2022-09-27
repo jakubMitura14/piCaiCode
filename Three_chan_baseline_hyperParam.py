@@ -178,7 +178,7 @@ def getOptNAdam(lr):
 options={
 
 # "models":[getUnetA,getUnetB,getVNet,getSegResNet],
-"models":[getSwinUNETR ],# getVNet,getSegResNet
+"models":[getVNet,getSegResNet,getSwinUNETR ],# getVNet,getSegResNet
 "regression_channels":[[1,1,1],[2,4,8],[10,16,32]],
 
 # "lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)

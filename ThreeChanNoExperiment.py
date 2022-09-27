@@ -88,7 +88,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     
     data = DataModule.PiCaiDataModule(
         df= df,
-        batch_size=5,#
+        batch_size=6,#
         trainSizePercent=percentSplit,# 
         num_workers=cpu_num,#os.cpu_count(),
         drop_last=False,#True,
@@ -147,7 +147,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     )
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
         monitor='mean_val_acc',
-        patience=4,
+        patience=3,
         mode="max",
         #divergence_threshold=(-0.1)
     )
@@ -201,7 +201,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         "logger" : comet_logger,
         "default_root_dir" : default_root_dir,
         "auto_lr_find" : False,
-        "check_val_every_n_epoch" : 1,
+        "check_val_every_n_epoch" : 10,
         "accumulate_grad_batches" : accumulate_grad_batches,
         "gradient_clip_val" :gradient_clip_val,
         "log_every_n_steps" :2,
