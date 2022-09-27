@@ -230,9 +230,11 @@ class Model(pl.LightningModule):
     def calcLossHelp(self,isAnythingInAnnotated_list,seg_hat_list, y_true_list,reg_hat_list,numLesions_list ,i):
         if(isAnythingInAnnotated_list[i]>0):
             lossSeg=self.criterion(seg_hat_list[i], y_true_list[i])
-            lossReg=F.smooth_l1_loss(reg_hat_list[i],numLesions_list[i])
+            lossReg=F.smooth_l1_loss(torch.Tensor(reg_hat_list[i]).int().device('cuda') , torch.Tensor(int(numLesions_list[i])).int().device('cuda') ) 
             return torch.add(lossSeg,lossReg)
-        return  F.smooth_l1_loss(reg_hat_list[i],numLesions_list[i]) 
+        return  F.smooth_l1_loss(torch.Tensor(reg_hat_list[i]).int().device('cuda') , torch.Tensor(int(numLesions_list[i])).int().device('cuda') ) 
+
+
 
     def calculateLoss(self,isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions):
         seg_hat_list = decollate_batch(seg_hat)
