@@ -137,7 +137,7 @@ def mainTrain(trial,df,experiment_name,dummyDict,num_workers,cpu_num ,default_ro
     num_res_units= 0#config["num_res_units")
     act = (Act.PRELU, {"init": 0.2}) #getParam(config,options,"act",df)
     norm= (Norm.BATCH, {}) #getParam(config,options,"norm",df)
-    dropout= trial.suggest_float("RandCoarseDropoutd_prob", 0.0,0.6)
+    dropout= trial.suggest_float("dropout", 0.0,0.6)
     print(f"aaaaaaaaaaaaaaaaaaa dropout {dropout}")
     to_onehot_y_loss= False
     monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)

@@ -250,7 +250,7 @@ class Model(pl.LightningModule):
             lossReg=F.smooth_l1_loss(reg_hat,torch.Tensor(numLesions).to(self.device))
             return torch.add(segLoss,lossReg)
 
-        print(f"reg_hat {reg_hat} numLesions{numLesions}  "  )        
+        #print(f"reg_hat {reg_hat} numLesions{numLesions}  "  )        
         return F.smooth_l1_loss(reg_hat,torch.Tensor(numLesions).to(self.device) )
 
         #for i in range(0,len( y_det)):
@@ -358,7 +358,7 @@ class Model(pl.LightningModule):
         avg_acc = np.mean(np.array(([x['val_acc'].cpu().detach().numpy() for x in outputs])).flatten() )
 
         # self.log("mean_val_loss", avg_loss)
-        self.log("mean_val_acc", avg_acc)
+        self.log("mean_val_acc", np.mean(avg_acc))
 
         # self.log('ptl/val_loss', avg_loss)
         # self.log('ptl/val_accuracy', avg_acc)
