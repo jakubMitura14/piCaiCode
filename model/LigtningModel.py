@@ -227,12 +227,13 @@ class Model(pl.LightningModule):
     #     y_hat = self.net(x)
     #     return y_hat, numLesions
 
-    def calcLossHelp(self,isAnythingInAnnotated_list,seg_hat_list, y_true_list,reg_hat_list,numLesions_list ,i):
+    def calcLossHelp(self,isAnythingInAnnotated_list,seg_hat_list, y_true_list,i):
         if(isAnythingInAnnotated_list[i]>0):
-            lossSeg=self.criterion(seg_hat_list[i], y_true_list[i])
-            lossReg=F.smooth_l1_loss(torch.Tensor(reg_hat_list[i]).int().to(self.device) , torch.Tensor(int(numLesions_list[i])).int().to(self.device) ) 
-            return torch.add(lossSeg,lossReg)
-        return  F.smooth_l1_loss(torch.Tensor(reg_hat_list[i]).int().to(self.device) , torch.Tensor(int(numLesions_list[i])).int().to(self.device) ) 
+            return self.criterion(seg_hat_list[i], y_true_list[i])
+        return ' '    
+        #     lossReg=F.smooth_l1_loss(torch.Tensor(reg_hat_list[i]).int().to(self.device) , torch.Tensor(int(numLesions_list[i])).int().to(self.device) ) 
+        #     return torch.add(lossSeg,lossReg)
+        # return  F.smooth_l1_loss(torch.Tensor(reg_hat_list[i]).int().to(self.device) , torch.Tensor(int(numLesions_list[i])).int().to(self.device) ) 
 
 
 
@@ -240,10 +241,11 @@ class Model(pl.LightningModule):
         seg_hat_list = decollate_batch(seg_hat)
         isAnythingInAnnotated_list = decollate_batch(isAnythingInAnnotated)
         y_true_list = decollate_batch(y_true)
-        reg_hat_list = decollate_batch(reg_hat)
-        numLesions_list = decollate_batch(numLesions)
-        toSum= list(map(lambda i:  self.calcLossHelp(isAnythingInAnnotated_list,seg_hat_list, y_true_list,reg_hat_list,numLesions_list ,i) , list( range(0,len( seg_hat_list)) )))
-        return torch.sum(torch.stack(toSum))
+        toSum= list(map(lambda i:  self.calcLossHelp(isAnythingInAnnotated_list,seg_hat_list, y_true_list ,i) , list( range(0,len( seg_hat_list)) )))
+        toSum= list(filter(lambda it: it!=' '  ,toSum))
+        segLoss= torch.sum(torch.stack(toSum))
+        lossReg=F.smooth_l1_loss(reg_hat,numLesions)
+        return torch.add(segLoss,lossReg)
         #for i in range(0,len( y_det)):
             # if(isAnythingInAnnotated[i]>0):
             #     lossSeg=self.criterion(seg_hat, y_true)
