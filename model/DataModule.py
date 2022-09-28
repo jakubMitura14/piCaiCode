@@ -24,7 +24,7 @@ from monai.networks.layers import Norm
 from monai.metrics import DiceMetric
 from monai.losses import DiceLoss
 from monai.inferers import sliding_window_inference
-from monai.data import CacheDataset,Dataset,PersistentDataset,LMDBDataset, pad_list_data_collate, decollate_batch,list_data_collate
+from monai.data import CacheDataset,Dataset,PersistentDataset,LMDBDataset, pad_list_data_collate, decollate_batch,list_data_collate,SmartCacheDataset
 from monai.config import print_config
 from monai.apps import download_and_extract
 
@@ -262,9 +262,9 @@ class PiCaiDataModule(pl.LightningDataModule):
 # 
 # PersistentDataset
         # self.train_ds_all =  CacheDataset(data=train_set_all, transform=train_transforms)
-        self.val_ds=     CacheDataset(data=valid_set_all, transform=val_transforms)
+        self.val_ds=     SmartCacheDataset(data=valid_set_all, transform=val_transforms)
         # self.val_ds=     CacheDataset(data=valid_set_pos+onlyNegatives[0: int(round(len(valid_set_pos)/2)) ], transform=val_transforms)
-        self.train_ds_all =  CacheDataset(data=train_set_all, transform=train_transforms)
+        self.train_ds_all =  SmartCacheDataset(data=train_set_all, transform=train_transforms)
 
 
 
