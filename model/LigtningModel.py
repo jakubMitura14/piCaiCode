@@ -320,15 +320,15 @@ class Model(pl.LightningModule):
         forGoldVal=list(map(lambda tupl :tupl[0] ,pathssList  ))
         fory_hatVal=list(map(lambda tupl :tupl[1] ,pathssList  ))
 
-        self.list_gold_val=self.list_gold_val+forGoldVal
-        self.list_yHat_val=self.list_gold_val+fory_hatVal
+        # self.list_gold_val=self.list_gold_val+forGoldVal
+        # self.list_yHat_val=self.list_gold_val+fory_hatVal
 
 # save_candidates_to_dir(y_true,y_det,patIds,i,temp_val_dir)
         
-#         for i in range(0,len(y_true)):
-#             tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
-#             self.list_gold_val.append(tupl[0])
-#             self.list_yHat_val.append(tupl[1])
+        for i in range(0,len(y_true)):
+            #tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
+            self.list_gold_val.append(forGoldVal[i])
+            self.list_yHat_val.append(fory_hatVal[i])
 
         self.log('val_loss', loss)
 
@@ -373,14 +373,14 @@ class Model(pl.LightningModule):
 
 
     def validation_epoch_end(self, outputs):
-
+        print(f" self.list_yHat_val {self.list_yHat_val} ")
         if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
             chunkLen=8
 
             valid_metrics = evaluate(y_det=self.list_yHat_val,
                                 y_true=self.list_gold_val,
-                                num_parallel_calls= os.cpu_count(),
-                                verbose=1
+                                num_parallel_calls= os.cpu_count()
+                                #verbose=1
                                 #y_true=iter(y_true),
                                 #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
                                 )
