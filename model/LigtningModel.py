@@ -315,8 +315,9 @@ class Model(pl.LightningModule):
         patIds = decollate_batch(batch['patient_id'])
         #reg_hat = decollate_batch(reg_hat)
 
-        print(f" rrrrr {reg_hat.cpu().detach().numpy()}  ")
         reg_hat=np.rint(reg_hat.cpu().detach().numpy().flatten())
+        print(f" rrrrr {reg_hat}  ")
+
         y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
         y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
         
