@@ -169,6 +169,8 @@ def getArrayFromPath(path):
 def extractLesions_my(x):
     return extract_lesion_candidates(x)[0]
 
+def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir):
+    return saveFilesInDir(y_true[i],y_det[i], temp_val_dir, patIds[i])
 class Model(pl.LightningModule):
     def __init__(self
     , net
@@ -294,6 +296,11 @@ class Model(pl.LightningModule):
         # return lossa
     # def validation_step(self, batch, batch_idx):
 
+
+        # self.list_gold_val.append(tupl[0])
+        # self.list_yHat_val.append(tupl[1])
+
+
     def validation_step(self, batch, batch_idx):
         x, y_true, numLesions,isAnythingInAnnotated = batch['chan3_col_name_val'], batch['label_name_val'], batch['num_lesions_to_retain'], batch['isAnythingInAnnotated']
         
@@ -306,10 +313,22 @@ class Model(pl.LightningModule):
 
         y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
         y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
-        for i in range(0,len(y_true)):
-            tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
-            self.list_gold_val.append(tupl[0])
-            self.list_yHat_val.append(tupl[1])
+        
+        pathssList=[]
+        with mp.Pool(processes = mp.cpu_count()) as pool:
+            pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir),list(range(0,len(y_true))))
+        forGoldVal=list(map(lambda tupl :tupl[0] ,pathssList  ))
+        fory_hatVal=list(map(lambda tupl :tupl[1] ,pathssList  ))
+
+        self.list_gold_val=self.list_gold_val+forGoldVal
+        self.list_yHat_val=self.list_gold_val+fory_hatVal
+
+# save_candidates_to_dir(y_true,y_det,patIds,i,temp_val_dir)
+        
+#         for i in range(0,len(y_true)):
+#             tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
+#             self.list_gold_val.append(tupl[0])
+#             self.list_yHat_val.append(tupl[1])
 
         self.log('val_loss', loss)
 
