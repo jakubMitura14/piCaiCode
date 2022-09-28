@@ -147,7 +147,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     )
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
         monitor='mean_val_acc',
-        patience=3,
+        patience=7,
         mode="max",
         #divergence_threshold=(-0.1)
     )

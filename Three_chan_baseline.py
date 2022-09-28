@@ -121,13 +121,7 @@ def mainTrain(trial,df,experiment_name,dummyDict,num_workers,cpu_num ,default_ro
     # img_size = sizz#(sizz[2],sizz[1],sizz[0])
     dummyLabelPath,img_size=dummyDict[spacing_keyword]
     print(f"aaaaaa  img_size {img_size}  {type(img_size)}")
-    RandGaussianNoised_prob= trial.suggest_float("RandGaussianNoised_prob", 0.0, 1.0)
-    RandAdjustContrastd_prob=trial.suggest_float("RandAdjustContrastd_prob", 0.0, 1.0)
-    RandGaussianSmoothd_prob=trial.suggest_float("RandGaussianSmoothd_prob", 0.0, 1.0)
-    RandRicianNoised_prob=trial.suggest_float("RandRicianNoised_prob", 0.0, 1.0)
-    RandFlipd_prob=trial.suggest_float("RandFlipd_prob", 0.0, 1.0)
-    RandAffined_prob=trial.suggest_float("RandAffined_prob", 0.0, 1.0)
-    RandCoarseDropoutd_prob=trial.suggest_float("RandCoarseDropoutd_prob", 0.0, 1.0)
+
     is_whole_to_train= (sizeWord=="_maxSize_")
     centerCropSize=(81.0, 160.0, 192.0)#=getParam(experiment,options,"centerCropSize",df)
     net= getParam(trial,options,"models") #options["models"][0]#   
@@ -148,19 +142,25 @@ def mainTrain(trial,df,experiment_name,dummyDict,num_workers,cpu_num ,default_ro
     optimizer_class= torch.optim.NAdam#(lr=config["lr"])#getParam(config,options,"optimizer_class",df)(config["lr"])
     regression_channels=getParam(trial,options,"regression_channels") #options["regression_channels"][1] # getParam(config,options,"regression_channels")#options["regression_channels"][1] #getParam(config,options,"regression_channels",df)
     accumulate_grad_batches=3#config["accumulate_grad_batches"]
-    gradient_clip_val= trial.suggest_float("gradient_clip_val",0.0,100.0) #config["gradient_clip_val"]# 0.5,2.0
+    gradient_clip_val= trial.suggest_float("gradient_clip_val",0.0,1.0) #config["gradient_clip_val"]# 0.5,2.0
     net=net(dropout,img_size,in_channels,out_channels)
 
 
+    RandGaussianNoised_prob= 0.0#trial.suggest_float("RandGaussianNoised_prob", 0.0, 1.0)
+    RandAdjustContrastd_prob=trial.suggest_float("RandAdjustContrastd_prob", 0.0, 0.6)
+    RandGaussianSmoothd_prob=trial.suggest_float("RandGaussianSmoothd_prob", 0.0, 0.6)
+    RandRicianNoised_prob=trial.suggest_float("RandRicianNoised_prob", 0.0, 0.6)
+    RandFlipd_prob=trial.suggest_float("RandFlipd_prob", 0.0, 0.6)
+    RandAffined_prob=trial.suggest_float("RandAffined_prob", 0.0, 0.6)
+    RandCoarseDropoutd_prob= 0.0#trial.suggest_float("RandCoarseDropoutd_prob", 0.0, 1.0)
 
 
-
-    RandomElasticDeformation_prob=trial.suggest_float("RandRicianNoised_prob", 0.0, 1.0)
-    RandomAnisotropy_prob=trial.suggest_float("RandRicianNoised_prob", 0.0, 1.0)
-    RandomMotion_prob=trial.suggest_float("RandRicianNoised_prob", 0.0, 1.0)
-    RandomGhosting_prob=trial.suggest_float("RandRicianNoised_prob", 0.0, 1.0)
-    RandomSpike_prob=trial.suggest_float("RandRicianNoised_prob", 0.0, 1.0)
-    RandomBiasField_prob=trial.suggest_float("RandRicianNoised_prob", 0.0, 1.0)
+    RandomElasticDeformation_prob=trial.suggest_float("RandomElasticDeformation_prob", 0.0, 0.6)
+    RandomAnisotropy_prob=trial.suggest_float("RandomAnisotropy_prob", 0.0, 0.6)
+    RandomMotion_prob=trial.suggest_float("RandomMotion_prob", 0.0, 0.6)
+    RandomGhosting_prob=trial.suggest_float("RandomGhosting_prob", 0.0, 0.6)
+    RandomSpike_prob=trial.suggest_float("RandomSpike_prob", 0.0, 0.6)
+    RandomBiasField_prob=trial.suggest_float("RandomBiasField_prob", 0.0, 0.6)
 
 
     os.makedirs('/home/sliceruser/data/temp', exist_ok = True)
