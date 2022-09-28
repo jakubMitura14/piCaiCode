@@ -360,9 +360,13 @@ class Model(pl.LightningModule):
 
             valid_metrics = evaluate(y_det=self.list_yHat_val,
                                 y_true=self.list_gold_val,
+                                num_parallel_calls= os.cpu_count(),
+                                verbose=1
                                 #y_true=iter(y_true),
                                 #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
                                 )
+
+
 
             meanPiecaiMetr_auroc=valid_metrics.auroc
             meanPiecaiMetr_AP=valid_metrics.AP
@@ -406,23 +410,23 @@ class Model(pl.LightningModule):
         return {"mean_val_acc": self.log}
 
 
-        # avg_loss = torch.mean(torch.stack([torch.as_tensor(x['val_loss']) for x in outputs]))
-        # print(f"mean_val_loss { avg_loss}")
-        # avg_acc = torch.mean(torch.stack([torch.as_tensor(x['val_acc']) for x in outputs]))
-        #val_accs=list(map(lambda x : x['val_acc'],outputs))
-        val_accs=list(map(lambda x : x['val_acc'].cpu().detach().numpy(),outputs))
-        #print(f" a  val_accs {val_accs} ")
-        val_accs=np.nanmean(np.array( val_accs).flatten())
-        #print(f" b  val_accs {val_accs} mean {np.mean(val_accs)}")
+        # # avg_loss = torch.mean(torch.stack([torch.as_tensor(x['val_loss']) for x in outputs]))
+        # # print(f"mean_val_loss { avg_loss}")
+        # # avg_acc = torch.mean(torch.stack([torch.as_tensor(x['val_acc']) for x in outputs]))
+        # #val_accs=list(map(lambda x : x['val_acc'],outputs))
+        # val_accs=list(map(lambda x : x['val_acc'].cpu().detach().numpy(),outputs))
+        # #print(f" a  val_accs {val_accs} ")
+        # val_accs=np.nanmean(np.array( val_accs).flatten())
+        # #print(f" b  val_accs {val_accs} mean {np.mean(val_accs)}")
 
-        #avg_acc = np.mean(np.array(([x['val_acc'].cpu().detach().numpy() for x in outputs])).flatten() )
+        # #avg_acc = np.mean(np.array(([x['val_acc'].cpu().detach().numpy() for x in outputs])).flatten() )
 
-        # self.log("mean_val_loss", avg_loss)
-        self.log("mean_val_acc", np.mean(val_accs))
+        # # self.log("mean_val_loss", avg_loss)
+        # self.log("mean_val_acc", np.mean(val_accs))
 
-        # self.log('ptl/val_loss', avg_loss)
-        # self.log('ptl/val_accuracy', avg_acc)
-        #return {'mean_val_loss': avg_loss, 'mean_val_acc':avg_acc}
+        # # self.log('ptl/val_loss', avg_loss)
+        # # self.log('ptl/val_accuracy', avg_acc)
+        # #return {'mean_val_loss': avg_loss, 'mean_val_acc':avg_acc}
 
 
 
