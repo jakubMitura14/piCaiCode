@@ -314,6 +314,7 @@ class Model(pl.LightningModule):
         y_true = decollate_batch(y_true)
         patIds = decollate_batch(batch['patient_id'])
         #reg_hat = decollate_batch(reg_hat)
+        print(f" rrrrr prim {reg_hat}  ")
 
         reg_hat=np.rint(reg_hat.cpu().detach().numpy().flatten())
         print(f" rrrrr {reg_hat}  ")
