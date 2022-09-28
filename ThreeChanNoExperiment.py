@@ -88,7 +88,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     
     data = DataModule.PiCaiDataModule(
         df= df,
-        batch_size=10,#
+        batch_size=7,#
         trainSizePercent=percentSplit,# 
         num_workers=cpu_num,#os.cpu_count(),
         drop_last=False,#True,
@@ -205,7 +205,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         "accumulate_grad_batches" : accumulate_grad_batches,
         "gradient_clip_val" :gradient_clip_val,
         "log_every_n_steps" :2,
-        "strategy" :'ddp_sharded'# "dp"
+        "strategy" :'dp'# "ddp_sharded"
         }
 
     # if os.path.exists(os.path.join(checkpoint_dir, "checkpointtt")):
