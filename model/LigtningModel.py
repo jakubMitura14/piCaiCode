@@ -302,7 +302,7 @@ class Model(pl.LightningModule):
         y_det=torch.sigmoid(seg_hat)
         y_det = decollate_batch(seg_hat)
         y_true = decollate_batch(y_true)
-        patIds = decollate_batch(patIds)
+        patIds = decollate_batch(batch['patient_id'])
 
         y_det=[extract_lesion_candidates( x.numpy()[1,:,:,:])[0] for x in y_det]
         y_true=[x.numpy()[1,:,:,:] for x in y_true]
