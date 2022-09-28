@@ -252,11 +252,11 @@ class Model(pl.LightningModule):
         toSum= list(filter(lambda it: it!=' '  ,toSum))
         if(len(toSum)>0):
             segLoss= torch.sum(torch.stack(toSum))
-            lossReg=F.smooth_l1_loss(reg_hat.flatten(),torch.Tensor(numLesions).to(self.device).flatten())
+            lossReg=F.smooth_l1_loss(reg_hat.flatten(),torch.Tensor(numLesions).to(self.device).flatten())*2
             return torch.add(segLoss,lossReg)
 
         #print(f"reg_hat {reg_hat} numLesions{numLesions}  "  )        
-        return F.smooth_l1_loss(reg_hat.flatten(),torch.Tensor(numLesions).to(self.device).flatten() )
+        return F.smooth_l1_loss(reg_hat.flatten(),torch.Tensor(numLesions).to(self.device).flatten() )*2
 
         #for i in range(0,len( y_det)):
             # if(isAnythingInAnnotated[i]>0):
@@ -315,8 +315,8 @@ class Model(pl.LightningModule):
         patIds = decollate_batch(batch['patient_id'])
         #reg_hat = decollate_batch(reg_hat)
 
-
-        reg_hat=[round(x) for x in reg_hat.cpu().detach().numpy()]
+        print(f" rrrrr {reg_hat.cpu().detach().numpy()}  ")
+        reg_hat=np.rint(reg_hat.cpu().detach().numpy().flatten())
         y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
         y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
         
