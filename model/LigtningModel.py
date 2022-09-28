@@ -199,7 +199,7 @@ class Model(pl.LightningModule):
         self.picaiLossArr_AP_final=picaiLossArr_AP_final
         self.picaiLossArr_score_final=picaiLossArr_score_final
         #temporary directory for validation images and their labels
-        self.temp_val_dir= '/home/sliceruser/data/temp' #tempfile.mkdtemp()
+        self.temp_val_dir= tempfile.mkdtemp()#'/home/sliceruser/data/temp' #tempfile.mkdtemp()
         self.list_gold_val=[]
         self.list_yHat_val=[]
         self.isAnyNan=False
@@ -298,62 +298,121 @@ class Model(pl.LightningModule):
         x, y_true, numLesions,isAnythingInAnnotated = batch['chan3_col_name_val'], batch['label_name_val'], batch['num_lesions_to_retain'], batch['isAnythingInAnnotated']
         
         seg_hat, reg_hat = self.modelRegression(x)        
-        val_losss= self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)
-
+        loss= self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)
+        y_det=torch.sigmoid(y_det)
         y_det = decollate_batch(seg_hat)
         y_true = decollate_batch(y_true)
+        patIds = decollate_batch(patIds)
+
+        y_det=[extract_lesion_candidates( x.numpy()[1,:,:,:])[0] for x in y_det]
+        y_true=[x.numpy()[1,:,:,:] for x in y_true]
+        for i in range(0,len(y_true)):
+            tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
+            self.list_gold_val.append(tupl[0])
+            self.list_yHat_val.append(tupl[1])
+
+        self.log('val_loss', loss)
+
+        return loss
+
         #TODO probably this [1,:,:,:] could break the evaluation ...
         # y_det=[x.cpu().detach().numpy()[1,:,:,:][0] for x in y_det]
         # y_true=[x.cpu().detach().numpy() for x in y_true]
         # y_det= list(map(self.postProcess  , y_det))
         # y_true= list(map(self.postTrue , y_det))
 
-        regress_res2= torch.flatten(reg_hat) 
-        regress_res3=list(map(lambda el:round(el) ,torch.flatten(regress_res2).cpu().detach().numpy() ))
 
-        # #print( f"torch.Tensor(numLesions).cpu() {torch.Tensor(numLesions).cpu()}  torch.Tensor(regress_res).cpu() {torch.Tensor(regress_res).cpu()}   ")
-        # #self.F1Score(torch.Tensor(regress_res3).int(), torch.Tensor(numLesions2).cpu().int())
-        total_loss=precision_recall(torch.Tensor(regress_res3).int(), torch.Tensor(numLesions).cpu().int(), average='macro', num_classes=4)
-        total_loss1=torch.mean(torch.stack([total_loss[0],total_loss[1]] ))#self.F1Score
+        # if(torch.sum(torch.isnan( y_det))>0):
+        #     self.isAnyNan=True
+
+        # regress_res2= torch.flatten(reg_hat) 
+        # regress_res3=list(map(lambda el:round(el) ,torch.flatten(regress_res2).cpu().detach().numpy() ))
+
+        # total_loss=precision_recall(torch.Tensor(regress_res3).int(), torch.Tensor(numLesions).cpu().int(), average='macro', num_classes=4)
+        # total_loss1=torch.mean(torch.stack([total_loss[0],total_loss[1]] ))#self.F1Score
         
-        if(torch.sum(isAnythingInAnnotated)>0):
-            dice = DiceMetric()
-            for i in range(0,len( y_det)):
-                if(isAnythingInAnnotated[i]>0):
-                    y_det_i=self.postProcess(y_det[i])[0,:,:,:].cpu()
-                    y_true_i=self.postTrue(y_true[i])[1,:,:,:].cpu()
-                    if(torch.sum(y_det_i).item()>0 and torch.sum(y_true_i).item()>0 ):
-                        dice(y_det_i,y_true_i)
+        # if(torch.sum(isAnythingInAnnotated)>0):
+        #     dice = DiceMetric()
+        #     for i in range(0,len( y_det)):
+        #         if(isAnythingInAnnotated[i]>0):
+        #             y_det_i=self.postProcess(y_det[i])[0,:,:,:].cpu()
+        #             y_true_i=self.postTrue(y_true[i])[1,:,:,:].cpu()
+        #             if(torch.sum(y_det_i).item()>0 and torch.sum(y_true_i).item()>0 ):
+        #                 dice(y_det_i,y_true_i)
 
-            self.log("dice", dice.aggregate())
-            #print(f" total loss a {total_loss1} val_loss {val_losss}  dice.aggregate() {dice.aggregate()}")
-            total_loss2= torch.add(total_loss1,dice.aggregate())
-            print(f" total loss b {total_loss2}  total_loss,dice.aggregate() {dice.aggregate()}")
+        #     self.log("dice", dice.aggregate())
+        #     #print(f" total loss a {total_loss1} val_loss {val_losss}  dice.aggregate() {dice.aggregate()}")
+        #     total_loss2= torch.add(total_loss1,dice.aggregate())
+        #     print(f" total loss b {total_loss2}  total_loss,dice.aggregate() {dice.aggregate()}")
             
-            self.picaiLossArr_score_final.append(total_loss2.item())
-            return {'val_acc': total_loss2.item(), 'val_loss':val_losss}
+        #     self.picaiLossArr_score_final.append(total_loss2.item())
+        #     return {'val_acc': total_loss2.item(), 'val_loss':val_losss}
         
-        #in case no positive segmentation information is available
-        self.picaiLossArr_score_final.append(total_loss1.item())
-        return {'val_acc': total_loss1.item(), 'val_loss':val_losss}
-       
-        # self.picaiLossArr_score_final.append(total_loss2.item())
-        # print(f" validation_acc {total_loss2.item()}  ")
-        # self.log("validation_acc", total_loss2.item(), on_epoch=True, on_step=False, sync_dist=True, prog_bar=True, logger=True)
-        # self.log("val_loss", val_losss.item(), on_epoch=True, on_step=False, sync_dist=True, prog_bar=True, logger=True)
-       
-        #return {'val_acc': dice.aggregate().item(), 'val_loss':val_losss}
+        # #in case no positive segmentation information is available
+        # self.picaiLossArr_score_final.append(total_loss1.item())
+        # return {'val_acc': total_loss1.item(), 'val_loss':val_losss}
 
 
     def validation_epoch_end(self, outputs):
-        
+
+        if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
+            chunkLen=8
+
+            valid_metrics = evaluate(y_det=self.list_yHat_val,
+                                y_true=self.list_gold_val,
+                                #y_true=iter(y_true),
+                                #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+                                )
+
+            meanPiecaiMetr_auroc=valid_metrics.auroc
+            meanPiecaiMetr_AP=valid_metrics.AP
+            meanPiecaiMetr_score=valid_metrics.score
+      
+            print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
+
+            self.log('val_mean_auroc', meanPiecaiMetr_auroc)
+            self.log('val_mean_AP', meanPiecaiMetr_AP)
+            self.log('mean_val_acc', meanPiecaiMetr_score)
+
+            # self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
+            # self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
+            # self.experiment.log_metric('val_mean_score', meanPiecaiMetr_score)
+
+
+            self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
+            self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
+            self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
+
+            #resetting to 0 
+            self.picaiLossArr_auroc=[]
+            self.picaiLossArr_AP=[]
+            self.picaiLossArr_score=[]
+
+
+            #clearing and recreatin temporary directory
+            shutil.rmtree(self.temp_val_dir)    
+            self.temp_val_dir=tempfile.mkdtemp()
+            self.list_gold_val=[]
+            self.list_yHat_val=[]
+        #in case we have Nan values training is unstable and we want to terminate it     
+        if(self.isAnyNan):
+            self.log('val_mean_score', -0.2)
+            self.picaiLossArr_score_final=[-0.2]
+            self.picaiLossArr_AP_final=[-0.2]
+            self.picaiLossArr_auroc_final=[-0.2]
+            print(" naans in outputt  ")
+
+        #self.isAnyNan=False
+        return {"mean_val_acc": self.log}
+
+
         # avg_loss = torch.mean(torch.stack([torch.as_tensor(x['val_loss']) for x in outputs]))
         # print(f"mean_val_loss { avg_loss}")
         # avg_acc = torch.mean(torch.stack([torch.as_tensor(x['val_acc']) for x in outputs]))
         #val_accs=list(map(lambda x : x['val_acc'],outputs))
         val_accs=list(map(lambda x : x['val_acc'].cpu().detach().numpy(),outputs))
         #print(f" a  val_accs {val_accs} ")
-        val_accs=np.mean(np.array( val_accs).flatten())
+        val_accs=np.nanmean(np.array( val_accs).flatten())
         #print(f" b  val_accs {val_accs} mean {np.mean(val_accs)}")
 
         #avg_acc = np.mean(np.array(([x['val_acc'].cpu().detach().numpy() for x in outputs])).flatten() )
