@@ -97,7 +97,7 @@ def mainTrain(trial,df,experiment_name,dummyDict,num_workers,cpu_num ,default_ro
     picaiLossArr_auroc_final=[]
     picaiLossArr_AP_final=[]
     picaiLossArr_score_final=[]
-    max_epochs=90#100#experiment.get_parameter("max_epochs")
+    max_epochs=120#100#experiment.get_parameter("max_epochs")
     
     in_channels=4
     out_channels=2
@@ -134,7 +134,6 @@ def mainTrain(trial,df,experiment_name,dummyDict,num_workers,cpu_num ,default_ro
     dropout= trial.suggest_float("dropout", 0.0,0.6)
     print(f"aaaaaaaaaaaaaaaaaaa dropout {dropout}")
     to_onehot_y_loss= False
-    monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
 
 
 
@@ -153,8 +152,6 @@ def mainTrain(trial,df,experiment_name,dummyDict,num_workers,cpu_num ,default_ro
     RandFlipd_prob=trial.suggest_float("RandFlipd_prob", 0.0, 0.6)
     RandAffined_prob=trial.suggest_float("RandAffined_prob", 0.0, 0.6)
     RandCoarseDropoutd_prob= 0.0#trial.suggest_float("RandCoarseDropoutd_prob", 0.0, 1.0)
-
-
     RandomElasticDeformation_prob=trial.suggest_float("RandomElasticDeformation_prob", 0.0, 0.6)
     RandomAnisotropy_prob=trial.suggest_float("RandomAnisotropy_prob", 0.0, 0.6)
     RandomMotion_prob=trial.suggest_float("RandomMotion_prob", 0.0, 0.6)
