@@ -169,8 +169,11 @@ def getArrayFromPath(path):
 def extractLesions_my(x):
     return extract_lesion_candidates(x)[0]
 
-def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir):
-    return saveFilesInDir(y_true[i],y_det[i], temp_val_dir, patIds[i])
+def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,reg_hat):
+    if(reg_hat[i]>0):
+        return saveFilesInDir(y_true[i],y_det[i], temp_val_dir, patIds[i])
+    #when it is equal 0 we zero out the result
+    return saveFilesInDir(y_true[i],np.zeros_like(y_det[i]), temp_val_dir, patIds[i])    
 class Model(pl.LightningModule):
     def __init__(self
     , net
@@ -310,13 +313,16 @@ class Model(pl.LightningModule):
         y_det = decollate_batch(seg_hat)
         y_true = decollate_batch(y_true)
         patIds = decollate_batch(batch['patient_id'])
+        reg_hat = decollate_batch(reg_hat)
 
+
+        reg_hat=[round(x) for x in reg_hat.cpu().detach().numpy()]
         y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
         y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
         
         pathssList=[]
         with mp.Pool(processes = mp.cpu_count()) as pool:
-            pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir),list(range(0,len(y_true))))
+            pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
         forGoldVal=list(map(lambda tupl :tupl[0] ,pathssList  ))
         fory_hatVal=list(map(lambda tupl :tupl[1] ,pathssList  ))
 
@@ -373,7 +379,7 @@ class Model(pl.LightningModule):
 
 
     def validation_epoch_end(self, outputs):
-        print(f" self.list_yHat_val {self.list_yHat_val} ")
+        #print(f" self.list_yHat_val {self.list_yHat_val} ")
         if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
             chunkLen=8
 
