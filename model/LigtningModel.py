@@ -304,8 +304,8 @@ class Model(pl.LightningModule):
         y_true = decollate_batch(y_true)
         patIds = decollate_batch(batch['patient_id'])
 
-        y_det=[extract_lesion_candidates( x.numpy()[1,:,:,:])[0] for x in y_det]
-        y_true=[x.numpy()[1,:,:,:] for x in y_true]
+        y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
+        y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
         for i in range(0,len(y_true)):
             tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
             self.list_gold_val.append(tupl[0])
