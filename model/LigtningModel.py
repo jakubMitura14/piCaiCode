@@ -170,10 +170,11 @@ def extractLesions_my(x):
     return extract_lesion_candidates(x)[0]
 
 def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,reg_hat):
-    if(reg_hat[i]>0):
-        return saveFilesInDir(y_true[i],y_det[i], temp_val_dir, patIds[i])
+    y_dett=extract_lesion_candidates( y_det[i].cpu().detach().numpy()[1,:,:,:])[0]
+    if(reg_hat[i]>0):        
+        return saveFilesInDir(y_true[i],y_dett, temp_val_dir, patIds[i])
     #when it is equal 0 we zero out the result
-    return saveFilesInDir(y_true[i],np.zeros_like(y_det[i]), temp_val_dir, patIds[i])    
+    return saveFilesInDir(y_true[i],np.zeros_like(y_dett), temp_val_dir, patIds[i])    
 class Model(pl.LightningModule):
     def __init__(self
     , net
@@ -319,7 +320,7 @@ class Model(pl.LightningModule):
         reg_hat=np.rint(reg_hat.cpu().detach().numpy().flatten())
         print(f" rrrrr {reg_hat}  ")
 
-        y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
+        #y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
         y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
         
         pathssList=[]
