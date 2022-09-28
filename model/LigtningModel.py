@@ -313,7 +313,7 @@ class Model(pl.LightningModule):
         y_det = decollate_batch(seg_hat)
         y_true = decollate_batch(y_true)
         patIds = decollate_batch(batch['patient_id'])
-        reg_hat = decollate_batch(reg_hat)
+        #reg_hat = decollate_batch(reg_hat)
 
 
         reg_hat=[round(x) for x in reg_hat.cpu().detach().numpy()]
