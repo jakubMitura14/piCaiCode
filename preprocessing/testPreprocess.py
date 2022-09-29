@@ -79,6 +79,7 @@ for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:
 registered images were already resampled now time for t2w and labels
 """
 def resample_ToMedianSpac(row,colName,targetSpacing,spacing_keyword):
+    row=row[1]    
     path=row[colName]
     print(f" pathhhh {path} ")
     if(path!= " " and path!=""):
