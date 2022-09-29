@@ -278,10 +278,32 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     t2wKeyWord ="t2w"+spacing_keyword    
     #needs to be on single thread as resampling GAN is acting on GPU
     # we save the metadata to main pandas data frame 
-    df["adc"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_'+'adc',targetSpacingg,spacing_keyword)   , axis = 1) 
-    df["hbv"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_'+'hbv',targetSpacingg,spacing_keyword)   , axis = 1) 
-    df["t2w"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 't2w',targetSpacingg,spacing_keyword)   , axis = 1) 
-    df["label"+spacing_keyword]=df.apply(lambda row : resample_labels(row,targetSpacingg,spacing_keyword)   , axis = 1) 
+
+    resList=[]
+    with mp.Pool(processes = mp.cpu_count()) as pool:
+        resList=pool.map(partial(resample_ToMedianSpac,colName='registered_'+'adc',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ),list(df.iterrows()))    
+    df["adc"+spacing_keyword]=resList
+
+
+    resList=[]
+    with mp.Pool(processes = mp.cpu_count()) as pool:
+        resList=pool.map(partial(resample_ToMedianSpac,colName='registered_'+'hbv',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ),list(df.iterrows()))    
+    df["hbv"+spacing_keyword]=resList
+
+    resList=[]
+    with mp.Pool(processes = mp.cpu_count()) as pool:
+        resList=pool.map(partial(resample_ToMedianSpac,colName='t2w',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ),list(df.iterrows()))    
+    df["t2w"+spacing_keyword]=resList
+
+    resList=[]
+    with mp.Pool(processes = mp.cpu_count()) as pool:
+        resList=pool.map(partial(resample_labels,targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ),list(df.iterrows()))    
+    df["label"+spacing_keyword]=resList
+
+    # df["adc"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_'+'adc',targetSpacingg,spacing_keyword)   , axis = 1) 
+    # df["hbv"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_'+'hbv',targetSpacingg,spacing_keyword)   , axis = 1) 
+    # df["t2w"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 't2w',targetSpacingg,spacing_keyword)   , axis = 1) 
+    # df["label"+spacing_keyword]=df.apply(lambda row : resample_labels(row,targetSpacingg,spacing_keyword)   , axis = 1) 
 
 
 
