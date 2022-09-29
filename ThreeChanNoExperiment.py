@@ -194,7 +194,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     #cuda_now = int(os.environ['cuda_now'])
     
     kwargs = {
-        "accelerator":'gpu',
+        "accelerator":'auto',
          "devices": 'auto',#[cuda_now],
         "max_epochs": max_epochs,
         "callbacks" :callbacks,
