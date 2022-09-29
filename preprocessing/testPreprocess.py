@@ -138,6 +138,8 @@ def resample_labels(row,targetSpacing,spacing_keyword):
     """
     performs labels resampling  to the target 
     """
+    row=row[1]    
+
     path=row['reSampledPath']
 
     if(path!= " " and path!=""):
