@@ -397,7 +397,7 @@ class Model(pl.LightningModule):
 
             meanPiecaiMetr_auroc=valid_metrics.auroc
             meanPiecaiMetr_AP=valid_metrics.AP
-            meanPiecaiMetr_score=valid_metrics.score
+            meanPiecaiMetr_score=(-1)*valid_metrics.score
       
             print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
 

@@ -189,8 +189,8 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     #     log_every_n_steps=2,
     #     strategy=strategy#'ddp'#'ddp' # for multi gpu training
     # )
-    #callbacks=[PyTorchLightningPruningCallback(trial, monitor="val_acc") ]#checkPointCallback
-    callbacks=[early_stopping ]#checkPointCallback
+    callbacks=[PyTorchLightningPruningCallback(trial, monitor="val_acc") ]#checkPointCallback
+    #callbacks=[early_stopping ]#checkPointCallback
     #cuda_now = int(os.environ['cuda_now'])
     
     kwargs = {
