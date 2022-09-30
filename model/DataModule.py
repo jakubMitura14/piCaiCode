@@ -227,7 +227,7 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.onlyPositiveSubjects=onlyPositiveSubjects
         self.onlyNegative=list(filter(lambda subj :  subj['num_lesions_to_retain']==0  ,allSubjects))
 
-        currSet=onlyPositiveSubjects[0:100]+ self.onlyNegative[0:50]
+        currSet=onlyPositiveSubjects #onlyPositiveSubjects[0:100]+ self.onlyNegative[0:50]
         #print(f"self.allSubjects {len(self.allSubjects)}  self.onlyPositiveSubjects {len(self.onlyPositiveSubjects)}")
         train_set_all, valid_set_all,test_set_all = self.splitDataSet(currSet, self.trainSizePercent,True)
         # train_set_pos, valid_set_pos,test_set_pos = self.splitDataSet(self.onlyPositiveSubjects , self.trainSizePercent,True)

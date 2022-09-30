@@ -251,24 +251,20 @@ class Model(pl.LightningModule):
 
 
     def calculateLoss(self,isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions):
-        seg_hat_list = decollate_batch(seg_hat)
-        isAnythingInAnnotated_list = decollate_batch(isAnythingInAnnotated)
-        y_true_list = decollate_batch(y_true)
-        toSum= list(map(lambda i:  self.calcLossHelp(isAnythingInAnnotated_list,seg_hat_list, y_true_list ,i) , list( range(0,len( seg_hat_list)) )))
-        toSum= list(filter(lambda it: it!=' '  ,toSum))
-        if(len(toSum)>0):
-            segLoss= torch.sum(torch.stack(toSum))
-            lossReg=F.smooth_l1_loss(reg_hat.flatten(),torch.Tensor(numLesions).to(self.device).flatten())*2
-            return torch.add(segLoss,lossReg)
+        return self.criterion(seg_hat,y_true)
 
-        #print(f"reg_hat {reg_hat} numLesions{numLesions}  "  )        
-        return F.smooth_l1_loss(reg_hat.flatten(),torch.Tensor(numLesions).to(self.device).flatten() )*2
+        # seg_hat_list = decollate_batch(seg_hat)
+        # isAnythingInAnnotated_list = decollate_batch(isAnythingInAnnotated)
+        # y_true_list = decollate_batch(y_true)
+        # toSum= list(map(lambda i:  self.calcLossHelp(isAnythingInAnnotated_list,seg_hat_list, y_true_list ,i) , list( range(0,len( seg_hat_list)) )))
+        # toSum= list(filter(lambda it: it!=' '  ,toSum))
+        # if(len(toSum)>0):
+        #     segLoss= torch.sum(torch.stack(toSum))
+        #     lossReg=F.smooth_l1_loss(reg_hat.flatten(),torch.Tensor(numLesions).to(self.device).flatten())*2
+        #     return torch.add(segLoss,lossReg)
 
-        #for i in range(0,len( y_det)):
-            # if(isAnythingInAnnotated[i]>0):
-            #     lossSeg=self.criterion(seg_hat, y_true)
-            #     lossReg=F.smooth_l1_loss(reg_hat,numLesions)
-
+        # #print(f"reg_hat {reg_hat} numLesions{numLesions}  "  )        
+        # return F.smooth_l1_loss(reg_hat.flatten(),torch.Tensor(numLesions).to(self.device).flatten() )*2
 
 
     def training_step(self, batch, batch_idx):
