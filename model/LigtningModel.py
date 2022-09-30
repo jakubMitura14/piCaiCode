@@ -379,7 +379,6 @@ class Model(pl.LightningModule):
         # self.picaiLossArr_score_final.append(total_loss1.item())
         # return {'val_acc': total_loss1.item(), 'val_loss':val_losss}
 
-
     def validation_epoch_end(self, outputs):
         #print(f" self.list_yHat_val {self.list_yHat_val} ")
         if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
