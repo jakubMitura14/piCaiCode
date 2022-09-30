@@ -170,10 +170,14 @@ def extractLesions_my(x):
     return extract_lesion_candidates(x)[0]
 
 def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,reg_hat):
-    if(reg_hat[i]>0):
-        return saveFilesInDir(y_true[i],y_det[i], temp_val_dir, patIds[i])
-    #when it is equal 0 we zero out the result
-    return saveFilesInDir(y_true[i],np.zeros_like(y_det[i]), temp_val_dir, patIds[i])    
+    return saveFilesInDir(y_true[i],y_det[i], temp_val_dir, patIds[i])
+    
+    # if(reg_hat[i]>0):
+    #     return saveFilesInDir(y_true[i],y_det[i], temp_val_dir, patIds[i])
+    # #when it is equal 0 we zero out the result
+    # return saveFilesInDir(y_true[i],np.zeros_like(y_det[i]), temp_val_dir, patIds[i])    
+
+
 class Model(pl.LightningModule):
     def __init__(self
     , net
