@@ -312,7 +312,7 @@ class Model(pl.LightningModule):
         
         seg_hat, reg_hat = self.modelRegression(x)        
         loss= self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)
-        #y_det=torch.sigmoid(seg_hat)
+        y_det=torch.sigmoid(seg_hat)
         y_det = decollate_batch(seg_hat)
         y_true = decollate_batch(y_true)
         patIds = decollate_batch(batch['patient_id'])
