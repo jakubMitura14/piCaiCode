@@ -162,17 +162,18 @@ def get_train_transforms(RandGaussianNoised_prob
             # wrapTorchio(torchio.transforms.RandomGhosting(include=["chan3_col_name"],p=RandomGhosting_prob)),
             # wrapTorchio(torchio.transforms.RandomSpike(include=["chan3_col_name"],p=RandomSpike_prob)),
             # wrapTorchio(torchio.transforms.RandomBiasField(include=["chan3_col_name"],p=RandomBiasField_prob)),
-            RandCropByPosNegLabeld(
-                keys=["chan3_col_name","label"],
-                label_key="label",
-                spatial_size=(96, 96, 32),
-                pos=1,
-                neg=1,
-                num_samples=4,
-                image_key="chan3_col_name",
-                image_threshold=0
-            ),
-            DivisiblePadd(keys=["chan3_col_name","label"],k=32) , 
+            
+            DivisiblePadd(keys=["chan3_col_name","label"],k=32)
+            ,RandCropByPosNegLabeld(
+            keys=["chan3_col_name","label"],
+            label_key="label",
+            spatial_size=(96, 96, 32),
+            pos=1,
+            neg=1,
+            num_samples=2,
+            image_key="chan3_col_name",
+            image_threshold=0
+        ),
 
          ]
     )
