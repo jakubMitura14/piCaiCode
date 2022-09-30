@@ -136,10 +136,12 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId):
     """
     saves arrays in given directory and return paths to them
     """
-    gold_im_path = join(directory, patId+ "_gold.npy" )
-    yHat_im_path = join(directory, patId+ "_hat.npy" )
-    np.save(gold_im_path, gold_arr)
-    np.save(yHat_im_path, y_hat_arr)
+    #gold_im_path = join(directory, patId+ "_gold.npy" )
+    #yHat_im_path = join(directory, patId+ "_hat.npy" )
+    # np.save(gold_im_path, gold_arr)
+    # np.save(yHat_im_path, y_hat_arr)
+    gold_im_path = join(directory, patId+ "_gold.nii.gz" )
+    yHat_im_path =join(directory, patId+ "_hat.nii.gz" )
 
     image = sitk.GetImageFromArray(gold_arr)
     writer = sitk.ImageFileWriter()
@@ -208,7 +210,7 @@ class Model(pl.LightningModule):
         self.picaiLossArr_AP_final=picaiLossArr_AP_final
         self.picaiLossArr_score_final=picaiLossArr_score_final
         #temporary directory for validation images and their labels
-        self.temp_val_dir= tempfile.mkdtemp()#'/home/sliceruser/data/temp' #tempfile.mkdtemp()
+        self.temp_val_dir= '/home/sliceruser/data/temp' #tempfile.mkdtemp()
         self.list_gold_val=[]
         self.list_yHat_val=[]
         self.isAnyNan=False
@@ -424,17 +426,17 @@ class Model(pl.LightningModule):
 
 
             #clearing and recreatin temporary directory
-            shutil.rmtree(self.temp_val_dir)    
-            self.temp_val_dir=tempfile.mkdtemp()
+            #shutil.rmtree(self.temp_val_dir)    
+            self.temp_val_dir=join(self.temp_val_dir,self.trainer.current_epoch)
             self.list_gold_val=[]
             self.list_yHat_val=[]
         #in case we have Nan values training is unstable and we want to terminate it     
-        if(self.isAnyNan):
-            self.log('val_mean_score', -0.2)
-            self.picaiLossArr_score_final=[-0.2]
-            self.picaiLossArr_AP_final=[-0.2]
-            self.picaiLossArr_auroc_final=[-0.2]
-            print(" naans in outputt  ")
+        # if(self.isAnyNan):
+        #     self.log('val_mean_score', -0.2)
+        #     self.picaiLossArr_score_final=[-0.2]
+        #     self.picaiLossArr_AP_final=[-0.2]
+        #     self.picaiLossArr_auroc_final=[-0.2]
+        #     print(" naans in outputt  ")
 
         #self.isAnyNan=False
         return {"mean_val_acc": self.log}
