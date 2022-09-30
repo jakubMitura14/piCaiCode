@@ -221,6 +221,7 @@ class Model(pl.LightningModule):
         self.lr=lr
         self.trial=trial
         #shutil.rmtree(self.temp_val_dir) 
+        os.makedirs(self.temp_val_dir,  exist_ok = True)             
 
     def configure_optimizers(self):
         optimizer = self.optimizer_class(self.parameters(), lr=self.lr)
