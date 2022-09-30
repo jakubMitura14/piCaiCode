@@ -246,7 +246,7 @@ study = optuna.create_study(
         ,pruner=optuna.pruners.HyperbandPruner()
         #,storage="mysql://root@34.147.7.30:3306/picai_hp_35"
         ,load_if_exists=True
-        ,storage="mysql://root:pwd@127.0.0.1:3306/picai_hp_35"
+        ,storage="mysql://root@127.0.0.1:3306/picai_hp_35"
         )
         #mysql://root@localhost/example
 study.optimize(objective, n_trials=40)
