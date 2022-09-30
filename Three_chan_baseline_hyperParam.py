@@ -218,7 +218,7 @@ dummyDict={"_one_spac_c" :aa[0],"_med_spac_b":aa[1]   }
 
 
 
-experiment_name="picai_hp_36"
+experiment_name="picai_hp_35"
 # Three_chan_baseline.mainTrain(options,df,experiment_name,dummyDict)
 num_workers=2
 cpu_num=11 #per gpu
@@ -244,9 +244,9 @@ study = optuna.create_study(
         study_name=experiment_name
         ,sampler=optuna.samplers.NSGAIISampler()    
         ,pruner=optuna.pruners.HyperbandPruner()
-        ,storage="mysql://root@34.147.7.30:3306/picai_hp_36"
+        ,storage="mysql://root@34.147.7.30:3306/picai_hp_35"
         , load_if_exists=True
-        #,storage="mysql://root:pwd@127.0.0.1:88/picai_hp_36"
+        #,storage="mysql://root:pwd@127.0.0.1:88/picai_hp_35"
         )
         #mysql://root@localhost/example
 study.optimize(objective, n_trials=40)
