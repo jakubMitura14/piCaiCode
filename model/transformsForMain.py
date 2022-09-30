@@ -156,13 +156,23 @@ def get_train_transforms(RandGaussianNoised_prob
             RandAffined(keys=["chan3_col_name","label"], prob=RandAffined_prob),
             #RandCoarseDropoutd(keys=["chan3_col_name"], prob=RandCoarseDropoutd_prob,holes=6, spatial_size=5),
 
-            wrapTorchio(torchio.transforms.RandomElasticDeformation(include=["chan3_col_name","label"],p=RandomElasticDeformation_prob)),
-            wrapTorchio(torchio.transforms.RandomAnisotropy(include=["chan3_col_name","label"],p=RandomAnisotropy_prob)),
-            wrapTorchio(torchio.transforms.RandomMotion(include=["chan3_col_name"],p=RandomMotion_prob)),
-            wrapTorchio(torchio.transforms.RandomGhosting(include=["chan3_col_name"],p=RandomGhosting_prob)),
-            wrapTorchio(torchio.transforms.RandomSpike(include=["chan3_col_name"],p=RandomSpike_prob)),
-            wrapTorchio(torchio.transforms.RandomBiasField(include=["chan3_col_name"],p=RandomBiasField_prob)),
-            #DivisiblePadd(keys=["chan3_col_name","label"],k=32) , 
+            # wrapTorchio(torchio.transforms.RandomElasticDeformation(include=["chan3_col_name","label"],p=RandomElasticDeformation_prob)),
+            # wrapTorchio(torchio.transforms.RandomAnisotropy(include=["chan3_col_name","label"],p=RandomAnisotropy_prob)),
+            # wrapTorchio(torchio.transforms.RandomMotion(include=["chan3_col_name"],p=RandomMotion_prob)),
+            # wrapTorchio(torchio.transforms.RandomGhosting(include=["chan3_col_name"],p=RandomGhosting_prob)),
+            # wrapTorchio(torchio.transforms.RandomSpike(include=["chan3_col_name"],p=RandomSpike_prob)),
+            # wrapTorchio(torchio.transforms.RandomBiasField(include=["chan3_col_name"],p=RandomBiasField_prob)),
+            RandCropByPosNegLabeld(
+                keys=["chan3_col_name","label"],
+                label_key="label",
+                spatial_size=(96, 96, 32),
+                pos=1,
+                neg=1,
+                num_samples=4,
+                image_key="chan3_col_name",
+                image_threshold=0
+            ),
+            DivisiblePadd(keys=["chan3_col_name","label"],k=32) , 
 
          ]
     )
@@ -182,7 +192,7 @@ def get_val_transforms(is_whole_to_train,centerCropSize):
             # Spacingd(keys=["chan3_col_name","label"]], pixdim=(
             #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
             #SpatialPadd(keys=["chan3_col_name","label"],spatial_size=maxSize) ,
-            #DivisiblePadd(keys=["chan3_col_name_val","label_name_val"],k=32) ,
+            DivisiblePadd(keys=["chan3_col_name_val","label_name_val"],k=32) ,
             #ResizeWithPadOrCropd(keys=["chan3_col_name","label_name_val"],spatial_size=centerCropSize ),
 
             #*decide_if_whole_image_train(is_whole_to_train,"chan3_col_name_val","label_name_val"),
