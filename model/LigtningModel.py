@@ -427,7 +427,7 @@ class Model(pl.LightningModule):
 
             #clearing and recreatin temporary directory
             #shutil.rmtree(self.temp_val_dir)    
-            self.temp_val_dir=pathOs.join(self.temp_val_dir,self.trainer.current_epoch)
+            self.temp_val_dir=pathOs.join(self.temp_val_dir,str(self.trainer.current_epoch))
             self.list_gold_val=[]
             self.list_yHat_val=[]
         #in case we have Nan values training is unstable and we want to terminate it     
