@@ -97,7 +97,7 @@ def mainTrain(trial,df,experiment_name,dummyDict,num_workers,cpu_num ,default_ro
     picaiLossArr_auroc_final=[]
     picaiLossArr_AP_final=[]
     picaiLossArr_score_final=[]
-    max_epochs=210#100#experiment.get_parameter("max_epochs")
+    max_epochs=810#100#experiment.get_parameter("max_epochs")
     
     in_channels=4
     out_channels=2

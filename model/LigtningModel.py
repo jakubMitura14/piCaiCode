@@ -210,7 +210,7 @@ class Model(pl.LightningModule):
         self.picaiLossArr_AP_final=picaiLossArr_AP_final
         self.picaiLossArr_score_final=picaiLossArr_score_final
         #temporary directory for validation images and their labels
-        self.temp_val_dir= '/home/sliceruser/data/tempD' #tempfile.mkdtemp()
+        self.temp_val_dir= '/home/sliceruser/data/tempE' #tempfile.mkdtemp()
         self.list_gold_val=[]
         self.list_yHat_val=[]
         self.isAnyNan=False
@@ -252,7 +252,7 @@ class Model(pl.LightningModule):
 
 
     def calculateLoss(self,isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions):
-        return self.criterion(seg_hat,y_true)
+        return self.criterion(seg_hat,y_true)+ F.smooth_l1_loss(reg_hat.flatten(),torch.Tensor(numLesions).to(self.device).flatten() )
 
         # seg_hat_list = decollate_batch(seg_hat)
         # isAnythingInAnnotated_list = decollate_batch(isAnythingInAnnotated)
@@ -424,7 +424,7 @@ class Model(pl.LightningModule):
 
             #clearing and recreatin temporary directory
             #shutil.rmtree(self.temp_val_dir)    
-            self.temp_val_dir=pathOs.join('/home/sliceruser/data/tempD',str(self.trainer.current_epoch))
+            self.temp_val_dir=pathOs.join('/home/sliceruser/data/tempE',str(self.trainer.current_epoch))
             os.makedirs(self.temp_val_dir,  exist_ok = True)             
             self.list_gold_val=[]
             self.list_yHat_val=[]

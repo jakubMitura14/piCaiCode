@@ -179,7 +179,7 @@ options={
 
 # "models":[getUnetA,getUnetB,getVNet,getSegResNet],
 "models":[getUnetA],# getVNet,getSegResNet,getSwinUNETR
-"regression_channels":[[1,1,1],[2,4,8],[10,16,32]],
+"regression_channels":[[10,16,32]], #[1,1,1],[2,4,8],
 
 # "lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
 #         # ,SamplesLoss(loss="sinkhorn",p=3)
