@@ -163,17 +163,17 @@ def get_train_transforms(RandGaussianNoised_prob
             # wrapTorchio(torchio.transforms.RandomSpike(include=["chan3_col_name"],p=RandomSpike_prob)),
             # wrapTorchio(torchio.transforms.RandomBiasField(include=["chan3_col_name"],p=RandomBiasField_prob)),
             
-            DivisiblePadd(keys=["chan3_col_name","label"],k=32)
-            ,RandCropByPosNegLabeld(
-            keys=["chan3_col_name","label"],
-            label_key="label",
-            spatial_size=(96, 96, 32),
-            pos=1,
-            neg=1,
-            num_samples=2,
-            image_key="chan3_col_name",
-            image_threshold=0
-        ),
+        #     DivisiblePadd(keys=["chan3_col_name","label"],k=32)
+        #     ,RandCropByPosNegLabeld(
+        #     keys=["chan3_col_name","label"],
+        #     label_key="label",
+        #     spatial_size=(96, 96, 32),
+        #     pos=1,
+        #     neg=1,
+        #     num_samples=2,
+        #     image_key="chan3_col_name",
+        #     image_threshold=0
+        # ),
 
          ]
     )
@@ -193,7 +193,7 @@ def get_val_transforms(is_whole_to_train,centerCropSize):
             # Spacingd(keys=["chan3_col_name","label"]], pixdim=(
             #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
             #SpatialPadd(keys=["chan3_col_name","label"],spatial_size=maxSize) ,
-            DivisiblePadd(keys=["chan3_col_name_val","label_name_val"],k=32) ,
+            #DivisiblePadd(keys=["chan3_col_name_val","label_name_val"],k=32) ,
             #ResizeWithPadOrCropd(keys=["chan3_col_name","label_name_val"],spatial_size=centerCropSize ),
 
             #*decide_if_whole_image_train(is_whole_to_train,"chan3_col_name_val","label_name_val"),
