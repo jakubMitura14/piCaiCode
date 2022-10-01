@@ -135,8 +135,6 @@ def mainTrain(trial,df,experiment_name,dummyDict,num_workers,cpu_num ,default_ro
     print(f"aaaaaaaaaaaaaaaaaaa dropout {dropout}")
     to_onehot_y_loss= False
 
-
-
     criterion= monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)# Our seg labels are single channel images indicating class index, rather than one-hot
     optimizer_class= torch.optim.NAdam#(lr=config["lr"])#getParam(config,options,"optimizer_class",df)(config["lr"])
     regression_channels=getParam(trial,options,"regression_channels") #options["regression_channels"][1] # getParam(config,options,"regression_channels")#options["regression_channels"][1] #getParam(config,options,"regression_channels",df)
