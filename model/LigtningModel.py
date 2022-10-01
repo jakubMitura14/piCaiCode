@@ -141,23 +141,23 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId):
     """
     saves arrays in given directory and return paths to them
     """
-    #gold_im_path = join(directory, patId+ "_gold.npy" )
-    #yHat_im_path = join(directory, patId+ "_hat.npy" )
-    # np.save(gold_im_path, gold_arr)
-    # np.save(yHat_im_path, y_hat_arr)
-    gold_im_path = join(directory, patId+ "_gold.nii.gz" )
-    yHat_im_path =join(directory, patId+ "_hat.nii.gz" )
+    gold_im_path = join(directory, patId+ "_gold.npy" )
+    yHat_im_path = join(directory, patId+ "_hat.npy" )
+    np.save(gold_im_path, gold_arr)
+    np.save(yHat_im_path, y_hat_arr)
+    # gold_im_path = join(directory, patId+ "_gold.nii.gz" )
+    # yHat_im_path =join(directory, patId+ "_hat.nii.gz" )
 
-    image = sitk.GetImageFromArray(gold_arr)
-    writer = sitk.ImageFileWriter()
-    writer.SetFileName(join(directory, patId+ "_gold.nii.gz" ))
-    writer.Execute(image)
+    # image = sitk.GetImageFromArray(gold_arr)
+    # writer = sitk.ImageFileWriter()
+    # writer.SetFileName(join(directory, patId+ "_gold.nii.gz" ))
+    # writer.Execute(image)
 
 
-    image = sitk.GetImageFromArray(y_hat_arr)
-    writer = sitk.ImageFileWriter()
-    writer.SetFileName(join(directory, patId+ "_hat.nii.gz" ))
-    writer.Execute(image)
+    # image = sitk.GetImageFromArray(y_hat_arr)
+    # writer = sitk.ImageFileWriter()
+    # writer.SetFileName(join(directory, patId+ "_hat.nii.gz" ))
+    # writer.Execute(image)
 
     return(gold_im_path,yHat_im_path)
 
@@ -216,7 +216,7 @@ class Model(pl.LightningModule):
         self.picaiLossArr_AP_final=picaiLossArr_AP_final
         self.picaiLossArr_score_final=picaiLossArr_score_final
         #temporary directory for validation images and their labels
-        self.temp_val_dir= '/home/sliceruser/data/tempE' #tempfile.mkdtemp()
+        self.temp_val_dir= tempfile.mkdtemp() #'/home/sliceruser/data/tempE' #tempfile.mkdtemp()
         self.list_gold_val=[]
         self.list_yHat_val=[]
         self.isAnyNan=False
@@ -329,15 +329,15 @@ class Model(pl.LightningModule):
         y_true = decollate_batch(y_true)
         patIds = decollate_batch(batch['patient_id'])
 
-        # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
-        # confMetric=monai.metrics.ConfusionMatrixMetric()
+        dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
+        confMetric=monai.metrics.ConfusionMatrixMetric()
         
-        # for i in range(0,len(y_det)):
-        #     # print("caalc dice ")
-        #     hatPost=self.postProcess(seg_hat[i])
-        #     # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
-        #     dice_metric(hatPost ,y_true[i])
-        #     monai.metrics.get_confusion_matrix(hatPost ,y_true[i])
+        for i in range(0,len(y_det)):
+            # print("caalc dice ")
+            hatPost=self.postProcess(seg_hat[i])
+            # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
+            dice_metric(hatPost ,y_true[i])
+            monai.metrics.get_confusion_matrix(hatPost ,y_true[i])
 
 
         # self.log('loc_tp', diceVall)
@@ -347,8 +347,8 @@ class Model(pl.LightningModule):
 
         # monai.metrics.compute_confusion_matrix_metric() 
         
-        # diceVall = dice_metric.aggregate().item()
-        # self.log('loc_dice', diceVall)
+        diceVall = dice_metric.aggregate().item()
+        self.log('loc_dice', diceVall)
         # print("after dices")
 
 
@@ -449,9 +449,9 @@ class Model(pl.LightningModule):
             self.log('val_mean_AP', meanPiecaiMetr_AP)
             self.log('mean_val_acc', meanPiecaiMetr_score)
             
-            # avg_dice = torch.mean(torch.stack([torch.as_tensor(x['loc_dice']) for x in outputs]))
+            avg_dice = torch.mean(torch.stack([torch.as_tensor(x['loc_dice']) for x in outputs]))
 
-            # self.log('dice', avg_dice )
+            self.log('dice', avg_dice )
 
             # self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
             # self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
@@ -469,9 +469,12 @@ class Model(pl.LightningModule):
 
 
             #clearing and recreatin temporary directory
-            #shutil.rmtree(self.temp_val_dir)    
-            self.temp_val_dir=pathOs.join('/home/sliceruser/data/tempE',str(self.trainer.current_epoch))
-            os.makedirs(self.temp_val_dir,  exist_ok = True)             
+            shutil.rmtree(self.temp_val_dir)   
+            self.temp_val_dir=tempfile.mkdtemp() 
+            # self.temp_val_dir=pathOs.join('/home/sliceruser/data/tempE',str(self.trainer.current_epoch))
+            # os.makedirs(self.temp_val_dir,  exist_ok = True)  
+
+
             self.list_gold_val=[]
             self.list_yHat_val=[]
         #in case we have Nan values training is unstable and we want to terminate it     
