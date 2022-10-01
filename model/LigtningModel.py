@@ -331,14 +331,14 @@ class Model(pl.LightningModule):
 
         # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
         # confMetric=monai.metrics.ConfusionMatrixMetric()
-        
+        print("pre dicess")
         for i in range(0,len(y_det)):
             # print("caalc dice ")
             hatPost=self.postProcess(y_det[i])
             # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
             self.dice_metric(hatPost.cpu() ,y_true[i].cpu())
             #monai.metrics.get_confusion_matrix(hatPost ,y_true[i])
-
+        print("post dicess ")
 
         # self.log('loc_tp', diceVall)
         # self.log('loc_fp', diceVall)
