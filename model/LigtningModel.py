@@ -274,7 +274,6 @@ class Model(pl.LightningModule):
         x, y_true, numLesions,isAnythingInAnnotated = batch['chan3_col_name'], batch['label'], batch['num_lesions_to_retain'], batch['isAnythingInAnnotated']
         # seg_hat, reg_hat = self.modelRegression(x)
         seg_hat = self.net(x)
-        print( f" seg_hat {seg_hat.size()}  y_true {y_true.size()} " )
         return self.criterion(seg_hat,y_true)
         #return self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)
 
@@ -317,6 +316,8 @@ class Model(pl.LightningModule):
         #seg_hat, reg_hat = self.modelRegression(x)        
         # seg_hat, reg_hat = self.modelRegression(x)        
         seg_hat = self.net(x)
+        print( f" seg_hat {seg_hat.size()}  y_true {y_true.size} " )
+        
         self.dice_metric(self.postProcess(seg_hat),y_true  )
         loss= self.criterion(seg_hat,y_true)# self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)
         y_det=torch.sigmoid(seg_hat)
