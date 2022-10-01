@@ -217,7 +217,7 @@ class Model(pl.LightningModule):
         self.isAnyNan=False
         #os.makedirs('/home/sliceruser/data/temp')
         # self.postProcess=monai.transforms.Compose([EnsureType(), monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])#, monai.transforms.KeepLargestConnectedComponent()
-        self.postProcess=monai.transforms.Compose([EnsureType(),  monai.transforms.ForegroundMask()])#, monai.transforms.KeepLargestConnectedComponent()
+        self.postProcess=monai.transforms.Compose([EnsureType(),  monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])#, monai.transforms.KeepLargestConnectedComponent()
         self.postTrue = Compose([EnsureType()])
         self.F1Score = torchmetrics.F1Score()
         self.lr=lr
@@ -326,7 +326,7 @@ class Model(pl.LightningModule):
         for i in range(0,len(y_det)):
             hatPost=self.postProcess(seg_hat[i]).cpu().detach()
             print( f" hatPost {hatPost[i].size()}  y_true {y_true[i].size()} " )
-            self.dice_metric(hatPost ,torch.reshape(y_true[i].cpu().detach()[1,:,:,:],hatPost.size())  )
+            self.dice_metric(hatPost ,y_true[i].cpu().detach()[1,:,:,:])
 
 
         #reg_hat = decollate_batch(reg_hat)
