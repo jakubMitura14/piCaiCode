@@ -217,6 +217,7 @@ class Model(pl.LightningModule):
         self.isAnyNan=False
         #os.makedirs('/home/sliceruser/data/temp')
         # self.postProcess=monai.transforms.Compose([EnsureType(), monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])#, monai.transforms.KeepLargestConnectedComponent()
+        # self.postProcess=monai.transforms.Compose([EnsureType(),  monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])#, monai.transforms.KeepLargestConnectedComponent()
         self.postProcess=monai.transforms.Compose([EnsureType(),  monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])#, monai.transforms.KeepLargestConnectedComponent()
         self.postTrue = Compose([EnsureType()])
         self.F1Score = torchmetrics.F1Score()
@@ -327,9 +328,9 @@ class Model(pl.LightningModule):
 
 
         for i in range(0,len(y_det)):
-            #print("caalc dice ")
+            print("caalc dice ")
             hatPost=self.postProcess(seg_hat[i])
-            #print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
+            print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
             dice_metric(hatPost ,y_true[i])
 
          
