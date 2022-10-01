@@ -145,16 +145,16 @@ def get_train_transforms(RandGaussianNoised_prob
             # SelectItemsd(keys=["chan3_col_name","label"]),
             #AddChanneld( keys=["chan3_col_name","label"]) ,          
             #ResizeWithPadOrCropd(keys=["chan3_col_name","label"],spatial_size=centerCropSize ),
-            RandCropByPosNegLabeld(
-                keys=["chan3_col_name","label"],
-                label_key="label",
-                spatial_size=(96, 96, 32),
-                pos=1,
-                neg=1,
-                num_samples=2,
-                image_key="chan3_col_name",
-                image_threshold=0
-            ),
+            # RandCropByPosNegLabeld(
+            #     keys=["chan3_col_name","label"],
+            #     label_key="label",
+            #     spatial_size=(96, 96, 32),
+            #     pos=1,
+            #     neg=1,
+            #     num_samples=2,
+            #     image_key="chan3_col_name",
+            #     image_threshold=0
+            # ),
             #*decide_if_whole_image_train(is_whole_to_train,"chan3_col_name","label"),
             #SpatialPadd(keys=["chan3_col_name","label"]],spatial_size=maxSize) ,            
             #RandGaussianNoised(keys=["chan3_col_name"], prob=RandGaussianNoised_prob),
