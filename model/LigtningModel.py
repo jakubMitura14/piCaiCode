@@ -323,13 +323,19 @@ class Model(pl.LightningModule):
         y_true = decollate_batch(y_true)
         patIds = decollate_batch(batch['patient_id'])
 
+        dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
+
+
         for i in range(0,len(y_det)):
-            print("caalc dice ")
-            hatPost=self.postProcess(seg_hat[i]).cpu()
+            #print("caalc dice ")
+            hatPost=self.postProcess(seg_hat[i])
             #print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
-            self.dice_metric(hatPost ,y_true[i].cpu())
+            dice_metric(hatPost ,y_true[i])
 
-
+         
+        diceVall = dice_metric.aggregate().item()
+        self.log('loc_dice', diceVall)
+        dice_metric.reset()
         #reg_hat = decollate_batch(reg_hat)
         # print(f" rrrrr prim{reg_hat}  ")
 
@@ -357,9 +363,9 @@ class Model(pl.LightningModule):
             # self.list_gold_val.append(forGoldVal[i])
             # self.list_yHat_val.append(fory_hatVal[i])
 
-        self.log('val_loss', loss)
+        self.log('val_loss', loss )
 
-        return loss
+        return {'loss' :loss,'loc_dice': diceVall }
 
         #TODO probably this [1,:,:,:] could break the evaluation ...
         # y_det=[x.cpu().detach().numpy()[1,:,:,:][0] for x in y_det]
@@ -423,9 +429,10 @@ class Model(pl.LightningModule):
             self.log('val_mean_AP', meanPiecaiMetr_AP)
             self.log('mean_val_acc', meanPiecaiMetr_score)
             
-            self.log('dice', self.dice_metric.aggregate().item() )
-            
-            self.dice_metric.reset()
+            avg_dice = torch.mean(torch.stack([torch.as_tensor(x['loc_dice']) for x in outputs]))
+
+            self.log('dice', avg_dice )
+
             # self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
             # self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
             # self.experiment.log_metric('val_mean_score', meanPiecaiMetr_score)
