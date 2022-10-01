@@ -317,15 +317,18 @@ class Model(pl.LightningModule):
         # seg_hat, reg_hat = self.modelRegression(x)        
         seg_hat = self.net(x)
         seg_hat=torch.sigmoid(seg_hat)
-        hatPost=self.postProcess(seg_hat).cpu().detach()
-        print( f" hatPost {hatPost.size()}  y_true {y_true.size()} " )
 
-        self.dice_metric(hatPost ,y_true.cpu().detach(), hatPost)
-        loss= self.criterion(seg_hat,y_true)# self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)
-       
+        loss= self.criterion(seg_hat,y_true)# self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)      
         y_det = decollate_batch(seg_hat)
         y_true = decollate_batch(y_true)
         patIds = decollate_batch(batch['patient_id'])
+
+        for i in range(0,len(y_det)):
+            hatPost=self.postProcess(seg_hat[i]).cpu().detach()
+            print( f" hatPost {hatPost[i].size()}  y_true {y_true[i].size()} " )
+            self.dice_metric(hatPost ,y_true[i].cpu().detach())
+
+
         #reg_hat = decollate_batch(reg_hat)
         # print(f" rrrrr prim{reg_hat}  ")
 
