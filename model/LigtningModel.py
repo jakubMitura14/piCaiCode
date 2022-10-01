@@ -329,19 +329,29 @@ class Model(pl.LightningModule):
         y_true = decollate_batch(y_true)
         patIds = decollate_batch(batch['patient_id'])
 
-        dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
+        # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
+        # confMetric=monai.metrics.ConfusionMatrixMetric()
+        
+        # for i in range(0,len(y_det)):
+        #     # print("caalc dice ")
+        #     hatPost=self.postProcess(seg_hat[i])
+        #     # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
+        #     dice_metric(hatPost ,y_true[i])
+        #     monai.metrics.get_confusion_matrix(hatPost ,y_true[i])
 
 
-        for i in range(0,len(y_det)):
-            # print("caalc dice ")
-            hatPost=self.postProcess(seg_hat[i])
-            # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
-            dice_metric(hatPost ,y_true[i])
+        # self.log('loc_tp', diceVall)
+        # self.log('loc_fp', diceVall)
+        # self.log('loc_fn', diceVall)
+        # self.log('loc_fp', diceVall)
 
-         
-        diceVall = dice_metric.aggregate().item()
-        self.log('loc_dice', diceVall)
-        print("after dices")
+        # monai.metrics.compute_confusion_matrix_metric() 
+        
+        # diceVall = dice_metric.aggregate().item()
+        # self.log('loc_dice', diceVall)
+        # print("after dices")
+
+
         #reg_hat = decollate_batch(reg_hat)
         # print(f" rrrrr prim{reg_hat}  ")
 
@@ -372,7 +382,7 @@ class Model(pl.LightningModule):
 
         self.log('val_loss', loss )
 
-        return {'loss' :loss,'loc_dice': diceVall }
+       # return {'loss' :loss,'loc_dice': diceVall }
 
         #TODO probably this [1,:,:,:] could break the evaluation ...
         # y_det=[x.cpu().detach().numpy()[1,:,:,:][0] for x in y_det]
@@ -439,9 +449,9 @@ class Model(pl.LightningModule):
             self.log('val_mean_AP', meanPiecaiMetr_AP)
             self.log('mean_val_acc', meanPiecaiMetr_score)
             
-            avg_dice = torch.mean(torch.stack([torch.as_tensor(x['loc_dice']) for x in outputs]))
+            # avg_dice = torch.mean(torch.stack([torch.as_tensor(x['loc_dice']) for x in outputs]))
 
-            self.log('dice', avg_dice )
+            # self.log('dice', avg_dice )
 
             # self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
             # self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
