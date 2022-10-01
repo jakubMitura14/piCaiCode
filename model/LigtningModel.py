@@ -316,7 +316,7 @@ class Model(pl.LightningModule):
         #seg_hat, reg_hat = self.modelRegression(x)        
         # seg_hat, reg_hat = self.modelRegression(x)        
         seg_hat = self.net(x)
-        self.dice_metric(seg_hat,y_true  )
+        self.dice_metric(self.postProcess(seg_hat),y_true  )
         loss= self.criterion(seg_hat,y_true)# self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)
         y_det=torch.sigmoid(seg_hat)
         y_det = decollate_batch(seg_hat)
