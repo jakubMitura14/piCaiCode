@@ -94,7 +94,12 @@ from torchmetrics.functional import precision_recall
 from torch.utils.cpp_extension import load
 import torchmetrics
 # lltm_cuda = load('lltm_cuda', ['lltm_cuda.cpp', 'lltm_cuda_kernel.cu'], verbose=True)
-
+from monai.metrics import (
+    ConfusionMatrixMetric,
+    compute_confusion_matrix_metric,
+    do_metric_reduction,
+    get_confusion_matrix,
+)
 class UNetToRegresion(nn.Module):
     def __init__(self,
         in_channels,
@@ -328,15 +333,15 @@ class Model(pl.LightningModule):
 
 
         for i in range(0,len(y_det)):
-            print("caalc dice ")
+            # print("caalc dice ")
             hatPost=self.postProcess(seg_hat[i])
-            print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
+            # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
             dice_metric(hatPost ,y_true[i])
 
          
         diceVall = dice_metric.aggregate().item()
         self.log('loc_dice', diceVall)
-        dice_metric.reset()
+        print("after dices")
         #reg_hat = decollate_batch(reg_hat)
         # print(f" rrrrr prim{reg_hat}  ")
 
@@ -345,6 +350,7 @@ class Model(pl.LightningModule):
 
         y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
         y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
+        print("after extracting")
         
         pathssList=[]
         # with mp.Pool(processes = mp.cpu_count()) as pool:
@@ -406,8 +412,11 @@ class Model(pl.LightningModule):
         # return {'val_acc': total_loss1.item(), 'val_loss':val_losss}
 
     def validation_epoch_end(self, outputs):
+        print("validation_epoch_end")
+        
         #print(f" self.list_yHat_val {self.list_yHat_val} ")
         if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
+            print("validation_epoch_end in   ")
             chunkLen=8
 
             valid_metrics = evaluate(y_det=self.list_yHat_val,
