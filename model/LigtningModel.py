@@ -195,7 +195,8 @@ class Model(pl.LightningModule):
     ):
         super().__init__()
         self.lr = learning_rate
-        self.modelRegression = UNetToRegresion(2,regression_channels,net)
+        self.net=net
+        # self.modelRegression = UNetToRegresion(2,regression_channels,net)
         self.criterion = criterion
         self.optimizer_class = optimizer_class
         self.best_val_dice = 0
@@ -271,8 +272,10 @@ class Model(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         # every second iteration we will do the training for segmentation
         x, y_true, numLesions,isAnythingInAnnotated = batch['chan3_col_name'], batch['label'], batch['num_lesions_to_retain'], batch['isAnythingInAnnotated']
-        seg_hat, reg_hat = self.modelRegression(x)
-        return self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)
+        # seg_hat, reg_hat = self.modelRegression(x)
+        seg_hat = self.net(x)
+        return self.criterion(seg_hat,y_true)
+        #return self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)
 
         # if(isAnythingInAnnotated>0):
         #     lossSeg=self.criterion(seg_hat, y_true)
@@ -310,17 +313,20 @@ class Model(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         x, y_true, numLesions,isAnythingInAnnotated = batch['chan3_col_name_val'], batch['label_name_val'], batch['num_lesions_to_retain'], batch['isAnythingInAnnotated']
         
-        seg_hat, reg_hat = self.modelRegression(x)        
-        loss= self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)
+        #seg_hat, reg_hat = self.modelRegression(x)        
+        # seg_hat, reg_hat = self.modelRegression(x)        
+        seg_hat = self.net(x)
+        self.dice_metric(seg_hat,y_true  )
+        loss= self.criterion(seg_hat,y_true)# self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)
         y_det=torch.sigmoid(seg_hat)
         y_det = decollate_batch(seg_hat)
         y_true = decollate_batch(y_true)
         patIds = decollate_batch(batch['patient_id'])
         #reg_hat = decollate_batch(reg_hat)
-        print(f" rrrrr prim{reg_hat}  ")
+        # print(f" rrrrr prim{reg_hat}  ")
 
-        reg_hat=np.rint(reg_hat.cpu().detach().numpy().flatten())
-        print(f" rrrrr {reg_hat}  ")
+        # reg_hat=np.rint(reg_hat.cpu().detach().numpy().flatten())
+        # print(f" rrrrr {reg_hat}  ")
 
         y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
         y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
@@ -406,7 +412,8 @@ class Model(pl.LightningModule):
             self.log('val_mean_auroc', meanPiecaiMetr_auroc)
             self.log('val_mean_AP', meanPiecaiMetr_AP)
             self.log('mean_val_acc', meanPiecaiMetr_score)
-
+            self.log('dice', self.dice.aggregate().item() )
+            self.dice.reset()
             # self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
             # self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
             # self.experiment.log_metric('val_mean_score', meanPiecaiMetr_score)
