@@ -316,7 +316,7 @@ class Model(pl.LightningModule):
         #seg_hat, reg_hat = self.modelRegression(x)        
         # seg_hat, reg_hat = self.modelRegression(x)        
         seg_hat = self.net(x)
-        print( f" seg_hat {seg_hat.size()}  y_true {y_true.size} " )
+        print( f" seg_hat {seg_hat.size()}  y_true {y_true.size()} " )
         
         self.dice_metric(self.postProcess(seg_hat),y_true  )
         loss= self.criterion(seg_hat,y_true)# self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)
