@@ -306,8 +306,6 @@ class Model(pl.LightningModule):
         # # return torch.add(torch.add(lossa,lossb),lossab)
         # return lossa
     # def validation_step(self, batch, batch_idx):
-
-
         # self.list_gold_val.append(tupl[0])
         # self.list_yHat_val.append(tupl[1])
 
