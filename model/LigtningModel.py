@@ -325,7 +325,7 @@ class Model(pl.LightningModule):
 
         for i in range(0,len(y_det)):
             hatPost=self.postProcess(seg_hat[i]).cpu()
-            print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
+            #print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
             self.dice_metric(hatPost ,y_true[i].cpu())
 
 
