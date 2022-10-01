@@ -330,14 +330,14 @@ class Model(pl.LightningModule):
         patIds = decollate_batch(batch['patient_id'])
 
         # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
-        confMetric=monai.metrics.ConfusionMatrixMetric()
+        # confMetric=monai.metrics.ConfusionMatrixMetric()
         
         for i in range(0,len(y_det)):
             # print("caalc dice ")
             hatPost=self.postProcess(seg_hat[i])
             # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
             self.dice_metric(hatPost.cpu() ,y_true[i].cpu())
-            monai.metrics.get_confusion_matrix(hatPost ,y_true[i])
+            #monai.metrics.get_confusion_matrix(hatPost ,y_true[i])
 
 
         # self.log('loc_tp', diceVall)
@@ -358,9 +358,9 @@ class Model(pl.LightningModule):
         # reg_hat=np.rint(reg_hat.cpu().detach().numpy().flatten())
         # print(f" rrrrr {reg_hat}  ")
 
-#         y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
-#         y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
-#         print("after extracting")
+        y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
+        y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
+        print("after extracting")
         
 #         pathssList=[]
 #         # with mp.Pool(processes = mp.cpu_count()) as pool:
@@ -373,12 +373,13 @@ class Model(pl.LightningModule):
 
 # # save_candidates_to_dir(y_true,y_det,patIds,i,temp_val_dir)
         
-#         for i in range(0,len(y_true)):
-#             tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
-#             self.list_gold_val.append(tupl[0])
-#             self.list_yHat_val.append(tupl[1])
-#             # self.list_gold_val.append(forGoldVal[i])
-#             # self.list_yHat_val.append(fory_hatVal[i])
+        for i in range(0,len(y_true)):
+            tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
+            print("saving entry   ")
+            self.list_gold_val.append(tupl[0])
+            self.list_yHat_val.append(tupl[1])
+            # self.list_gold_val.append(forGoldVal[i])
+            # self.list_yHat_val.append(fory_hatVal[i])
 
 #         self.log('val_loss', loss )
 
