@@ -329,14 +329,14 @@ class Model(pl.LightningModule):
         y_true = decollate_batch(y_true)
         patIds = decollate_batch(batch['patient_id'])
 
-        dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
+        # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
         confMetric=monai.metrics.ConfusionMatrixMetric()
         
         for i in range(0,len(y_det)):
             # print("caalc dice ")
             hatPost=self.postProcess(seg_hat[i])
             # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
-            dice_metric(hatPost ,y_true[i])
+            self.dice_metric(hatPost.cpu() ,y_true[i].cpu())
             monai.metrics.get_confusion_matrix(hatPost ,y_true[i])
 
 
@@ -347,8 +347,8 @@ class Model(pl.LightningModule):
 
         # monai.metrics.compute_confusion_matrix_metric() 
         
-        diceVall = dice_metric.aggregate().item()
-        self.log('loc_dice', diceVall)
+        # diceVall = dice_metric.aggregate().item()
+        # self.log('loc_dice', diceVall)
         # print("after dices")
 
 
@@ -424,12 +424,9 @@ class Model(pl.LightningModule):
     def validation_epoch_end(self, outputs):
         print("validation_epoch_end")
 
-        tensorss = [torch.as_tensor(x['loc_dice']) for x in outputs]
-        if( len(tensorss)>0):
-            avg_dice = torch.mean(torch.stack(tensorss))
 
-            self.log('dice', avg_dice )
-
+        self.log('dice', self.dice_metric.aggregate().item() )
+        self.dice_metric.reset()
         #print(f" self.list_yHat_val {self.list_yHat_val} ")
         if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
             print("validation_epoch_end in   ")
@@ -454,11 +451,11 @@ class Model(pl.LightningModule):
             self.log('val_mean_auroc', meanPiecaiMetr_auroc)
             self.log('val_mean_AP', meanPiecaiMetr_AP)
             self.log('mean_val_acc', meanPiecaiMetr_score)
-            tensorss = [torch.as_tensor(x['loc_dice']) for x in outputs]
-            if( len(tensorss)>0):
-                avg_dice = torch.mean(torch.stack(tensorss))
+            # tensorss = [torch.as_tensor(x['loc_dice']) for x in outputs]
+            # if( len(tensorss)>0):
+            #     avg_dice = torch.mean(torch.stack(tensorss))
 
-                self.log('dice', avg_dice )
+            #     self.log('dice', avg_dice )
 
             # self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
             # self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
