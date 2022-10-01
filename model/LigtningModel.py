@@ -326,7 +326,7 @@ class Model(pl.LightningModule):
         for i in range(0,len(y_det)):
             hatPost=self.postProcess(seg_hat[i]).cpu().detach()
             print( f" hatPost {hatPost[i].size()}  y_true {y_true[i].size()} " )
-            self.dice_metric(hatPost ,y_true[i].cpu().detach()[1,:,:,:])
+            self.dice_metric(hatPost ,torch.reshape(y_true[i].cpu().detach()[1,:,:,:],hatPost.size())  )
 
 
         #reg_hat = decollate_batch(reg_hat)
