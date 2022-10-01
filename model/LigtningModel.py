@@ -448,10 +448,11 @@ class Model(pl.LightningModule):
             self.log('val_mean_auroc', meanPiecaiMetr_auroc)
             self.log('val_mean_AP', meanPiecaiMetr_AP)
             self.log('mean_val_acc', meanPiecaiMetr_score)
-            
-            avg_dice = torch.mean(torch.stack([torch.as_tensor(x['loc_dice']) for x in outputs]))
+            tensorss = [torch.as_tensor(x['loc_dice']) for x in outputs]
+            if( len(tensorss)>0):
+                avg_dice = torch.mean(torch.stack(tensorss))
 
-            self.log('dice', avg_dice )
+                self.log('dice', avg_dice )
 
             # self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
             # self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
