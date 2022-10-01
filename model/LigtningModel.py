@@ -334,7 +334,7 @@ class Model(pl.LightningModule):
         
         for i in range(0,len(y_det)):
             # print("caalc dice ")
-            hatPost=self.postProcess(seg_hat[i])
+            hatPost=self.postProcess(y_det[i])
             # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
             self.dice_metric(hatPost.cpu() ,y_true[i].cpu())
             #monai.metrics.get_confusion_matrix(hatPost ,y_true[i])
@@ -357,7 +357,7 @@ class Model(pl.LightningModule):
 
         # reg_hat=np.rint(reg_hat.cpu().detach().numpy().flatten())
         # print(f" rrrrr {reg_hat}  ")
-
+        print("before extracting")
         y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
         y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
         print("after extracting")
