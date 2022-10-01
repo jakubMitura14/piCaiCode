@@ -202,7 +202,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         "logger" : comet_logger,
         "default_root_dir" : default_root_dir,
         "auto_lr_find" : False,
-        "check_val_every_n_epoch" : 6,
+        "check_val_every_n_epoch" : 9,
         "accumulate_grad_batches" : accumulate_grad_batches,
         "gradient_clip_val" :gradient_clip_val,
         "log_every_n_steps" :2,
