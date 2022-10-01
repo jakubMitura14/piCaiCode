@@ -332,10 +332,10 @@ class Model(pl.LightningModule):
         y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
         
         pathssList=[]
-        with mp.Pool(processes = mp.cpu_count()) as pool:
-            pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
-        forGoldVal=list(map(lambda tupl :tupl[0] ,pathssList  ))
-        fory_hatVal=list(map(lambda tupl :tupl[1] ,pathssList  ))
+        # with mp.Pool(processes = mp.cpu_count()) as pool:
+        #     pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
+        # forGoldVal=list(map(lambda tupl :tupl[0] ,pathssList  ))
+        # fory_hatVal=list(map(lambda tupl :tupl[1] ,pathssList  ))
 
         # self.list_gold_val=self.list_gold_val+forGoldVal
         # self.list_yHat_val=self.list_gold_val+fory_hatVal
@@ -343,9 +343,11 @@ class Model(pl.LightningModule):
 # save_candidates_to_dir(y_true,y_det,patIds,i,temp_val_dir)
         
         for i in range(0,len(y_true)):
-            #tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
-            self.list_gold_val.append(forGoldVal[i])
-            self.list_yHat_val.append(fory_hatVal[i])
+            tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
+            self.list_gold_val.append(tupl[0])
+            self.list_yHat_val.append(tupl[1])
+            # self.list_gold_val.append(forGoldVal[i])
+            # self.list_yHat_val.append(fory_hatVal[i])
 
         self.log('val_loss', loss)
 
