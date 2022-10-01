@@ -324,9 +324,9 @@ class Model(pl.LightningModule):
         patIds = decollate_batch(batch['patient_id'])
 
         for i in range(0,len(y_det)):
-            hatPost=self.postProcess(seg_hat[i]).cpu().detach()
+            hatPost=self.postProcess(seg_hat[i]).cpu().detach().numpy()
             print( f" hatPost {hatPost[i].size()}  y_true {y_true[i].cpu()[1,:,:,:].size()} " )
-            self.dice_metric(hatPost ,y_true[i].cpu()[1,:,:,:])
+            self.dice_metric(hatPost ,y_true[i].cpu().detach().numpy()[1,:,:,:])
 
 
         #reg_hat = decollate_batch(reg_hat)
