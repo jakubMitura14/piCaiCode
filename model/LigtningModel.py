@@ -436,7 +436,7 @@ class Model(pl.LightningModule):
             valid_metrics = evaluate(y_det=self.list_yHat_val,
                                 y_true=self.list_gold_val,
                                 num_parallel_calls= os.cpu_count()
-                                ,verbose=1
+                                #,verbose=1
                                 #y_true=iter(y_true),
                                 #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
                                 )
