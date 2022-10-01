@@ -135,7 +135,7 @@ def mainTrain(trial,df,experiment_name,dummyDict,num_workers,cpu_num ,default_ro
     print(f"aaaaaaaaaaaaaaaaaaa dropout {dropout}")
     to_onehot_y_loss= False
 
-    criterion= monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
+    criterion= monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)# Our seg labels are single channel images indicating class index, rather than one-hot
     optimizer_class= torch.optim.NAdam#(lr=config["lr"])#getParam(config,options,"optimizer_class",df)(config["lr"])
     regression_channels=getParam(trial,options,"regression_channels") #options["regression_channels"][1] # getParam(config,options,"regression_channels")#options["regression_channels"][1] #getParam(config,options,"regression_channels",df)
     accumulate_grad_batches=3#config["accumulate_grad_batches"]
@@ -174,7 +174,7 @@ def mainTrain(trial,df,experiment_name,dummyDict,num_workers,cpu_num ,default_ro
     ,RandomMotion_prob
     ,RandomGhosting_prob
     ,RandomSpike_prob
-    ,RandomBiasField_prob,regression_channels,num_workers,cpu_num ,default_root_dir,checkpoint_dir,trial.suggest_float("lr", 1e-3, 1e-4),num_cpus_per_worker,trial)
+    ,RandomBiasField_prob,regression_channels,num_workers,cpu_num ,default_root_dir,checkpoint_dir,trial.suggest_float("lr", 1e-5, 1e-3),num_cpus_per_worker,trial)
     # if(len(picaiLossArr_auroc_final)>0):
     #     experiment.log_metric("last_val_loss_auroc",np.nanmax(picaiLossArr_auroc_final))
     #     experiment.log_metric("last_val_loss_Ap",np.nanmax(picaiLossArr_AP_final))
