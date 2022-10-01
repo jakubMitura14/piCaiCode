@@ -324,6 +324,7 @@ class Model(pl.LightningModule):
         patIds = decollate_batch(batch['patient_id'])
 
         for i in range(0,len(y_det)):
+            print("caalc dice ")
             hatPost=self.postProcess(seg_hat[i]).cpu()
             #print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
             self.dice_metric(hatPost ,y_true[i].cpu())
@@ -421,7 +422,9 @@ class Model(pl.LightningModule):
             self.log('val_mean_auroc', meanPiecaiMetr_auroc)
             self.log('val_mean_AP', meanPiecaiMetr_AP)
             self.log('mean_val_acc', meanPiecaiMetr_score)
+            
             self.log('dice', self.dice_metric.aggregate().item() )
+            
             self.dice_metric.reset()
             # self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
             # self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
