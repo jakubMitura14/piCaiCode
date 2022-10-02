@@ -141,23 +141,25 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId):
     """
     saves arrays in given directory and return paths to them
     """
-    gold_im_path = join(directory, patId+ "_gold.npy" )
-    yHat_im_path = join(directory, patId+ "_hat.npy" )
-    np.save(gold_im_path, gold_arr)
-    np.save(yHat_im_path, y_hat_arr)
-    # gold_im_path = join(directory, patId+ "_gold.nii.gz" )
-    # yHat_im_path =join(directory, patId+ "_hat.nii.gz" )
+    # gold_im_path = join(directory, patId+ "_gold.npy" )
+    # yHat_im_path = join(directory, patId+ "_hat.npy" )
+    # np.save(gold_im_path, gold_arr)
+    # np.save(yHat_im_path, y_hat_arr)
+    gold_im_path = join(directory, patId+ "_gold.nii.gz" )
+    yHat_im_path =join(directory, patId+ "_hat.nii.gz" )
+    print("got pathss")
+    image = sitk.GetImageFromArray(gold_arr)
+    writer = sitk.ImageFileWriter()
+    writer.SetFileName(join(directory, patId+ "_gold.nii.gz" ))
+    writer.Execute(image)
+    print("saved gold")
 
-    # image = sitk.GetImageFromArray(gold_arr)
-    # writer = sitk.ImageFileWriter()
-    # writer.SetFileName(join(directory, patId+ "_gold.nii.gz" ))
-    # writer.Execute(image)
 
-
-    # image = sitk.GetImageFromArray(y_hat_arr)
-    # writer = sitk.ImageFileWriter()
-    # writer.SetFileName(join(directory, patId+ "_hat.nii.gz" ))
-    # writer.Execute(image)
+    image = sitk.GetImageFromArray(y_hat_arr)
+    writer = sitk.ImageFileWriter()
+    writer.SetFileName(join(directory, patId+ "_hat.nii.gz" ))
+    writer.Execute(image)
+    print("saved hat")
 
     return(gold_im_path,yHat_im_path)
 
@@ -208,6 +210,7 @@ class Model(pl.LightningModule):
         self.best_val_dice = 0
         self.best_val_epoch = 0
         self.dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
+        self.confMetric=monai.metrics.ConfusionMatrixMetric()
         self.picaiLossArr=[]
         self.post_pred = Compose([ AsDiscrete( to_onehot=2)])
         self.picaiLossArr_auroc=[]
@@ -226,11 +229,11 @@ class Model(pl.LightningModule):
         # self.postProcess=monai.transforms.Compose([EnsureType(),  monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])#, monai.transforms.KeepLargestConnectedComponent()
         self.postProcess=monai.transforms.Compose([EnsureType(),  monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])#, monai.transforms.KeepLargestConnectedComponent()
         self.postTrue = Compose([EnsureType()])
-        self.F1Score = torchmetrics.F1Score()
+        #self.F1Score = torchmetrics.F1Score()
         self.lr=lr
         self.trial=trial
         #shutil.rmtree(self.temp_val_dir) 
-        os.makedirs(self.temp_val_dir,  exist_ok = True)             
+        #os.makedirs(self.temp_val_dir,  exist_ok = True)             
 
     def configure_optimizers(self):
         # optimizer = self.optimizer_class(self.parameters(), lr=self.lr)
@@ -331,14 +334,14 @@ class Model(pl.LightningModule):
         patIds = decollate_batch(batch['patient_id'])
 
         # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
-        # confMetric=monai.metrics.ConfusionMatrixMetric()
+        
         print("pre dicess")
         for i in range(0,len(y_det)):
             # print("caalc dice ")
             hatPost=self.postProcess(y_det[i])
             # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
             self.dice_metric(hatPost.cpu() ,y_true[i].cpu())
-            #monai.metrics.get_confusion_matrix(hatPost ,y_true[i])
+            self.confMetric(hatPost.cpu() ,y_true[i].cpu())
         print("post dicess ")
 
         # self.log('loc_tp', diceVall)
@@ -375,13 +378,13 @@ class Model(pl.LightningModule):
 
 # # save_candidates_to_dir(y_true,y_det,patIds,i,temp_val_dir)
         
-        # for i in range(0,len(y_true)):
-        #     tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
-        #     print("saving entry   ")
-        #     self.list_gold_val.append(tupl[0])
-        #     self.list_yHat_val.append(tupl[1])
-            # self.list_gold_val.append(forGoldVal[i])
-            # self.list_yHat_val.append(fory_hatVal[i])
+        for i in range(0,len(y_true)):
+            # tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
+            # print("saving entry   ")
+            # self.list_gold_val.append(tupl[0])
+            # self.list_yHat_val.append(tupl[1])
+            self.list_gold_val.append(forGoldVal[i])
+            self.list_yHat_val.append(fory_hatVal[i])
 
 #         self.log('val_loss', loss )
 
@@ -430,6 +433,14 @@ class Model(pl.LightningModule):
 
         self.log('dice', self.dice_metric.aggregate().item() )
         self.dice_metric.reset()
+
+        confusion_matrix= self.confMetric.aggregate()
+
+        self.log('precision ', monai.metrics.compute_confusion_matrix_metric("precision", confusion_matrix) )
+        self.confMetric.reset()        
+
+
+        
         #print(f" self.list_yHat_val {self.list_yHat_val} ")
         if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
             print("validation_epoch_end in   ")
