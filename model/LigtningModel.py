@@ -240,9 +240,11 @@ def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,images):
 #     return monai.metrics.compute_generalized_dice( postProcessHat(y_hat) ,load_true(gold_val))
 
 def evaluate_case_for_map(i,y_det,y_true):
-    print("evaluate_case_for_map")
-    return evaluate_case( y_det=extract_lesion_candidates(y_det[i])[0]
-                    ,y_true=y_true[i] )
+    print("evaluate_case_for_map") 
+    return evaluate_case(y_det=y_det[i] 
+                    ,y_true=y_true[i] 
+                    ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+                    )
 
 class Model(pl.LightningModule):
     def __init__(self
