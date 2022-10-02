@@ -137,7 +137,7 @@ def divide_chunks(l, n):
     for i in range(0, len(l), n):
         yield l[i:i + n]
 
-def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,y_backgroundArr):
+def saveFilesInDir(gold_arr,y_hat_arr, directory, patId):
     """
     saves arrays in given directory and return paths to them
     """
