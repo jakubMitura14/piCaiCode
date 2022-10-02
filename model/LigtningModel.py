@@ -337,9 +337,9 @@ class Model(pl.LightningModule):
 #         y_true=y_true[:,1,:,:,:].cpu().detach()
 #         y_det=seg_hat[:,1,:,:,:].cpu().detach()
 
-        y_det = decollate_batch(seg_hat).cpu().detach()
-        y_true = decollate_batch(y_true).cpu().detach()
-        patIds = decollate_batch(batch['patient_id']).cpu().detach()
+        y_det = decollate_batch(seg_hat.cpu().detach())
+        y_true = decollate_batch(y_true.cpu().detach())
+        patIds = decollate_batch(batch['patient_id'].cpu().detach())
 
 #         # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
         
@@ -482,6 +482,11 @@ class Model(pl.LightningModule):
             self.picaiLossArr_auroc=[]
             self.picaiLossArr_AP=[]
             self.picaiLossArr_score=[]
+
+        pathssList=[]
+        with mp.Pool(processes = mp.cpu_count()) as pool:
+            # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
+            pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir),list(range(0,len(y_true))))
 
 
 
