@@ -339,7 +339,7 @@ class Model(pl.LightningModule):
 
         y_det = decollate_batch(seg_hat.cpu().detach())
         y_true = decollate_batch(y_true.cpu().detach())
-        patIds = decollate_batch(batch['patient_id'].cpu().detach())
+        patIds = decollate_batch(batch['patient_id'])
 
 #         # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
         
@@ -483,15 +483,14 @@ class Model(pl.LightningModule):
             self.picaiLossArr_AP=[]
             self.picaiLossArr_score=[]
 
-        pathssList=[]
-        with mp.Pool(processes = mp.cpu_count()) as pool:
-            # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
-            pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir),list(range(0,len(y_true))))
+        dices=[]
+        # with mp.Pool(processes = mp.cpu_count()) as pool:
+        #     # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
+        #     # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir),list(range(0,len(y_true))))
 
 
 
-#             image1=sitk.ReadImage(path)
-# #     data = sitk.GetArrayFromImage(image1)
+
 
 
         #clearing and recreatin temporary directory
@@ -535,4 +534,7 @@ class Model(pl.LightningModule):
         # #return {'mean_val_loss': avg_loss, 'mean_val_acc':avg_acc}
 
 
-
+def calcDiceFromPaths():
+    monai.metrics.compute_generalized_dice( hatPost ,y_true[i])
+#             image1=sitk.ReadImage(path)
+# #     data = sitk.GetArrayFromImage(image1)
