@@ -199,7 +199,7 @@ def calcDiceFromPaths(i,list_yHat_val,list_gold_val):
     y_hat= monai.transforms.LoadImage()(list_yHat_val[i])
     gold_val= monai.transforms.LoadImage()(list_gold_val[i])
 
-    print(f" yHat_val {y_hat.size()} gold_val {gold_val.size()} ")
+    print(f" yHat_val {y_hat} gold_val {gold_val} ")
     
     postProcessHat=monai.transforms.Compose([EnsureType(),  monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])
     load_true=monai.transforms.Compose([AsDiscrete( to_onehot=2)])
