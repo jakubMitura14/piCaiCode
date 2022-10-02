@@ -150,7 +150,7 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr):
     # gold_arr=np.swapaxes(gold_arr,0,2)
     # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
 
-    print(f"uniq gold { gold_arr.shape  }   yhat { y_hat_arr.shape }")
+    print(f"uniq gold { gold_arr.shape  }   yhat { y_hat_arr.shape }   yhat maxes  {np.max(y_hat_arr)}  hyat min {np.min(y_hat_arr)} ")
     gold_arr=gold_arr[1,:,:,:]
     y_hat_arr=y_hat_arr[1,:,:,:]
 
@@ -490,7 +490,7 @@ class Model(pl.LightningModule):
             self.log('meanDice',torch.mean(torch.stack( self.dices)).item())
 
             lenn=len(self.list_yHat_val)
-            numPerIter=7
+            numPerIter=1
             numIters=math.ceil(lenn/numPerIter)-1
 
 
