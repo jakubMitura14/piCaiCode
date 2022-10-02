@@ -135,7 +135,7 @@ def divide_chunks(l, n):
     for i in range(0, len(l), n):
         yield l[i:i + n]
 
-def saveFilesInDir(gold_arr,y_hat_arr, directory, patId):
+def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr):
     """
     saves arrays in given directory and return paths to them
     """
@@ -145,12 +145,12 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId):
     # np.save(yHat_im_path, y_hat_arr)
     gold_im_path = join(directory, patId+ "_gold.nii.gz" )
     yHat_im_path =join(directory, patId+ "_hat.nii.gz" )
-    back_im_path =join(directory, patId+ "_back_hat.nii.gz" )
+    image_path =join(directory, patId+ "image.nii.gz" )
 
-    gold_arr=np.swapaxes(gold_arr,0,2)
-    y_hat_arr=np.swapaxes(y_hat_arr,0,2)
+    # gold_arr=np.swapaxes(gold_arr,0,2)
+    # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
 
-    print(f"uniq gold {np.unique(gold_arr[1,:,:,:])}  ")
+    print(f"uniq gold { gold_arr.shape  }   yhat { y_hat_arr.shape }")
     image = sitk.GetImageFromArray(gold_arr)
     writer = sitk.ImageFileWriter()
     writer.SetFileName(gold_im_path)
@@ -160,6 +160,11 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId):
     image = sitk.GetImageFromArray(y_hat_arr)
     writer = sitk.ImageFileWriter()
     writer.SetFileName(yHat_im_path)
+    writer.Execute(image)
+
+    image = sitk.GetImageFromArray(imageArr)
+    writer = sitk.ImageFileWriter()
+    writer.SetFileName(image_path)
     writer.Execute(image)
 
     return(gold_im_path,yHat_im_path)
@@ -179,9 +184,9 @@ def getArrayFromPath(path):
 def extractLesions_my(x):
     return extract_lesion_candidates(x)[0]
 
-def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir):
+def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,images):
 # def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,reg_hat):
-    return saveFilesInDir(y_true[i],y_det[i], temp_val_dir, patIds[i])
+    return saveFilesInDir(y_true[i],y_det[i], temp_val_dir, patIds[i],images[i])
     
     # if(reg_hat[i]>0):
     #     return saveFilesInDir(y_true[i],y_det[i], temp_val_dir, patIds[i])
@@ -360,6 +365,7 @@ class Model(pl.LightningModule):
         y_true = decollate_batch(y_true.cpu().detach())
         patIds = decollate_batch(batch['patient_id'])
 
+        images = decollate_batch(x.cpu().detach()) 
 #         # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
         
         for i in range(0,len(y_det)):
@@ -393,7 +399,7 @@ class Model(pl.LightningModule):
         pathssList=[]
         with mp.Pool(processes = mp.cpu_count()) as pool:
             # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
-            pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir),list(range(0,len(y_true))))
+            pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,images=images),list(range(0,len(y_true))))
         forGoldVal=list(map(lambda tupl :tupl[0] ,pathssList  ))
         fory_hatVal=list(map(lambda tupl :tupl[1] ,pathssList  ))
         # fory__bach_hatVal=list(map(lambda tupl :tupl[2] ,pathssList  ))
