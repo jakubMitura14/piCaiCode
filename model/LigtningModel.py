@@ -151,6 +151,12 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr):
     # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
 
     print(f"uniq gold { gold_arr.shape  }   yhat { y_hat_arr.shape }")
+    gold_arr=gold_arr[1,:,:,:]
+    y_hat_arr=y_hat_arr[1,:,:,:]
+
+    gold_arr=np.swapaxes(gold_arr,0,2)
+    y_hat_arr=np.swapaxes(y_hat_arr,0,2)
+    
     image = sitk.GetImageFromArray(gold_arr)
     writer = sitk.ImageFileWriter()
     writer.SetFileName(gold_im_path)
