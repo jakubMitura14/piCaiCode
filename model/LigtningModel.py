@@ -427,8 +427,8 @@ class Model(pl.LightningModule):
         print("validation_epoch_end")
 
 
-        self.log('dice', self.dice_metric.aggregate().item() )
-        self.dice_metric.reset()
+        # self.log('dice', self.dice_metric.aggregate().item() )
+        # self.dice_metric.reset()
 
  
         # print( f"rocAuc  {self.rocAuc.aggregate().item()}"  )
