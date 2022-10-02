@@ -325,7 +325,7 @@ class Model(pl.LightningModule):
         seg_hat = self.net(x)
         seg_hat=torch.sigmoid(seg_hat)
 
-        loss= self.criterion(seg_hat,y_true)# self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)      
+        #loss= self.criterion(seg_hat,y_true)# self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)      
         y_det = decollate_batch(seg_hat)
         y_true = decollate_batch(y_true)
         patIds = decollate_batch(batch['patient_id'])
@@ -333,15 +333,17 @@ class Model(pl.LightningModule):
         # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
         
 
-        for i in range(0,len(y_det)):
-            print(" post process dice")
-            hatPost=self.postProcess(y_det[i])
-            # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
-            print("calc dice")
-            self.dice_metric(hatPost.cpu() ,y_true[i].cpu())
-            #monai.metrics.compute_generalized_dice(
-            # self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
-        print("dice calculated")
+        # for i in range(0,len(y_det)):
+        #     print(" post process dice")
+        #     hatPost=self.postProcess(y_det[i])
+        #     # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
+        #     print("calc dice")
+        #     self.dice_metric(hatPost.cpu() ,y_true[i].cpu())
+        #     #monai.metrics.compute_generalized_dice(
+        #     # self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
+        # print("dice calculated")
+
+
 
         # monai.metrics.compute_confusion_matrix_metric() 
         
