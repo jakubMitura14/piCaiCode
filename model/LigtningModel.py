@@ -492,9 +492,9 @@ class Model(pl.LightningModule):
                                     y_true=self.list_gold_val[i*numPerIter:min((i+1)*numPerIter,lenn)],
                                     num_parallel_calls= min(numPerIter,os.cpu_count())
                                     ,verbose=1
-                                    ,y_true_postprocess_func=lambda pred: pred[1,:,:,:]
+                                    #,y_true_postprocess_func=lambda pred: pred[1,:,:,:]
                                     #y_true=iter(y_true),
-                                    ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred[1,:,:,:])[0]
+                                    ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
                                     #,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
                                     )
                 meanPiecaiMetr_auroc_list.append(valid_metrics.auroc)
