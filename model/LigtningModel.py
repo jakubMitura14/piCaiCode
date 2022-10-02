@@ -485,7 +485,7 @@ class Model(pl.LightningModule):
             meanPiecaiMetr_auroc_list=[]
             meanPiecaiMetr_AP_list=[]
             meanPiecaiMetr_score_list=[]
-            
+            print(f" numIters {numIters} ")
             for i in range(0,numIters):
                 valid_metrics = evaluate(y_det=self.list_yHat_val[i*numPerIter:min((i+1)*numPerIter,lenn)],
                                     y_true=self.list_gold_val[i*numPerIter:min((i+1)*numPerIter,lenn)],
