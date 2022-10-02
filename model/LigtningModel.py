@@ -195,7 +195,7 @@ def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,y_background):
     # return saveFilesInDir(y_true[i],np.zeros_like(y_det[i]), temp_val_dir, patIds[i])    
 
 def calcDiceFromPaths(i,list_yHat_val,list_gold_val):
-    
+    print(f" yHat_val {list_yHat_val[i]} gold_val {list_gold_val[i]} ")
 
     postProcessHat=monai.transforms.Compose([monai.transforms.LoadImage(),EnsureType(),  monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])
     load_true=monai.transforms.Compose([monai.transforms.LoadImage(), AsDiscrete( to_onehot=2)])
