@@ -328,7 +328,9 @@ class Model(pl.LightningModule):
 
         #loss= self.criterion(seg_hat,y_true)# self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)      
         #we want only first channel
-        locDice = monai.metrics.compute_generalized_dice(self.postProcess(seg_hat).to(self.device) , y_true.to(self.device) ).item()
+        print(f"self.postProcess(seg_hat) {self.postProcess(seg_hat)}  y_true {y_true}  ")
+
+        locDice = monai.metrics.compute_generalized_dice( self.postProcess(seg_hat.to(self.device)).to(self.device) ,  y_true.to(self.device)  ).item()
         
         self.dices.append(locDice)
         y_det=y_det[:,1,:,:,:].cpu().detach()
