@@ -149,7 +149,7 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId):
     yHat_im_path =join(directory, patId+ "_hat.nii.gz" )
     back_im_path =join(directory, patId+ "_back_hat.nii.gz" )
 
-
+    print(f"uniq gold {np.unique(gold_arr)}  hat {np.unique(y_hat_arr)}  ")
     image = sitk.GetImageFromArray(gold_arr)
     writer = sitk.ImageFileWriter()
     writer.SetFileName(gold_im_path)
