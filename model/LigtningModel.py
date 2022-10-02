@@ -201,9 +201,9 @@ def calcDiceFromPaths(i,list_yHat_val,list_gold_val):
 
     print(f" yHat_val {y_hat.size()} gold_val {gold_val.size()} ")
     
-    postProcessHat=monai.transforms.Compose([,EnsureType(),  monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])
-    load_true=monai.transforms.Compose([monai.transforms.LoadImage(), AsDiscrete( to_onehot=2)])
-    return monai.metrics.compute_generalized_dice( postProcessHat(list_yHat_val[i]) ,load_true(list_gold_val[i]))
+    postProcessHat=monai.transforms.Compose([EnsureType(),  monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])
+    load_true=monai.transforms.Compose([AsDiscrete( to_onehot=2)])
+    return monai.metrics.compute_generalized_dice( postProcessHat(y_hat) ,load_true(gold_val))
 
 
 class Model(pl.LightningModule):
