@@ -477,7 +477,7 @@ class Model(pl.LightningModule):
             # dices=list(map(partial(calcDiceFromPaths,list_yHat_val=self.list_yHat_val,list_gold_val=self.list_gold_val   ),list(range(0,len(self.list_yHat_val)))))
             # meanDice=torch.mean(torch.stack( dices)).item()
             
-            self.log('meanDice',torch.mean(torch.stack( dices)).item())
+            self.log('meanDice',torch.mean(torch.stack( self.dices)).item())
 
 
 
