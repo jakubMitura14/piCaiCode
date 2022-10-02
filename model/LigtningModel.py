@@ -147,8 +147,8 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId):
     yHat_im_path =join(directory, patId+ "_hat.nii.gz" )
     back_im_path =join(directory, patId+ "_back_hat.nii.gz" )
 
-    gold_arr=np.swapaxes(gold_arr[1,:,:,:],0,2)
-    y_hat_arr=np.swapaxes(y_hat_arr[1,:,:,:],0,2)
+    gold_arr=np.swapaxes(gold_arr,0,2)
+    y_hat_arr=np.swapaxes(y_hat_arr,0,2)
 
     print(f"uniq gold {np.unique(gold_arr[1,:,:,:])}  ")
     image = sitk.GetImageFromArray(gold_arr)
