@@ -183,6 +183,10 @@ def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir):
     #     return saveFilesInDir(y_true[i],y_det[i], temp_val_dir, patIds[i])
     # #when it is equal 0 we zero out the result
     # return saveFilesInDir(y_true[i],np.zeros_like(y_det[i]), temp_val_dir, patIds[i])    
+def calcDiceFromPaths(i,list_yHat_val,list_gold_val):
+    postProcessHat=monai.transforms.Compose([monai.transforms.LoadImage(),EnsureType(),  monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])
+    load_true=monai.transforms.Compose([monai.transforms.LoadImage()])
+    return monai.metrics.compute_generalized_dice( postProcessHat(list_yHat_val[i]) ,load_true(load_true[i]))
 
 
 class Model(pl.LightningModule):
@@ -218,7 +222,7 @@ class Model(pl.LightningModule):
         self.picaiLossArr_AP_final=picaiLossArr_AP_final
         self.picaiLossArr_score_final=picaiLossArr_score_final
         #temporary directory for validation images and their labels
-        self.temp_val_dir= tempfile.mkdtemp() #'/home/sliceruser/data/tempE' #tempfile.mkdtemp()
+        self.temp_val_dir= '/home/sliceruser/data/tempE' #tempfile.mkdtemp()
         self.list_gold_val=[]
         self.list_yHat_val=[]
         self.isAnyNan=False
@@ -230,8 +234,9 @@ class Model(pl.LightningModule):
         #self.F1Score = torchmetrics.F1Score()
         self.lr=lr
         self.trial=trial
-        #shutil.rmtree(self.temp_val_dir) 
-        #os.makedirs(self.temp_val_dir,  exist_ok = True)             
+        os.makedirs(self.temp_val_dir,  exist_ok = True)             
+        shutil.rmtree(self.temp_val_dir) 
+        os.makedirs(self.temp_val_dir,  exist_ok = True)             
 
     def configure_optimizers(self):
         # optimizer = self.optimizer_class(self.parameters(), lr=self.lr)
@@ -450,6 +455,15 @@ class Model(pl.LightningModule):
         #print(f" self.list_yHat_val {self.list_yHat_val} ")
         if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
         # if(False):
+            dices=[]
+            with mp.Pool(processes = mp.cpu_count()) as pool:
+                dices=pool.map(partial(calcDiceFromPaths,list_yHat_val=self.list_yHat_val,list_gold_val=self.list_gold_val   ),list(range(0,len(self.list_yHat_val))))
+            meanDice=torch.mean(torch.stack( dices)).item()
+            
+            self.log('meanDice', meanDice)
+
+
+
             valid_metrics = evaluate(y_det=self.list_yHat_val,
                                 y_true=self.list_gold_val,
                                 num_parallel_calls= os.cpu_count()
@@ -458,7 +472,7 @@ class Model(pl.LightningModule):
                                 #y_true=iter(y_true),
                                 ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred[1,:,:,:])[0]
                                 )
-
+            print("finished evaluating")
 
 
             meanPiecaiMetr_auroc=valid_metrics.auroc
@@ -483,10 +497,6 @@ class Model(pl.LightningModule):
             self.picaiLossArr_AP=[]
             self.picaiLossArr_score=[]
 
-        dices=[]
-        # with mp.Pool(processes = mp.cpu_count()) as pool:
-        #     # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
-        #     # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir),list(range(0,len(y_true))))
 
 
 
@@ -494,10 +504,10 @@ class Model(pl.LightningModule):
 
 
         #clearing and recreatin temporary directory
-        shutil.rmtree(self.temp_val_dir)   
-        self.temp_val_dir=tempfile.mkdtemp() 
-        # self.temp_val_dir=pathOs.join('/home/sliceruser/data/tempE',str(self.trainer.current_epoch))
-        # os.makedirs(self.temp_val_dir,  exist_ok = True)  
+        #shutil.rmtree(self.temp_val_dir)   
+        #self.temp_val_dir=tempfile.mkdtemp() 
+        self.temp_val_dir=pathOs.join('/home/sliceruser/data/tempE',str(self.trainer.current_epoch))
+        os.makedirs(self.temp_val_dir,  exist_ok = True)  
 
 
         self.list_gold_val=[]
@@ -534,7 +544,6 @@ class Model(pl.LightningModule):
         # #return {'mean_val_loss': avg_loss, 'mean_val_acc':avg_acc}
 
 #self.postProcess
-def calcDiceFromPaths():
-    monai.metrics.compute_generalized_dice( hatPost ,y_true[i])
+
 #             image1=sitk.ReadImage(path)
 # #     data = sitk.GetArrayFromImage(image1)
