@@ -196,8 +196,8 @@ def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,y_background):
 
 def calcDiceFromPaths(i,list_yHat_val,list_gold_val):
 
-    y_hat= monai.transforms.LoadImage(list_yHat_val[i])
-    gold_val= monai.transforms.LoadImage(list_gold_val[i])
+    y_hat= monai.transforms.LoadImage()(list_yHat_val[i])
+    gold_val= monai.transforms.LoadImage()(list_gold_val[i])
 
     print(f" yHat_val {y_hat.size()} gold_val {gold_val.size()} ")
     
