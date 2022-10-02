@@ -335,12 +335,15 @@ class Model(pl.LightningModule):
 
         # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
         
+
         for i in range(0,len(y_det)):
+            print(" post process dice")
             hatPost=self.postProcess(y_det[i])
             # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
+            print("calc dice")
             self.dice_metric(hatPost.cpu() ,y_true[i].cpu())
             # self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
-        print("dice")
+        print("dice calculated")
 
         # monai.metrics.compute_confusion_matrix_metric() 
         
@@ -354,6 +357,7 @@ class Model(pl.LightningModule):
 
         # reg_hat=np.rint(reg_hat.cpu().detach().numpy().flatten())
         # print(f" rrrrr {reg_hat}  ")
+        print("befor extracting")
         y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
         y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
         print("after extracting")
@@ -369,7 +373,7 @@ class Model(pl.LightningModule):
 #         # self.list_yHat_val=self.list_gold_val+fory_hatVal
 
 # # save_candidates_to_dir(y_true,y_det,patIds,i,temp_val_dir)
-        
+        print("appending ")
         for i in range(0,len(y_true)):
             # tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
             # print("saving entry   ")
@@ -377,7 +381,7 @@ class Model(pl.LightningModule):
             # self.list_yHat_val.append(tupl[1])
             self.list_gold_val.append(forGoldVal[i])
             self.list_yHat_val.append(fory_hatVal[i])
-
+        print("after appending")
 #         self.log('val_loss', loss )
 
        # return {'loss' :loss,'loc_dice': diceVall }
