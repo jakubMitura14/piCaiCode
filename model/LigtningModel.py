@@ -533,7 +533,7 @@ class Model(pl.LightningModule):
         # # self.log('ptl/val_accuracy', avg_acc)
         # #return {'mean_val_loss': avg_loss, 'mean_val_acc':avg_acc}
 
-
+#self.postProcess
 def calcDiceFromPaths():
     monai.metrics.compute_generalized_dice( hatPost ,y_true[i])
 #             image1=sitk.ReadImage(path)
