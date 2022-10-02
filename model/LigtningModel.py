@@ -456,8 +456,9 @@ class Model(pl.LightningModule):
         if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
         # if(False):
             dices=[]
-            with mp.Pool(processes = mp.cpu_count()) as pool:
-                dices=pool.map(partial(calcDiceFromPaths,list_yHat_val=self.list_yHat_val,list_gold_val=self.list_gold_val   ),list(range(0,len(self.list_yHat_val))))
+            # with mp.Pool(processes = mp.cpu_count()) as pool:
+            #     dices=pool.map(partial(calcDiceFromPaths,list_yHat_val=self.list_yHat_val,list_gold_val=self.list_gold_val   ),list(range(0,len(self.list_yHat_val))))
+            dices=list(map(partial(calcDiceFromPaths,list_yHat_val=self.list_yHat_val,list_gold_val=self.list_gold_val   ),list(range(0,len(self.list_yHat_val)))))
             meanDice=torch.mean(torch.stack( dices)).item()
             
             self.log('meanDice', meanDice)
