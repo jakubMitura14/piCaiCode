@@ -535,7 +535,12 @@ class Model(pl.LightningModule):
             print(f" numIters {numIters} ")
             
             listPerEval=[]
-            listPerEval=list(map( partial(evaluate_case_for_map,y_det= self.list_yHat_val,y_true=self.list_gold_val) , list(range(0,lenn))))
+            with mp.Pool(processes = mp.cpu_count()) as pool:
+                # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
+                listPerEval=pool.map( partial(evaluate_case_for_map,y_det= self.list_yHat_val,y_true=self.list_gold_val) , list(range(0,lenn)))
+
+
+            # listPerEval=list(map( partial(evaluate_case_for_map,y_det= self.list_yHat_val,y_true=self.list_gold_val) , list(range(0,lenn))))
 
 
             # initialize placeholders
