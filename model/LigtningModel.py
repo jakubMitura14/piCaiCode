@@ -179,7 +179,7 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr):
     # gold_arr=np.swapaxes(gold_arr,0,2)
     # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
 
-    print(f"uniq gold { gold_arr.shape  }   yhat { y_hat_arr.shape }   yhat maxes  {np.maximum(y_hat_arr)}  hyat min {np.minimum(y_hat_arr)} ")
+    # print(f"uniq gold { gold_arr.shape  }   yhat { y_hat_arr.shape }   yhat maxes  {np.maximum(y_hat_arr)}  hyat min {np.minimum(y_hat_arr)} ")
     gold_arr=gold_arr[1,:,:,:]
     y_hat_arr=y_hat_arr[1,:,:,:]
 
@@ -205,12 +205,12 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr):
     return(gold_im_path,yHat_im_path)
 
 
-def saveToValidate(i,y_det,regress_res_cpu,temp_val_dir,y_true,patIds):
-    y_det_curr=y_det[i]
-    #TODO unhash
-    if(np.rint(regress_res_cpu[i])==0):
-        y_det_curr=np.zeros_like(y_det_curr)
-    return saveFilesInDir(y_true[i],y_det_curr, temp_val_dir, patIds[i])
+# def saveToValidate(i,y_det,regress_res_cpu,temp_val_dir,y_true,patIds):
+#     y_det_curr=y_det[i]
+#     #TODO unhash
+#     if(np.rint(regress_res_cpu[i])==0):
+#         y_det_curr=np.zeros_like(y_det_curr)
+#     return saveFilesInDir(y_true[i],y_det_curr, temp_val_dir, patIds[i])
 
 def getArrayFromPath(path):
     image1=sitk.ReadImage(path)
