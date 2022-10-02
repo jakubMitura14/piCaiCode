@@ -45,6 +45,7 @@ import shutil
 import os
 import glob
 from picai_eval import evaluate
+from picai_eval import evaluate_case
 #from picai_eval.picai_eval import evaluate_case
 from statistics import mean
 from report_guided_annotation import extract_lesion_candidates
@@ -100,6 +101,32 @@ from monai.metrics import (
     do_metric_reduction,
     get_confusion_matrix,
 )
+
+import concurrent.futures
+import itertools
+import json
+import os
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+from typing import (Callable, Dict, Hashable, Iterable, List, Optional, Sized,
+                    Tuple, Union)
+
+import numpy as np
+from scipy import ndimage
+from scipy.optimize import linear_sum_assignment
+from tqdm import tqdm
+
+try:
+    import numpy.typing as npt
+except ImportError:  # pragma: no cover
+    pass
+
+from picai_eval.analysis_utils import (calculate_dsc, calculate_iou,
+                                       label_structure, parse_detection_map)
+from picai_eval.image_utils import (read_label, read_prediction,
+                                    resize_image_with_crop_or_pad)
+from picai_eval.metrics import Metrics
+
 class UNetToRegresion(nn.Module):
     def __init__(self,
         in_channels,
@@ -150,7 +177,7 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr):
     # gold_arr=np.swapaxes(gold_arr,0,2)
     # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
 
-    print(f"uniq gold { gold_arr.shape  }   yhat { y_hat_arr.shape }   yhat maxes  {np.max(y_hat_arr)}  hyat min {np.min(y_hat_arr)} ")
+    print(f"uniq gold { gold_arr.shape  }   yhat { y_hat_arr.shape }   yhat maxes  {np.maximum(y_hat_arr)}  hyat min {np.minimum(y_hat_arr)} ")
     gold_arr=gold_arr[1,:,:,:]
     y_hat_arr=y_hat_arr[1,:,:,:]
 
@@ -210,6 +237,9 @@ def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,images):
 #     load_true=monai.transforms.Compose([AsDiscrete( to_onehot=2)])
 #     return monai.metrics.compute_generalized_dice( postProcessHat(y_hat) ,load_true(gold_val))
 
+def evaluate_case_for_map(i,y_det,y_true):
+    return evaluate_case( y_det=extract_lesion_candidates(y_det[i])[0]
+                    ,y_true=y_true[i] )
 
 class Model(pl.LightningModule):
     def __init__(self
@@ -499,25 +529,68 @@ class Model(pl.LightningModule):
             meanPiecaiMetr_AP_list=[]
             meanPiecaiMetr_score_list=[]
             print(f" numIters {numIters} ")
-            for i in range(0,numIters):
-                valid_metrics = evaluate(y_det=self.list_yHat_val[i*numPerIter:min((i+1)*numPerIter,lenn)],
-                                    y_true=self.list_gold_val[i*numPerIter:min((i+1)*numPerIter,lenn)],
-                                    num_parallel_calls= min(numPerIter,os.cpu_count())
-                                    ,verbose=1
-                                    #,y_true_postprocess_func=lambda pred: pred[1,:,:,:]
-                                    #y_true=iter(y_true),
-                                    ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
-                                    #,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
-                                    )
-                meanPiecaiMetr_auroc_list.append(valid_metrics.auroc)
-                meanPiecaiMetr_AP_list.append(valid_metrics.AP)
-                meanPiecaiMetr_score_list.append((-1)*valid_metrics.score)
-            print("finished evaluating")
-
-            meanPiecaiMetr_auroc=np.nanmean(meanPiecaiMetr_auroc_list)
-            meanPiecaiMetr_AP=np.nanmean(meanPiecaiMetr_AP_list)
-            meanPiecaiMetr_score=np.nanmean(meanPiecaiMetr_score_list)
             
+            listPerEval=[]
+            listPerEval=list(map( partial(evaluate_case_for_map,y_det= self.list_yHat_val,y_true=self.list_gold_val) , list(range(0,lenn))))
+
+
+            # initialize placeholders
+            case_target: Dict[Hashable, int] = {}
+            case_weight: Dict[Hashable, float] = {}
+            case_pred: Dict[Hashable, float] = {}
+            lesion_results: Dict[Hashable, List[Tuple[int, float, float]]] = {}
+            lesion_weight: Dict[Hashable, List[float]] = {}
+            
+            idx=0
+            for pairr in listPerEval:
+                idx+=1
+                lesion_results_case, case_confidence = pairr
+
+                case_weight[idx] = 1.0
+                case_pred[idx] = case_confidence
+                if len(lesion_results_case):
+                    case_target[idx] = np.max([a[0] for a in lesion_results_case])
+                else:
+                    case_target[idx] = 0
+
+                # accumulate outputs
+                lesion_results[idx] = lesion_results_case
+                lesion_weight[idx] = [1.0] * len(lesion_results_case)
+
+            # collect results in a Metrics object
+            valid_metrics = Metrics(
+                lesion_results=lesion_results,
+                case_target=case_target,
+                case_pred=case_pred,
+                case_weight=case_weight,
+                lesion_weight=lesion_weight
+            )
+
+
+
+
+                # for i in range(0,numIters):
+                #     valid_metrics = evaluate(y_det=self.list_yHat_val[i*numPerIter:min((i+1)*numPerIter,lenn)],
+                #                         y_true=self.list_gold_val[i*numPerIter:min((i+1)*numPerIter,lenn)],
+                #                         num_parallel_calls= min(numPerIter,os.cpu_count())
+                #                         ,verbose=1
+                #                         #,y_true_postprocess_func=lambda pred: pred[1,:,:,:]
+                #                         #y_true=iter(y_true),
+                #                         ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+                #                         #,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+                #                         )
+                # meanPiecaiMetr_auroc_list.append(valid_metrics.auroc)
+                # meanPiecaiMetr_AP_list.append(valid_metrics.AP)
+                # meanPiecaiMetr_score_list.append((-1)*valid_metrics.score)
+                #print("finished evaluating")
+
+            meanPiecaiMetr_auroc=valid_metrics.auroc
+            meanPiecaiMetr_AP=valid_metrics.AP
+            meanPiecaiMetr_score=(-1)*valid_metrics.score
+            # meanPiecaiMetr_auroc=np.nanmean(meanPiecaiMetr_auroc_list)
+            # meanPiecaiMetr_AP=np.nanmean(meanPiecaiMetr_AP_list)
+            # meanPiecaiMetr_score=np.nanmean(meanPiecaiMetr_score_list)
+        
 
       
             print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
