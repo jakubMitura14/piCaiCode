@@ -210,7 +210,7 @@ class Model(pl.LightningModule):
         self.best_val_dice = 0
         self.best_val_epoch = 0
         self.dice_metric = monai.metrics.GeneralizedDiceScore()
-        self.rocAuc=monai.metrics.ROCAUCMetric()
+        #self.rocAuc=monai.metrics.ROCAUCMetric()
         self.picaiLossArr=[]
         self.post_pred = Compose([ AsDiscrete( to_onehot=2)])
         self.picaiLossArr_auroc=[]
@@ -339,7 +339,7 @@ class Model(pl.LightningModule):
             hatPost=self.postProcess(y_det[i])
             # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
             self.dice_metric(hatPost.cpu() ,y_true[i].cpu())
-            self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
+            # self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
 
 
         # monai.metrics.compute_confusion_matrix_metric() 
@@ -427,9 +427,9 @@ class Model(pl.LightningModule):
         self.dice_metric.reset()
 
  
-        print( f"rocAuc  {self.rocAuc.aggregate().item()}"  )
-        #self.log('precision ', monai.metrics.compute_confusion_matrix_metric("precision", confusion_matrix) )
-        self.rocAuc.reset()        
+        # print( f"rocAuc  {self.rocAuc.aggregate().item()}"  )
+        # #self.log('precision ', monai.metrics.compute_confusion_matrix_metric("precision", confusion_matrix) )
+        # self.rocAuc.reset()        
 
 
         
