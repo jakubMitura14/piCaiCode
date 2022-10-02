@@ -361,16 +361,13 @@ class Model(pl.LightningModule):
 
 #         # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
         
-        print("start dice")
         for i in range(0,len(y_det)):
-            print(" post process dice")
             hatPost=self.postProcess(y_det[i])
             # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
             locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i])
             #monai.metrics.compute_generalized_dice(
             # self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
             self.dices.append(locDice)
-        print("dice calculated")
 
 
 
@@ -479,24 +476,36 @@ class Model(pl.LightningModule):
             
             self.log('meanDice',torch.mean(torch.stack( self.dices)).item())
 
+            lenn=len(self.list_yHat_val)
+            numPerIter=7
+            numIters=math.ceil(lenn/numPerIter)-1
 
 
-            valid_metrics = evaluate(y_det=self.list_yHat_val[0:min(10,len(self.list_yHat_val))],
-                                y_true=self.list_gold_val[0:min(10,len(self.list_yHat_val))],
-                                num_parallel_calls= os.cpu_count()
-                                ,verbose=1
-                                ,y_true_postprocess_func=lambda pred: pred[1,:,:,:]
-                                #y_true=iter(y_true),
-                                ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred[1,:,:,:])[0]
-                                #,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
-                                )
 
+            meanPiecaiMetr_auroc_list=[]
+            meanPiecaiMetr_AP_list=[]
+            meanPiecaiMetr_score_list=[]
+            
+            for i in range(0,numIters):
+                valid_metrics = evaluate(y_det=self.list_yHat_val[i*numPerIter:min((i+1)*numPerIter,lenn)],
+                                    y_true=self.list_gold_val[i*numPerIter:min((i+1)*numPerIter,lenn)],
+                                    num_parallel_calls= min(numPerIter,os.cpu_count())
+                                    ,verbose=1
+                                    ,y_true_postprocess_func=lambda pred: pred[1,:,:,:]
+                                    #y_true=iter(y_true),
+                                    ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred[1,:,:,:])[0]
+                                    #,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+                                    )
+                meanPiecaiMetr_auroc_list.append(valid_metrics.auroc)
+                meanPiecaiMetr_AP_list.append(valid_metrics.AP)
+                meanPiecaiMetr_score_list.append((-1)*valid_metrics.score)
             print("finished evaluating")
 
+            meanPiecaiMetr_auroc=np.nanmean(meanPiecaiMetr_auroc_list)
+            meanPiecaiMetr_AP=np.nanmean(meanPiecaiMetr_AP_list)
+            meanPiecaiMetr_score=np.nanmean(meanPiecaiMetr_score_list)
+            
 
-            meanPiecaiMetr_auroc=valid_metrics.auroc
-            meanPiecaiMetr_AP=valid_metrics.AP
-            meanPiecaiMetr_score=(-1)*valid_metrics.score
       
             print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
 
