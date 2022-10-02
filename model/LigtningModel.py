@@ -161,14 +161,7 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,y_backgroundArr):
     writer.SetFileName(yHat_im_path)
     writer.Execute(image)
 
-    image = sitk.GetImageFromArray(y_backgroundArr)
-    writer = sitk.ImageFileWriter()
-    writer.SetFileName(back_im_path)
-    writer.Execute(image)
-
-
-
-    return(gold_im_path,yHat_im_path,y_backgroundArr)
+    return(gold_im_path,yHat_im_path)
 
 
 def saveToValidate(i,y_det,regress_res_cpu,temp_val_dir,y_true,patIds):
@@ -185,25 +178,25 @@ def getArrayFromPath(path):
 def extractLesions_my(x):
     return extract_lesion_candidates(x)[0]
 
-def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,y_background):
+def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir):
 # def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,reg_hat):
-    return saveFilesInDir(y_true[i],y_det[i], temp_val_dir, patIds[i],y_background[i])
+    return saveFilesInDir(y_true[i],y_det[i], temp_val_dir, patIds[i])
     
     # if(reg_hat[i]>0):
     #     return saveFilesInDir(y_true[i],y_det[i], temp_val_dir, patIds[i])
     # #when it is equal 0 we zero out the result
     # return saveFilesInDir(y_true[i],np.zeros_like(y_det[i]), temp_val_dir, patIds[i])    
 
-def calcDiceFromPaths(i,list_yHat_val,list_gold_val):
+# def calcDiceFromPaths(i,list_yHat_val,list_gold_val):
 
-    y_hat= monai.transforms.LoadImage()(list_yHat_val[i])
-    gold_val= monai.transforms.LoadImage()(list_gold_val[i])
+#     y_hat= monai.transforms.LoadImage()(list_yHat_val[i])
+#     gold_val= monai.transforms.LoadImage()(list_gold_val[i])
 
-    print(f" yHat_val {y_hat} gold_val {gold_val} ")
+#     print(f" yHat_val {y_hat[0]} gold_val {gold_val[0]} ")
     
-    postProcessHat=monai.transforms.Compose([EnsureType(),  monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])
-    load_true=monai.transforms.Compose([AsDiscrete( to_onehot=2)])
-    return monai.metrics.compute_generalized_dice( postProcessHat(y_hat) ,load_true(gold_val))
+#     postProcessHat=monai.transforms.Compose([EnsureType(),  monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])
+#     load_true=monai.transforms.Compose([AsDiscrete( to_onehot=2)])
+#     return monai.metrics.compute_generalized_dice( postProcessHat(y_hat) ,load_true(gold_val))
 
 
 class Model(pl.LightningModule):
@@ -235,6 +228,7 @@ class Model(pl.LightningModule):
         self.picaiLossArr_AP=[]
         self.picaiLossArr_score=[]
         self.dices=[]
+        
         self.picaiLossArr_auroc_final=picaiLossArr_auroc_final
         self.picaiLossArr_AP_final=picaiLossArr_AP_final
         self.picaiLossArr_score_final=picaiLossArr_score_final
@@ -360,23 +354,23 @@ class Model(pl.LightningModule):
 #         y_true=y_true[:,1,:,:,:].cpu().detach()
 #         y_det=seg_hat[:,1,:,:,:].cpu().detach()
 
-        y_det = decollate_batch(seg_hat[:,1,:,:,:].cpu().detach())
-        y_background = decollate_batch(seg_hat[:,0,:,:,:].cpu().detach())
-        y_true = decollate_batch(y_true[:,1,:,:,:].cpu().detach())
+        y_det = decollate_batch(seg_hat.cpu().detach())
+        # y_background = decollate_batch(seg_hat[:,0,:,:,:].cpu().detach())
+        y_true = decollate_batch(y_true.cpu().detach())
         patIds = decollate_batch(batch['patient_id'])
 
 #         # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
         
-
-        # for i in range(0,len(y_det)):
-        #     print(" post process dice")
-        #     hatPost=self.postProcess(y_det[i])
-        #     # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
-        #     locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i])
-        #     #monai.metrics.compute_generalized_dice(
-        #     # self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
-        #     self.dices.append(locDice)
-        # print("dice calculated")
+        print("start dice")
+        for i in range(0,len(y_det)):
+            print(" post process dice")
+            hatPost=self.postProcess(y_det[i])
+            # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
+            locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i])
+            #monai.metrics.compute_generalized_dice(
+            # self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
+            self.dices.append(locDice)
+        print("dice calculated")
 
 
 
@@ -401,10 +395,10 @@ class Model(pl.LightningModule):
         pathssList=[]
         with mp.Pool(processes = mp.cpu_count()) as pool:
             # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
-            pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir, y_background=y_background),list(range(0,len(y_true))))
+            pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir),list(range(0,len(y_true))))
         forGoldVal=list(map(lambda tupl :tupl[0] ,pathssList  ))
         fory_hatVal=list(map(lambda tupl :tupl[1] ,pathssList  ))
-        fory__bach_hatVal=list(map(lambda tupl :tupl[2] ,pathssList  ))
+        # fory__bach_hatVal=list(map(lambda tupl :tupl[2] ,pathssList  ))
 
         
 
@@ -420,7 +414,7 @@ class Model(pl.LightningModule):
             # self.list_yHat_val.append(tupl[1])
             self.list_gold_val.append(forGoldVal[i])
             self.list_yHat_val.append(fory_hatVal[i])
-            self.list_back_yHat_val.append(fory__bach_hatVal[i])
+            # self.list_back_yHat_val.append(fory__bach_hatVal[i])
 # #         self.log('val_loss', loss )
 
 #        # return {'loss' :loss,'loc_dice': diceVall }
@@ -478,13 +472,12 @@ class Model(pl.LightningModule):
         #print(f" self.list_yHat_val {self.list_yHat_val} ")
         if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
         # if(False):
-            dices=[]
             # with mp.Pool(processes = mp.cpu_count()) as pool:
             #     dices=pool.map(partial(calcDiceFromPaths,list_yHat_val=self.list_yHat_val,list_gold_val=self.list_gold_val   ),list(range(0,len(self.list_yHat_val))))
-            dices=list(map(partial(calcDiceFromPaths,list_yHat_val=self.list_yHat_val,list_gold_val=self.list_gold_val   ),list(range(0,len(self.list_yHat_val)))))
-            meanDice=torch.mean(torch.stack( dices)).item()
+            # dices=list(map(partial(calcDiceFromPaths,list_yHat_val=self.list_yHat_val,list_gold_val=self.list_gold_val   ),list(range(0,len(self.list_yHat_val)))))
+            # meanDice=torch.mean(torch.stack( dices)).item()
             
-            self.log('meanDice', meanDice)
+            self.log('meanDice',np.mean(self.dices) )
 
 
 
