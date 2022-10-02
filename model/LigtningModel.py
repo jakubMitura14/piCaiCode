@@ -45,7 +45,6 @@ import shutil
 import os
 import glob
 from picai_eval import evaluate
-from picai_eval import evaluate_case
 #from picai_eval.picai_eval import evaluate_case
 from statistics import mean
 from report_guided_annotation import extract_lesion_candidates
@@ -126,6 +125,9 @@ from picai_eval.analysis_utils import (calculate_dsc, calculate_iou,
 from picai_eval.image_utils import (read_label, read_prediction,
                                     resize_image_with_crop_or_pad)
 from picai_eval.metrics import Metrics
+
+from picai_eval.eval import evaluate_case
+
 
 class UNetToRegresion(nn.Module):
     def __init__(self,
