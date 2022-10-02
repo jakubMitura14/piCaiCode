@@ -137,7 +137,7 @@ def divide_chunks(l, n):
     for i in range(0, len(l), n):
         yield l[i:i + n]
 
-def saveFilesInDir(gold_arr,y_hat_arr, directory, patId):
+def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,y_backgroundArr):
     """
     saves arrays in given directory and return paths to them
     """
@@ -147,16 +147,26 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId):
     # np.save(yHat_im_path, y_hat_arr)
     gold_im_path = join(directory, patId+ "_gold.nii.gz" )
     yHat_im_path =join(directory, patId+ "_hat.nii.gz" )
+    back_im_path =join(directory, patId+ "_back_hat.nii.gz" )
+
+
     image = sitk.GetImageFromArray(gold_arr)
     writer = sitk.ImageFileWriter()
-    writer.SetFileName(join(directory, patId+ "_gold.nii.gz" ))
+    writer.SetFileName(gold_im_path)
     writer.Execute(image)
 
 
     image = sitk.GetImageFromArray(y_hat_arr)
     writer = sitk.ImageFileWriter()
-    writer.SetFileName(join(directory, patId+ "_hat.nii.gz" ))
+    writer.SetFileName(yHat_im_path)
     writer.Execute(image)
+
+    image = sitk.GetImageFromArray(y_backgroundArr)
+    writer = sitk.ImageFileWriter()
+    writer.SetFileName(back_im_path)
+    writer.Execute(image)
+
+
 
     return(gold_im_path,yHat_im_path)
 
@@ -175,9 +185,9 @@ def getArrayFromPath(path):
 def extractLesions_my(x):
     return extract_lesion_candidates(x)[0]
 
-def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir):
+def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,y_background):
 # def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,reg_hat):
-    return saveFilesInDir(y_true[i],y_det[i], temp_val_dir, patIds[i])
+    return saveFilesInDir(y_true[i],y_det[i], temp_val_dir, patIds[i],y_background[i])
     
     # if(reg_hat[i]>0):
     #     return saveFilesInDir(y_true[i],y_det[i], temp_val_dir, patIds[i])
@@ -186,7 +196,7 @@ def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir):
 
 def calcDiceFromPaths(i,list_yHat_val,list_gold_val):
     postProcessHat=monai.transforms.Compose([monai.transforms.LoadImage(),EnsureType(),  monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])
-    load_true=monai.transforms.Compose([monai.transforms.LoadImage()])
+    load_true=monai.transforms.Compose([monai.transforms.LoadImage(), AsDiscrete( to_onehot=2)])
     return monai.metrics.compute_generalized_dice( postProcessHat(list_yHat_val[i]) ,load_true(load_true[i]))
 
 
@@ -226,6 +236,7 @@ class Model(pl.LightningModule):
         self.temp_val_dir= '/home/sliceruser/data/tempE' #tempfile.mkdtemp()
         self.list_gold_val=[]
         self.list_yHat_val=[]
+        self.list_back_yHat_val=[]
         self.isAnyNan=False
         #os.makedirs('/home/sliceruser/data/temp')
         # self.postProcess=monai.transforms.Compose([EnsureType(), monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])#, monai.transforms.KeepLargestConnectedComponent()
@@ -384,9 +395,13 @@ class Model(pl.LightningModule):
         pathssList=[]
         with mp.Pool(processes = mp.cpu_count()) as pool:
             # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
-            pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir),list(range(0,len(y_true))))
+            pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir, y_background=y_background),list(range(0,len(y_true))))
         forGoldVal=list(map(lambda tupl :tupl[0] ,pathssList  ))
         fory_hatVal=list(map(lambda tupl :tupl[1] ,pathssList  ))
+        fory__bach_hatVal=list(map(lambda tupl :tupl[2] ,pathssList  ))
+
+        
+
 
 # #         # self.list_gold_val=self.list_gold_val+forGoldVal
 # #         # self.list_yHat_val=self.list_gold_val+fory_hatVal
@@ -399,7 +414,7 @@ class Model(pl.LightningModule):
             # self.list_yHat_val.append(tupl[1])
             self.list_gold_val.append(forGoldVal[i])
             self.list_yHat_val.append(fory_hatVal[i])
-
+            self.list_back_yHat_val.append(fory__bach_hatVal[i])
 # #         self.log('val_loss', loss )
 
 #        # return {'loss' :loss,'loc_dice': diceVall }
@@ -515,6 +530,7 @@ class Model(pl.LightningModule):
 
         self.list_gold_val=[]
         self.list_yHat_val=[]
+        self.list_back_yHat_val=[]
 
         #in case we have Nan values training is unstable and we want to terminate it     
         # if(self.isAnyNan):
