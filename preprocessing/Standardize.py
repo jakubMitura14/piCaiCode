@@ -26,6 +26,7 @@ def removeOutliersBiasFieldCorrect(path,numberOfStandardDeviations = 4):
     
     image = sitk.ReadImage(path)
     print("newwD")
+    
 #     data = sitk.GetArrayFromImage(image1)
 #     # shift the data up so that all intensity values turn positive
 #     stdd = np.std(data)*5
