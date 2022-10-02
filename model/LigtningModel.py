@@ -477,7 +477,7 @@ class Model(pl.LightningModule):
             # dices=list(map(partial(calcDiceFromPaths,list_yHat_val=self.list_yHat_val,list_gold_val=self.list_gold_val   ),list(range(0,len(self.list_yHat_val)))))
             # meanDice=torch.mean(torch.stack( dices)).item()
             
-            self.log('meanDice',np.mean(self.dices) )
+            self.log('meanDice',torch.mean(torch.stack( dices)).item())
 
 
 
@@ -485,10 +485,10 @@ class Model(pl.LightningModule):
                                 y_true=self.list_gold_val,
                                 num_parallel_calls= os.cpu_count()
                                 ,verbose=1
-                                # ,y_true_postprocess_func=lambda pred: pred[1,:,:,:]
+                                ,y_true_postprocess_func=lambda pred: pred[1,:,:,:]
                                 #y_true=iter(y_true),
-                                # ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred[1,:,:,:])[0]
-                                ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+                                ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred[1,:,:,:])[0]
+                                #,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
                                 )
             print("finished evaluating")
 
