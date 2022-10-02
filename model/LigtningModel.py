@@ -168,7 +168,7 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,y_backgroundArr):
 
 
 
-    return(gold_im_path,yHat_im_path)
+    return(gold_im_path,yHat_im_path,y_backgroundArr)
 
 
 def saveToValidate(i,y_det,regress_res_cpu,temp_val_dir,y_true,patIds):
