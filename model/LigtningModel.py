@@ -147,19 +147,16 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId):
     # np.save(yHat_im_path, y_hat_arr)
     gold_im_path = join(directory, patId+ "_gold.nii.gz" )
     yHat_im_path =join(directory, patId+ "_hat.nii.gz" )
-    print("got pathss")
     image = sitk.GetImageFromArray(gold_arr)
     writer = sitk.ImageFileWriter()
     writer.SetFileName(join(directory, patId+ "_gold.nii.gz" ))
     writer.Execute(image)
-    print("saved gold")
 
 
     image = sitk.GetImageFromArray(y_hat_arr)
     writer = sitk.ImageFileWriter()
     writer.SetFileName(join(directory, patId+ "_hat.nii.gz" ))
     writer.Execute(image)
-    print("saved hat")
 
     return(gold_im_path,yHat_im_path)
 
@@ -342,6 +339,7 @@ class Model(pl.LightningModule):
             # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
             print("calc dice")
             self.dice_metric(hatPost.cpu() ,y_true[i].cpu())
+            #monai.metrics.compute_generalized_dice(
             # self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
         print("dice calculated")
 
@@ -358,7 +356,8 @@ class Model(pl.LightningModule):
         # reg_hat=np.rint(reg_hat.cpu().detach().numpy().flatten())
         # print(f" rrrrr {reg_hat}  ")
         print("befor extracting")
-        y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
+        # y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
+        y_det=[x.cpu().detach().numpy()[1,:,:,:] for x in y_det]
         y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
         print("after extracting")
         
@@ -373,7 +372,6 @@ class Model(pl.LightningModule):
 #         # self.list_yHat_val=self.list_gold_val+fory_hatVal
 
 # # save_candidates_to_dir(y_true,y_det,patIds,i,temp_val_dir)
-        print("appending ")
         for i in range(0,len(y_true)):
             # tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
             # print("saving entry   ")
@@ -381,7 +379,7 @@ class Model(pl.LightningModule):
             # self.list_yHat_val.append(tupl[1])
             self.list_gold_val.append(forGoldVal[i])
             self.list_yHat_val.append(fory_hatVal[i])
-        print("after appending")
+
 #         self.log('val_loss', loss )
 
        # return {'loss' :loss,'loc_dice': diceVall }
