@@ -209,7 +209,7 @@ class Model(pl.LightningModule):
         self.optimizer_class = optimizer_class
         self.best_val_dice = 0
         self.best_val_epoch = 0
-        self.dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
+        self.dice_metric = monai.metrics.GeneralizedDiceScore()
         self.rocAuc=monai.metrics.ROCAUCMetric()
         self.picaiLossArr=[]
         self.post_pred = Compose([ AsDiscrete( to_onehot=2)])
