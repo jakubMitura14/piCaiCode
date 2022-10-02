@@ -335,19 +335,12 @@ class Model(pl.LightningModule):
 
         # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
         
-        print("pre dicess")
         for i in range(0,len(y_det)):
-            # print("caalc dice ")
             hatPost=self.postProcess(y_det[i])
             # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
             self.dice_metric(hatPost.cpu() ,y_true[i].cpu())
             self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
-        print("post dicess ")
 
-        # self.log('loc_tp', diceVall)
-        # self.log('loc_fp', diceVall)
-        # self.log('loc_fn', diceVall)
-        # self.log('loc_fp', diceVall)
 
         # monai.metrics.compute_confusion_matrix_metric() 
         
@@ -361,7 +354,6 @@ class Model(pl.LightningModule):
 
         # reg_hat=np.rint(reg_hat.cpu().detach().numpy().flatten())
         # print(f" rrrrr {reg_hat}  ")
-        print("before extracting")
         y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
         y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
         print("after extracting")
@@ -443,7 +435,6 @@ class Model(pl.LightningModule):
         
         #print(f" self.list_yHat_val {self.list_yHat_val} ")
         if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
-            print("validation_epoch_end in   ")
             chunkLen=8
 
             valid_metrics = evaluate(y_det=self.list_yHat_val,
