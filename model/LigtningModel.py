@@ -334,8 +334,8 @@ class Model(pl.LightningModule):
         print(f"locDice {locDice}")
         
         self.dices.append(locDice)
-        y_det=y_det[:,1,:,:,:].cpu().detach()
-        seg_hat=seg_hat[:,1,:,:,:].cpu().detach()
+        y_true=y_true[:,1,:,:,:].cpu().detach()
+        y_det=seg_hat[:,1,:,:,:].cpu().detach()
 
         y_det = decollate_batch(seg_hat)
         y_true = decollate_batch(y_true)
