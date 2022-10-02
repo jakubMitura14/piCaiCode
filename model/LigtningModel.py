@@ -481,9 +481,9 @@ class Model(pl.LightningModule):
 
 
 
-            valid_metrics = evaluate(y_det=self.list_yHat_val,
-                                y_true=self.list_gold_val,
-                                num_parallel_calls= 10#os.cpu_count()
+            valid_metrics = evaluate(y_det=self.list_yHat_val[0:25],
+                                y_true=self.list_gold_val[0:25],
+                                num_parallel_calls= os.cpu_count()
                                 ,verbose=1
                                 ,y_true_postprocess_func=lambda pred: pred[1,:,:,:]
                                 #y_true=iter(y_true),
