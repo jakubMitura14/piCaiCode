@@ -213,6 +213,7 @@ class Model(pl.LightningModule):
         self.picaiLossArr_auroc=[]
         self.picaiLossArr_AP=[]
         self.picaiLossArr_score=[]
+        self.dices=[]
         self.picaiLossArr_auroc_final=picaiLossArr_auroc_final
         self.picaiLossArr_AP_final=picaiLossArr_AP_final
         self.picaiLossArr_score_final=picaiLossArr_score_final
@@ -326,6 +327,13 @@ class Model(pl.LightningModule):
         seg_hat=torch.sigmoid(seg_hat)
 
         #loss= self.criterion(seg_hat,y_true)# self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)      
+        #we want only first channel
+        locDice = monai.metrics.compute_generalized_dice(self.postProcess(seg_hat) , y_true ).item()
+        
+        self.dices.append(locDice)
+        y_det=y_det[:,1,:,:,:].cpu().detach()
+        seg_hat=seg_hat[:,1,:,:,:].cpu().detach()
+
         y_det = decollate_batch(seg_hat)
         y_true = decollate_batch(y_true)
         patIds = decollate_batch(batch['patient_id'])
@@ -357,11 +365,11 @@ class Model(pl.LightningModule):
 
         # reg_hat=np.rint(reg_hat.cpu().detach().numpy().flatten())
         # print(f" rrrrr {reg_hat}  ")
-        print("befor extracting")
-        # y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
-        y_det=[x.cpu().detach().numpy()[1,:,:,:] for x in y_det]
-        y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
-        print("after extracting")
+        # print("befor extracting")
+        # # y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
+        # y_det=[x.cpu().detach().numpy()[1,:,:,:] for x in y_det]
+        # y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
+        # print("after extracting")
         
         pathssList=[]
         with mp.Pool(processes = mp.cpu_count()) as pool:
@@ -426,8 +434,7 @@ class Model(pl.LightningModule):
     def validation_epoch_end(self, outputs):
         print("validation_epoch_end")
 
-
-        # self.log('dice', self.dice_metric.aggregate().item() )
+        self.log('dice', np.mean(self.dices))
         # self.dice_metric.reset()
 
  
@@ -438,14 +445,14 @@ class Model(pl.LightningModule):
 
         
         #print(f" self.list_yHat_val {self.list_yHat_val} ")
-        # if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
-        if(False):
+        if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
+        # if(False):
             valid_metrics = evaluate(y_det=self.list_yHat_val,
                                 y_true=self.list_gold_val,
                                 num_parallel_calls= os.cpu_count()
-                                #,verbose=1
+                                ,verbose=1
                                 #y_true=iter(y_true),
-                                #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+                                ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
                                 )
 
 
