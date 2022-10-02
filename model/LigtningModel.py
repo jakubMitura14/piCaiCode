@@ -195,9 +195,11 @@ def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,y_background):
     # return saveFilesInDir(y_true[i],np.zeros_like(y_det[i]), temp_val_dir, patIds[i])    
 
 def calcDiceFromPaths(i,list_yHat_val,list_gold_val):
+    
+
     postProcessHat=monai.transforms.Compose([monai.transforms.LoadImage(),EnsureType(),  monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])
     load_true=monai.transforms.Compose([monai.transforms.LoadImage(), AsDiscrete( to_onehot=2)])
-    return monai.metrics.compute_generalized_dice( postProcessHat(list_yHat_val[i]) ,load_true(load_true[i]))
+    return monai.metrics.compute_generalized_dice( postProcessHat(list_yHat_val[i]) ,load_true(list_gold_val[i]))
 
 
 class Model(pl.LightningModule):
@@ -486,9 +488,10 @@ class Model(pl.LightningModule):
                                 y_true=self.list_gold_val,
                                 num_parallel_calls= os.cpu_count()
                                 ,verbose=1
-                                ,y_true_postprocess_func=lambda pred: pred[1,:,:,:]
+                                # ,y_true_postprocess_func=lambda pred: pred[1,:,:,:]
                                 #y_true=iter(y_true),
-                                ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred[1,:,:,:])[0]
+                                # ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred[1,:,:,:])[0]
+                                ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
                                 )
             print("finished evaluating")
 
