@@ -127,8 +127,6 @@ class UNetToRegresion(nn.Module):
         return (segmMap,self.model(segmMap))
 
 
-
-
 # torch.autograd.set_detect_anomaly(True)
 
 def divide_chunks(l, n):
