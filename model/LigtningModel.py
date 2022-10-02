@@ -210,7 +210,7 @@ class Model(pl.LightningModule):
         self.best_val_dice = 0
         self.best_val_epoch = 0
         self.dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
-        self.confMetric=monai.metrics.ConfusionMatrixMetric()
+        self.rocAuc=monai.metrics.ROCAUCMetric()
         self.picaiLossArr=[]
         self.post_pred = Compose([ AsDiscrete( to_onehot=2)])
         self.picaiLossArr_auroc=[]
@@ -341,7 +341,7 @@ class Model(pl.LightningModule):
             hatPost=self.postProcess(y_det[i])
             # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
             self.dice_metric(hatPost.cpu() ,y_true[i].cpu())
-            self.confMetric(hatPost.cpu() ,y_true[i].cpu())
+            self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
         print("post dicess ")
 
         # self.log('loc_tp', diceVall)
@@ -434,11 +434,10 @@ class Model(pl.LightningModule):
         self.log('dice', self.dice_metric.aggregate().item() )
         self.dice_metric.reset()
 
-        confusion_matrix= self.confMetric.aggregate()
-
-        print( f"confusion_matrix  {confusion_matrix}"  )
+ 
+        print( f"rocAuc  {self.rocAuc.aggregate().item()}"  )
         #self.log('precision ', monai.metrics.compute_confusion_matrix_metric("precision", confusion_matrix) )
-        self.confMetric.reset()        
+        self.rocAuc.reset()        
 
 
         
@@ -496,7 +495,7 @@ class Model(pl.LightningModule):
 
         self.list_gold_val=[]
         self.list_yHat_val=[]
-        
+
         #in case we have Nan values training is unstable and we want to terminate it     
         # if(self.isAnyNan):
         #     self.log('val_mean_score', -0.2)
