@@ -330,7 +330,7 @@ class Model(pl.LightningModule):
         #we want only first channel
         print(f"self.postProcess(seg_hat) {self.postProcess(seg_hat)}  y_true {y_true}  ")
 
-        locDice = monai.metrics.compute_generalized_dice( self.postProcess(seg_hat.to(self.device)).to(self.device) ,  y_true.to(self.device)  ).item()
+        locDice = monai.metrics.compute_generalized_dice( self.postProcess(seg_hat.to(self.device)).cpu().detach() ,  y_true.cpu().detach()  ).item()
         
         self.dices.append(locDice)
         y_det=y_det[:,1,:,:,:].cpu().detach()
