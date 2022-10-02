@@ -183,6 +183,7 @@ def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir):
     #     return saveFilesInDir(y_true[i],y_det[i], temp_val_dir, patIds[i])
     # #when it is equal 0 we zero out the result
     # return saveFilesInDir(y_true[i],np.zeros_like(y_det[i]), temp_val_dir, patIds[i])    
+
 def calcDiceFromPaths(i,list_yHat_val,list_gold_val):
     postProcessHat=monai.transforms.Compose([monai.transforms.LoadImage(),EnsureType(),  monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])
     load_true=monai.transforms.Compose([monai.transforms.LoadImage()])
@@ -342,8 +343,9 @@ class Model(pl.LightningModule):
 #         y_true=y_true[:,1,:,:,:].cpu().detach()
 #         y_det=seg_hat[:,1,:,:,:].cpu().detach()
 
-        y_det = decollate_batch(seg_hat.cpu().detach())
-        y_true = decollate_batch(y_true.cpu().detach())
+        y_det = decollate_batch(seg_hat[:,1,:,:,:].cpu().detach())
+        y_background = decollate_batch(seg_hat[:,0,:,:,:].cpu().detach())
+        y_true = decollate_batch(y_true[:,1,:,:,:].cpu().detach())
         patIds = decollate_batch(batch['patient_id'])
 
 #         # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
