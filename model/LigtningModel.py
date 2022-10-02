@@ -438,9 +438,8 @@ class Model(pl.LightningModule):
 
         
         #print(f" self.list_yHat_val {self.list_yHat_val} ")
-        if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
-            chunkLen=8
-
+        # if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
+        if(False):
             valid_metrics = evaluate(y_det=self.list_yHat_val,
                                 y_true=self.list_gold_val,
                                 num_parallel_calls= os.cpu_count()
