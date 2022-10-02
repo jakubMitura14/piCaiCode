@@ -340,7 +340,7 @@ class Model(pl.LightningModule):
             # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
             self.dice_metric(hatPost.cpu() ,y_true[i].cpu())
             # self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
-
+        print("dice")
 
         # monai.metrics.compute_confusion_matrix_metric() 
         
