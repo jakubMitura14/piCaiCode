@@ -436,7 +436,8 @@ class Model(pl.LightningModule):
 
         confusion_matrix= self.confMetric.aggregate()
 
-        self.log('precision ', monai.metrics.compute_confusion_matrix_metric("precision", confusion_matrix) )
+        print( f"confusion_matrix  {confusion_matrix}"  )
+        #self.log('precision ', monai.metrics.compute_confusion_matrix_metric("precision", confusion_matrix) )
         self.confMetric.reset()        
 
 
