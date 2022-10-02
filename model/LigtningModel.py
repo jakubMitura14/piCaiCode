@@ -327,75 +327,75 @@ class Model(pl.LightningModule):
         seg_hat=torch.sigmoid(seg_hat)
 
         #loss= self.criterion(seg_hat,y_true)# self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)      
-        #we want only first channel
-        print(f"self.postProcess(seg_hat) {self.postProcess(seg_hat)}  y_true {y_true}  ")
 
         locDice = np.mean(monai.metrics.compute_generalized_dice( self.postProcess(seg_hat).cpu().detach() ,  y_true.cpu().detach()  ).cpu().detach().numpy())
         print(f"locDice {locDice}")
         
         self.dices.append(locDice)
-        y_true=y_true[:,1,:,:,:].cpu().detach()
-        y_det=seg_hat[:,1,:,:,:].cpu().detach()
 
-        y_det = decollate_batch(seg_hat)
-        y_true = decollate_batch(y_true)
-        patIds = decollate_batch(batch['patient_id'])
+#         #we want only first channel
+#         y_true=y_true[:,1,:,:,:].cpu().detach()
+#         y_det=seg_hat[:,1,:,:,:].cpu().detach()
 
-        # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
+#         y_det = decollate_batch(seg_hat)
+#         y_true = decollate_batch(y_true)
+#         patIds = decollate_batch(batch['patient_id'])
+
+#         # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
         
 
-        # for i in range(0,len(y_det)):
-        #     print(" post process dice")
-        #     hatPost=self.postProcess(y_det[i])
-        #     # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
-        #     print("calc dice")
-        #     self.dice_metric(hatPost.cpu() ,y_true[i].cpu())
-        #     #monai.metrics.compute_generalized_dice(
-        #     # self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
-        # print("dice calculated")
+#         # for i in range(0,len(y_det)):
+#         #     print(" post process dice")
+#         #     hatPost=self.postProcess(y_det[i])
+#         #     # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
+#         #     print("calc dice")
+#         #     self.dice_metric(hatPost.cpu() ,y_true[i].cpu())
+#         #     #monai.metrics.compute_generalized_dice(
+#         #     # self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
+#         # print("dice calculated")
 
 
 
-        # monai.metrics.compute_confusion_matrix_metric() 
+#         # monai.metrics.compute_confusion_matrix_metric() 
         
-        # diceVall = dice_metric.aggregate().item()
-        # self.log('loc_dice', diceVall)
-        # print("after dices")
+#         # diceVall = dice_metric.aggregate().item()
+#         # self.log('loc_dice', diceVall)
+#         # print("after dices")
 
 
-        #reg_hat = decollate_batch(reg_hat)
-        # print(f" rrrrr prim{reg_hat}  ")
+#         #reg_hat = decollate_batch(reg_hat)
+#         # print(f" rrrrr prim{reg_hat}  ")
 
-        # reg_hat=np.rint(reg_hat.cpu().detach().numpy().flatten())
-        # print(f" rrrrr {reg_hat}  ")
-        # print("befor extracting")
-        # # y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
-        # y_det=[x.cpu().detach().numpy()[1,:,:,:] for x in y_det]
-        # y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
-        # print("after extracting")
+#         # reg_hat=np.rint(reg_hat.cpu().detach().numpy().flatten())
+#         # print(f" rrrrr {reg_hat}  ")
+#         # print("befor extracting")
+#         # # y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
+#         # y_det=[x.cpu().detach().numpy()[1,:,:,:] for x in y_det]
+#         # y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
+#         # print("after extracting")
         
-        pathssList=[]
-        with mp.Pool(processes = mp.cpu_count()) as pool:
-            # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
-            pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir),list(range(0,len(y_true))))
-        forGoldVal=list(map(lambda tupl :tupl[0] ,pathssList  ))
-        fory_hatVal=list(map(lambda tupl :tupl[1] ,pathssList  ))
+#         pathssList=[]
+#         with mp.Pool(processes = mp.cpu_count()) as pool:
+#             # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
+#             pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir),list(range(0,len(y_true))))
+#         forGoldVal=list(map(lambda tupl :tupl[0] ,pathssList  ))
+#         fory_hatVal=list(map(lambda tupl :tupl[1] ,pathssList  ))
 
-#         # self.list_gold_val=self.list_gold_val+forGoldVal
-#         # self.list_yHat_val=self.list_gold_val+fory_hatVal
+# #         # self.list_gold_val=self.list_gold_val+forGoldVal
+# #         # self.list_yHat_val=self.list_gold_val+fory_hatVal
 
-# # save_candidates_to_dir(y_true,y_det,patIds,i,temp_val_dir)
-        for i in range(0,len(y_true)):
-            # tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
-            # print("saving entry   ")
-            # self.list_gold_val.append(tupl[0])
-            # self.list_yHat_val.append(tupl[1])
-            self.list_gold_val.append(forGoldVal[i])
-            self.list_yHat_val.append(fory_hatVal[i])
+# # # save_candidates_to_dir(y_true,y_det,patIds,i,temp_val_dir)
+#         for i in range(0,len(y_true)):
+#             # tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
+#             # print("saving entry   ")
+#             # self.list_gold_val.append(tupl[0])
+#             # self.list_yHat_val.append(tupl[1])
+#             self.list_gold_val.append(forGoldVal[i])
+#             self.list_yHat_val.append(fory_hatVal[i])
 
-#         self.log('val_loss', loss )
+# #         self.log('val_loss', loss )
 
-       # return {'loss' :loss,'loc_dice': diceVall }
+#        # return {'loss' :loss,'loc_dice': diceVall }
 
         #TODO probably this [1,:,:,:] could break the evaluation ...
         # y_det=[x.cpu().detach().numpy()[1,:,:,:][0] for x in y_det]
@@ -448,8 +448,8 @@ class Model(pl.LightningModule):
 
         
         #print(f" self.list_yHat_val {self.list_yHat_val} ")
-        if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
-        # if(False):
+        #if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
+        if(False):
             valid_metrics = evaluate(y_det=self.list_yHat_val,
                                 y_true=self.list_gold_val,
                                 num_parallel_calls= os.cpu_count()
