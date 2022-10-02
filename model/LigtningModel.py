@@ -481,8 +481,8 @@ class Model(pl.LightningModule):
 
 
 
-            valid_metrics = evaluate(y_det=self.list_yHat_val[0:min(20,len(self.list_yHat_val))],
-                                y_true=self.list_gold_val[0:min(20,len(self.list_yHat_val))],
+            valid_metrics = evaluate(y_det=self.list_yHat_val[0:min(10,len(self.list_yHat_val))],
+                                y_true=self.list_gold_val[0:min(10,len(self.list_yHat_val))],
                                 num_parallel_calls= os.cpu_count()
                                 ,verbose=1
                                 ,y_true_postprocess_func=lambda pred: pred[1,:,:,:]
@@ -490,7 +490,7 @@ class Model(pl.LightningModule):
                                 ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred[1,:,:,:])[0]
                                 #,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
                                 )
-                                
+
             print("finished evaluating")
 
 
