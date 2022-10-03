@@ -537,22 +537,31 @@ class Model(pl.LightningModule):
             
             pool = mp.Pool()
             listPerEval=[None] * lenn
-            #timeout based on https://stackoverflow.com/questions/66051638/set-a-time-limit-on-the-pool-map-operation-when-using-multiprocessing
+
+            # #timeout based on https://stackoverflow.com/questions/66051638/set-a-time-limit-on-the-pool-map-operation-when-using-multiprocessing
             my_task=partial(evaluate_case_for_map,y_det= self.list_yHat_val,y_true=self.list_gold_val)
-            def my_callback(t):
-                print(f"tttttt  {t}")
-                s, i = t
-                listPerEval[i] = s
-            results=[pool.apply_async(my_task, args=(i,), callback=my_callback) for i in list(range(0,lenn))]
-            TIMEOUT = 300# second timeout
-            time.sleep(TIMEOUT)
-            pool.terminate()
+            # def my_callback(t):
+            #     print(f"tttttt  {t}")
+            #     s, i = t
+            #     listPerEval[i] = s
+            # results=[pool.apply_async(my_task, args=(i,), callback=my_callback) for i in list(range(0,lenn))]
+            # TIMEOUT = 300# second timeout
+            # time.sleep(TIMEOUT)
+            # pool.terminate()
+            # #filtering out those that timed out
+            # listPerEval=list(filter(lambda it:it!=None,listPerEval))
+            # print(f" results timed out {lenn-len(listPerEval)} from all {lenn} ")
+
+            TIMEOUT = 100# second timeout
+
+            with mp.Pool(processes = mp.cpu_count()) as pool:
+                it = pool.imap(my_task, range(lenn))
+                listPerEval=list(map(lambda ind :it.next(timeout=TIMEOUT) ,list(range(lenn)) ))
             #filtering out those that timed out
             listPerEval=list(filter(lambda it:it!=None,listPerEval))
-            print(f" results timed out {lenn-len(listPerEval)}  ")
-            # with mp.Pool(processes = mp.cpu_count()) as pool:
-            #     # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
-            #     listPerEval=pool.map( partial(evaluate_case_for_map,y_det= self.list_yHat_val,y_true=self.list_gold_val) , list(range(0,lenn)))
+            print(f" results timed out {lenn-len(listPerEval)} from all {lenn} ")                
+                    # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
+                # listPerEval=pool.map( partial(evaluate_case_for_map,y_det= self.list_yHat_val,y_true=self.list_gold_val) , list(range(0,lenn)))
 
 
             # listPerEval=list(map( partial(evaluate_case_for_map,y_det= self.list_yHat_val,y_true=self.list_gold_val) , list(range(0,lenn))))
