@@ -24,12 +24,10 @@ from monai.networks.layers import Norm
 from monai.metrics import DiceMetric
 from monai.losses import DiceLoss
 from monai.inferers import sliding_window_inference
-from monai.data import CacheDataset,Dataset,PersistentDataset,LMDBDataset, pad_list_data_collate, decollate_batch,list_data_collate,SmartCacheDataset
+from monai.data import CacheDataset,Dataset,PersistentDataset, pad_list_data_collate, decollate_batch,list_data_collate
 from monai.config import print_config
 from monai.apps import download_and_extract
 
-from torch.utils.data import DataLoader, BatchSampler, RandomSampler
-import random
 sns.set()
 plt.rcParams['figure.figsize'] = 12, 8
 monai.utils.set_determinism()
@@ -57,10 +55,10 @@ import glob
 import torch.nn as nn
 import torch.nn.functional as F
 
-# monai.utils.set_determinism()
+monai.utils.set_determinism()
 
-# import importlib.util
-# import sys
+import importlib.util
+import sys
 
 # spec = importlib.util.spec_from_file_location("transformsForMain", "/home/sliceruser/data/piCaiCode/preprocessing/transformsForMain.py")
 # transformsForMain = importlib.util.module_from_spec(spec)
@@ -72,19 +70,17 @@ import torch.nn.functional as F
 # sys.modules["ManageMetadata"] = manageMetaData
 # spec.loader.exec_module(manageMetaData)
 
+from model import transformsForMain as transformsForMain
 
-# spec = importlib.util.spec_from_file_location("dataUtils", "/home/sliceruser/data/piCaiCode/dataManag/utils/dataUtils.py")
-# dataUtils = importlib.util.module_from_spec(spec)
-# sys.modules["dataUtils"] = dataUtils
-# spec.loader.exec_module(dataUtils)
+spec = importlib.util.spec_from_file_location("dataUtils", "/home/sliceruser/data/piCaiCode/dataManag/utils/dataUtils.py")
+dataUtils = importlib.util.module_from_spec(spec)
+sys.modules["dataUtils"] = dataUtils
+spec.loader.exec_module(dataUtils)
 
 # import preprocessing.transformsForMain as transformsForMain
 # import preprocessing.ManageMetadata as manageMetaData
 # import dataManag.utils.dataUtils as dataUtils
 # import multiprocessing
-from model import transformsForMain as transformsForMain
-
-
 
 def getMonaiSubjectDataFromDataFrame(row,chan3_col_name,label_name,chan3_col_name_val,label_name_val):
         """
@@ -114,7 +110,6 @@ def getMonaiSubjectDataFromDataFrame(row,chan3_col_name,label_name,chan3_col_nam
 
         return subject
 
-
 class PiCaiDataModule(pl.LightningDataModule):
     def __init__(self,trainSizePercent,batch_size,num_workers
     ,drop_last,df,cache_dir,chan3_col_name,chan3_col_name_val
@@ -126,14 +121,7 @@ class PiCaiDataModule(pl.LightningDataModule):
     ,RandFlipd_prob
     ,RandAffined_prob
     ,RandCoarseDropoutd_prob
-    ,is_whole_to_train
-    ,centerCropSize
-    ,RandomElasticDeformation_prob
-    ,RandomAnisotropy_prob
-    ,RandomMotion_prob
-    ,RandomGhosting_prob
-    ,RandomSpike_prob
-    ,RandomBiasField_prob ):
+    ,is_whole_to_train ):
         super().__init__()
         self.cache_dir=cache_dir
         self.batch_size = batch_size
@@ -150,8 +138,7 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.train_ds = None
         self.val_ds= None
         self.test_ds= None        
-        self.allSubjects= None
-        self.onlyPositiveSubjects= None
+        self.subjects= None
         self.chan3_col_name=chan3_col_name
         self.chan3_col_name_val=chan3_col_name_val
         self.label_name=label_name
@@ -164,32 +151,10 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.RandAffined_prob=RandAffined_prob
         self.RandCoarseDropoutd_prob=RandCoarseDropoutd_prob
         self.is_whole_to_train=is_whole_to_train 
-        self.centerCropSize=centerCropSize
-        self.RandomElasticDeformation_prob=RandomElasticDeformation_prob
-        self.RandomAnisotropy_prob=RandomAnisotropy_prob
-        self.RandomMotion_prob=RandomMotion_prob
-        self.RandomGhosting_prob=RandomGhosting_prob
-        self.RandomSpike_prob=RandomSpike_prob
-        self.RandomBiasField_prob=RandomBiasField_prob
-        self.forTrainingSamplesNum=100
+
+
+
         self.dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
-        self.persistent_cache='/home/sliceruser/data/persistentDataset'
-
-    """
-    splitting for test and validation and separately in case of examples with some label inside 
-        and ecxamples without such constraint
-    """
-    def getSubjects(self):
-        onlyPositve = self.df.loc[self.df['isAnyMissing'] ==False]
-        onlyPositve = onlyPositve.loc[onlyPositve['isAnythingInAnnotated']>0 ]
-
-        allSubj=list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1]
-        ,self.chan3_col_name,self.label_name,self.chan3_col_name_val,self.label_name_val)   , list(self.df.iterrows())))
-        
-        onlyPositiveSubj=list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1]
-        ,self.chan3_col_name,self.label_name,self.chan3_col_name_val,self.label_name_val)   , list(onlyPositve.iterrows())))
-        
-        return allSubj,onlyPositiveSubj
 
     #TODO replace with https://docs.monai.io/en/stable/data.html
     def splitDataSet(self,patList, trainSizePercent,noTestSet):
@@ -215,28 +180,13 @@ class PiCaiDataModule(pl.LightningDataModule):
 
     def setup(self, stage=None):
         set_determinism(seed=0)
-        allSubj,onlyPositve=  self.getSubjects()
-
-        allSubjects= allSubj[400:450]
-        onlyPositiveSubjects= onlyPositve[0:150]
-        random.shuffle(allSubjects)
-        random.shuffle(onlyPositiveSubjects)
-
-
-        self.allSubjects= allSubjects
-        self.onlyPositiveSubjects=onlyPositiveSubjects
-        self.onlyNegative=list(filter(lambda subj :  subj['num_lesions_to_retain']==0  ,allSubjects))
-
-        currSet=onlyPositiveSubjects #onlyPositiveSubjects[0:100]+ self.onlyNegative[0:50]
-        #print(f"self.allSubjects {len(self.allSubjects)}  self.onlyPositiveSubjects {len(self.onlyPositiveSubjects)}")
-        train_set_all, valid_set_all,test_set_all = self.splitDataSet(currSet, self.trainSizePercent,True)
-        # train_set_pos, valid_set_pos,test_set_pos = self.splitDataSet(self.onlyPositiveSubjects , self.trainSizePercent,True)
-        #so we get just the example where we should not detect a thing 
-        onlyNegatives=list(filter(lambda subj :  subj['num_lesions_to_retain']==0  ,valid_set_all))
-
-        # self.train_subjects = train_set
-        # self.val_subjects = valid_set
-        # self.test_subjects = test_set
+        self.subjects = list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1]
+        ,self.chan3_col_name,self.label_name,self.chan3_col_name_val,self.label_name_val)   , list(self.df.iterrows())))
+        train_set, valid_set,test_set = self.splitDataSet(self.subjects , self.trainSizePercent,True)
+        
+        self.train_subjects = train_set
+        self.val_subjects = valid_set
+        self.test_subjects = test_set
         train_transforms=transformsForMain.get_train_transforms(
             self.RandGaussianNoised_prob
             ,self.RandAdjustContrastd_prob
@@ -245,70 +195,23 @@ class PiCaiDataModule(pl.LightningDataModule):
             ,self.RandFlipd_prob
             ,self.RandAffined_prob
             ,self.RandCoarseDropoutd_prob
-            ,self.is_whole_to_train 
-            ,self.centerCropSize
-            ,self.RandomElasticDeformation_prob
-            ,self.RandomAnisotropy_prob
-            ,self.RandomMotion_prob
-            ,self.RandomGhosting_prob
-            ,self.RandomSpike_prob
-            ,self.RandomBiasField_prob )
-        val_transforms= transformsForMain.get_val_transforms(self.is_whole_to_train,self.centerCropSize )
+            ,self.is_whole_to_train )
+        val_transforms= transformsForMain.get_val_transforms(self.is_whole_to_train )
         #todo - unhash
         # self.train_ds =  PersistentDataset(data=self.train_subjects, transform=train_transforms,cache_dir=self.cache_dir)
         # self.val_ds=     PersistentDataset(data=self.val_subjects, transform=val_transforms,cache_dir=self.cache_dir)
         # self.test_ds=    PersistentDataset(data=self.test_subjects, transform=val_transforms,cache_dir=self.cache_dir)    
 
-# 
-# PersistentDataset
-        # self.train_ds_all =  CacheDataset(data=train_set_all, transform=train_transforms)
-        self.val_ds=     SmartCacheDataset(data=valid_set_all, transform=val_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
-        # self.val_ds=     CacheDataset(data=valid_set_pos+onlyNegatives[0: int(round(len(valid_set_pos)/2)) ], transform=val_transforms)
-        self.train_ds_all =  SmartCacheDataset(data=train_set_all, transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
-
-
-
-
-
-
-        # self.train_ds_all =  LMDBDataset(data=train_set_all, transform=train_transforms,cache_dir=self.persistent_cache)
-        # self.val_ds=     LMDBDataset(data=valid_set_pos+onlyNegatives[0: int(round(len(valid_set_pos)/2)) ], transform=val_transforms,cache_dir=self.persistent_cache)
-        # self.train_ds_pos =  LMDBDataset(data=train_set_pos, transform=train_transforms,cache_dir=self.persistent_cache)
-
-
-
+        self.train_ds =  Dataset(data=self.train_subjects, transform=train_transforms)
+        self.val_ds=     Dataset(data=self.val_subjects, transform=val_transforms)
+        #self.test_ds=    Dataset(data=self.test_subjects, transform=val_transforms)
+        
     def train_dataloader(self):
-        # if self.trainer.current_epoch % 2 == 0:
-        # if True:
-        #     return DataLoader(self.train_ds_pos, batch_size=self.batch_size, drop_last=self.drop_last
-        #                   ,num_workers=self.num_workers)#,collate_fn=list_data_collate)
-        # return DataLoader(self.train_ds_all, batch_size=self.batch_size, drop_last=self.drop_last
-        #                   ,num_workers=self.num_workers)#,collate_fn=list_data_collate)
-
-
-
-        # return {"all": DataLoader(self.train_ds_all, batch_size=self.batch_size, drop_last=self.drop_last
-        #                   ,num_workers=self.num_workers,sampler=RandomSampler(self.train_ds_all,num_samples=self.forTrainingSamplesNum))#,collate_fn=list_data_collate
-        # , "pos": DataLoader(self.train_ds_pos, batch_size=self.batch_size, drop_last=self.drop_last
-        #                   ,num_workers=self.num_workers,sampler=RandomSampler(self.train_ds_pos,num_samples=self.forTrainingSamplesNum))}#,collate_fn=list_data_collate
-        return DataLoader(self.train_ds_all, batch_size=self.batch_size, drop_last=self.drop_last
-                          ,num_workers=self.num_workers)#,collate_fn=list_data_collate
-        
-        # return {"all": DataLoader(self.train_ds_all, batch_size=self.batch_size, drop_last=self.drop_last
-        #                   ,num_workers=self.num_workers)#,collate_fn=list_data_collate
-        # , "pos": DataLoader(self.train_ds_pos, batch_size=self.batch_size, drop_last=self.drop_last
-        #                   ,num_workers=self.num_workers)}#,collate_fn=list_data_collate
-        
-        
-        # return DataLoader(self.train_ds, batch_size=self.batch_size, drop_last=self.drop_last
-        #                   ,num_workers=self.num_workers,collate_fn=list_data_collate)#,collate_fn=list_data_collate , shuffle=True
+        return DataLoader(self.train_ds, batch_size=self.batch_size, drop_last=self.drop_last
+                          ,num_workers=self.num_workers,collate_fn=list_data_collate)#,collate_fn=list_data_collate , shuffle=True
 
     def val_dataloader(self):
-        # return {"all": DataLoader(self.val_ds_all, batch_size=1, drop_last=self.drop_last,num_workers=self.num_workers,collate_fn=list_data_collate)#,collate_fn=pad_list_data_collate
-        #        ,"pos": DataLoader(self.val_ds_pos, batch_size=1, drop_last=self.drop_last,num_workers=self.num_workers,collate_fn=list_data_collate)#,collate_fn=pad_list_data_collate
-        #        }
-
-        return DataLoader(self.val_ds, batch_size=5, drop_last=self.drop_last,num_workers=self.num_workers)#,collate_fn=list_data_collate)#,collate_fn=pad_list_data_collate
+        return DataLoader(self.val_ds, batch_size=1, drop_last=self.drop_last,num_workers=self.num_workers,collate_fn=list_data_collate)#,collate_fn=pad_list_data_collate
 
     # def test_dataloader(self):
     #     return DataLoader(self.test_ds, batch_size= 1, drop_last=False,num_workers=self.num_workers,collate_fn=list_data_collate)#num_workers=self.num_workers,
