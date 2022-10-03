@@ -598,7 +598,7 @@ class Model(pl.LightningModule):
             # listPerEval=list(filter(lambda it:it!=None,listPerEval))
             # print(f" results timed out {lenn-len(listPerEval)} from all {lenn} ")
 
-            TIMEOUT = 30# second timeout
+            TIMEOUT = 40# second timeout
 
 
 # TIMEOUT = 2# second timeout
@@ -623,7 +623,8 @@ class Model(pl.LightningModule):
             with mp.Pool(processes = mp.cpu_count()) as pool:
                 #it = pool.imap(my_task, range(lenn))
                 results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
-                listPerEval=pool.map(partial(getNext,results=results,TIMEOUT=TIMEOUT) ,list(range(lenn)) )
+                time.sleep(TIMEOUT)
+                listPerEval=list(map(lambda ind :getNext(ind,results,1) ,list(range(lenn)) ))
             #filtering out those that timed out
             listPerEval=list(filter(lambda it:it!=None,listPerEval))
             print(f" results timed out {lenn-len(listPerEval)} from all {lenn} ")                
