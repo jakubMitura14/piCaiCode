@@ -278,7 +278,7 @@ def evaluate_case_for_map(i,y_det,y_true):
                         ,y_true=y_true[i] 
                         ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0])
 
-def getNext(results,TIMEOUT,i):
+def getNext(i,results,TIMEOUT):
     try:
         # return it.next(timeout=TIMEOUT)
         return results[i].get(TIMEOUT)
@@ -623,7 +623,7 @@ class Model(pl.LightningModule):
             with mp.Pool(processes = mp.cpu_count()) as pool:
                 #it = pool.imap(my_task, range(lenn))
                 results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
-                listPerEval=list(map(lambda ind :getNext(results,TIMEOUT,ind) ,list(range(lenn)) ))
+                listPerEval=pool.map(lambda ind :partial(getNext,results=results,TIMEOUT=TIMEOUT) ,list(range(lenn)) )
             #filtering out those that timed out
             listPerEval=list(filter(lambda it:it!=None,listPerEval))
             print(f" results timed out {lenn-len(listPerEval)} from all {lenn} ")                
