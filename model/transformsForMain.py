@@ -119,7 +119,7 @@ def get_train_transforms(RandGaussianNoised_prob
             DivisiblePadd(keys=["chan3_col_name","label"],k=32) ,            
             #ResizeWithPadOrCropd(keys=["chan3_col_name","label"],spatial_size=centerCropSize ),
           
-            *decide_if_whole_image_train(True,"chan3_col_name","label"),
+            *decide_if_whole_image_train(False,"chan3_col_name","label"),
             #SpatialPadd(keys=["chan3_col_name","label"]],spatial_size=maxSize) ,            
             RandGaussianNoised(keys=["chan3_col_name"], prob=RandGaussianNoised_prob),
             RandAdjustContrastd(keys=["chan3_col_name"], prob=RandAdjustContrastd_prob),

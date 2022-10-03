@@ -220,83 +220,85 @@ class Model(pl.LightningModule):
 
         if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
             chunkLen=8
+            try:
+                valid_metrics = evaluate(y_det=self.list_yHat_val,
+                                    y_true=self.list_gold_val,
+                                    #y_true=iter(y_true),
+                                    #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+                                    )
 
-            valid_metrics = evaluate(y_det=self.list_yHat_val,
-                                y_true=self.list_gold_val,
-                                #y_true=iter(y_true),
-                                #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
-                                )
+                meanPiecaiMetr_auroc=valid_metrics.auroc
+                meanPiecaiMetr_AP=valid_metrics.AP
+                meanPiecaiMetr_score=valid_metrics.score
+                # for i in range(0,chunksNumb):
+                #     startIndex= i*chunkLen
+                #     endIndex=(i+1)*chunkLen
+                #     print(f" startIndex {startIndex}  endIndex {endIndex}")
+                #     valid_metrics = evaluate(y_det=list(map(getArrayFromPath, self.list_yHat_val[startIndex:endIndex])),
+                #                         y_true=list(map(getArrayFromPath, self.list_gold_val[startIndex:endIndex]  )),
+                #                         #y_true=iter(y_true),
+                #                         #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+                #                         )
+                #     self.picaiLossArr_auroc.append(valid_metrics.auroc)
+                #     self.picaiLossArr_AP.append(valid_metrics.AP)
+                #     self.picaiLossArr_score.append(valid_metrics.score)
+                
+                
+                # startIndex= chunksNumb*chunkLen
+                # endIndex=len(self.list_yHat_val)
+                # if endIndex>startIndex:
+                #     print(f" startIndex {startIndex}  endIndex {endIndex}")
 
-            meanPiecaiMetr_auroc=valid_metrics.auroc
-            meanPiecaiMetr_AP=valid_metrics.AP
-            meanPiecaiMetr_score=valid_metrics.score
-            # for i in range(0,chunksNumb):
-            #     startIndex= i*chunkLen
-            #     endIndex=(i+1)*chunkLen
-            #     print(f" startIndex {startIndex}  endIndex {endIndex}")
-            #     valid_metrics = evaluate(y_det=list(map(getArrayFromPath, self.list_yHat_val[startIndex:endIndex])),
-            #                         y_true=list(map(getArrayFromPath, self.list_gold_val[startIndex:endIndex]  )),
-            #                         #y_true=iter(y_true),
-            #                         #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
-            #                         )
-            #     self.picaiLossArr_auroc.append(valid_metrics.auroc)
-            #     self.picaiLossArr_AP.append(valid_metrics.AP)
-            #     self.picaiLossArr_score.append(valid_metrics.score)
+                #     # and the last part
+                #     valid_metrics = evaluate(y_det=list(map(getArrayFromPath, self.list_yHat_val[startIndex:endIndex])),
+                #                             y_true=list(map(getArrayFromPath, self.list_gold_val[startIndex:endIndex]  )),
+                #                             #y_true=iter(y_true),
+                #                             #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+                #                             )
+                #     self.picaiLossArr_auroc.append(valid_metrics.auroc)
+                #     self.picaiLossArr_AP.append(valid_metrics.AP)
+                #     self.picaiLossArr_score.append(valid_metrics.score)
+
+
+
+                #     meanPiecaiMetr_auroc= np.nanmean(self.picaiLossArr_auroc) 
+                #     meanPiecaiMetr_AP=np.nanmean(self.picaiLossArr_AP) 
+                #     meanPiecaiMetr_score=np.nanmean(self.picaiLossArr_score) 
+                
+
             
-            
-            # startIndex= chunksNumb*chunkLen
-            # endIndex=len(self.list_yHat_val)
-            # if endIndex>startIndex:
-            #     print(f" startIndex {startIndex}  endIndex {endIndex}")
+                # meanPiecaiMetr_auroc= getMeanIgnoreNan(self.picaiLossArr_auroc) # mean(self.picaiLossArr_auroc)
+                # meanPiecaiMetr_AP= getMeanIgnoreNan(self.picaiLossArr_AP) # mean(self.picaiLossArr_AP)        
+                # meanPiecaiMetr_score= getMeanIgnoreNan(self.picaiLossArr_score) #mean(self.picaiLossArr_score)        
 
-            #     # and the last part
-            #     valid_metrics = evaluate(y_det=list(map(getArrayFromPath, self.list_yHat_val[startIndex:endIndex])),
-            #                             y_true=list(map(getArrayFromPath, self.list_gold_val[startIndex:endIndex]  )),
-            #                             #y_true=iter(y_true),
-            #                             #y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
-            #                             )
-            #     self.picaiLossArr_auroc.append(valid_metrics.auroc)
-            #     self.picaiLossArr_AP.append(valid_metrics.AP)
-            #     self.picaiLossArr_score.append(valid_metrics.score)
+                print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
+
+                self.log('val_mean_auroc', meanPiecaiMetr_auroc)
+                self.log('val_mean_AP', meanPiecaiMetr_AP)
+                self.log('val_mean_score', meanPiecaiMetr_score)
+
+                self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
+                self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
+                self.experiment.log_metric('val_mean_score', meanPiecaiMetr_score)
 
 
+                self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
+                self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
+                self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
 
-            #     meanPiecaiMetr_auroc= np.nanmean(self.picaiLossArr_auroc) 
-            #     meanPiecaiMetr_AP=np.nanmean(self.picaiLossArr_AP) 
-            #     meanPiecaiMetr_score=np.nanmean(self.picaiLossArr_score) 
-            
-
-        
-            # meanPiecaiMetr_auroc= getMeanIgnoreNan(self.picaiLossArr_auroc) # mean(self.picaiLossArr_auroc)
-            # meanPiecaiMetr_AP= getMeanIgnoreNan(self.picaiLossArr_AP) # mean(self.picaiLossArr_AP)        
-            # meanPiecaiMetr_score= getMeanIgnoreNan(self.picaiLossArr_score) #mean(self.picaiLossArr_score)        
-
-            print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
-
-            self.log('val_mean_auroc', meanPiecaiMetr_auroc)
-            self.log('val_mean_AP', meanPiecaiMetr_AP)
-            self.log('val_mean_score', meanPiecaiMetr_score)
-
-            self.experiment.log_metric('val_mean_auroc', meanPiecaiMetr_auroc)
-            self.experiment.log_metric('val_mean_AP', meanPiecaiMetr_AP)
-            self.experiment.log_metric('val_mean_score', meanPiecaiMetr_score)
+                #resetting to 0 
+                self.picaiLossArr_auroc=[]
+                self.picaiLossArr_AP=[]
+                self.picaiLossArr_score=[]
 
 
-            self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
-            self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
-            self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
-
-            #resetting to 0 
-            self.picaiLossArr_auroc=[]
-            self.picaiLossArr_AP=[]
-            self.picaiLossArr_score=[]
-
-
-            #clearing and recreatin temporary directory
-            shutil.rmtree(self.temp_val_dir)    
-            self.temp_val_dir=tempfile.mkdtemp()
-            self.list_gold_val=[]
-            self.list_yHat_val=[]
+                #clearing and recreatin temporary directory
+                shutil.rmtree(self.temp_val_dir)    
+                self.temp_val_dir=tempfile.mkdtemp()
+                self.list_gold_val=[]
+                self.list_yHat_val=[]
+            except:
+                print("error in evall")    
         #in case we have Nan values training is unstable and we want to terminate it     
         if(self.isAnyNan):
             self.log('val_mean_score', -0.2)
