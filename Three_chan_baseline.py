@@ -109,6 +109,7 @@ def mainTrain(experiment,options,df):
     df=df.loc[df[chan3_col_name] != ' ']
     label_name=f"label{spacing_keyword}{sizeWord}" 
     label_name_val=label_name
+    df=df.loc[df[label_name_val] != ' ']
 
     cacheDir =  f"/home/sliceruser/preprocess/monai_persistent_Dataset/{spacing_keyword}/{sizeWord}"
 
@@ -122,7 +123,7 @@ def mainTrain(experiment,options,df):
 
     data = DataModule.PiCaiDataModule(
         df= df,
-        batch_size=2,#
+        batch_size=20,#
         trainSizePercent=percentSplit,# TODO(change to 0.7 or 0.8
         num_workers=os.cpu_count(),
         drop_last=False,#True,
