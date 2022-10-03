@@ -98,18 +98,25 @@ import time
 #     time.sleep(v)
 #     return v ** 2
 
-# def getNext(it,TIMEOUT):
-#     try:
-#         return it.next(timeout=TIMEOUT)
-#     except:
-#         return None    
 
-# squares=[]
-# lenn=20
-# TIMEOUT = 4# second timeout
+# lenn=8
+# squares=[None] * lenn
+
+# TIMEOUT = 2# second timeout
 # with mp.Pool(processes = mp.cpu_count()) as pool:
-#     it = pool.imap(my_task, range(lenn))
-#     squares=list(map(lambda ind :getNext(it,TIMEOUT) ,list(range(lenn)) ))
+#     results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
+    
+#     for i in range(lenn):
+#         try:
+#             return_value = results[i].get(2) # wait for up to time_to_wait seconds
+#         except mp.TimeoutError:
+#             print('Timeout for v = ', i)
+#         else:
+#             squares[i]=return_value
+#             print(f'Return value for v = {i} is {return_value}')
+
+#     # it = pool.imap(my_task, range(lenn))
+#     # squares=list(map(lambda ind :getNext(it,TIMEOUT) ,list(range(lenn)) ))
 # print(squares)
 
 
@@ -584,7 +591,7 @@ class Model(pl.LightningModule):
             # listPerEval=list(filter(lambda it:it!=None,listPerEval))
             # print(f" results timed out {lenn-len(listPerEval)} from all {lenn} ")
 
-            TIMEOUT = 100# second timeout
+            TIMEOUT = 60# second timeout
 
             with mp.Pool(processes = mp.cpu_count()) as pool:
                 it = pool.imap(my_task, range(lenn))
