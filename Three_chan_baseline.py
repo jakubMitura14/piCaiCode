@@ -175,7 +175,7 @@ def mainTrain(experiment,options,df):
     )
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
         monitor='val_mean_score',
-        patience=4,
+        patience=7,
         mode="max",
         divergence_threshold=(-0.1)
     )
@@ -190,12 +190,12 @@ def mainTrain(experiment,options,df):
         accelerator='auto',
         devices='auto',       
         default_root_dir= "/home/sliceruser/data/lightning_logs",
-        auto_scale_batch_size="binsearch",
+        # auto_scale_batch_size="binsearch",
         auto_lr_find=True,
         check_val_every_n_epoch=10,
         accumulate_grad_batches=experiment.get_parameter("accumulate_grad_batches"),
         gradient_clip_val=experiment.get_parameter("gradient_clip_val"),# 0.5,2.0
-        log_every_n_steps=30,
+        log_every_n_steps=10,
         strategy='dp'
     )
     trainer.logger._default_hp_metric = False
