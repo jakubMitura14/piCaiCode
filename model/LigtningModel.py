@@ -278,9 +278,11 @@ def evaluate_case_for_map(i,y_det,y_true):
                         ,y_true=y_true[i] 
                         ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0])
 
-def getNext(it,TIMEOUT):
+def getNext(results,TIMEOUT,i):
     try:
-        return it.next(timeout=TIMEOUT)
+        # return it.next(timeout=TIMEOUT)
+        return results[i].get(TIMEOUT)
+
     except:
         print("timed outt ")
         return None    
@@ -488,6 +490,10 @@ class Model(pl.LightningModule):
         
 
 
+
+        
+
+
 # #         # self.list_gold_val=self.list_gold_val+forGoldVal
 # #         # self.list_yHat_val=self.list_gold_val+fory_hatVal
 
@@ -594,9 +600,30 @@ class Model(pl.LightningModule):
 
             TIMEOUT = 30# second timeout
 
+
+# TIMEOUT = 2# second timeout
+# with mp.Pool(processes = mp.cpu_count()) as pool:
+#     results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
+    
+#     for i in range(lenn):
+#         try:
+#             return_value = results[i].get(2) # wait for up to time_to_wait seconds
+#         except mp.TimeoutError:
+#             print('Timeout for v = ', i)
+#         else:
+#             squares[i]=return_value
+#             print(f'Return value for v = {i} is {return_value}')
+
+
+#     # it = pool.imap(my_task, range(lenn))
+#     # squares=list(map(lambda ind :getNext(it,TIMEOUT) ,list(range(lenn)) ))
+# print(squares)
+
+
             with mp.Pool(processes = mp.cpu_count()) as pool:
-                it = pool.imap(my_task, range(lenn))
-                listPerEval=list(map(lambda ind :getNext(it,TIMEOUT) ,list(range(lenn)) ))
+                #it = pool.imap(my_task, range(lenn))
+                results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
+                listPerEval=list(map(lambda ind :getNext(results,TIMEOUT,ind) ,list(range(lenn)) ))
             #filtering out those that timed out
             listPerEval=list(filter(lambda it:it!=None,listPerEval))
             print(f" results timed out {lenn-len(listPerEval)} from all {lenn} ")                
