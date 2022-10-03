@@ -148,7 +148,7 @@ def mainTrain(experiment,options,df):
     # from https://github.com/DIAGNijmegen/picai_baseline/blob/main/src/picai_baseline/unet/training_setup/neural_networks/unets.py
     unet= unets.UNet(
         spatial_dims=3,
-        in_channels=3,
+        in_channels=4,
         out_channels=2,
         strides=getParam(experiment,options,"stridesAndChannels",df)["strides"],
         channels=getParam(experiment,options,"stridesAndChannels",df)["channels"],
