@@ -598,7 +598,7 @@ class Model(pl.LightningModule):
             # listPerEval=list(filter(lambda it:it!=None,listPerEval))
             # print(f" results timed out {lenn-len(listPerEval)} from all {lenn} ")
 
-            TIMEOUT = 40# second timeout
+            TIMEOUT = 90# second timeout
 
 
 # TIMEOUT = 2# second timeout
