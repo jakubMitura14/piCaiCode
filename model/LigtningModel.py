@@ -598,7 +598,7 @@ class Model(pl.LightningModule):
             # listPerEval=list(filter(lambda it:it!=None,listPerEval))
             # print(f" results timed out {lenn-len(listPerEval)} from all {lenn} ")
 
-            TIMEOUT = 90# second timeout
+            TIMEOUT = 30# second timeout
 
 
 # TIMEOUT = 2# second timeout
@@ -624,7 +624,7 @@ class Model(pl.LightningModule):
                 #it = pool.imap(my_task, range(lenn))
                 results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
                 time.sleep(TIMEOUT)
-                listPerEval=list(map(lambda ind :getNext(ind,results,1) ,list(range(lenn)) ))
+                listPerEval=list(map(lambda ind :getNext(ind,results,15) ,list(range(lenn)) ))
             #filtering out those that timed out
             listPerEval=list(filter(lambda it:it!=None,listPerEval))
             print(f" results timed out {lenn-len(listPerEval)} from all {lenn} ")                
@@ -641,31 +641,36 @@ class Model(pl.LightningModule):
             case_pred: Dict[Hashable, float] = {}
             lesion_results: Dict[Hashable, List[Tuple[int, float, float]]] = {}
             lesion_weight: Dict[Hashable, List[float]] = {}
-            
+
+            meanPiecaiMetr_auroc=0.0
+            meanPiecaiMetr_AP=0.0
+            meanPiecaiMetr_score=0.0
+
             idx=0
-            for pairr in listPerEval:
-                idx+=1
-                lesion_results_case, case_confidence = pairr
+            if(len(listPerEval)>0):
+                for pairr in listPerEval:
+                    idx+=1
+                    lesion_results_case, case_confidence = pairr
 
-                case_weight[idx] = 1.0
-                case_pred[idx] = case_confidence
-                if len(lesion_results_case):
-                    case_target[idx] = np.max([a[0] for a in lesion_results_case])
-                else:
-                    case_target[idx] = 0
+                    case_weight[idx] = 1.0
+                    case_pred[idx] = case_confidence
+                    if len(lesion_results_case):
+                        case_target[idx] = np.max([a[0] for a in lesion_results_case])
+                    else:
+                        case_target[idx] = 0
 
-                # accumulate outputs
-                lesion_results[idx] = lesion_results_case
-                lesion_weight[idx] = [1.0] * len(lesion_results_case)
+                    # accumulate outputs
+                    lesion_results[idx] = lesion_results_case
+                    lesion_weight[idx] = [1.0] * len(lesion_results_case)
 
-            # collect results in a Metrics object
-            valid_metrics = Metrics(
-                lesion_results=lesion_results,
-                case_target=case_target,
-                case_pred=case_pred,
-                case_weight=case_weight,
-                lesion_weight=lesion_weight
-            )
+                # collect results in a Metrics object
+                valid_metrics = Metrics(
+                    lesion_results=lesion_results,
+                    case_target=case_target,
+                    case_pred=case_pred,
+                    case_weight=case_weight,
+                    lesion_weight=lesion_weight
+                )
 
 
 
@@ -685,9 +690,9 @@ class Model(pl.LightningModule):
                 # meanPiecaiMetr_score_list.append((-1)*valid_metrics.score)
                 #print("finished evaluating")
 
-            meanPiecaiMetr_auroc=valid_metrics.auroc
-            meanPiecaiMetr_AP=valid_metrics.AP
-            meanPiecaiMetr_score=(-1)*valid_metrics.score
+                meanPiecaiMetr_auroc=valid_metrics.auroc
+                meanPiecaiMetr_AP=valid_metrics.AP
+                meanPiecaiMetr_score=(-1)*valid_metrics.score
             # meanPiecaiMetr_auroc=np.nanmean(meanPiecaiMetr_auroc_list)
             # meanPiecaiMetr_AP=np.nanmean(meanPiecaiMetr_AP_list)
             # meanPiecaiMetr_score=np.nanmean(meanPiecaiMetr_score_list)
