@@ -99,7 +99,7 @@ def get_train_transforms(RandGaussianNoised_prob
     ,RandAffined_prob
     ,RandCoarseDropoutd_prob
     ,is_whole_to_train
-    ,centerCropSize ):
+     ):
     
     train_transforms = Compose(
         [
