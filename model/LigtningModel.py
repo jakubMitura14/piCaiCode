@@ -25,6 +25,7 @@ from monai.inferers import sliding_window_inference
 from monai.data import CacheDataset,Dataset,PersistentDataset, list_data_collate, decollate_batch
 from monai.config import print_config
 from monai.apps import download_and_extract
+import time
 
 from datetime import datetime
 import os
@@ -534,10 +535,22 @@ class Model(pl.LightningModule):
             meanPiecaiMetr_score_list=[]
             print(f" numIters {numIters} ")
             
-            listPerEval=[]
-            with mp.Pool(processes = mp.cpu_count()) as pool:
-                # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
-                listPerEval=pool.map( partial(evaluate_case_for_map,y_det= self.list_yHat_val,y_true=self.list_gold_val) , list(range(0,lenn)))
+            pool = mp.Pool()
+            listPerEval=[None] * lenn
+            #timeout based on https://stackoverflow.com/questions/66051638/set-a-time-limit-on-the-pool-map-operation-when-using-multiprocessing
+            my_task=partial(evaluate_case_for_map,y_det= self.list_yHat_val,y_true=self.list_gold_val)
+            def my_callback(t):
+                i, s = t
+                listPerEval[i] = s
+            results=[pool.apply_async(my_task, args=(i,), callback=my_callback) for i in list(range(0,lenn))]
+            TIMEOUT = 300#200 second timeout
+            time.sleep(TIMEOUT)
+            pool.terminate()
+            listPerEval=list(filter(lambda it:it!=None,listPerEval))
+            print(f" results timed out {lenn-len(listPerEval)}  ")
+            # with mp.Pool(processes = mp.cpu_count()) as pool:
+            #     # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
+            #     listPerEval=pool.map( partial(evaluate_case_for_map,y_det= self.list_yHat_val,y_true=self.list_gold_val) , list(range(0,lenn)))
 
 
             # listPerEval=list(map( partial(evaluate_case_for_map,y_det= self.list_yHat_val,y_true=self.list_gold_val) , list(range(0,lenn))))
