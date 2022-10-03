@@ -279,7 +279,6 @@ def evaluate_case_for_map(i,y_det,y_true):
                         ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0])
 
 def getNext(i,results,TIMEOUT):
-    results[i].get(TIMEOUT)
     try:
         # return it.next(timeout=TIMEOUT)
         return results[i].get(TIMEOUT)
