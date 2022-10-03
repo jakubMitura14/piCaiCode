@@ -230,7 +230,7 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr):
     writer.SetFileName(yHat_im_path)
     writer.Execute(image)
 
-    image = sitk.GetImageFromArray(imageArr)
+    image = sitk.GetImageFromArray(imageArr[1,:,:,:])
     writer = sitk.ImageFileWriter()
     writer.SetFileName(image_path)
     writer.Execute(image)
