@@ -90,6 +90,31 @@ from torch.nn.intrinsic.qat import ConvBnReLU3d
 
 import multiprocessing as mp
 import time
+
+
+
+
+# def my_task(v):
+#     time.sleep(v)
+#     return v ** 2
+
+# def getNext(it,TIMEOUT):
+#     try:
+#         return it.next(timeout=TIMEOUT)
+#     except:
+#         return None    
+
+# squares=[]
+# lenn=20
+# TIMEOUT = 4# second timeout
+# with mp.Pool(processes = mp.cpu_count()) as pool:
+#     it = pool.imap(my_task, range(lenn))
+#     squares=list(map(lambda ind :getNext(it,TIMEOUT) ,list(range(lenn)) ))
+# print(squares)
+
+
+
+import time
 from functools import partial
 from torchmetrics.functional import precision_recall
 from torch.utils.cpp_extension import load
@@ -245,6 +270,13 @@ def evaluate_case_for_map(i,y_det,y_true):
     return evaluate_case(y_det=y_det[i] 
                         ,y_true=y_true[i] 
                         ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0])
+
+def getNext(it,TIMEOUT):
+    try:
+        return it.next(timeout=TIMEOUT)
+    except:
+        return None    
+
 
 class Model(pl.LightningModule):
     def __init__(self
@@ -556,7 +588,7 @@ class Model(pl.LightningModule):
 
             with mp.Pool(processes = mp.cpu_count()) as pool:
                 it = pool.imap(my_task, range(lenn))
-                listPerEval=list(map(lambda ind :it.next(timeout=TIMEOUT) ,list(range(lenn)) ))
+                listPerEval=list(map(lambda ind :getNext(it,TIMEOUT) ,list(range(lenn)) ))
             #filtering out those that timed out
             listPerEval=list(filter(lambda it:it!=None,listPerEval))
             print(f" results timed out {lenn-len(listPerEval)} from all {lenn} ")                
