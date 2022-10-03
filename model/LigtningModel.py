@@ -540,12 +540,14 @@ class Model(pl.LightningModule):
             #timeout based on https://stackoverflow.com/questions/66051638/set-a-time-limit-on-the-pool-map-operation-when-using-multiprocessing
             my_task=partial(evaluate_case_for_map,y_det= self.list_yHat_val,y_true=self.list_gold_val)
             def my_callback(t):
+                print(f"tttttt  {t}")
                 i, s = t
                 listPerEval[i] = s
             results=[pool.apply_async(my_task, args=(i,), callback=my_callback) for i in list(range(0,lenn))]
-            TIMEOUT = 300#200 second timeout
+            TIMEOUT = 300# second timeout
             time.sleep(TIMEOUT)
             pool.terminate()
+            #filtering out those that timed out
             listPerEval=list(filter(lambda it:it!=None,listPerEval))
             print(f" results timed out {lenn-len(listPerEval)}  ")
             # with mp.Pool(processes = mp.cpu_count()) as pool:
