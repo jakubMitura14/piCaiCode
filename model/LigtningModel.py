@@ -279,6 +279,7 @@ def evaluate_case_for_map(i,y_det,y_true):
                         ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0])
 
 def getNext(i,results,TIMEOUT):
+    results[i].get(TIMEOUT)
     try:
         # return it.next(timeout=TIMEOUT)
         return results[i].get(TIMEOUT)
@@ -573,7 +574,7 @@ class Model(pl.LightningModule):
             
             self.log('meanDice',torch.mean(torch.stack( self.dices)).item())
             self.log('mean_surface_distance',torch.mean(torch.stack( self.surfDists)).item())
-            
+
             lenn=len(self.list_yHat_val)
             numPerIter=1
             numIters=math.ceil(lenn/numPerIter)-1
@@ -602,7 +603,7 @@ class Model(pl.LightningModule):
             # listPerEval=list(filter(lambda it:it!=None,listPerEval))
             # print(f" results timed out {lenn-len(listPerEval)} from all {lenn} ")
 
-            TIMEOUT = 30# second timeout
+            TIMEOUT = 50# second timeout
 
 
 # TIMEOUT = 2# second timeout
@@ -628,7 +629,7 @@ class Model(pl.LightningModule):
                 #it = pool.imap(my_task, range(lenn))
                 results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
                 time.sleep(TIMEOUT)
-                listPerEval=list(map(lambda ind :getNext(ind,results,15) ,list(range(lenn)) ))
+                listPerEval=list(map(lambda ind :getNext(ind,results,5) ,list(range(lenn)) ))
             #filtering out those that timed out
             listPerEval=list(filter(lambda it:it!=None,listPerEval))
             print(f" results timed out {lenn-len(listPerEval)} from all {lenn} ")                
