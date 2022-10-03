@@ -110,6 +110,7 @@ def mainTrain(experiment,options,df):
     label_name=f"label{spacing_keyword}{sizeWord}" 
     label_name_val=label_name
     df=df.loc[df[label_name_val] != ' ']
+    df=df.loc[df['isAnythingInAnnotated']>0]
 
     cacheDir =  f"/home/sliceruser/preprocess/monai_persistent_Dataset/{spacing_keyword}/{sizeWord}"
 
