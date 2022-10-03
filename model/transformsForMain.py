@@ -132,7 +132,7 @@ def get_train_transforms(RandGaussianNoised_prob
         ]
     )
     return train_transforms
-def get_val_transforms(is_whole_to_train,centerCropSize):
+def get_val_transforms(is_whole_to_train):
     val_transforms = Compose(
         [
             LoadImaged(keys=["chan3_col_name_val","label_name_val"]),
