@@ -197,7 +197,7 @@ def divide_chunks(l, n):
     for i in range(0, len(l), n):
         yield l[i:i + n]
 
-def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr):
+def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     """
     saves arrays in given directory and return paths to them
     """
@@ -208,6 +208,7 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr):
     gold_im_path = join(directory, patId+ "_gold.nii.gz" )
     yHat_im_path =join(directory, patId+ "_hat.nii.gz" )
     image_path =join(directory, patId+ "image.nii.gz" )
+    hatPostA_path =join(directory, patId+ "hatPostA.nii.gz" )
 
     # gold_arr=np.swapaxes(gold_arr,0,2)
     # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
@@ -228,11 +229,16 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr):
     image = sitk.GetImageFromArray(y_hat_arr)
     writer = sitk.ImageFileWriter()
     writer.SetFileName(yHat_im_path)
-    writer.Execute(image)
+    writer.Execute(image) 
 
-    image = sitk.GetImageFromArray(imageArr[1,:,:,:])
+    image = sitk.GetImageFromArray(np.swapaxes(imageArr[2,:,:,:],0,2))
     writer = sitk.ImageFileWriter()
     writer.SetFileName(image_path)
+    writer.Execute(image)
+
+    image = sitk.GetImageFromArray(np.swapaxes(hatPostA,0,2))
+    writer = sitk.ImageFileWriter()
+    writer.SetFileName(hatPostA_path)
     writer.Execute(image)
 
     return(gold_im_path,yHat_im_path)
@@ -252,9 +258,9 @@ def getArrayFromPath(path):
 def extractLesions_my(x):
     return extract_lesion_candidates(x)[0]
 
-def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,images):
+def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,images,hatPostA):
 # def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,reg_hat):
-    return saveFilesInDir(y_true[i],y_det[i], temp_val_dir, patIds[i],images[i])
+    return saveFilesInDir(y_true[i],y_det[i], temp_val_dir, patIds[i],images[i],hatPostA[i])
     
     # if(reg_hat[i]>0):
     #     return saveFilesInDir(y_true[i],y_det[i], temp_val_dir, patIds[i])
@@ -451,7 +457,7 @@ class Model(pl.LightningModule):
 
         images = decollate_batch(x.cpu().detach()) 
 #         # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
-        
+        hatPostA=[]
         for i in range(0,len(y_det)):
             hatPost=self.postProcess(y_det[i])
             # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
@@ -461,7 +467,7 @@ class Model(pl.LightningModule):
             # self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
             self.dices.append(locDice)
             self.surfDists.append(avSurface_dist_loc)
-
+            hatPostA.append(hatPost)[1,:,:,:]
 
 
 #         # monai.metrics.compute_confusion_matrix_metric() 

@@ -206,7 +206,7 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
         "accumulate_grad_batches" : accumulate_grad_batches,
         "gradient_clip_val" :gradient_clip_val,
         "log_every_n_steps" :2,
-        "strategy" :'dp',# "ddp_sharded"
+        #"strategy" :'dp',# "ddp_sharded"
         #"profiler":'simple'
         }
 
