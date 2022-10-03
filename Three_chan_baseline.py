@@ -113,11 +113,11 @@ def mainTrain(experiment,options,df):
     cacheDir =  f"/home/sliceruser/preprocess/monai_persistent_Dataset/{spacing_keyword}/{sizeWord}"
 
     ##filtering out some pathological cases
-    resList=[]     
-    with mp.Pool(processes = mp.cpu_count()) as pool:
-        resList=pool.map(partial(isAnnytingInAnnotatedInner,colName=label_name),list(df.iterrows()))    
-    df['locIsInAnnot']= resList
-    df = df.loc[df['locIsInAnnot']>0]
+    # resList=[]     
+    # with mp.Pool(processes = mp.cpu_count()) as pool:
+    #     resList=pool.map(partial(isAnnytingInAnnotatedInner,colName=label_name),list(df.iterrows()))    
+    # df['locIsInAnnot']= resList
+    # df = df.loc[df['locIsInAnnot']>0]
 
 
     data = DataModule.PiCaiDataModule(
