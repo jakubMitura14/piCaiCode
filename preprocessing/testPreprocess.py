@@ -239,60 +239,62 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
         ):
         #if(not pathOs.exists(outPath)):
         if(True):
-            patId=str(row[1]['patient_id'])
-            print(f" str(row[1][colNameAdc])  {str(row[1][colNameAdc])}  str(row[1][colNameHbv]) {str(row[1][colNameHbv])}"    )
-            imgT2w=sitk.ReadImage(str(row[1][colNameT2w]))
-            imgAdc=sitk.ReadImage(str(row[1][colNameAdc]))
-            imgHbv=sitk.ReadImage(str(row[1][colNameHbv]))
-            imgLabel=sitk.ReadImage(str(row[1][labelColName]))
+            try:
+                patId=str(row[1]['patient_id'])
+                print(f" str(row[1][colNameAdc])  {str(row[1][colNameAdc])}  str(row[1][colNameHbv]) {str(row[1][colNameHbv])}"    )
+                imgT2w=sitk.ReadImage(str(row[1][colNameT2w]))
+                imgAdc=sitk.ReadImage(str(row[1][colNameAdc]))
+                imgHbv=sitk.ReadImage(str(row[1][colNameHbv]))
+                imgLabel=sitk.ReadImage(str(row[1][labelColName]))
 
-            imgT2w=sitk.Cast(imgT2w, sitk.sitkFloat32)
-            imgAdc=sitk.Cast(imgAdc, sitk.sitkFloat32)
-            imgHbv=sitk.Cast(imgHbv, sitk.sitkFloat32)
-            print(f"pre patient id  {patId} ")
-            print(f"pre t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
-            print(f"pre adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
-            print(f"pre hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
-            print(f"pre imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
+                imgT2w=sitk.Cast(imgT2w, sitk.sitkFloat32)
+                imgAdc=sitk.Cast(imgAdc, sitk.sitkFloat32)
+                imgHbv=sitk.Cast(imgHbv, sitk.sitkFloat32)
+                print(f"pre patient id  {patId} ")
+                print(f"pre t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
+                print(f"pre adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
+                print(f"pre hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
+                print(f"pre imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
 
-            if(ToBedivisibleBy32):
-                imgT2w=Standardize.padToDivisibleBy32(imgT2w,paddValue)
-                imgAdc=Standardize.padToDivisibleBy32(imgAdc,paddValue)
-                imgHbv=Standardize.padToDivisibleBy32(imgHbv,paddValue)
-                imgLabel=Standardize.padToDivisibleBy32(imgLabel,paddValue)
-            else:
-                imgT2w=Standardize.padToSize(imgT2w,targetSize,paddValue)
-                imgAdc=Standardize.padToSize(imgAdc,targetSize,paddValue)
-                imgHbv=Standardize.padToSize(imgHbv,targetSize,paddValue)
-                imgLabel=Standardize.padToSize(imgLabel,targetSize,paddValue)
+                if(ToBedivisibleBy32):
+                    imgT2w=Standardize.padToDivisibleBy32(imgT2w,paddValue)
+                    imgAdc=Standardize.padToDivisibleBy32(imgAdc,paddValue)
+                    imgHbv=Standardize.padToDivisibleBy32(imgHbv,paddValue)
+                    imgLabel=Standardize.padToDivisibleBy32(imgLabel,paddValue)
+                else:
+                    imgT2w=Standardize.padToSize(imgT2w,targetSize,paddValue)
+                    imgAdc=Standardize.padToSize(imgAdc,targetSize,paddValue)
+                    imgHbv=Standardize.padToSize(imgHbv,targetSize,paddValue)
+                    imgLabel=Standardize.padToSize(imgLabel,targetSize,paddValue)
 
-            print(f"post patient id  {patId} ")
-            print(f"post t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
-            print(f"post adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
-            print(f"post hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
-            print(f"post imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
+                print(f"post patient id  {patId} ")
+                print(f"post t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
+                print(f"post adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
+                print(f"post hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
+                print(f"post imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
 
-            join = sitk.JoinSeriesImageFilter()
-            joined_image = join.Execute(imgT2w, imgAdc,imgHbv,imgAdc)
-            
-            writer = sitk.ImageFileWriter()
-            writer.KeepOriginalImageUIDOn()
-            writer.SetFileName(outPath)
-            writer.Execute(joined_image)
+                join = sitk.JoinSeriesImageFilter()
+                joined_image = join.Execute(imgT2w, imgAdc,imgHbv,imgAdc)
+                
+                writer = sitk.ImageFileWriter()
+                writer.KeepOriginalImageUIDOn()
+                writer.SetFileName(outPath)
+                writer.Execute(joined_image)
 
-            writer = sitk.ImageFileWriter()
-            writer.KeepOriginalImageUIDOn()
-            writer.SetFileName(outLabelPath)
-            writer.Execute(imgLabel)
-
-
-            writer = sitk.ImageFileWriter()
-            writer.KeepOriginalImageUIDOn()
-            writer.SetFileName(pathDebugT2w)
-            writer.Execute(imgT2w)
+                writer = sitk.ImageFileWriter()
+                writer.KeepOriginalImageUIDOn()
+                writer.SetFileName(outLabelPath)
+                writer.Execute(imgLabel)
 
 
-        return (outPath,outLabelPath)      
+                writer = sitk.ImageFileWriter()
+                writer.KeepOriginalImageUIDOn()
+                writer.SetFileName(pathDebugT2w)
+                writer.Execute(imgT2w)
+
+                return (outPath,outLabelPath)
+            except:
+                return (" ", " ")                         
     return (" ", " ")
 
 
