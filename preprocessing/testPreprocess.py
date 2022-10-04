@@ -262,6 +262,10 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
                 joined_image = join.Execute(imgT2w, imgHbv,imgAdc,imgLabel)
                 joined_image=Standardize.padToSize(joined_image,targetSize,paddValue)
 
+                writer = sitk.ImageFileWriter()
+                writer.SetFileName(pathDebugT2w)
+                writer.Execute(imgT2w)
+
                 select = sitk.VectorIndexSelectionCastImageFilter()
                 imgT2w = select.Execute(joined_image, 0, sitk.sitkFloat32)
                 imgAdc = select.Execute(joined_image, 1, sitk.sitkFloat32)
@@ -299,9 +303,7 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
                 writer.Execute(imgLabel)
 
 
-                writer = sitk.ImageFileWriter()
-                writer.SetFileName(pathDebugT2w)
-                writer.Execute(imgT2w)
+
 
                 return (outPath,outLabelPath)
             except:
