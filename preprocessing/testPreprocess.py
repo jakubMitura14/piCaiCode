@@ -167,7 +167,7 @@ def resample_labels(row,targetSpacing,spacing_keyword):
             writer.SetFileName(newPath)
             writer.Execute(resampled)
 
-            print(f"in resample labels  newPath {newPath} ")
+            print(f"in resample labels  newPath {newPath} old path {path} ")
             
             return newPath  
         else:
