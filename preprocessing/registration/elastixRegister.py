@@ -33,7 +33,7 @@ def reg_adc_hbv_to_t2w_sitk(row,colName,t2wColName,outPathh=""):
         outPath = path.replace(".mha","_reg.mha")
     #returning faster if the result is already present
     if(pathOs.exists(outPath)):
-        return outPath #TODO unhash
+        return outPath 
         #pass     
     else:
         if(len(path)>2):
@@ -164,9 +164,9 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
             p = Popen(cmd, shell=True)#,stdout=subprocess.PIPE , stderr=subprocess.PIPE
             p.wait()
             #we will repeat operation multiple max 9 times if the result would not be written
-            if((not pathOs.exists(result)) and reIndex<15):
+            if((not pathOs.exists(result)) and reIndex<8):
                 reIndexNew=reIndex+1
-                if(reIndex==6): #in case it do not work we will try diffrent parametrization
+                if(reIndex==4): #in case it do not work we will try diffrent parametrization
                     reg_prop=reg_prop.replace("parameters","parametersB")              
                 reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment,reIndexNew)
             if(not pathOs.exists(result)):
