@@ -153,15 +153,15 @@ def resample_labels(row,targetSpacing,spacing_keyword):
         newPath = outPath.replace(".mha",spacing_keyword+".nii.gz" )
         #if(not pathOs.exists(newPath)):         
         if(True):         
-            try:
-                print(" resampling label A ")
-                #experiment.log_text(f" new resample label {study_id}")
-                resampled = Resampling.resample_label_with_GAN(path,targetSpacing)
-            except Exception as e:
-                print(f"error resampling {e}")
-                #recursively apply resampling
-                resample_labels(row,targetSpacing,spacing_keyword)
-                #resampled = Resampling.resample_label_with_GAN(path,targetSpacing)
+            # try:
+            print(" resampling label A ")
+            #experiment.log_text(f" new resample label {study_id}")
+            resampled = Resampling.resample_label_with_GAN(path,targetSpacing)
+            # except Exception as e:
+            #     print(f"error resampling {e}")
+            #     #recursively apply resampling
+            #     resample_labels(row,targetSpacing,spacing_keyword)
+            #     #resampled = Resampling.resample_label_with_GAN(path,targetSpacing)
 
             write_to_modif_path(resampled,outPath,".mha",spacing_keyword+"resampl.nii.gz" )
         else:
