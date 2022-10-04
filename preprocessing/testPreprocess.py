@@ -242,6 +242,11 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
             imgT2w=sitk.Cast(imgT2w, sitk.sitkFloat32)
             imgAdc=sitk.Cast(imgAdc, sitk.sitkFloat32)
             imgHbv=sitk.Cast(imgHbv, sitk.sitkFloat32)
+            print(f"pre patient id  {patId} ")
+            print(f"pre t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
+            print(f"pre adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
+            print(f"pre hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
+            print(f"pre imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
 
             if(ToBedivisibleBy32):
                 imgT2w=Standardize.padToDivisibleBy32(imgT2w,paddValue)
@@ -254,11 +259,11 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
                 imgHbv=Standardize.padToSize(imgHbv,targetSize,paddValue)
                 imgLabel=Standardize.padToSize(imgLabel,targetSize,paddValue)
 
-            print(f"patient id  {patId} ")
-            print(f"t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
-            print(f"adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
-            print(f"hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
-            print(f"imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
+            print(f"post patient id  {patId} ")
+            print(f"post t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
+            print(f"post adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
+            print(f"post hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
+            print(f"post imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
 
             join = sitk.JoinSeriesImageFilter()
             joined_image = join.Execute(imgT2w, imgAdc,imgHbv,imgAdc)
