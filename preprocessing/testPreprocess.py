@@ -256,16 +256,29 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
                 print(f"pre hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
                 print(f"pre imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
 
-                if(ToBedivisibleBy32):
-                    imgT2w=Standardize.padToDivisibleBy32(imgT2w,paddValue)
-                    imgAdc=Standardize.padToDivisibleBy32(imgAdc,paddValue)
-                    imgHbv=Standardize.padToDivisibleBy32(imgHbv,paddValue)
-                    imgLabel=Standardize.padToDivisibleBy32(imgLabel,paddValue)
-                else:
-                    imgT2w=Standardize.padToSize(imgT2w,targetSize,paddValue)
-                    imgAdc=Standardize.padToSize(imgAdc,targetSize,paddValue)
-                    imgHbv=Standardize.padToSize(imgHbv,targetSize,paddValue)
-                    imgLabel=Standardize.padToSize(imgLabel,targetSize,paddValue)
+                join = sitk.JoinSeriesImageFilter()
+                joined_image = join.Execute(imgT2w, imgHbv,imgAdc,imgLabel)
+                joined_image=Standardize.padToSize(joined_image,targetSize,paddValue)
+
+                select = sitk.VectorIndexSelectionCastImageFilter()
+                imgT2w = select.Execute(joined_image, 0, sitk.sitkFloat32)
+                imgAdc = select.Execute(joined_image, 1, sitk.sitkFloat32)
+                imgHbv = select.Execute(joined_image, 2, sitk.sitkFloat32)
+                imgLabel = select.Execute(joined_image, 3, sitk.sitkUInt8)
+
+                join = sitk.JoinSeriesImageFilter()
+                joined_image = join.Execute(imgT2w,imgAdc, imgHbv,imgAdc)
+
+                # if(ToBedivisibleBy32):
+                #     imgT2w=Standardize.padToDivisibleBy32(imgT2w,paddValue)
+                #     imgAdc=Standardize.padToDivisibleBy32(imgAdc,paddValue)
+                #     imgHbv=Standardize.padToDivisibleBy32(imgHbv,paddValue)
+                #     imgLabel=Standardize.padToDivisibleBy32(imgLabel,paddValue)
+                # else:
+                #     imgT2w=Standardize.padToSize(imgT2w,targetSize,paddValue)
+                #     imgAdc=Standardize.padToSize(imgAdc,targetSize,paddValue)
+                #     imgHbv=Standardize.padToSize(imgHbv,targetSize,paddValue)
+                #     imgLabel=Standardize.padToSize(imgLabel,targetSize,paddValue)
 
                 print(f"post patient id  {patId} ")
                 print(f"post t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
@@ -273,22 +286,18 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
                 print(f"post hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
                 print(f"post imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
 
-                join = sitk.JoinSeriesImageFilter()
-                joined_image = join.Execute(imgT2w, imgAdc,imgHbv,imgAdc)
+
                 
                 writer = sitk.ImageFileWriter()
-                writer.KeepOriginalImageUIDOn()
                 writer.SetFileName(outPath)
                 writer.Execute(joined_image)
 
                 writer = sitk.ImageFileWriter()
-                writer.KeepOriginalImageUIDOn()
                 writer.SetFileName(outLabelPath)
                 writer.Execute(imgLabel)
 
 
                 writer = sitk.ImageFileWriter()
-                writer.KeepOriginalImageUIDOn()
                 writer.SetFileName(pathDebugT2w)
                 writer.Execute(imgT2w)
 
