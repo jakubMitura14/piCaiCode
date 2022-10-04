@@ -154,6 +154,7 @@ def resample_labels(row,targetSpacing,spacing_keyword):
         # if(not pathOs.exists(newPath)):         
         if(True):         
             try:
+                print(" resampling label A ")
                 #experiment.log_text(f" new resample label {study_id}")
                 resampled = Resampling.resample_label_with_GAN(path,targetSpacing)
             except Exception as e:
