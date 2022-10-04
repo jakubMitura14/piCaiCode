@@ -228,7 +228,7 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
     size will be padded to targetSize
     """
     #row=row[1]
-    print(f"resize_and_join colNameT2w {colNameT2w} row[1] str(row[colNameT2w]) t2w {str(row[1][colNameT2w]) !=' '} labb {str(row[1][labelColName]) !=' '} ")
+    print(f"resize_and_join labb {str(row[1][labelColName]) !=' '} ")
     outPath = str(row[1][colNameT2w]).replace('.mha',sizeWord+ '_34Chan_ee.mha')
     outLabelPath=str(row[1][labelColName]).replace('.nii.gz',sizeWord+ 'labeee.nii.gz')
     outt2wPath=str(row[1][colNameT2w]).replace('.mha',sizeWord+ 't2weee.mha')
