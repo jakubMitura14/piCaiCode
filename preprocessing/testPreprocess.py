@@ -226,6 +226,8 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
     print(f"resize_and_join colNameT2w {colNameT2w} row[1] str(row[colNameT2w]) {str(row[1][colNameT2w])}  ")
     outPath = str(row[1][colNameT2w]).replace('.mha',sizeWord+ '_34Chan.mha')
     outLabelPath=str(row[1][labelColName]).replace('.nii.gz',sizeWord+ 'ccc'+'.nii.gz')
+    pathDebugT2w=str(row[1][colNameT2w]).replace('.nii.gz',sizeWord+ 'debugT2w'+'.nii.gz')
+    
     if(str(row[1][colNameT2w])!= " " and str(row[1][colNameT2w])!="" 
         and str(row[1][colNameAdc])!= " " and str(row[1][colNameAdc])!="" 
         and str(row[1][colNameHbv])!= " " and str(row[1][colNameHbv])!=""
@@ -278,6 +280,12 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
             writer.KeepOriginalImageUIDOn()
             writer.SetFileName(outLabelPath)
             writer.Execute(imgLabel)
+
+
+            writer = sitk.ImageFileWriter()
+            writer.KeepOriginalImageUIDOn()
+            writer.SetFileName(pathDebugT2w)
+            writer.Execute(imgT2w)
 
 
         return (outPath,outLabelPath)      
