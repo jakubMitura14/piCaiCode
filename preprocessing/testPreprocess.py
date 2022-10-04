@@ -47,7 +47,7 @@ df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData.csv')
 # df = df.loc[df['isAnyMissing'] ==False]
 # df = df.loc[df['isAnythingInAnnotated']>0 ]    
 #just for testing    
-#df= df.head(30)
+df= df.head(25)
 ##df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
 print(df)    
 
@@ -141,7 +141,7 @@ def resample_labels(row,targetSpacing,spacing_keyword):
     row=row[1]    
 
     path=row['reSampledPath']
-
+    print(f"in resample labels ${path!= ' ' and path!=''}  {path} ")
     if(path!= " " and path!=""):
         path_t2w=row['t2w']
 
@@ -424,11 +424,11 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 # bias field correction
 # Standardize.iterateAndBiasCorrect('t2w',df)
 #Standarization
-for keyWord in ['t2w','adc', 'hbv']: #'cor',,'sag'
+#for keyWord in ['t2w','adc', 'hbv']: #'cor',,'sag'
     # denoising
     # Standardize.iterateAndDenoise(keyWord,df)
     # standarization
-    Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,80)   
+    #Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,80)   
 # standardize labels
 Standardize.iterateAndchangeLabelToOnes(df)
 
