@@ -47,7 +47,7 @@ df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData.csv')
 # df = df.loc[df['isAnyMissing'] ==False]
 # df = df.loc[df['isAnythingInAnnotated']>0 ]    
 #just for testing    
-df= df.head(25)
+# df= df.head(25)
 ##df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
 print(df)    
 
@@ -373,51 +373,51 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     # df[t2wKeyWord+"_3Chan"+sizeWord]=resList
     # #setting padding to labels
     # Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,maxSize, 0.0,spacing_keyword+sizeWord,True)
-    sizzX= physical_size[0]/targetSpacingg[0]
-    sizzY= physical_size[1]/targetSpacingg[1]
-    sizzZ= physical_size[2]/targetSpacingg[2]
-    sizz=(sizzX,sizzY,sizzZ)
-    multNum=16#32
-    targetSize=(math.ceil(sizz[0]/multNum)*multNum, math.ceil(sizz[1]/multNum)*multNum,math.ceil(sizz[2]/multNum)*multNum  )
+    # sizzX= physical_size[0]/targetSpacingg[0]
+    # sizzY= physical_size[1]/targetSpacingg[1]
+    # sizzZ= physical_size[2]/targetSpacingg[2]
+    # sizz=(sizzX,sizzY,sizzZ)
+    # multNum=16#32
+    # targetSize=(math.ceil(sizz[0]/multNum)*multNum, math.ceil(sizz[1]/multNum)*multNum,math.ceil(sizz[2]/multNum)*multNum  )
     
-    sizeWord="_maxSize_"
-    resList=[]
-    with mp.Pool(processes = mp.cpu_count()) as pool:
-        resList=pool.map(partial(resize_and_join
-                                ,colNameT2w=t2wKeyWord
-                                ,colNameAdc="adc"+spacing_keyword
-                                ,colNameHbv="hbv"+spacing_keyword
-                                ,sizeWord=sizeWord
-                                ,targetSize=targetSize
-                                ,ToBedivisibleBy32=False
-                                ,labelColName=labelColName
-                                )  ,list(df.iterrows())) 
-    # resList=list(map(partial(resize_and_join
-    #                         ,colNameT2w=t2wKeyWord
-    #                         ,colNameAdc="adc"+spacing_keyword
-    #                         ,colNameHbv="hbv"+spacing_keyword
-    #                         ,sizeWord=sizeWord
-    #                         ,targetSize=targetSize
-    #                         ,ToBedivisibleBy32=False
-    #                         ,labelColName="label"+spacing_keyword
-    #                         )  ,list(df.iterrows())) )
+    # sizeWord="_maxSize_"
+    # resList=[]
+    # with mp.Pool(processes = mp.cpu_count()) as pool:
+    #     resList=pool.map(partial(resize_and_join
+    #                             ,colNameT2w=t2wKeyWord
+    #                             ,colNameAdc="adc"+spacing_keyword
+    #                             ,colNameHbv="hbv"+spacing_keyword
+    #                             ,sizeWord=sizeWord
+    #                             ,targetSize=targetSize
+    #                             ,ToBedivisibleBy32=False
+    #                             ,labelColName=labelColName
+    #                             )  ,list(df.iterrows())) 
+    # # resList=list(map(partial(resize_and_join
+    # #                         ,colNameT2w=t2wKeyWord
+    # #                         ,colNameAdc="adc"+spacing_keyword
+    # #                         ,colNameHbv="hbv"+spacing_keyword
+    # #                         ,sizeWord=sizeWord
+    # #                         ,targetSize=targetSize
+    # #                         ,ToBedivisibleBy32=False
+    # #                         ,labelColName="label"+spacing_keyword
+    # #                         )  ,list(df.iterrows())) )
 
-    pathsLabels = list(map(lambda tupl: tupl[0], resList ))
-    pathst2w = list(map(lambda tupl: tupl[1], resList ))
-    pathsadc = list(map(lambda tupl: tupl[2], resList ))
-    pathshbv = list(map(lambda tupl: tupl[1], resList ))
+    # pathsLabels = list(map(lambda tupl: tupl[0], resList ))
+    # pathst2w = list(map(lambda tupl: tupl[1], resList ))
+    # pathsadc = list(map(lambda tupl: tupl[2], resList ))
+    # pathshbv = list(map(lambda tupl: tupl[1], resList ))
 
-    label_name=f"label_{spacing_keyword}{sizeWord}" 
+    # label_name=f"label_{spacing_keyword}{sizeWord}" 
 
-    t2wColName="t2w"+spacing_keyword+sizeWord+"cropped"
-    adcColName="adc"+spacing_keyword+sizeWord+"cropped"
-    hbvColName="hbv"+spacing_keyword+sizeWord+"cropped"
+    # t2wColName="t2w"+spacing_keyword+sizeWord+"cropped"
+    # adcColName="adc"+spacing_keyword+sizeWord+"cropped"
+    # hbvColName="hbv"+spacing_keyword+sizeWord+"cropped"
 
 
-    df[label_name]=pathsLabels
-    df[t2wColName]=pathst2w
-    df[adcColName]=pathsadc
-    df[hbvColName]=pathshbv
+    # df[label_name]=pathsLabels
+    # df[t2wColName]=pathst2w
+    # df[adcColName]=pathsadc
+    # df[hbvColName]=pathshbv
 
 
     # Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,targetSize, 0.0,spacing_keyword+sizeWord+'_3Chan',False)
@@ -438,7 +438,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     # denoising
     # Standardize.iterateAndDenoise(keyWord,df)
     # standarization
-    #Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,80)   
+    Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,110)   
 # standardize labels
 Standardize.iterateAndchangeLabelToOnes(df)
 
