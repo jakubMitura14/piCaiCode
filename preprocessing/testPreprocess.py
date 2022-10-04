@@ -366,7 +366,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 
 
     df[t2wKeyWord+"_3Chan"+sizeWord]=resList
-    Standardize.iterateAndpadLabels(df,"label_3Chan"+spacing_keyword,targetSize, 0.0,spacing_keyword+sizeWord,False)
+    Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,targetSize, 0.0,spacing_keyword+sizeWord+'_3Chan',False)
 
 
 
