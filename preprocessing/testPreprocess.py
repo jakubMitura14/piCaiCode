@@ -214,7 +214,7 @@ def join_and_save_3Channel(row,colNameT2w,colNameAdc,colNameHbv):
 
 
 def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
-,sizeWord,targetSize,ToBedivisibleBy32,paddValue=0.0):
+,sizeWord,targetSize,ToBedivisibleBy32,labelColName,paddValue=0.0):
     """
     resizes and join images into 3 channel images 
     if ToBedivisibleBy32 is set to true size will be set to be divisible to 32 
@@ -224,17 +224,20 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
     #row=row[1]
     print(f"resize_and_join colNameT2w {colNameT2w} row[1] str(row[colNameT2w]) {str(row[1][colNameT2w])}  ")
     outPath = str(row[1][colNameT2w]).replace('.mha',sizeWord+ '_34Chan.mha')
+    outLabelPath=str(row[1][labelColName]).replace('.nii.gz',sizeWord+ 'padded'+'.nii.gz')
     if(str(row[1][colNameT2w])!= " " and str(row[1][colNameT2w])!="" 
         and str(row[1][colNameAdc])!= " " and str(row[1][colNameAdc])!="" 
         and str(row[1][colNameHbv])!= " " and str(row[1][colNameHbv])!=""
+        and str(row[1][labelColName])!= " " and str(row[1][labelColName])!=""
         ):
-        if(not pathOs.exists(outPath)):
-        #if(True):
+        #if(not pathOs.exists(outPath)):
+        if(True):
             patId=str(row[1]['patient_id'])
             print(f" str(row[1][colNameAdc])  {str(row[1][colNameAdc])}  str(row[1][colNameHbv]) {str(row[1][colNameHbv])}"    )
             imgT2w=sitk.ReadImage(str(row[1][colNameT2w]))
             imgAdc=sitk.ReadImage(str(row[1][colNameAdc]))
             imgHbv=sitk.ReadImage(str(row[1][colNameHbv]))
+            imgLabel=sitk.ReadImage(str(row[1][labelColName]))
 
             imgT2w=sitk.Cast(imgT2w, sitk.sitkFloat32)
             imgAdc=sitk.Cast(imgAdc, sitk.sitkFloat32)
@@ -244,24 +247,35 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
                 imgT2w=Standardize.padToDivisibleBy32(imgT2w,paddValue)
                 imgAdc=Standardize.padToDivisibleBy32(imgAdc,paddValue)
                 imgHbv=Standardize.padToDivisibleBy32(imgHbv,paddValue)
+                imgLabel=Standardize.padToDivisibleBy32(imgLabel,paddValue)
             else:
                 imgT2w=Standardize.padToSize(imgT2w,targetSize,paddValue)
                 imgAdc=Standardize.padToSize(imgAdc,targetSize,paddValue)
                 imgHbv=Standardize.padToSize(imgHbv,targetSize,paddValue)
+                imgLabel=Standardize.padToSize(imgLabel,targetSize,paddValue)
 
             print(f"patient id  {patId} ")
             print(f"t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
             print(f"adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
             print(f"hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
+            print(f"imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
 
             join = sitk.JoinSeriesImageFilter()
             joined_image = join.Execute(imgT2w, imgAdc,imgHbv,imgAdc)
+            
             writer = sitk.ImageFileWriter()
             writer.KeepOriginalImageUIDOn()
             writer.SetFileName(outPath)
             writer.Execute(joined_image)
-        return outPath      
-    return " "
+
+            writer = sitk.ImageFileWriter()
+            writer.KeepOriginalImageUIDOn()
+            writer.SetFileName(outLabelPath)
+            writer.Execute(imgLabel)
+
+
+        return (outPath,outLabelPath)      
+    return (" ", " ")
 
 
 
@@ -364,9 +378,15 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
                                 ,ToBedivisibleBy32=False
                                 )  ,list(df.iterrows())) 
 
+    pathsImageJoined = list(map(lambda tupl: tupl[0], resList ))
+    pathsLabels = list(map(lambda tupl: tupl[1], resList ))
+    label_name=f"label_{spacing_keyword}{sizeWord}" 
 
-    df[t2wKeyWord+"_3Chan"+sizeWord]=resList
-    Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,targetSize, 0.0,spacing_keyword+sizeWord+'_3Chan',False)
+    df[t2wKeyWord+"_3Chan"+sizeWord]=pathsImageJoined
+    df[label_name]=pathsLabels
+
+
+    # Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,targetSize, 0.0,spacing_keyword+sizeWord+'_3Chan',False)
 
 
 
