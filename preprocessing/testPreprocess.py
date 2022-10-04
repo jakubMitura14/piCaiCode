@@ -231,9 +231,9 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
     print(f"resize_and_join colNameT2w {colNameT2w} row[1] str(row[colNameT2w]) t2w {str(row[1][colNameT2w]) !=' '} labb {str(row[1][labelColName]) !=' '} ")
     outPath = str(row[1][colNameT2w]).replace('.mha',sizeWord+ '_34Chan_ee.mha')
     outLabelPath=str(row[1][labelColName]).replace('.nii.gz',sizeWord+ 'labeee.nii.gz')
-    outt2wPath=str(row[1][colNameT2w]).replace('.nii.gz',sizeWord+ 't2weee.nii.gz')
-    outadcPath=str(row[1][colNameAdc]).replace('.nii.gz',sizeWord+ 'adceee.nii.gz')
-    outhbvPath=str(row[1][colNameHbv]).replace('.nii.gz',sizeWord+ 'hbveee.nii.gz')
+    outt2wPath=str(row[1][colNameT2w]).replace('.mha',sizeWord+ 't2weee.mha')
+    outadcPath=str(row[1][colNameAdc]).replace('.mha',sizeWord+ 'adceee.mha')
+    outhbvPath=str(row[1][colNameHbv]).replace('.mha',sizeWord+ 'hbveee.mha')
     
     
 
