@@ -225,7 +225,7 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
     #row=row[1]
     print(f"resize_and_join colNameT2w {colNameT2w} row[1] str(row[colNameT2w]) {str(row[1][colNameT2w])}  ")
     outPath = str(row[1][colNameT2w]).replace('.mha',sizeWord+ '_34Chan.mha')
-    outLabelPath=str(row[1][labelColName]).replace('.nii.gz',sizeWord+ 'padded'+'.nii.gz')
+    outLabelPath=str(row[1][labelColName]).replace('.nii.gz',sizeWord+ 'ccc'+'.nii.gz')
     if(str(row[1][colNameT2w])!= " " and str(row[1][colNameT2w])!="" 
         and str(row[1][colNameAdc])!= " " and str(row[1][colNameAdc])!="" 
         and str(row[1][colNameHbv])!= " " and str(row[1][colNameHbv])!=""
