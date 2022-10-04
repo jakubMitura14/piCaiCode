@@ -107,7 +107,7 @@ def mainTrain(experiment,options,df):
     chan3_col_name=f"t2w{spacing_keyword}_3Chan{sizeWord}" 
     chan3_col_name_val=chan3_col_name 
     df=df.loc[df[chan3_col_name] != ' ']
-    label_name=f"label{spacing_keyword}{sizeWord}" 
+    label_name=f"label_3Chan{spacing_keyword}{sizeWord}" 
     label_name_val=label_name
     df=df.loc[df[label_name_val] != ' ']
     df=df.loc[df['isAnythingInAnnotated']>0]
