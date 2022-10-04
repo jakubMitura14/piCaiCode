@@ -164,6 +164,7 @@ def resample_labels(row,targetSpacing,spacing_keyword):
             #     #resampled = Resampling.resample_label_with_GAN(path,targetSpacing)
 
             write_to_modif_path(resampled,outPath,".mha",spacing_keyword+"resampl.nii.gz" )
+            return newPath  
         else:
             print("already resampled")
             experiment.log_text(f"already reSampled label {study_id}")
