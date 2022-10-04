@@ -128,7 +128,7 @@ def resample_To_t2w(row,colName,spacing_keyword,t2wColName):
             experiment.log_text(f" old resample {colName} {study_id}")
             print(f"already resampled {study_id} colname {colName} newPath {newPath}")
         return newPath 
-           
+
     return " "
 
 
@@ -231,8 +231,9 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
     print(f"resize_and_join colNameT2w {colNameT2w} row[1] str(row[colNameT2w]) t2w {str(row[1][colNameT2w]) !=' '} labb {str(row[1][labelColName]) !=' '} ")
     outPath = str(row[1][colNameT2w]).replace('.mha',sizeWord+ '_34Chan_ddd.mha')
     outLabelPath=str(row[1][labelColName]).replace('.nii.gz',sizeWord+ 'ddd.nii.gz')
-    pathDebugT2w=str(row[1][colNameT2w]).replace('.mha',sizeWord+ 'debugT2w.mha')
+    pathDebugT2w=str(row[1][colNameT2w]).replace('.mha',sizeWord+ '_debug_t2w.mha')
     
+
     if(str(row[1][colNameT2w])!= " " and str(row[1][colNameT2w])!="" 
         and str(row[1][colNameAdc])!= " " and str(row[1][colNameAdc])!="" 
         and str(row[1][colNameHbv])!= " " and str(row[1][colNameHbv])!=""
@@ -241,6 +242,7 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
         #if(not pathOs.exists(outPath)):
         if(True):
             try:
+                print(f" pathDebugT2w {pathDebugT2w} outLabelPath {outLabelPath} ")
                 patId=str(row[1]['patient_id'])
                 print(f" str(row[1][colNameAdc])  {str(row[1][colNameAdc])}  str(row[1][colNameHbv]) {str(row[1][colNameHbv])}"    )
                 imgT2w=sitk.ReadImage(str(row[1][colNameT2w]))
@@ -250,11 +252,11 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
                 imgT2w=sitk.Cast(imgT2w, sitk.sitkFloat32)
                 imgAdc=sitk.Cast(imgAdc, sitk.sitkFloat32)
                 imgHbv=sitk.Cast(imgHbv, sitk.sitkFloat32)
-                print(f"pre patient id  {patId} ")
-                print(f"pre t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
-                print(f"pre adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
-                print(f"pre hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
-                print(f"pre imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
+                # print(f"pre patient id  {patId} ")
+                # print(f"pre t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
+                # print(f"pre adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
+                # print(f"pre hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
+                # print(f"pre imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
 
                 join = sitk.JoinSeriesImageFilter()
                 joined_image = join.Execute(imgT2w, imgHbv,imgAdc,imgLabel)
@@ -280,11 +282,11 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
                 #     imgHbv=Standardize.padToSize(imgHbv,targetSize,paddValue)
                 #     imgLabel=Standardize.padToSize(imgLabel,targetSize,paddValue)
 
-                print(f"post patient id  {patId} ")
-                print(f"post t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
-                print(f"post adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
-                print(f"post hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
-                print(f"post imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
+                # print(f"post patient id  {patId} ")
+                # print(f"post t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
+                # print(f"post adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
+                # print(f"post hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
+                # print(f"post imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
 
 
                 
