@@ -228,7 +228,7 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
     size will be padded to targetSize
     """
     #row=row[1]
-    print(f"resize_and_join labb {str(row[1][labelColName]) !=' '} ")
+    print(f"resize_and_join labelColName {labelColName} labb {str(row[1][labelColName]) !=' '} ")
     outPath = str(row[1][colNameT2w]).replace('.mha',sizeWord+ '_34Chan_ee.mha')
     outLabelPath=str(row[1][labelColName]).replace('.nii.gz',sizeWord+ 'labeee.nii.gz')
     outt2wPath=str(row[1][colNameT2w]).replace('.mha',sizeWord+ 't2weee.mha')
@@ -246,7 +246,7 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
         if(True):
             # print(f" pathDebugT2w {pathDebugT2w} outLabelPath {outLabelPath} ")
             patId=str(row[1]['patient_id'])
-            print(f" {str(row[1][colNameAdc])}  str(row[1][colNameHbv]) {str(row[1][colNameHbv])}"    )
+            # print(f" {str(row[1][colNameAdc])}  str(row[1][colNameHbv]) {str(row[1][colNameHbv])}"    )
             imgT2w=sitk.ReadImage(str(row[1][colNameT2w]))
             imgAdc=sitk.ReadImage(str(row[1][colNameAdc]))
             imgHbv=sitk.ReadImage(str(row[1][colNameHbv]))
