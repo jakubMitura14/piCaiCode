@@ -177,46 +177,6 @@ def resample_labels(row,targetSpacing,spacing_keyword):
     return " "    
 
 
-def join_and_save_3Channel(row,colNameT2w,colNameAdc,colNameHbv):
-    """
-    join 3 images into 1 3 channel image
-    """
-    row=row[1]
-    # print(row)
-    print(str(row[colNameT2w]))
-    print(str(row[colNameAdc]))
-    print(str(row[colNameHbv]))
-    outPath = str(row[colNameT2w]).replace('.mha', '_3Chan.mha')
-    if(str(row[colNameT2w])!= " " and str(row[colNameT2w])!="" 
-        and str(row[colNameAdc])!= " " and str(row[colNameAdc])!="" 
-        and str(row[colNameHbv])!= " " and str(row[colNameHbv])!=""
-        ):
-        if(True):
-            patId=str(row['patient_id'])
-        # if(not pathOs.exists(outPath)):
-
-            imgT2w=sitk.ReadImage(str(row[colNameT2w]))
-            imgAdc=sitk.ReadImage(str(row[colNameAdc]))
-            imgHbv=sitk.ReadImage(str(row[colNameHbv]))
-
-            imgT2w=sitk.Cast(imgT2w, sitk.sitkFloat32)
-            imgAdc=sitk.Cast(imgAdc, sitk.sitkFloat32)
-            imgHbv=sitk.Cast(imgHbv, sitk.sitkFloat32)
-            print(f"patient id  {patId} ")
-            print(f"t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
-            print(f"adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
-            print(f"hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
-
-            join = sitk.JoinSeriesImageFilter()
-            joined_image = join.Execute(imgT2w, imgAdc,imgHbv)
-            writer = sitk.ImageFileWriter()
-            writer.KeepOriginalImageUIDOn()
-            writer.SetFileName(outPath)
-            writer.Execute(joined_image)
-        return outPath      
-    return " "
-
-
 
 
 def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
@@ -228,7 +188,7 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
     size will be padded to targetSize
     """
     #row=row[1]
-    print(f"resize_and_join labelColName {labelColName} labb {str(row[1][labelColName]) !=' '} ")
+    print(f"resize_and_join labelColName {labelColName} labb {str(row[1][labelColName]) !=' '} source {str(row[1][labelColName])} ")
     outPath = str(row[1][colNameT2w]).replace('.mha',sizeWord+ '_34Chan_ee.mha')
     outLabelPath=str(row[1][labelColName]).replace('.nii.gz',sizeWord+ 'labeee.nii.gz')
     outt2wPath=str(row[1][colNameT2w]).replace('.mha',sizeWord+ 't2weee.mha')
