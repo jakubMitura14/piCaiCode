@@ -376,6 +376,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
                                 ,sizeWord=sizeWord
                                 ,targetSize=targetSize
                                 ,ToBedivisibleBy32=False
+                                ,labelColName="label"+spacing_keyword
                                 )  ,list(df.iterrows())) 
 
     pathsImageJoined = list(map(lambda tupl: tupl[0], resList ))
