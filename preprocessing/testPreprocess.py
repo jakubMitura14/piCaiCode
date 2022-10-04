@@ -127,7 +127,8 @@ def resample_To_t2w(row,colName,spacing_keyword,t2wColName):
         else:
             experiment.log_text(f" old resample {colName} {study_id}")
             print(f"already resampled {study_id} colname {colName} newPath {newPath}")
-        return newPath    
+        return newPath 
+           
     return " "
 
 
