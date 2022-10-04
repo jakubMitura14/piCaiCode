@@ -161,8 +161,11 @@ def resample_labels(row,targetSpacing,spacing_keyword):
             #     #recursively apply resampling
             #     resample_labels(row,targetSpacing,spacing_keyword)
             #     #resampled = Resampling.resample_label_with_GAN(path,targetSpacing)
+            writer = sitk.ImageFileWriter()
+            writer.KeepOriginalImageUIDOn()
+            writer.SetFileName(newPath)
+            writer.Execute(resampled)
 
-            write_to_modif_path(resampled,outPath,".mha",spacing_keyword+"resampl.nii.gz" )
             print(f"in resample labels  newPath {newPath} ")
             
             return newPath  
