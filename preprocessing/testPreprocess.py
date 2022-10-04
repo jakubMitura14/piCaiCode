@@ -151,7 +151,7 @@ def resample_labels(row,targetSpacing,spacing_keyword):
     
         
         newPath = outPath.replace(".mha",spacing_keyword+".nii.gz" )
-        # if(not pathOs.exists(newPath)):         
+        #if(not pathOs.exists(newPath)):         
         if(True):         
             try:
                 print(" resampling label A ")
@@ -167,9 +167,7 @@ def resample_labels(row,targetSpacing,spacing_keyword):
         else:
             print("already resampled")
             experiment.log_text(f"already reSampled label {study_id}")
-            
-        
-        return newPath  
+            return newPath  
     return " "    
 
 
@@ -330,7 +328,8 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     resList=[]
     with mp.Pool(processes = mp.cpu_count()) as pool:
         resList=pool.map(partial(resample_labels,targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ),list(df.iterrows()))    
-    df["label"+spacing_keyword]=resList
+    labelColName="label"+spacing_keyword
+    df[labelColName]=resList
 
     # df["adc"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_'+'adc',targetSpacingg,spacing_keyword)   , axis = 1) 
     # df["hbv"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_'+'hbv',targetSpacingg,spacing_keyword)   , axis = 1) 
@@ -391,7 +390,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
                                 ,sizeWord=sizeWord
                                 ,targetSize=targetSize
                                 ,ToBedivisibleBy32=False
-                                ,labelColName="label"+spacing_keyword
+                                ,labelColName=labelColName
                                 )  ,list(df.iterrows())) 
     # resList=list(map(partial(resize_and_join
     #                         ,colNameT2w=t2wKeyWord
