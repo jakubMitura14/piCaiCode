@@ -112,8 +112,8 @@ def resample_To_t2w(row,colName,spacing_keyword,t2wColName):
         t2wImage=sitk.ReadImage(str(row[t2wColName]))
         targetSpacing=t2wImage.GetSpacing()
         newPath = path.replace(".mha",spacing_keyword+".mha" )
-        if(not pathOs.exists(newPath)):   #unhash   
-        #if(True):  
+        #if(not pathOs.exists(newPath)):   #unhash   
+        if(True):  
             experiment.log_text(f" new resample {colName} {study_id}")
             resampled=None
             try:
@@ -228,9 +228,9 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
     """
     #row=row[1]
     print(f"resize_and_join colNameT2w {colNameT2w} row[1] str(row[colNameT2w]) t2w {str(row[1][colNameT2w]) !=' '} labb {str(row[1][labelColName]) !=' '} ")
-    outPath = str(row[1][colNameT2w]).replace('.mha',sizeWord+ '_34Chan.mha')
-    outLabelPath=str(row[1][labelColName]).replace('.nii.gz',sizeWord+ 'ccc'+'.nii.gz')
-    pathDebugT2w=str(row[1][colNameT2w]).replace('.nii.gz',sizeWord+ 'debugT2w'+'.mha')
+    outPath = str(row[1][colNameT2w]).replace('.mha',sizeWord+ '_34Chan_ddd.mha')
+    outLabelPath=str(row[1][labelColName]).replace('.nii.gz',sizeWord+ 'ddd.nii.gz')
+    pathDebugT2w=str(row[1][colNameT2w]).replace('.mha',sizeWord+ 'debugT2w.mha')
     
     if(str(row[1][colNameT2w])!= " " and str(row[1][colNameT2w])!="" 
         and str(row[1][colNameAdc])!= " " and str(row[1][colNameAdc])!="" 
