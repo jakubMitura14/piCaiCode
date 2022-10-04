@@ -141,7 +141,6 @@ def resample_labels(row,targetSpacing,spacing_keyword):
     row=row[1]    
 
     path=row['reSampledPath']
-    print(f"in resample labels ${path!= ' ' and path!=''}  {path} ")
     if(path!= " " and path!=""):
         path_t2w=row['t2w']
 
@@ -164,6 +163,8 @@ def resample_labels(row,targetSpacing,spacing_keyword):
             #     #resampled = Resampling.resample_label_with_GAN(path,targetSpacing)
 
             write_to_modif_path(resampled,outPath,".mha",spacing_keyword+"resampl.nii.gz" )
+            print(f"in resample labels  newPath {newPath} ")
+            
             return newPath  
         else:
             print("already resampled")
