@@ -150,7 +150,7 @@ def resample_labels(row,targetSpacing,spacing_keyword):
         study_id=str(row['study_id'])
     
         
-        newPath = outPath.replace(".mha",spacing_keyword+".nii.gz" )
+        newPath = outPath.replace(".mha",spacing_keyword+"lab_.nii.gz" )
         #if(not pathOs.exists(newPath)):         
         if(True):         
             # try:
@@ -246,7 +246,7 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
         if(True):
             # print(f" pathDebugT2w {pathDebugT2w} outLabelPath {outLabelPath} ")
             patId=str(row[1]['patient_id'])
-            print(f" str(row[1][colNameAdc])  {str(row[1][colNameAdc])}  str(row[1][colNameHbv]) {str(row[1][colNameHbv])}"    )
+            print(f" {str(row[1][colNameAdc])}  str(row[1][colNameHbv]) {str(row[1][colNameHbv])}"    )
             imgT2w=sitk.ReadImage(str(row[1][colNameT2w]))
             imgAdc=sitk.ReadImage(str(row[1][colNameAdc]))
             imgHbv=sitk.ReadImage(str(row[1][colNameHbv]))
@@ -264,7 +264,7 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
 
             writer = sitk.ImageFileWriter()
             writer.SetFileName(outt2wPath)
-            writer.Execute(imgAdc)
+            writer.Execute(imgT2w)
 
             writer = sitk.ImageFileWriter()
             writer.SetFileName(outadcPath)
@@ -313,11 +313,11 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
             #     imgHbv=Standardize.padToSize(imgHbv,targetSize,paddValue)
             #     imgLabel=Standardize.padToSize(imgLabel,targetSize,paddValue)
 
-            # print(f"post patient id  {patId} ")
-            # print(f"post t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
-            # print(f"post adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
-            # print(f"post hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
-            # print(f"post imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
+            print(f"post patient id  {patId} ")
+            print(f"post t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
+            print(f"post adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
+            print(f"post hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
+            print(f"post imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
 
 
             

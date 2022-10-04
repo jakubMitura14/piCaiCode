@@ -82,17 +82,19 @@ spec.loader.exec_module(dataUtils)
 # import dataManag.utils.dataUtils as dataUtils
 # import multiprocessing
 
-def getMonaiSubjectDataFromDataFrame(row,chan3_col_name,label_name,chan3_col_name_val,label_name_val):
+
+
+def getMonaiSubjectDataFromDataFrame(row,chan3_col_name,label_name,chan3_col_name_val,label_name_val,t2wColName
+,adcColName,hbvColName ):
         """
         given row from data frame prepares Subject object from it
         """
         subject= {"chan3_col_name": str(row[chan3_col_name])
-        ,"chan3_col_name_val": str(row[chan3_col_name_val])        
-        #, "cor":str(row['cor'])
-        #, "hbv":str(row[hbv_name])
-        #, "sag":str(row['sag'])
-        #, "t2w":str(row[t2w_name])
-        , "isAnythingInAnnotated":int(row['isAnythingInAnnotated'])
+        ,"t2w": str(row[t2wColName])        
+        ,"hbv": str(row[adcColName])        
+        ,"adc": str(row[hbvColName])        
+        
+       , "isAnythingInAnnotated":int(row['isAnythingInAnnotated'])
         , "patient_id":str(row['patient_id'])
         , "num_lesions_to_retain":int(row['num_lesions_to_retain'])
         # , "study_id":row['study_id']
@@ -110,10 +112,14 @@ def getMonaiSubjectDataFromDataFrame(row,chan3_col_name,label_name,chan3_col_nam
 
         return subject
 
+
+
+
 class PiCaiDataModule(pl.LightningDataModule):
     def __init__(self,trainSizePercent,batch_size,num_workers
     ,drop_last,df,cache_dir,chan3_col_name,chan3_col_name_val
     ,label_name,label_name_val,
+    t2wColName,adcColName,hbvColName,
     RandGaussianNoised_prob
     ,RandAdjustContrastd_prob
     ,RandGaussianSmoothd_prob
@@ -143,6 +149,13 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.chan3_col_name_val=chan3_col_name_val
         self.label_name=label_name
         self.label_name_val=label_name_val
+        
+        self.t2wColName=t2wColName
+        self.adcColName=adcColName
+        self.hbvColName=hbvColName
+
+
+
         self.RandGaussianNoised_prob=RandGaussianNoised_prob
         self.RandAdjustContrastd_prob=RandAdjustContrastd_prob
         self.RandGaussianSmoothd_prob=RandGaussianSmoothd_prob
@@ -178,10 +191,13 @@ class PiCaiDataModule(pl.LightningDataModule):
         else:    
             return torch.utils.data.random_split(patList, [numTrain,numVal,numTest])
 
+
+
     def setup(self, stage=None):
         set_determinism(seed=0)
         self.subjects = list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1]
-        ,self.chan3_col_name,self.label_name,self.chan3_col_name_val,self.label_name_val)   , list(self.df.iterrows())))
+        ,self.chan3_col_name,self.label_name,self.chan3_col_name_val,self.label_name_val
+            ,self.t2wColName, self.adcColName,self.hbvColName )   , list(self.df.iterrows())))
         train_set, valid_set,test_set = self.splitDataSet(self.subjects , self.trainSizePercent,True)
         
         self.train_subjects = train_set

@@ -121,6 +121,9 @@ def mainTrain(experiment,options,df):
     # df['locIsInAnnot']= resList
     # df = df.loc[df['locIsInAnnot']>0]
 
+    label_name=f"label_{spacing_keyword}{sizeWord}" 
+
+
 
     data = DataModule.PiCaiDataModule(
         df= df,
@@ -134,6 +137,9 @@ def mainTrain(experiment,options,df):
         chan3_col_name_val=chan3_col_name_val,
         label_name_val=label_name_val,
         label_name=label_name
+        ,t2wColName=t2wColName
+        ,adcColName=adcColName
+        ,hbvColName=hbvColName
         #maxSize=maxSize
         ,RandGaussianNoised_prob=experiment.get_parameter("RandGaussianNoised_prob")
         ,RandAdjustContrastd_prob=experiment.get_parameter("RandAdjustContrastd_prob")
