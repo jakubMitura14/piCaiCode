@@ -373,16 +373,25 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     
     sizeWord="_maxSize_"
     resList=[]
-    with mp.Pool(processes = mp.cpu_count()) as pool:
-        resList=pool.map(partial(resize_and_join
-                                ,colNameT2w=t2wKeyWord
-                                ,colNameAdc="adc"+spacing_keyword
-                                ,colNameHbv="hbv"+spacing_keyword
-                                ,sizeWord=sizeWord
-                                ,targetSize=targetSize
-                                ,ToBedivisibleBy32=False
-                                ,labelColName="label"+spacing_keyword
-                                )  ,list(df.iterrows())) 
+    # with mp.Pool(processes = mp.cpu_count()) as pool:
+    #     resList=pool.map(partial(resize_and_join
+    #                             ,colNameT2w=t2wKeyWord
+    #                             ,colNameAdc="adc"+spacing_keyword
+    #                             ,colNameHbv="hbv"+spacing_keyword
+    #                             ,sizeWord=sizeWord
+    #                             ,targetSize=targetSize
+    #                             ,ToBedivisibleBy32=False
+    #                             ,labelColName="label"+spacing_keyword
+    #                             )  ,list(df.iterrows())) 
+    resList=list(map(partial(resize_and_join
+                            ,colNameT2w=t2wKeyWord
+                            ,colNameAdc="adc"+spacing_keyword
+                            ,colNameHbv="hbv"+spacing_keyword
+                            ,sizeWord=sizeWord
+                            ,targetSize=targetSize
+                            ,ToBedivisibleBy32=False
+                            ,labelColName="label"+spacing_keyword
+                            )  ,list(df.iterrows())) )
 
     pathsImageJoined = list(map(lambda tupl: tupl[0], resList ))
     pathsLabels = list(map(lambda tupl: tupl[1], resList ))
