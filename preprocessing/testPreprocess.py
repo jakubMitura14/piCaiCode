@@ -246,7 +246,6 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
                 imgAdc=sitk.ReadImage(str(row[1][colNameAdc]))
                 imgHbv=sitk.ReadImage(str(row[1][colNameHbv]))
                 imgLabel=sitk.ReadImage(str(row[1][labelColName]))
-
                 imgT2w=sitk.Cast(imgT2w, sitk.sitkFloat32)
                 imgAdc=sitk.Cast(imgAdc, sitk.sitkFloat32)
                 imgHbv=sitk.Cast(imgHbv, sitk.sitkFloat32)
