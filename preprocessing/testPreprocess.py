@@ -244,7 +244,7 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
         ):
         #if(not pathOs.exists(outPath)):
         if(True):
-            print(f" pathDebugT2w {pathDebugT2w} outLabelPath {outLabelPath} ")
+            # print(f" pathDebugT2w {pathDebugT2w} outLabelPath {outLabelPath} ")
             patId=str(row[1]['patient_id'])
             print(f" str(row[1][colNameAdc])  {str(row[1][colNameAdc])}  str(row[1][colNameHbv]) {str(row[1][colNameHbv])}"    )
             imgT2w=sitk.ReadImage(str(row[1][colNameT2w]))
