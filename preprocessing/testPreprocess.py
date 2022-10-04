@@ -229,9 +229,12 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
     """
     #row=row[1]
     print(f"resize_and_join colNameT2w {colNameT2w} row[1] str(row[colNameT2w]) t2w {str(row[1][colNameT2w]) !=' '} labb {str(row[1][labelColName]) !=' '} ")
-    outPath = str(row[1][colNameT2w]).replace('.mha',sizeWord+ '_34Chan_ddd.mha')
-    outLabelPath=str(row[1][labelColName]).replace('.nii.gz',sizeWord+ 'ddd.nii.gz')
-    pathDebugT2w=str(row[1][colNameT2w]).replace('.mha',sizeWord+ '_debug_t2w.mha')
+    outPath = str(row[1][colNameT2w]).replace('.mha',sizeWord+ '_34Chan_ee.mha')
+    outLabelPath=str(row[1][labelColName]).replace('.nii.gz',sizeWord+ 'eee.nii.gz')
+    outt2wPath=str(row[1][colNameT2w]).replace('.nii.gz',sizeWord+ 'eee.nii.gz')
+    outadcPath=str(row[1][colNameAdc]).replace('.nii.gz',sizeWord+ 'eee.nii.gz')
+    outhbvPath=str(row[1][colNameHbv]).replace('.nii.gz',sizeWord+ 'eee.nii.gz')
+    
     
 
     if(str(row[1][colNameT2w])!= " " and str(row[1][colNameT2w])!="" 
@@ -241,74 +244,91 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
         ):
         #if(not pathOs.exists(outPath)):
         if(True):
-            try:
-                print(f" pathDebugT2w {pathDebugT2w} outLabelPath {outLabelPath} ")
-                patId=str(row[1]['patient_id'])
-                print(f" str(row[1][colNameAdc])  {str(row[1][colNameAdc])}  str(row[1][colNameHbv]) {str(row[1][colNameHbv])}"    )
-                imgT2w=sitk.ReadImage(str(row[1][colNameT2w]))
-                imgAdc=sitk.ReadImage(str(row[1][colNameAdc]))
-                imgHbv=sitk.ReadImage(str(row[1][colNameHbv]))
-                imgLabel=sitk.ReadImage(str(row[1][labelColName]))
-                imgT2w=sitk.Cast(imgT2w, sitk.sitkFloat32)
-                imgAdc=sitk.Cast(imgAdc, sitk.sitkFloat32)
-                imgHbv=sitk.Cast(imgHbv, sitk.sitkFloat32)
-                # print(f"pre patient id  {patId} ")
-                # print(f"pre t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
-                # print(f"pre adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
-                # print(f"pre hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
-                # print(f"pre imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
+            print(f" pathDebugT2w {pathDebugT2w} outLabelPath {outLabelPath} ")
+            patId=str(row[1]['patient_id'])
+            print(f" str(row[1][colNameAdc])  {str(row[1][colNameAdc])}  str(row[1][colNameHbv]) {str(row[1][colNameHbv])}"    )
+            imgT2w=sitk.ReadImage(str(row[1][colNameT2w]))
+            imgAdc=sitk.ReadImage(str(row[1][colNameAdc]))
+            imgHbv=sitk.ReadImage(str(row[1][colNameHbv]))
+            imgLabel=sitk.ReadImage(str(row[1][labelColName]))
+            imgT2w=sitk.Cast(imgT2w, sitk.sitkFloat32)
+            imgAdc=sitk.Cast(imgAdc, sitk.sitkFloat32)
+            imgHbv=sitk.Cast(imgHbv, sitk.sitkFloat32)
+            imgLabel=sitk.Cast(imgHbv, sitk.sitkUInt8)
 
-                join = sitk.JoinSeriesImageFilter()
-                joined_image = join.Execute(imgT2w, imgHbv,imgAdc,imgLabel)
-                joined_image=Standardize.padToSize(joined_image,targetSize,paddValue)
-
-                writer = sitk.ImageFileWriter()
-                writer.SetFileName(pathDebugT2w)
-                writer.Execute(imgT2w)
-
-                select = sitk.VectorIndexSelectionCastImageFilter()
-                imgT2w = select.Execute(joined_image, 0, sitk.sitkFloat32)
-                imgAdc = select.Execute(joined_image, 1, sitk.sitkFloat32)
-                imgHbv = select.Execute(joined_image, 2, sitk.sitkFloat32)
-                imgLabel = select.Execute(joined_image, 3, sitk.sitkUInt8)
-
-                join = sitk.JoinSeriesImageFilter()
-                joined_image = join.Execute(imgT2w,imgAdc, imgHbv,imgAdc)
-
-                # if(ToBedivisibleBy32):
-                #     imgT2w=Standardize.padToDivisibleBy32(imgT2w,paddValue)
-                #     imgAdc=Standardize.padToDivisibleBy32(imgAdc,paddValue)
-                #     imgHbv=Standardize.padToDivisibleBy32(imgHbv,paddValue)
-                #     imgLabel=Standardize.padToDivisibleBy32(imgLabel,paddValue)
-                # else:
-                #     imgT2w=Standardize.padToSize(imgT2w,targetSize,paddValue)
-                #     imgAdc=Standardize.padToSize(imgAdc,targetSize,paddValue)
-                #     imgHbv=Standardize.padToSize(imgHbv,targetSize,paddValue)
-                #     imgLabel=Standardize.padToSize(imgLabel,targetSize,paddValue)
-
-                # print(f"post patient id  {patId} ")
-                # print(f"post t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
-                # print(f"post adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
-                # print(f"post hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
-                # print(f"post imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
+            imgT2w=Standardize.padToSize(imgT2w,targetSize,paddValue)
+            imgAdc=Standardize.padToSize(imgAdc,targetSize,paddValue)
+            imgHbv=Standardize.padToSize(imgHbv,targetSize,paddValue)
+            imgLabel=Standardize.padToSize(imgLabel,targetSize,paddValue)
 
 
-                
-                writer = sitk.ImageFileWriter()
-                writer.SetFileName(outPath)
-                writer.Execute(joined_image)
+            writer = sitk.ImageFileWriter()
+            writer.SetFileName(outt2wPath)
+            writer.Execute(imgAdc)
 
-                writer = sitk.ImageFileWriter()
-                writer.SetFileName(outLabelPath)
-                writer.Execute(imgLabel)
+            writer = sitk.ImageFileWriter()
+            writer.SetFileName(outadcPath)
+            writer.Execute(imgLabel)
+
+            writer = sitk.ImageFileWriter()
+            writer.SetFileName(outhbvPath)
+            writer.Execute(imgHbv)
+
+            writer = sitk.ImageFileWriter()
+            writer.SetFileName(outLabelPath)
+            writer.Execute(imgLabel)            
+
+
+            # print(f"pre patient id  {patId} ")
+            # print(f"pre t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
+            # print(f"pre adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
+            # print(f"pre hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
+            # print(f"pre imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
+
+            # join = sitk.JoinSeriesImageFilter()
+            # joined_image = join.Execute(imgT2w, imgHbv,imgAdc,imgLabel)
+            # joined_image=Standardize.padToSize(joined_image,targetSize,paddValue)
+
+            # writer = sitk.ImageFileWriter()
+            # writer.SetFileName(pathDebugT2w)
+            # writer.Execute(imgT2w)
+
+            # select = sitk.VectorIndexSelectionCastImageFilter()
+            # imgT2w = select.Execute(joined_image, 0, sitk.sitkFloat32)
+            # imgAdc = select.Execute(joined_image, 1, sitk.sitkFloat32)
+            # imgHbv = select.Execute(joined_image, 2, sitk.sitkFloat32)
+            # imgLabel = select.Execute(joined_image, 3, sitk.sitkUInt8)
+
+            # join = sitk.JoinSeriesImageFilter()
+            # joined_image = join.Execute(imgT2w,imgAdc, imgHbv,imgAdc)
+
+            # if(ToBedivisibleBy32):
+            #     imgT2w=Standardize.padToDivisibleBy32(imgT2w,paddValue)
+            #     imgAdc=Standardize.padToDivisibleBy32(imgAdc,paddValue)
+            #     imgHbv=Standardize.padToDivisibleBy32(imgHbv,paddValue)
+            #     imgLabel=Standardize.padToDivisibleBy32(imgLabel,paddValue)
+            # else:
+            #     imgT2w=Standardize.padToSize(imgT2w,targetSize,paddValue)
+            #     imgAdc=Standardize.padToSize(imgAdc,targetSize,paddValue)
+            #     imgHbv=Standardize.padToSize(imgHbv,targetSize,paddValue)
+            #     imgLabel=Standardize.padToSize(imgLabel,targetSize,paddValue)
+
+            # print(f"post patient id  {patId} ")
+            # print(f"post t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
+            # print(f"post adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
+            # print(f"post hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
+            # print(f"post imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
+
+
+            
 
 
 
 
-                return (outPath,outLabelPath)
-            except:
-                return (" ", " ")                         
-    return (" ", " ")
+
+            return (outLabelPath,outt2wPath,outadcPath,outhbvPath)
+                   
+    return (" ", " ", " ", " ")
 
 
 
@@ -422,12 +442,22 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     #                         ,labelColName="label"+spacing_keyword
     #                         )  ,list(df.iterrows())) )
 
-    pathsImageJoined = list(map(lambda tupl: tupl[0], resList ))
-    pathsLabels = list(map(lambda tupl: tupl[1], resList ))
+    pathsLabels = list(map(lambda tupl: tupl[0], resList ))
+    pathst2w = list(map(lambda tupl: tupl[1], resList ))
+    pathsadc = list(map(lambda tupl: tupl[2], resList ))
+    pathshbv = list(map(lambda tupl: tupl[1], resList ))
+
     label_name=f"label_{spacing_keyword}{sizeWord}" 
 
-    df[t2wKeyWord+"_3Chan"+sizeWord]=pathsImageJoined
+    t2wColName="t2w"+spacing_keyword+sizeWord+"cropped"
+    adcColName="adc"+spacing_keyword+sizeWord+"cropped"
+    hbvColName="hbv"+spacing_keyword+sizeWord+"cropped"
+
+
     df[label_name]=pathsLabels
+    df[t2wColName]=pathst2w
+    df[adcColName]=pathsadc
+    df[hbvColName]=pathshbv
 
 
     # Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,targetSize, 0.0,spacing_keyword+sizeWord+'_3Chan',False)
