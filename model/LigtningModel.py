@@ -453,7 +453,7 @@ class Model(pl.LightningModule):
 
         images = decollate_batch(x.cpu().detach()) 
 #         # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
-        # hatPostA=[]
+        hatPostA=[]
         for i in range(0,len(y_det)):
             hatPost=self.postProcess(y_det[i])
             # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
@@ -463,7 +463,7 @@ class Model(pl.LightningModule):
             # self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
             self.dices.append(locDice)
             self.surfDists.append(avSurface_dist_loc)
-            # hatPostA.append(hatPost)[1,:,:,:]
+            hatPostA.append(hatPost[1,:,:,:])
 
 
 #         # monai.metrics.compute_confusion_matrix_metric() 
@@ -487,7 +487,7 @@ class Model(pl.LightningModule):
         pathssList=[]
         with mp.Pool(processes = mp.cpu_count()) as pool:
             # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
-            pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,images=images),list(range(0,len(y_true))))
+            pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,images=images,hatPostA=hatPostA),list(range(0,len(y_true))))
         forGoldVal=list(map(lambda tupl :tupl[0] ,pathssList  ))
         fory_hatVal=list(map(lambda tupl :tupl[1] ,pathssList  ))
         # fory__bach_hatVal=list(map(lambda tupl :tupl[2] ,pathssList  ))
