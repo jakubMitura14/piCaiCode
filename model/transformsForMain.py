@@ -111,7 +111,7 @@ def get_train_transforms(RandGaussianNoised_prob
             EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label"]),
             AsDiscreted(keys=["label"],to_onehot=2),
             ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label"], spatial_size=spatial_size,),
-            ConcatItemsd(keys=["t2w","hbv","adc" ],name="chan3_col_name"),
+            ConcatItemsd(keys=["t2w","adc","hbv","adc" ],name="chan3_col_name"),
 
             standardizeLabels(keys=["label"]),
             #torchio.transforms.OneHot(include=["label"] ), #num_classes=3,
@@ -148,7 +148,7 @@ def get_val_transforms(is_whole_to_train,spatial_size):
             EnsureTyped(keys=["t2w","hbv","adc" ,"label_name_val"]),
             AsDiscreted(keys=["label_name_val"], to_onehot=2),
             ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label_name_val"], spatial_size=spatial_size,),
-            ConcatItemsd(["t2w","hbv","adc" ], "chan3_col_name_val"),
+            ConcatItemsd(["t2w","adc","hbv","adc" ], "chan3_col_name_val"),
             standardizeLabels(keys=["label_name_val"]),
 
             #torchio.transforms.OneHot(include=["label"] ),#num_classes=3
