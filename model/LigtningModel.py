@@ -453,7 +453,7 @@ class Model(pl.LightningModule):
 
         images = decollate_batch(x.cpu().detach()) 
 #         # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
-        hatPostA=[]
+        # hatPostA=[]
         for i in range(0,len(y_det)):
             hatPost=self.postProcess(y_det[i])
             # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
@@ -463,7 +463,7 @@ class Model(pl.LightningModule):
             # self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
             self.dices.append(locDice)
             self.surfDists.append(avSurface_dist_loc)
-            hatPostA.append(hatPost)[1,:,:,:]
+            # hatPostA.append(hatPost)[1,:,:,:]
 
 
 #         # monai.metrics.compute_confusion_matrix_metric() 
