@@ -111,7 +111,7 @@ def mainTrain(experiment,options,df,physical_size ):
     hbvColName="hbv"+spacing_keyword
 
     df=df.loc[df[t2wColName] != ' ']
-    label_name=f"label_{spacing_keyword}{sizeWord}" 
+    label_name="label"+spacing_keyword
     label_name_val=label_name
     df=df.loc[df[label_name_val] != ' ']
     df=df.loc[df['isAnythingInAnnotated']>0]
