@@ -24,10 +24,12 @@ from monai.networks.layers import Norm
 from monai.metrics import DiceMetric
 from monai.losses import DiceLoss
 from monai.inferers import sliding_window_inference
-from monai.data import CacheDataset,Dataset,PersistentDataset, pad_list_data_collate, decollate_batch,list_data_collate
+from monai.data import CacheDataset,Dataset,PersistentDataset,LMDBDataset, pad_list_data_collate, decollate_batch,list_data_collate,SmartCacheDataset
 from monai.config import print_config
 from monai.apps import download_and_extract
 
+from torch.utils.data import DataLoader, BatchSampler, RandomSampler
+import random
 sns.set()
 plt.rcParams['figure.figsize'] = 12, 8
 monai.utils.set_determinism()
@@ -55,10 +57,6 @@ import glob
 import torch.nn as nn
 import torch.nn.functional as F
 
-monai.utils.set_determinism()
-
-import importlib.util
-import sys
 
 # spec = importlib.util.spec_from_file_location("transformsForMain", "/home/sliceruser/data/piCaiCode/preprocessing/transformsForMain.py")
 # transformsForMain = importlib.util.module_from_spec(spec)
@@ -219,8 +217,12 @@ class PiCaiDataModule(pl.LightningDataModule):
         # self.val_ds=     PersistentDataset(data=self.val_subjects, transform=val_transforms,cache_dir=self.cache_dir)
         # self.test_ds=    PersistentDataset(data=self.test_subjects, transform=val_transforms,cache_dir=self.cache_dir)    
 
-        self.train_ds =  Dataset(data=self.train_subjects, transform=train_transforms)
-        self.val_ds=     Dataset(data=self.val_subjects, transform=val_transforms)
+        self.val_ds=     SmartCacheDataset(data=self.val_subjects, transform=val_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+        self.train_ds=     SmartCacheDataset(data=self.train_subjects, transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+
+
+        # self.train_ds =  Dataset(data=self.train_subjects, transform=train_transforms)
+        # self.val_ds=     Dataset(data=self.val_subjects, transform=val_transforms)
         #self.test_ds=    Dataset(data=self.test_subjects, transform=val_transforms)
         
     def train_dataloader(self):
