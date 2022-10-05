@@ -458,11 +458,11 @@ class Model(pl.LightningModule):
             hatPost=self.postProcess(y_det[i])
             # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
             locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i])
-            avSurface_dist_loc=monai.metrics.compute_average_surface_distance(hatPost, y_true[i])
+            # avSurface_dist_loc=monai.metrics.compute_average_surface_distance(hatPost, y_true[i])
             #monai.metrics.compute_generalized_dice(
             # self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
             self.dices.append(locDice)
-            self.surfDists.append(avSurface_dist_loc)
+            # self.surfDists.append(avSurface_dist_loc)
             hatPostA.append(hatPost[1,:,:,:])
 
 
@@ -574,7 +574,7 @@ class Model(pl.LightningModule):
             # meanDice=torch.mean(torch.stack( dices)).item()
             
             self.log('meanDice',torch.mean(torch.stack( self.dices)).item())
-            self.log('mean_surface_distance',torch.mean(torch.stack( self.surfDists)).item())
+            # self.log('mean_surface_distance',torch.mean(torch.stack( self.surfDists)).item())
 
             lenn=len(self.list_yHat_val)
             numPerIter=1
