@@ -190,7 +190,7 @@ def mainTrain(experiment,options,df,physical_size ):
         criterion=  getParam(experiment,options,"lossF",df),# Our seg labels are single channel images indicating class index, rather than one-hot
         learning_rate=1e-2,
         optimizer_class= getParam(experiment,options,"optimizer_class",df) ,
-        experiment=experiment,
+        # experiment=experiment,
         picaiLossArr_auroc_final=picaiLossArr_auroc_final,
         picaiLossArr_AP_final=picaiLossArr_AP_final,
         picaiLossArr_score_final=picaiLossArr_score_final
