@@ -70,10 +70,10 @@ import torch.nn.functional as F
 
 from model import transformsForMain as transformsForMain
 
-spec = importlib.util.spec_from_file_location("dataUtils", "/home/sliceruser/data/piCaiCode/dataManag/utils/dataUtils.py")
-dataUtils = importlib.util.module_from_spec(spec)
-sys.modules["dataUtils"] = dataUtils
-spec.loader.exec_module(dataUtils)
+# spec = importlib.util.spec_from_file_location("dataUtils", "/home/sliceruser/data/piCaiCode/dataManag/utils/dataUtils.py")
+# dataUtils = importlib.util.module_from_spec(spec)
+# sys.modules["dataUtils"] = dataUtils
+# spec.loader.exec_module(dataUtils)
 
 # import preprocessing.transformsForMain as transformsForMain
 # import preprocessing.ManageMetadata as manageMetaData
