@@ -209,34 +209,33 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     yHat_im_path =join(directory, patId+ "_hat.nii.gz" )
     image_path =join(directory, patId+ "image.nii.gz" )
     hatPostA_path =join(directory, patId+ "hatPostA.nii.gz" )
-    print(f"suum hat  {np.sum( y_hat_arr)} hatPostA {np.sum(hatPostA)}  ")
+    print(f"suum hat  {np.sum( y_hat_arr.numpy())} hatPostA {np.sum(hatPostA.numpy())}  ")
     # gold_arr=np.swapaxes(gold_arr,0,2)
     # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
-
     # print(f"uniq gold { gold_arr.shape  }   yhat { y_hat_arr.shape }   yhat maxes  {np.maximum(y_hat_arr)}  hyat min {np.minimum(y_hat_arr)} ")
-    gold_arr=gold_arr[1,:,:,:]
-    y_hat_arr=y_hat_arr[1,:,:,:]
+    gold_arr=gold_arr[1,:,:,:].numpy()
+    y_hat_arr=y_hat_arr[1,:,:,:].numpy()
 
     gold_arr=np.swapaxes(gold_arr,0,2)
     y_hat_arr=np.swapaxes(y_hat_arr,0,2)
     
-    image = sitk.GetImageFromArray(gold_arr)
+    image = sitk.GetImageFromArray(gold_arr.numpy())
     writer = sitk.ImageFileWriter()
     writer.SetFileName(gold_im_path)
     writer.Execute(image)
 
 
-    image = sitk.GetImageFromArray(y_hat_arr)
+    image = sitk.GetImageFromArray(y_hat_arr.numpy())
     writer = sitk.ImageFileWriter()
     writer.SetFileName(yHat_im_path)
     writer.Execute(image) 
 
-    image = sitk.GetImageFromArray(np.swapaxes(imageArr[0,:,:,:],0,2))
+    image = sitk.GetImageFromArray(np.swapaxes(imageArr[0,:,:,:].numpy(),0,2))
     writer = sitk.ImageFileWriter()
     writer.SetFileName(image_path)
     writer.Execute(image)
 
-    image = sitk.GetImageFromArray(np.swapaxes(hatPostA,0,2))
+    image = sitk.GetImageFromArray(np.swapaxes(hatPostA.numpy(),0,2))
     writer = sitk.ImageFileWriter()
     writer.SetFileName(hatPostA_path)
     writer.Execute(image)
@@ -338,8 +337,8 @@ class Model(pl.LightningModule):
         self.postTrue = Compose([EnsureType()])
         #self.F1Score = torchmetrics.F1Score()
 
-        # os.makedirs(self.temp_val_dir,  exist_ok = True)             
-        # shutil.rmtree(self.temp_val_dir) 
+        os.makedirs(self.temp_val_dir,  exist_ok = True)             
+        shutil.rmtree(self.temp_val_dir) 
         os.makedirs(self.temp_val_dir,  exist_ok = True)             
 
     def configure_optimizers(self):
