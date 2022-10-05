@@ -106,16 +106,18 @@ def mainTrain(experiment,options,df,physical_size ):
     sizeWord= "_maxSize_" #config["sizeWord")
     chan3_col_name=f"t2w{spacing_keyword}_3Chan{sizeWord}" 
     chan3_col_name_val=chan3_col_name 
-    df=df.loc[df[chan3_col_name] != ' ']
+    t2wColName="t2w"+spacing_keyword 
+    adcColName="adc"+spacing_keyword
+    hbvColName="hbv"+spacing_keyword
+
+    df=df.loc[df[t2wColName] != ' ']
     label_name=f"label_{spacing_keyword}{sizeWord}" 
     label_name_val=label_name
     df=df.loc[df[label_name_val] != ' ']
     df=df.loc[df['isAnythingInAnnotated']>0]
     print(df)
     cacheDir =  f"/home/sliceruser/preprocess/monai_persistent_Dataset/{spacing_keyword}/{sizeWord}"
-    t2wColName="t2w"+spacing_keyword 
-    adcColName="adc"+spacing_keyword
-    hbvColName="hbv"+spacing_keyword
+
     ##filtering out some pathological cases
     # resList=[]     
     # with mp.Pool(processes = mp.cpu_count()) as pool:
