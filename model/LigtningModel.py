@@ -235,7 +235,7 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     writer.SetFileName(image_path)
     writer.Execute(image)
 
-    image = sitk.GetImageFromArray(np.swapaxes(hatPostA.numpy(),0,2))
+    image = sitk.GetImageFromArray(np.swapaxes(hatPostA,0,2))
     writer = sitk.ImageFileWriter()
     writer.SetFileName(hatPostA_path)
     writer.Execute(image)
@@ -292,6 +292,21 @@ def getNext(i,results,TIMEOUT):
         print("timed outt ")
         return None    
 
+
+def processDice(i,postProcess,y_det,y_true):
+    try:
+        hatPost=postProcess(y_det[i])
+        # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
+        locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i])
+        return (locDice,hatPost.numpy())
+    except:
+        return (0.0,np.zeros_like(y_det[i]))
+    # avSurface_dist_loc=monai.metrics.compute_average_surface_distance(hatPost, y_true[i])
+    #monai.metrics.compute_generalized_dice(
+    # self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
+    # self.dices.append(locDice)
+    # # self.surfDists.append(avSurface_dist_loc)
+    # hatPostA.append(hatPost[1,:,:,:])    
 
 class Model(pl.LightningModule):
     def __init__(self
@@ -452,18 +467,20 @@ class Model(pl.LightningModule):
 
         images = decollate_batch(x.cpu().detach()) 
 #         # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
-        hatPostA=[]
-        for i in range(0,len(y_det)):
-            hatPost=self.postProcess(y_det[i])
-            # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
-            locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i])
-            # avSurface_dist_loc=monai.metrics.compute_average_surface_distance(hatPost, y_true[i])
-            #monai.metrics.compute_generalized_dice(
-            # self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
-            self.dices.append(locDice)
-            # self.surfDists.append(avSurface_dist_loc)
-            hatPostA.append(hatPost[1,:,:,:])
-            print("error in dice loop")
+        # hatPostA=[]
+        # for i in range(0,len(y_det)):
+        #     hatPost=self.postProcess(y_det[i])
+        #     # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
+        #     locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i])
+        #     # avSurface_dist_loc=monai.metrics.compute_average_surface_distance(hatPost, y_true[i])
+        #     #monai.metrics.compute_generalized_dice(
+        #     # self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
+        #     self.dices.append(locDice)
+        #     # self.surfDists.append(avSurface_dist_loc)
+        #     hatPostA.append(hatPost[1,:,:,:])
+
+
+        #     self.dices.append(locDice)
 
 
 
@@ -486,9 +503,18 @@ class Model(pl.LightningModule):
 #         # print("after extracting")
         
         pathssList=[]
+        dicesList=[]
+        hatPostA=[]
         with mp.Pool(processes = mp.cpu_count()) as pool:
             # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
+            dicesList=pool.map(partial(processDice,postProcess=self.postProcess,y_det=y_det, y_true=y_true ),list(range(0,len(y_true))))
+
+        hatPostA=list(map(lambda tupl: tupl[1],dicesList ))
+        dicees=list(map(lambda tupl: tupl[1],dicesList ))
+        
+        with mp.Pool(processes = mp.cpu_count()) as pool:        
             pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,images=images,hatPostA=hatPostA),list(range(0,len(y_true))))
+
         forGoldVal=list(map(lambda tupl :tupl[0] ,pathssList  ))
         fory_hatVal=list(map(lambda tupl :tupl[1] ,pathssList  ))
         # fory__bach_hatVal=list(map(lambda tupl :tupl[2] ,pathssList  ))
@@ -511,6 +537,7 @@ class Model(pl.LightningModule):
             # self.list_yHat_val.append(tupl[1])
             self.list_gold_val.append(forGoldVal[i])
             self.list_yHat_val.append(fory_hatVal[i])
+            self.dices.append(dicees[i])
             # self.list_back_yHat_val.append(fory__bach_hatVal[i])
 # #         self.log('val_loss', loss )
 
