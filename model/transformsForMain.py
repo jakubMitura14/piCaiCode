@@ -139,8 +139,8 @@ def get_val_transforms(is_whole_to_train,spatial_size):
     val_transforms = Compose(
         [
             LoadImaged(keys=["t2w","hbv","adc" ,"label_name_val"]),
+            ResizeWithPadOrCropd(spatial_size= spatial_size, keys=["t2w","hbv","adc","label_name_val"]),
             ConcatItemsd(["t2w","hbv","adc" ], "label_name_val"),
-            ResizeWithPadOrCropd(spatial_size= spatial_size, keys=["chan3_col_name","label"]),
             EnsureChannelFirstd(keys=["chan3_col_name_val","label_name_val"]),
             standardizeLabels(keys=["label_name_val"]),
             AsDiscreted(keys=["label_name_val"], to_onehot=2),
