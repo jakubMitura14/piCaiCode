@@ -122,7 +122,7 @@ def get_train_transforms(RandGaussianNoised_prob
             #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),            
             #CropForegroundd(keys=["t2w","adc", "hbv","label"], source_key="image"),
             # SelectItemsd(keys=["chan3_col_name","label"]),
-            DivisiblePadd(keys=["chan3_col_name","label"],k=32) ,            
+            #DivisiblePadd(keys=["chan3_col_name","label"],k=32) ,            
             #ResizeWithPadOrCropd(keys=["chan3_col_name","label"],spatial_size=centerCropSize ),
           
             #*decide_if_whole_image_train(False,"chan3_col_name","label"),
@@ -158,7 +158,7 @@ def get_val_transforms(is_whole_to_train,spatial_size):
             # Spacingd(keys=["chan3_col_name","label"]], pixdim=(
             #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
             #SpatialPadd(keys=["chan3_col_name","label"],spatial_size=maxSize) ,
-            DivisiblePadd(keys=["chan3_col_name_val","label_name_val"],k=32) ,
+            #DivisiblePadd(keys=["chan3_col_name_val","label_name_val"],k=32) ,
             #ResizeWithPadOrCropd(keys=["chan3_col_name","label_name_val"],spatial_size=centerCropSize ),
 
             #*decide_if_whole_image_train(is_whole_to_train,"chan3_col_name_val","label_name_val"),
