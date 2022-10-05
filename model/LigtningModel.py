@@ -574,6 +574,7 @@ class Model(pl.LightningModule):
             # meanDice=torch.mean(torch.stack( dices)).item()
             
             self.log('meanDice',torch.mean(torch.stack( self.dices)).item())
+            print('meanDice',torch.mean(torch.stack( self.dices)).item())
             # self.log('mean_surface_distance',torch.mean(torch.stack( self.surfDists)).item())
 
             lenn=len(self.list_yHat_val)
