@@ -105,9 +105,9 @@ def get_train_transforms(RandGaussianNoised_prob
     train_transforms = Compose(
         [
             LoadImaged(keys=["t2w","hbv","adc" ,"label"]),
+            ResizeWithPadOrCropd(spatial_size= spatial_size, keys=["t2w","hbv","adc","label"]),
             ConcatItemsd(keys=["t2w","hbv","adc" ],name="chan3_col_name"),
             EnsureTyped(keys=["chan3_col_name","label"]),
-            ResizeWithPadOrCropd(spatial_size= spatial_size, keys=["chan3_col_name","label"]),
             EnsureChannelFirstd(keys=["chan3_col_name","label"]),
             standardizeLabels(keys=["label"]),
             AsDiscreted(keys=["label"],to_onehot=2),
