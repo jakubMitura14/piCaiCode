@@ -107,7 +107,8 @@ def get_train_transforms(RandGaussianNoised_prob
     train_transforms = Compose(
         [
             LoadImaged(keys=["t2w","hbv","adc" ,"label"]),
-            ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label"], spatial_size=spatial_size),
+            ResizeWithPadOrCropd(keys=["t2w"], spatial_size=spatial_size),
+            # ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label"], spatial_size=spatial_size),
             ConcatItemsd(keys=["t2w","hbv","adc" ],name="chan3_col_name"),
             EnsureTyped(keys=["chan3_col_name","label"]),
             EnsureChannelFirstd(keys=["chan3_col_name","label"]),
@@ -143,7 +144,8 @@ def get_val_transforms(is_whole_to_train,spatial_size):
     val_transforms = Compose(
         [
             LoadImaged(keys=["t2w","hbv","adc" ,"label_name_val"]),
-            ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label"], spatial_size=spatial_size),
+            ResizeWithPadOrCropd(keys=["t2w"], spatial_size=spatial_size),
+            # ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label"], spatial_size=spatial_size),
             ConcatItemsd(["t2w","hbv","adc" ], "label_name_val"),
             EnsureChannelFirstd(keys=["chan3_col_name_val","label_name_val"]),
             standardizeLabels(keys=["label_name_val"]),
