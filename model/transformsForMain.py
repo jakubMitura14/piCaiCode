@@ -106,7 +106,8 @@ def get_train_transforms(RandGaussianNoised_prob
         [
             LoadImaged(keys=["t2w","hbv","adc" ,"label"]),
             ConcatItemsd(keys=["t2w","hbv","adc" ],name="chan3_col_name"),
-            ResizeWithPadOrCropd(spatial_size= spatial_size, keys=["chan3_col_name","label"],dim=2),
+            EnsureTyped(keys=["chan3_col_name","label"]),
+            ResizeWithPadOrCropd(spatial_size= spatial_size, keys=["chan3_col_name","label"]),
             EnsureChannelFirstd(keys=["chan3_col_name","label"]),
             standardizeLabels(keys=["label"]),
             AsDiscreted(keys=["label"],to_onehot=2),
@@ -117,7 +118,6 @@ def get_train_transforms(RandGaussianNoised_prob
             #Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
             #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),            
             #CropForegroundd(keys=["t2w","adc", "hbv","label"], source_key="image"),
-            EnsureTyped(keys=["chan3_col_name","label"]),
             # SelectItemsd(keys=["chan3_col_name","label"]),
             DivisiblePadd(keys=["chan3_col_name","label"],k=32) ,            
             #ResizeWithPadOrCropd(keys=["chan3_col_name","label"],spatial_size=centerCropSize ),
