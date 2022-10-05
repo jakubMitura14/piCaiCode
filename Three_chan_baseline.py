@@ -127,7 +127,6 @@ def mainTrain(experiment,options,df,physical_size ):
 
     targetSpacingg=(1,1,1)
     
-    label_name=f"label_{spacing_keyword}{sizeWord}" 
     multNum=32
     sizzX= physical_size[0]/targetSpacingg[0]
     sizzY= physical_size[1]/targetSpacingg[1]
