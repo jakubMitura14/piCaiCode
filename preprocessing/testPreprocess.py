@@ -438,7 +438,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     # denoising
     # Standardize.iterateAndDenoise(keyWord,df)
     # standarization
-    Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,110)   
+    #Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,110)   
 # standardize labels
 Standardize.iterateAndchangeLabelToOnes(df)
 

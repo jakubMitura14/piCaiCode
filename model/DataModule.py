@@ -127,7 +127,8 @@ class PiCaiDataModule(pl.LightningDataModule):
     ,RandFlipd_prob
     ,RandAffined_prob
     ,RandCoarseDropoutd_prob
-    ,is_whole_to_train ):
+    ,is_whole_to_train
+    ,spatial_size ):
         super().__init__()
         self.cache_dir=cache_dir
         self.batch_size = batch_size
@@ -149,7 +150,7 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.chan3_col_name_val=chan3_col_name_val
         self.label_name=label_name
         self.label_name_val=label_name_val
-        
+        self.spatial_size=spatial_size
         self.t2wColName=t2wColName
         self.adcColName=adcColName
         self.hbvColName=hbvColName
@@ -211,8 +212,8 @@ class PiCaiDataModule(pl.LightningDataModule):
             ,self.RandFlipd_prob
             ,self.RandAffined_prob
             ,self.RandCoarseDropoutd_prob
-            ,self.is_whole_to_train )
-        val_transforms= transformsForMain.get_val_transforms(self.is_whole_to_train )
+            ,self.is_whole_to_train,self.spatial_size )
+        val_transforms= transformsForMain.get_val_transforms(self.is_whole_to_train,self.spatial_size )
         #todo - unhash
         # self.train_ds =  PersistentDataset(data=self.train_subjects, transform=train_transforms,cache_dir=self.cache_dir)
         # self.val_ds=     PersistentDataset(data=self.val_subjects, transform=val_transforms,cache_dir=self.cache_dir)

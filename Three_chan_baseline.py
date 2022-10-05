@@ -87,7 +87,7 @@ def isAnnytingInAnnotatedInner(row,colName):
     return np.sum(data)
 
 
-def mainTrain(experiment,options,df):
+def mainTrain(experiment,options,df,physical_size ):
     picaiLossArr_auroc_final=[]
     picaiLossArr_AP_final=[]
     picaiLossArr_score_final=[]
@@ -113,7 +113,9 @@ def mainTrain(experiment,options,df):
     df=df.loc[df['isAnythingInAnnotated']>0]
     print(df)
     cacheDir =  f"/home/sliceruser/preprocess/monai_persistent_Dataset/{spacing_keyword}/{sizeWord}"
-
+    t2wColName="t2w"+spacing_keyword 
+    adcColName="adc"+spacing_keyword
+    hbvColName="hbv"+spacing_keyword
     ##filtering out some pathological cases
     # resList=[]     
     # with mp.Pool(processes = mp.cpu_count()) as pool:
@@ -121,8 +123,17 @@ def mainTrain(experiment,options,df):
     # df['locIsInAnnot']= resList
     # df = df.loc[df['locIsInAnnot']>0]
 
+    targetSpacingg=(1,1,1)
+    
     label_name=f"label_{spacing_keyword}{sizeWord}" 
+    multNum=32
+    sizzX= physical_size[0]/targetSpacingg[0]
+    sizzY= physical_size[1]/targetSpacingg[1]
+    sizzZ= physical_size[2]/targetSpacingg[2]
+    sizz=(sizzX,sizzY,sizzZ)
 
+    spatial_size=(math.ceil(sizz[0]/multNum)*multNum, math.ceil(sizz[1]/multNum)*multNum,math.ceil(sizz[2]/multNum)*multNum  )
+    
 
 
     data = DataModule.PiCaiDataModule(
@@ -149,6 +160,7 @@ def mainTrain(experiment,options,df):
         ,RandAffined_prob=experiment.get_parameter("RandAffined_prob")
         ,RandCoarseDropoutd_prob=experiment.get_parameter("RandCoarseDropoutd_prob")
         ,is_whole_to_train= (sizeWord=="_maxSize_")
+        ,spatial_size=spatial_size
     )
     data.prepare_data()
     data.setup()
