@@ -77,6 +77,170 @@ from monai.transforms import (
 )
 import torchio
 
+### Define Data Handling
+
+import time
+from pathlib import Path
+from datetime import datetime
+import SimpleITK as sitk
+from monai.utils import set_determinism
+import math
+import torch
+from torch.utils.data import random_split, DataLoader
+import monai
+import gdown
+import pandas as pd
+import torchio as tio
+import pytorch_lightning as pl
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+from sklearn.model_selection import train_test_split
+from monai.networks.nets import UNet
+from monai.networks.layers import Norm
+from monai.metrics import DiceMetric
+from monai.losses import DiceLoss
+from monai.inferers import sliding_window_inference
+from monai.data import CacheDataset,Dataset,PersistentDataset, list_data_collate, decollate_batch
+from monai.config import print_config
+from monai.apps import download_and_extract
+import time
+
+from datetime import datetime
+import os
+import tempfile
+from glob import glob
+from monai.handlers.utils import from_engine
+from monai.networks.nets import UNet
+from monai.networks.layers import Norm
+from monai.metrics import DiceMetric
+from monai.losses import DiceLoss
+from monai.inferers import sliding_window_inference
+from monai.config import print_config
+from monai.apps import download_and_extract
+import torch
+import matplotlib.pyplot as plt
+import tempfile
+import shutil
+import os
+import glob
+from picai_eval import evaluate
+#from picai_eval.picai_eval import evaluate_case
+from statistics import mean
+from report_guided_annotation import extract_lesion_candidates
+from scipy.ndimage import gaussian_filter
+import tempfile
+import shutil
+from os import path as pathOs
+from os.path import basename, dirname, exists, isdir, join, split
+import torch.nn as nn
+import torch.nn.functional as F
+
+from monai.metrics import (DiceMetric, HausdorffDistanceMetric,
+                           SurfaceDistanceMetric)
+from torchmetrics import Precision
+from monai.transforms import (
+    AsDiscrete,
+    AddChanneld,
+    Compose,
+    CropForegroundd,
+    LoadImaged,
+    Orientationd,
+    RandCropByPosNegLabeld,
+    ScaleIntensityRanged,
+    Spacingd,
+    EnsureTyped,
+    EnsureType,
+)
+import torchio
+import importlib.util
+import sys
+import warnings
+from typing import Optional, Sequence, Tuple, Union
+import torch
+import torch.nn as nn
+from monai.networks.blocks.convolutions import Convolution, ResidualUnit
+from monai.networks.layers.factories import Act, Norm
+from monai.networks.layers.simplelayers import SkipConnection
+from monai.utils import alias, deprecated_arg, export
+import functools
+import operator
+from torch.nn.intrinsic.qat import ConvBnReLU3d
+
+import multiprocessing as mp
+import time
+
+
+
+
+# def my_task(v):
+#     time.sleep(v)
+#     return v ** 2
+
+
+# lenn=8
+# squares=[None] * lenn
+
+# TIMEOUT = 2# second timeout
+# with mp.Pool(processes = mp.cpu_count()) as pool:
+#     results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
+    
+#     for i in range(lenn):
+#         try:
+#             return_value = results[i].get(2) # wait for up to time_to_wait seconds
+#         except mp.TimeoutError:
+#             print('Timeout for v = ', i)
+#         else:
+#             squares[i]=return_value
+#             print(f'Return value for v = {i} is {return_value}')
+
+#     # it = pool.imap(my_task, range(lenn))
+#     # squares=list(map(lambda ind :getNext(it,TIMEOUT) ,list(range(lenn)) ))
+# print(squares)
+
+
+
+import time
+from functools import partial
+from torchmetrics.functional import precision_recall
+from torch.utils.cpp_extension import load
+import torchmetrics
+# lltm_cuda = load('lltm_cuda', ['lltm_cuda.cpp', 'lltm_cuda_kernel.cu'], verbose=True)
+from monai.metrics import (
+    ConfusionMatrixMetric,
+    compute_confusion_matrix_metric,
+    do_metric_reduction,
+    get_confusion_matrix,
+)
+
+import concurrent.futures
+import itertools
+import json
+import os
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+from typing import (Callable, Dict, Hashable, Iterable, List, Optional, Sized,
+                    Tuple, Union)
+
+import numpy as np
+from scipy import ndimage
+from scipy.optimize import linear_sum_assignment
+from tqdm import tqdm
+
+try:
+    import numpy.typing as npt
+except ImportError:  # pragma: no cover
+    pass
+
+from picai_eval.analysis_utils import (calculate_dsc, calculate_iou,
+                                       label_structure, parse_detection_map)
+from picai_eval.image_utils import (read_label, read_prediction,
+                                    resize_image_with_crop_or_pad)
+from picai_eval.metrics import Metrics
+
+from picai_eval.eval import evaluate_case
+
+
 torch.autograd.set_detect_anomaly(True)
 
 def divide_chunks(l, n):
@@ -139,6 +303,7 @@ class Model(pl.LightningModule):
         self.picaiLossArr=[]
         self.post_pred = Compose([ AsDiscrete( to_onehot=2)])
 #        self.post_pred = Compose([ AsDiscrete(argmax=True, to_onehot=2)])
+        self.dices=[]
 
         #self.post_label = Compose([EnsureType("tensor", device="cpu"), AsDiscrete(to_onehot=2)])
         #self.post_label = Compose([EnsureType("tensor", device="cpu"), torchio.transforms.OneHot(include=["label"] ,num_classes=2)])
@@ -146,7 +311,8 @@ class Model(pl.LightningModule):
         self.picaiLossArr_auroc=[]
         self.picaiLossArr_AP=[]
         self.picaiLossArr_score=[]
-
+        self.postProcess=monai.transforms.Compose([EnsureType(),  monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])#, monai.transforms.KeepLargestConnectedComponent()
+        self.postTrue = Compose([EnsureType()])
         self.picaiLossArr_auroc_final=picaiLossArr_auroc_final
         self.picaiLossArr_AP_final=picaiLossArr_AP_final
         self.picaiLossArr_score_final=picaiLossArr_score_final
@@ -191,10 +357,19 @@ class Model(pl.LightningModule):
         y_det=torch.sigmoid(y_det)
         # print( f"before extract lesion  sum a {torch.sum(y_hat)  } " )
 
-        y_det = decollate_batch(y_det)
-        y_true = decollate_batch(y_true)
+        y_det = decollate_batch(y_det.cpu())
+        y_true = decollate_batch(y_true.cpu())
         patIds = decollate_batch(patIds)
         #print(f"after decollate  y_hat{y_hat[0].size()} labels{labels[0].size()} y_hat len {len(y_hat)} labels len {len(labels)}")
+        
+        for i in range(0,len(y_det)):
+            hatPost=self.postProcess(y_det[i])
+            # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
+            locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i])
+            #monai.metrics.compute_generalized_dice(
+            # self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
+            self.dices.append(locDice)            
+        
         y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
         y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
 
@@ -204,7 +379,7 @@ class Model(pl.LightningModule):
             self.list_gold_val.append(tupl[0])
             self.list_yHat_val.append(tupl[1])
         #now we need to save files in temporary direcory and save outputs to the appripriate lists wit paths
-        
+    
 
         self.log('val_loss', loss)
 
@@ -219,8 +394,9 @@ class Model(pl.LightningModule):
         """
 
         if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
-            chunkLen=8
+            self.log('meanDice',torch.mean(torch.stack( self.dices)).item())
             try:
+                
                 valid_metrics = evaluate(y_det=self.list_yHat_val,
                                     y_true=self.list_gold_val,
                                     #y_true=iter(y_true),
