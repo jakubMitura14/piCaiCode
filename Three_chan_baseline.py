@@ -93,12 +93,12 @@ def mainTrain(experiment,options,df,physical_size ):
     picaiLossArr_score_final=[]
     print("mmmmmmmmmmmmmmmmmm")
     #TODO(remove)
-    # comet_logger = CometLogger(
-    #     api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
-    #     #workspace="OPI", # Optional
-    #     project_name="picai_base_3Channels", # Optional
-    #     #experiment_name="baseline" # Optional
-    # )
+    comet_logger = CometLogger(
+        api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
+        #workspace="OPI", # Optional
+        # project_name="pi", # Optional
+        experiment_name="picai-hyperparam-search-42" # Optional
+    )
     #############loading meta data 
     #maxSize=manageMetaData.getMaxSize(getParam(experiment,options,"dirs")["chan3_col_name"],df)
     # print(f"************    maxSize {maxSize}   ***************")
@@ -208,7 +208,7 @@ def mainTrain(experiment,options,df,physical_size ):
         #gpus=1,
         #precision=experiment.get_parameter("precision"), 
         #callbacks=[ early_stopping ],
-        #logger=comet_logger,
+        logger=comet_logger,
         accelerator='auto',
         devices='auto',       
         default_root_dir= "/home/sliceruser/data/lightning_logs",
