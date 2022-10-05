@@ -454,15 +454,19 @@ class Model(pl.LightningModule):
 #         # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
         hatPostA=[]
         for i in range(0,len(y_det)):
-            hatPost=self.postProcess(y_det[i])
-            # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
-            locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i])
-            # avSurface_dist_loc=monai.metrics.compute_average_surface_distance(hatPost, y_true[i])
-            #monai.metrics.compute_generalized_dice(
-            # self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
-            self.dices.append(locDice)
-            # self.surfDists.append(avSurface_dist_loc)
-            hatPostA.append(hatPost[1,:,:,:])
+            try:
+                hatPost=self.postProcess(y_det[i])
+                # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
+                locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i])
+                # avSurface_dist_loc=monai.metrics.compute_average_surface_distance(hatPost, y_true[i])
+                #monai.metrics.compute_generalized_dice(
+                # self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
+                self.dices.append(locDice)
+                # self.surfDists.append(avSurface_dist_loc)
+                hatPostA.append(hatPost[1,:,:,:])
+            except:
+                print("error in dice loop")
+
 
 
 #         # monai.metrics.compute_confusion_matrix_metric() 

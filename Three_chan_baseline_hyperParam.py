@@ -124,7 +124,7 @@ config = {
         "max_epochs": {"type": "discrete", "values": [800]},#900
 
         "accumulate_grad_batches": {"type": "discrete", "values": [1,3,10]},
-        "gradient_clip_val": {"type": "discrete", "values": [0.0, 0.2,0.5,2.0,100.0]},#,2.0, 0.2,0.5
+        "gradient_clip_val": {"type": "discrete", "values": [0.7]},#,2.0, 0.2,0.5
 
         "RandGaussianNoised_prob": {"type": "float", "min": 0.0, "max": 0.5},
         "RandAdjustContrastd_prob": {"type": "float", "min": 0.3, "max": 0.8},
