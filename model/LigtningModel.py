@@ -505,9 +505,9 @@ class Model(pl.LightningModule):
         pathssList=[]
         dicesList=[]
         hatPostA=[]
-        with mp.Pool(processes = mp.cpu_count()) as pool:
-            # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
-            dicesList=pool.map(partial(processDice,postProcess=self.postProcess,y_det=y_det, y_true=y_true ),list(range(0,len(y_true))))
+        # with mp.Pool(processes = mp.cpu_count()) as pool:
+        #     # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
+        #     dicesList=pool.map(partial(processDice,postProcess=self.postProcess,y_det=y_det, y_true=y_true ),list(range(0,len(y_true))))
 
         hatPostA=list(map(lambda tupl: tupl[1],dicesList ))
         dicees=list(map(lambda tupl: tupl[1],dicesList ))
