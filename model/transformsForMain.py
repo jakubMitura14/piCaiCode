@@ -101,7 +101,7 @@ def get_train_transforms(RandGaussianNoised_prob
     ,is_whole_to_train
     ,spatial_size
      ):
-    
+    print(f"spatial_sizeeee {spatial_size}"  )
     train_transforms = Compose(
         [
             LoadImaged(keys=["t2w","hbv","adc" ,"label"]),
