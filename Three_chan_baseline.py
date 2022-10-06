@@ -95,7 +95,7 @@ def mainTrain(options,df,physical_size ):
         api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
         #workspace="OPI", # Optional
         # project_name="pi", # Optional
-        experiment_name="picai-hyperparam-search-43" # Optional
+        experiment_name="picai-hyperparam-search-44" # Optional
     )
     #############loading meta data 
     #maxSize=manageMetaData.getMaxSize(getParam(experiment,options,"dirs")["chan3_col_name"],df)
@@ -213,7 +213,7 @@ def mainTrain(options,df,physical_size ):
         # auto_scale_batch_size="binsearch",
         auto_lr_find=True,
         check_val_every_n_epoch=2,
-        accumulate_grad_batches= 2,# experiment.get_parameter("accumulate_grad_batches"),
+        accumulate_grad_batches= 20,# experiment.get_parameter("accumulate_grad_batches"),
         gradient_clip_val=  0.9 ,#experiment.get_parameter("gradient_clip_val"),# 0.5,2.0
         log_every_n_steps=10,
         strategy='dp'
