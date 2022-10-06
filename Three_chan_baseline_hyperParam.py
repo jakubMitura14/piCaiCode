@@ -138,7 +138,6 @@ config = {
         "sizeWord": {"type": "categorical", "values": ["_div32_"]},#,"_maxSize_"# ,"_div32_"
         #"dirs": {"type": "discrete", "values": list(range(0,len(options["dirs"])))},
     },
-
     # Declare what we will be optimizing, and how:
     "spec": {
     "metric": "last_val_loss_score",
