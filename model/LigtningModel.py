@@ -483,35 +483,16 @@ class Model(pl.LightningModule):
         #     self.dices.append(locDice)
 
 
-
-#         # monai.metrics.compute_confusion_matrix_metric() 
-        
-#         # diceVall = dice_metric.aggregate().item()
-#         # self.log('loc_dice', diceVall)
-#         # print("after dices")
-
-
-#         #reg_hat = decollate_batch(reg_hat)
-#         # print(f" rrrrr prim{reg_hat}  ")
-
-#         # reg_hat=np.rint(reg_hat.cpu().detach().numpy().flatten())
-#         # print(f" rrrrr {reg_hat}  ")
-#         # print("befor extracting")
-#         # # y_det=[extract_lesion_candidates( x.cpu().detach().numpy()[1,:,:,:])[0] for x in y_det]
-#         # y_det=[x.cpu().detach().numpy()[1,:,:,:] for x in y_det]
-#         # y_true=[x.cpu().detach().numpy()[1,:,:,:] for x in y_true]
-#         # print("after extracting")
-        
         pathssList=[]
         dicesList=[]
         hatPostA=[]
-        # with mp.Pool(processes = mp.cpu_count()) as pool:
-        #     # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
-        #     dicesList=pool.map(partial(processDice,postProcess=self.postProcess,y_det=y_det, y_true=y_true ),list(range(0,len(y_true))))
-        dicesList=list(map(partial(processDice,postProcess=self.postProcess,y_det=y_det, y_true=y_true ),list(range(0,len(y_true)))))
+        with mp.Pool(processes = mp.cpu_count()) as pool:
+            # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
+            dicesList=pool.map(partial(processDice,postProcess=self.postProcess,y_det=y_det, y_true=y_true ),list(range(0,len(y_true))))
+        # dicesList=list(map(partial(processDice,postProcess=self.postProcess,y_det=y_det, y_true=y_true ),list(range(0,len(y_true)))))
 
         hatPostA=list(map(lambda tupl: tupl[1],dicesList ))
-        dicees=list(map(lambda tupl: tupl[1],dicesList ))
+        dicees=list(map(lambda tupl: tupl[0],dicesList ))
         
         with mp.Pool(processes = mp.cpu_count()) as pool:        
             pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,images=images,hatPostA=hatPostA),list(range(0,len(y_true))))

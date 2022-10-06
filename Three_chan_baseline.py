@@ -46,10 +46,8 @@ import os
 import os.path
 monai.utils.set_determinism()
 from functools import partial
-
 import importlib.util
 import sys
-
 percentSplit=0.8
 
 def loadLib(name,path):
@@ -87,7 +85,7 @@ def isAnnytingInAnnotatedInner(row,colName):
     return np.sum(data)
 
 
-def mainTrain(experiment,options,df,physical_size ):
+def mainTrain(options,df,physical_size ):
     picaiLossArr_auroc_final=[]
     picaiLossArr_AP_final=[]
     picaiLossArr_score_final=[]
@@ -97,7 +95,7 @@ def mainTrain(experiment,options,df,physical_size ):
         api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
         #workspace="OPI", # Optional
         # project_name="pi", # Optional
-        experiment_name="picai-hyperparam-search-42" # Optional
+        experiment_name="picai-hyperparam-search-43" # Optional
     )
     #############loading meta data 
     #maxSize=manageMetaData.getMaxSize(getParam(experiment,options,"dirs")["chan3_col_name"],df)
@@ -156,13 +154,13 @@ def mainTrain(experiment,options,df,physical_size ):
         ,adcColName=adcColName
         ,hbvColName=hbvColName
         #maxSize=maxSize
-        ,RandGaussianNoised_prob=experiment.get_parameter("RandGaussianNoised_prob")
-        ,RandAdjustContrastd_prob=experiment.get_parameter("RandAdjustContrastd_prob")
-        ,RandGaussianSmoothd_prob=experiment.get_parameter("RandGaussianSmoothd_prob")
-        ,RandRicianNoised_prob=experiment.get_parameter("RandRicianNoised_prob")
-        ,RandFlipd_prob=experiment.get_parameter("RandFlipd_prob")
-        ,RandAffined_prob=experiment.get_parameter("RandAffined_prob")
-        ,RandCoarseDropoutd_prob=experiment.get_parameter("RandCoarseDropoutd_prob")
+        ,RandGaussianNoised_prob=0.2#experiment.get_parameter("RandGaussianNoised_prob")
+        ,RandAdjustContrastd_prob=0.2#experiment.get_parameter("RandAdjustContrastd_prob")
+        ,RandGaussianSmoothd_prob=0.2#experiment.get_parameter("RandGaussianSmoothd_prob")
+        ,RandRicianNoised_prob=0.2#experiment.get_parameter("RandRicianNoised_prob")
+        ,RandFlipd_prob=0.2#experiment.get_parameter("RandFlipd_prob")
+        ,RandAffined_prob=0.2#experiment.get_parameter("RandAffined_prob")
+        ,RandCoarseDropoutd_prob=0.2#experiment.get_parameter("RandCoarseDropoutd_prob")
         ,is_whole_to_train= (sizeWord=="_maxSize_")
         ,spatial_size=spatial_size
     )
@@ -174,12 +172,12 @@ def mainTrain(experiment,options,df,physical_size ):
         spatial_dims=3,
         in_channels=4,
         out_channels=2,
-        strides=getParam(experiment,options,"stridesAndChannels",df)["strides"],
-        channels=getParam(experiment,options,"stridesAndChannels",df)["channels"],
-        num_res_units= experiment.get_parameter("num_res_units"),
-        act = getParam(experiment,options,"act",df),
-        norm= getParam(experiment,options,"norm",df),
-        dropout= experiment.get_parameter("dropout")
+        strides= options["stridesAndChannels"][0]["strides"],  #getParam(experiment,options,"stridesAndChannels",df)["strides"],
+        channels=options["stridesAndChannels"][0]["channels"], #getParam(experiment,options,"stridesAndChannels",df)["channels"],
+        num_res_units=0, # experiment.get_parameter("num_res_units"),
+        act =options["act"][0], # getParam(experiment,options,"act",df),
+        norm= options["norm"][0], #  getParam(experiment,options,"norm",df),
+        dropout= options["dropout"][0], #experiment.get_parameter("dropout")
     )
 
 
@@ -187,9 +185,9 @@ def mainTrain(experiment,options,df,physical_size ):
 
     model = LigtningModel.Model(
         net=unet,
-        criterion=  getParam(experiment,options,"lossF",df),# Our seg labels are single channel images indicating class index, rather than one-hot
+        criterion= options["lossF"][0], # getParam(experiment,options,"lossF",df),# Our seg labels are single channel images indicating class index, rather than one-hot
         learning_rate=1e-2,
-        optimizer_class= getParam(experiment,options,"optimizer_class",df) ,
+        optimizer_class= options["optimizer_class"][0], #getParam(experiment,options,"optimizer_class",df) ,
         # experiment=experiment,
         picaiLossArr_auroc_final=picaiLossArr_auroc_final,
         picaiLossArr_AP_final=picaiLossArr_AP_final,
@@ -204,7 +202,7 @@ def mainTrain(experiment,options,df,physical_size ):
     #stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging()
     trainer = pl.Trainer(
         #accelerator="cpu", #TODO(remove)
-        max_epochs=experiment.get_parameter("max_epochs"),
+        max_epochs=900,#experiment.get_parameter("max_epochs"),
         #gpus=1,
         #precision=experiment.get_parameter("precision"), 
         #callbacks=[ early_stopping ],
@@ -214,9 +212,9 @@ def mainTrain(experiment,options,df,physical_size ):
         default_root_dir= "/home/sliceruser/data/lightning_logs",
         # auto_scale_batch_size="binsearch",
         auto_lr_find=True,
-        check_val_every_n_epoch=10,
-        accumulate_grad_batches=experiment.get_parameter("accumulate_grad_batches"),
-        gradient_clip_val=experiment.get_parameter("gradient_clip_val"),# 0.5,2.0
+        check_val_every_n_epoch=2,
+        accumulate_grad_batches= 2,# experiment.get_parameter("accumulate_grad_batches"),
+        gradient_clip_val=  0.9 ,#experiment.get_parameter("gradient_clip_val"),# 0.5,2.0
         log_every_n_steps=10,
         strategy='dp'
     )
@@ -227,12 +225,12 @@ def mainTrain(experiment,options,df,physical_size ):
     print('Training duration:', datetime.now() - start)
 
 
-    experiment.log_metric("last_val_loss_auroc",np.nanmax(picaiLossArr_auroc_final))
-    experiment.log_metric("last_val_loss_Ap",np.nanmax(picaiLossArr_AP_final))
-    experiment.log_metric("last_val_loss_score",np.nanmax(picaiLossArr_score_final))
+    # experiment.log_metric("last_val_loss_auroc",np.nanmax(picaiLossArr_auroc_final))
+    # experiment.log_metric("last_val_loss_Ap",np.nanmax(picaiLossArr_AP_final))
+    # experiment.log_metric("last_val_loss_score",np.nanmax(picaiLossArr_score_final))
 
-    #experiment.log_parameters(parameters)  
-    experiment.end()
+    # #experiment.log_parameters(parameters)  
+    # experiment.end()
     # #evaluating on test dataset
     # with torch.no_grad():   
     # for batch in data.test_dataloader():

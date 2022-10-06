@@ -179,7 +179,9 @@ opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4",trials=500)
 
 physical_size =(81.0, 160.0, 192.0)#taken from picai used to crop image so only center will remain
 
-for experiment in opt.get_experiments(
-        project_name="picai-hyperparam-search-42"):
-    print("******* new experiment *****")    
-    Three_chan_baseline.mainTrain(experiment,options,df,physical_size)
+Three_chan_baseline.mainTrain(options,df,physical_size)
+
+# for experiment in opt.get_experiments(
+#         project_name="picai-hyperparam-search-43"):
+#     print("******* new experiment *****")    
+#     Three_chan_baseline.mainTrain(experiment,options,df,physical_size)
