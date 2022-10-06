@@ -177,7 +177,7 @@ def mainTrain(options,df,physical_size ):
         num_res_units=0, # experiment.get_parameter("num_res_units"),
         act =options["act"][0], # getParam(experiment,options,"act",df),
         norm= options["norm"][0], #  getParam(experiment,options,"norm",df),
-        dropout= options["dropout"][0], #experiment.get_parameter("dropout")
+        dropout= 0.1#options["dropout"][0], #experiment.get_parameter("dropout")
     )
 
 
