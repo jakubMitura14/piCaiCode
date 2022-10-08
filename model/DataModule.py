@@ -218,20 +218,20 @@ class PiCaiDataModule(pl.LightningDataModule):
         # self.val_ds=     PersistentDataset(data=self.val_subjects, transform=val_transforms,cache_dir=self.cache_dir)
         # self.test_ds=    PersistentDataset(data=self.test_subjects, transform=val_transforms,cache_dir=self.cache_dir)    
 
-        self.val_ds=     SmartCacheDataset(data=self.val_subjects, transform=val_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
-        self.train_ds=     SmartCacheDataset(data=self.train_subjects, transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+        # self.val_ds=     SmartCacheDataset(data=self.val_subjects, transform=val_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+        # self.train_ds=     SmartCacheDataset(data=self.train_subjects, transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
 
 
-        # self.train_ds =  Dataset(data=self.train_subjects, transform=train_transforms)
-        # self.val_ds=     Dataset(data=self.val_subjects, transform=val_transforms)
+        self.train_ds =  Dataset(data=self.train_subjects, transform=train_transforms)
+        self.val_ds=     Dataset(data=self.val_subjects, transform=val_transforms)
         #self.test_ds=    Dataset(data=self.test_subjects, transform=val_transforms)
         
     def train_dataloader(self):
         return DataLoader(self.train_ds, batch_size=self.batch_size, drop_last=self.drop_last
-                          ,num_workers=self.num_workers)#,collate_fn=list_data_collate , shuffle=True ,collate_fn=list_data_collate
+                          ,num_workers=self.num_workers,collate_fn=list_data_collate )#,collate_fn=list_data_collate , shuffle=True ,collate_fn=list_data_collate
 
     def val_dataloader(self):
-        return DataLoader(self.val_ds, batch_size=1, drop_last=self.drop_last,num_workers=self.num_workers)#,collate_fn=list_data_collate,collate_fn=pad_list_data_collate
+        return DataLoader(self.val_ds, batch_size=1, drop_last=self.drop_last,num_workers=self.num_workers,collate_fn=list_data_collate )#,collate_fn=list_data_collate,collate_fn=pad_list_data_collate
 
     # def test_dataloader(self):
     #     return DataLoader(self.test_ds, batch_size= 1, drop_last=False,num_workers=self.num_workers,collate_fn=list_data_collate)#num_workers=self.num_workers,
