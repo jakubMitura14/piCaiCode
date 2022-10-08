@@ -207,11 +207,11 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     # yHat_im_path = join(directory, patId+ "_hat.npy" )
     # np.save(gold_im_path, gold_arr)
     # np.save(yHat_im_path, y_hat_arr)
-    gold_im_path = join(directory, patId+ "_gold" )
-    yHat_im_path =join(directory, patId+ "_hat" )
-    image_path =join(directory, patId+ "image" )
-    imageB_path =join(directory, patId+ "imageB" )
-    hatPostA_path =join(directory, patId+ "hatPostA" )
+    gold_im_path = join(directory,'0_'+ patId+ "_gold.nii.gz" )
+    yHat_im_path =join(directory, '0_'+patId+ "_hat.nii.gz" )
+    image_path =join(directory, '0_'+patId+ "image.nii.gz" )
+    imageB_path =join(directory, '0_'+patId+ "imageB.nii.gz" )
+    hatPostA_path =join(directory, '0_'+patId+ "hatPostA.nii.gz" )
     # gold_im_path = join(directory, patId+ "_gold.nii.gz" )
     # yHat_im_path =join(directory, patId+ "_hat.nii.gz" )
     # image_path =join(directory, patId+ "image.nii.gz" )
@@ -220,11 +220,11 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
 
 
     print(f"suum hat  {np.sum( y_hat_arr.numpy())} hatPostA {np.sum(hatPostA)} hatPostA uniqq {np.unique(hatPostA) } hatpostA shape {hatPostA.shape} y_hat_arr sh {y_hat_arr.shape} gold_arr shape {gold_arr.shape} ")
-    monai.transforms.SaveImage(output_dir=gold_im_path,separate_folder=False)(gold_arr[1,:,:,:])
-    monai.transforms.SaveImage(output_dir=yHat_im_path,separate_folder=False)(y_hat_arr[1,:,:,:])
-    monai.transforms.SaveImage(output_dir=image_path,separate_folder=False)(imageArr[0,:,:,:])
-    monai.transforms.SaveImage(output_dir=imageB_path,separate_folder=False)(imageArr[1,:,:,:])
-    monai.transforms.SaveImage(output_dir=hatPostA_path,separate_folder=False)(hatPostA[1,:,:,:])
+    monai.transforms.SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "_gold")(gold_arr[1,:,:,:])
+    monai.transforms.SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "_hat")(y_hat_arr[1,:,:,:])
+    monai.transforms.SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "image")(imageArr[0,:,:,:])
+    monai.transforms.SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "imageB")(imageArr[1,:,:,:])
+    monai.transforms.SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "hatPostA")(hatPostA[1,:,:,:])
 
     # gold_arr=np.swapaxes(gold_arr,0,2)
     # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
@@ -263,8 +263,8 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     # writer.SetFileName(hatPostA_path)
     # writer.Execute(image)
 
-    return(gold_im_path,yHat_im_path)
-
+    # return(join(gold_im_path,'0_trans.nii.gz'),join(yHat_im_path,'0_trans.nii.gz'))
+    return( gold_im_path ,yHat_im_path )
 
 # def saveToValidate(i,y_det,regress_res_cpu,temp_val_dir,y_true,patIds):
 #     y_det_curr=y_det[i]
@@ -487,7 +487,8 @@ class Model(pl.LightningModule):
         y_det = decollate_batch(seg_hat.cpu().detach())
         # y_background = decollate_batch(seg_hat[:,0,:,:,:].cpu().detach())
         y_true = decollate_batch(y_true.cpu().detach())
-        patIds = decollate_batch(batch['study_id'])
+        # patIds = decollate_batch(batch['study_id'])
+        patIds = decollate_batch(batch['patient_id'])
 
         images = decollate_batch(x.cpu().detach()) 
 #         # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
