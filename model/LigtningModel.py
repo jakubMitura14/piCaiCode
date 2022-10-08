@@ -313,7 +313,7 @@ def getNext(i,results,TIMEOUT):
         return results[i].get(TIMEOUT)
 
     except Exception as e:
-        print("timed outt {e}")
+        print(f"timed outt {e}")
         return None    
 
 
