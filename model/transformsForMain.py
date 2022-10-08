@@ -108,6 +108,7 @@ def get_train_transforms(RandGaussianNoised_prob
         [
             LoadImaged(keys=["t2w","hbv","adc" ,"label"]),
             EnsureTyped(keys=["t2w","hbv","adc" ,"label"]),
+            AsDiscreted(keys=["label"],to_onehot=2),
             EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label"]),
             Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
             Spacingd(keys=["t2w","adc","hbv"], pixdim=(
@@ -117,7 +118,6 @@ def get_train_transforms(RandGaussianNoised_prob
             # Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
             #     1.0, 1.0, 1.0), mode=("bilinear", "nearest")),
       
-            AsDiscreted(keys=["label"],to_onehot=2),
             ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label"], spatial_size=spatial_size,),
             ConcatItemsd(keys=["t2w","adc","hbv","adc" ],name="chan3_col_name"),
 
