@@ -208,6 +208,7 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     gold_im_path = join(directory, patId+ "_gold.nii.gz" )
     yHat_im_path =join(directory, patId+ "_hat.nii.gz" )
     image_path =join(directory, patId+ "image.nii.gz" )
+    imageB_path =join(directory, patId+ "imageB.nii.gz" )
     hatPostA_path =join(directory, patId+ "hatPostA.nii.gz" )
     print(f"suum hat  {np.sum( y_hat_arr.numpy())} hatPostA {np.sum(hatPostA)} hatPostA uniqq {np.unique(hatPostA) } hatpostA shape {hatPostA.shape} y_hat_arr sh {y_hat_arr.shape} gold_arr shape {gold_arr.shape} ")
     # gold_arr=np.swapaxes(gold_arr,0,2)
@@ -216,8 +217,8 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     gold_arr=gold_arr[1,:,:,:].numpy()
     y_hat_arr=y_hat_arr[1,:,:,:].numpy()
 
-    # gold_arr=np.swapaxes(gold_arr,0,2)
-    # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
+    gold_arr=np.swapaxes(gold_arr,0,2)
+    y_hat_arr=np.swapaxes(y_hat_arr,0,2)
     
     image = sitk.GetImageFromArray(gold_arr)
     writer = sitk.ImageFileWriter()
@@ -235,7 +236,12 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     writer.SetFileName(image_path)
     writer.Execute(image)
 
-    image = sitk.GetImageFromArray(np.swapaxes(hatPostA,0,2))
+    image = sitk.GetImageFromArray(np.swapaxes(imageArr[1,:,:,:].numpy(),0,2))
+    writer = sitk.ImageFileWriter()
+    writer.SetFileName(imageB_path)
+    writer.Execute(image)
+
+    image = sitk.GetImageFromArray(np.swapaxes(hatPostA[1,:,:,:],0,2))
     writer = sitk.ImageFileWriter()
     writer.SetFileName(hatPostA_path)
     writer.Execute(image)
