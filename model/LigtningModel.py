@@ -315,7 +315,7 @@ def processDice(i,postProcess,y_det,y_true):
     try:
         hatPost=postProcess(y_det[i])
         # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
-        locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i])
+        locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i]).item()
         #locDice=0.0
         return (locDice,hatPost.numpy())
     except:
