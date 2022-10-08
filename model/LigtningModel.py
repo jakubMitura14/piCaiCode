@@ -471,7 +471,7 @@ class Model(pl.LightningModule):
         y_det = decollate_batch(seg_hat.cpu().detach())
         # y_background = decollate_batch(seg_hat[:,0,:,:,:].cpu().detach())
         y_true = decollate_batch(y_true.cpu().detach())
-        patIds = decollate_batch(batch['patient_id'])
+        patIds = decollate_batch(batch['study_id'])
 
         images = decollate_batch(x.cpu().detach()) 
 #         # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
