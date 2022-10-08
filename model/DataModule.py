@@ -167,7 +167,6 @@ class PiCaiDataModule(pl.LightningDataModule):
 
 
 
-        self.dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
 
     #TODO replace with https://docs.monai.io/en/stable/data.html
     def splitDataSet(self,patList, trainSizePercent,noTestSet):

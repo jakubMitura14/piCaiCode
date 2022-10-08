@@ -145,7 +145,7 @@ def mainTrain(options,df,physical_size ):
 
     data = DataModule.PiCaiDataModule(
         df= df,
-        batch_size=5,#
+        batch_size=1,#
         trainSizePercent=percentSplit,# TODO(change to 0.7 or 0.8
         num_workers=os.cpu_count(),
         drop_last=False,#True,

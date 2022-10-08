@@ -39,7 +39,8 @@ from monai.transforms import (
     RandCoarseDropoutd,
     AsDiscreted,
     MapTransform,
-    ResizeWithPadOrCropd
+    ResizeWithPadOrCropd,
+    EnsureChannelFirstd
     
 )
 from monai.config import KeysCollection

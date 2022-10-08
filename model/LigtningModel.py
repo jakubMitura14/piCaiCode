@@ -91,7 +91,52 @@ from torch.nn.intrinsic.qat import ConvBnReLU3d
 
 import multiprocessing as mp
 import time
-
+from monai.transforms import (
+    EnsureChannelFirstd,
+    Orientationd,
+    AsDiscrete,
+    AddChanneld,
+    Spacingd,
+    Compose,
+    CropForegroundd,
+    LoadImaged,
+    Orientationd,
+    RandCropByPosNegLabeld,
+    ScaleIntensityRanged,
+    Spacingd,
+    EnsureTyped,
+    EnsureType,
+    Resize,
+    Resized,
+    RandSpatialCropd,
+        AsDiscrete,
+    AsDiscreted,
+    CropForegroundd,
+    LoadImaged,
+    Orientationd,
+    RandCropByPosNegLabeld,
+    SaveImaged,
+    ScaleIntensityRanged,
+    SelectItemsd,
+    Invertd,
+    DivisiblePadd,
+    SpatialPadd,
+    RandGaussianNoised,
+    RandAdjustContrastd,
+    RandGaussianSmoothd,
+    RandRicianNoised,
+    RandFlipd,
+    RandAffined,
+    ConcatItemsd,
+    RandCoarseDropoutd,
+    AsDiscreted,
+    MapTransform,
+    ResizeWithPadOrCropd,
+    EnsureChannelFirstd,
+    SaveImage,
+    EnsureChannelFirst
+    
+)
 
 
 
@@ -221,11 +266,16 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
 
 
     print(f"suum hat  {np.sum( y_hat_arr.numpy())} hatPostA {np.sum(hatPostA)} hatPostA uniqq {np.unique(hatPostA) } hatpostA shape {hatPostA.shape} y_hat_arr sh {y_hat_arr.shape} gold_arr shape {gold_arr.shape} ")
-    monai.transforms.SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "_gold")(gold_arr[1,:,:,:])
-    monai.transforms.SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "_hat")(y_hat_arr[1,:,:,:])
-    monai.transforms.SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "image")(imageArr[0,:,:,:])
-    monai.transforms.SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "imageB")(imageArr[1,:,:,:])
-    monai.transforms.SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "hatPostA")(hatPostA[1,:,:,:])
+    SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "_gold")(EnsureChannelFirst()(gold_arr[1,:,:,:]))
+    SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "_hat")(EnsureChannelFirst()(y_hat_arr[1,:,:,:]))
+    SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "image")(EnsureChannelFirst()(imageArr[0,:,:,:]))
+    SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "imageB")(EnsureChannelFirst()(imageArr[1,:,:,:]))
+    SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "hatPostA")(EnsureChannelFirst()(hatPostA[1,:,:,:]))
+    # SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "_gold")(gold_arr[1,:,:,:])
+    # SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "_hat")(y_hat_arr[1,:,:,:])
+    # SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "image")(imageArr[0,:,:,:])
+    # SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "imageB")(imageArr[1,:,:,:])
+    # SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "hatPostA")(hatPostA[1,:,:,:])
 
     # gold_arr=np.swapaxes(gold_arr,0,2)
     # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
