@@ -146,7 +146,7 @@ config = {
 }
 
 df = pd.read_csv("/home/sliceruser/data/metadata/processedMetaData_current_b.csv")
-df=df.head(50)
+# df=df.head(50)
 # maxSize=manageMetaData.getMaxSize("t2w_med_spac",df)
 
 
