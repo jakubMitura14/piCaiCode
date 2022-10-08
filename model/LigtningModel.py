@@ -1,5 +1,6 @@
 ### Define Data Handling
 
+from distutils.log import error
 import time
 from pathlib import Path
 from datetime import datetime
@@ -311,8 +312,8 @@ def getNext(i,results,TIMEOUT):
         # return it.next(timeout=TIMEOUT)
         return results[i].get(TIMEOUT)
 
-    except:
-        print("timed outt ")
+    except(error):
+        print("timed outt {error}")
         return None    
 
 
