@@ -108,8 +108,8 @@ def get_train_transforms(RandGaussianNoised_prob
         [
             LoadImaged(keys=["t2w","hbv","adc" ,"label"]),
             EnsureTyped(keys=["t2w","hbv","adc" ,"label"]),
-            Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
             EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label"]),
+            Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
             Spacingd(keys=["t2w","adc","hbv"], pixdim=(
                 1.0, 1.0, 1.0), mode="bilinear"),      
             Spacingd(keys=["label"], pixdim=(
