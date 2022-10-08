@@ -465,7 +465,7 @@ class Model(pl.LightningModule):
         
         #seg_hat, reg_hat = self.modelRegression(x)        
         # seg_hat, reg_hat = self.modelRegression(x)        
-        seg_hat = self.net(x[:,0:2,:,:,:]).cpu().detach()
+        seg_hat = self.net(x.cpu().detach())
         seg_hat=torch.sigmoid(seg_hat).cpu().detach()
 
         #loss= self.criterion(seg_hat,y_true)# self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)      
