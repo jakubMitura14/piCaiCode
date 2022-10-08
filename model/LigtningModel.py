@@ -209,15 +209,15 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     yHat_im_path =join(directory, patId+ "_hat.nii.gz" )
     image_path =join(directory, patId+ "image.nii.gz" )
     hatPostA_path =join(directory, patId+ "hatPostA.nii.gz" )
-    print(f"suum hat  {np.sum( y_hat_arr.numpy())} hatPostA {np.sum(hatPostA)}  ")
+    print(f"suum hat  {np.sum( y_hat_arr.numpy())} hatPostA {np.sum(hatPostA)} hatPostA uniqq {np.unique(hatPostA) } hatpostA shape {hatPostA.shape} y_hat_arr sh {y_hat_arr.shape} gold_arr shape {gold_arr.shape} ")
     # gold_arr=np.swapaxes(gold_arr,0,2)
     # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
     # print(f"uniq gold { gold_arr.shape  }   yhat { y_hat_arr.shape }   yhat maxes  {np.maximum(y_hat_arr)}  hyat min {np.minimum(y_hat_arr)} ")
     gold_arr=gold_arr[1,:,:,:].numpy()
     y_hat_arr=y_hat_arr[1,:,:,:].numpy()
 
-    gold_arr=np.swapaxes(gold_arr,0,2)
-    y_hat_arr=np.swapaxes(y_hat_arr,0,2)
+    # gold_arr=np.swapaxes(gold_arr,0,2)
+    # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
     
     image = sitk.GetImageFromArray(gold_arr)
     writer = sitk.ImageFileWriter()
@@ -340,7 +340,7 @@ class Model(pl.LightningModule):
         self.picaiLossArr_AP_final=picaiLossArr_AP_final
         self.picaiLossArr_score_final=picaiLossArr_score_final
         #temporary directory for validation images and their labels
-        self.temp_val_dir= '/home/sliceruser/data/tempE' #tempfile.mkdtemp()
+        self.temp_val_dir= '/home/sliceruser/data/tempF' #tempfile.mkdtemp()
         self.list_gold_val=[]
         self.list_yHat_val=[]
         self.list_back_yHat_val=[]
@@ -743,7 +743,7 @@ class Model(pl.LightningModule):
         #clearing and recreatin temporary directory
         #shutil.rmtree(self.temp_val_dir)   
         #self.temp_val_dir=tempfile.mkdtemp() 
-        self.temp_val_dir=pathOs.join('/home/sliceruser/data/tempE',str(self.trainer.current_epoch))
+        self.temp_val_dir=pathOs.join('/home/sliceruser/data/tempF',str(self.trainer.current_epoch))
         os.makedirs(self.temp_val_dir,  exist_ok = True)  
 
 
