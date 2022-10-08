@@ -115,7 +115,7 @@ def get_train_transforms(RandGaussianNoised_prob
             AsDiscreted(keys=["label"],to_onehot=2),
             Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
             Spacingd(keys=["t2w","adc","hbv"], pixdim=(
-                1.0, 1.0, 1.0), mode=monai.utils.SplineMode.THREE),      
+                1.0, 1.0, 1.0), mode="bilinear" ),      #monai.utils.SplineMode.THREE
             Spacingd(keys=["label"], pixdim=(
                 1.0, 1.0, 1.0), mode="nearest"),     
             # Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
@@ -157,7 +157,7 @@ def get_val_transforms(is_whole_to_train,spatial_size):
             EnsureTyped(keys=["t2w","hbv","adc" ,"label_name_val"]),
             Orientationd(keys=["t2w","adc", "hbv","label_name_val"], axcodes="RAS"),
             Spacingd(keys=["t2w","adc","hbv"], pixdim=(
-                1.0, 1.0, 1.0), mode=monai.utils.SplineMode.THREE),      
+                1.0, 1.0, 1.0), mode="bilinear"),      
             Spacingd(keys=["label_name_val"], pixdim=(
                 1.0, 1.0, 1.0), mode="nearest"),  
             #ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label_name_val"], spatial_size=spatial_size,),
