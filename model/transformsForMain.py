@@ -109,15 +109,13 @@ def get_train_transforms(RandGaussianNoised_prob
             LoadImaged(keys=["t2w","hbv","adc" ,"label"]),
             EnsureTyped(keys=["t2w","hbv","adc" ,"label"]),
             Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
-            Spacingd(keys=["t2w"], pixdim=(
-                1.0, 1.0, 1.0), mode="bilinear"),     
-            Spacingd(keys=["adc"], pixdim=(
-                1.0, 1.0, 1.0), mode="bilinear"),     
+            EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label"]),
+            Spacingd(keys=["t2w","adc","hbv"], pixdim=(
+                1.0, 1.0, 1.0), mode="bilinear"),      
             Spacingd(keys=["label"], pixdim=(
                 1.0, 1.0, 1.0), mode="nearest"),     
             # Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
             #     1.0, 1.0, 1.0), mode=("bilinear", "nearest")),
-            EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label"]),
       
             AsDiscreted(keys=["label"],to_onehot=2),
             ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label"], spatial_size=spatial_size,),
@@ -155,8 +153,10 @@ def get_val_transforms(is_whole_to_train,spatial_size):
             EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label_name_val"]),
             EnsureTyped(keys=["t2w","hbv","adc" ,"label_name_val"]),
             Orientationd(keys=["t2w","adc", "hbv","label_name_val"], axcodes="RAS"),
-            Spacingd(keys=["t2w","adc", "hbv","label_name_val"], pixdim=(
-                1.0, 1.0, 1.0), mode=("bilinear", "nearest")), 
+            Spacingd(keys=["t2w","adc","hbv"], pixdim=(
+                1.0, 1.0, 1.0), mode="bilinear"),      
+            Spacingd(keys=["label_name_val"], pixdim=(
+                1.0, 1.0, 1.0), mode="nearest"),  
             #AsDiscreted(keys=["label_name_val"], to_onehot=2),
             #ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label_name_val"], spatial_size=spatial_size,),
             ConcatItemsd(["t2w","adc","hbv","adc" ], "chan3_col_name_val"),
