@@ -214,7 +214,8 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     # gold_arr=np.swapaxes(gold_arr,0,2)
     # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
     # print(f"uniq gold { gold_arr.shape  }   yhat { y_hat_arr.shape }   yhat maxes  {np.maximum(y_hat_arr)}  hyat min {np.minimum(y_hat_arr)} ")
-    gold_arr=gold_arr[1,:,:,:].numpy()
+    # gold_arr=gold_arr[1,:,:,:].numpy()
+    gold_arr=gold_arr[0,:,:,:].numpy()
     y_hat_arr=y_hat_arr[1,:,:,:].numpy()
 
     gold_arr=np.swapaxes(gold_arr,0,2)
@@ -303,7 +304,8 @@ def processDice(i,postProcess,y_det,y_true):
     try:
         hatPost=postProcess(y_det[i])
         # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
-        locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i])
+        #locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i])
+        locDice=0.0
         return (locDice,hatPost.numpy())
     except:
         return (0.0,np.zeros_like(y_det[i]))
