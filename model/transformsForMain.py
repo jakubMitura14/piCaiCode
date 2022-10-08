@@ -160,7 +160,7 @@ def get_val_transforms(is_whole_to_train,spatial_size):
                 1.0, 1.0, 1.0), mode="bilinear"),      
             Spacingd(keys=["label_name_val"], pixdim=(
                 1.0, 1.0, 1.0), mode="nearest"),  
-            #ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label_name_val"], spatial_size=spatial_size,),
+            ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label_name_val"], spatial_size=spatial_size,),
             ConcatItemsd(["t2w","adc","hbv","adc" ], "chan3_col_name_val"),
             standardizeLabels(keys=["label_name_val"]),
             AsDiscreted(keys=["label_name_val"], to_onehot=2),
@@ -171,7 +171,7 @@ def get_val_transforms(is_whole_to_train,spatial_size):
             # Spacingd(keys=["chan3_col_name","label_name_val"], pixdim=(
             #     1.0, 1.0, 1.0), mode=("bilinear", "nearest")),
             #SpatialPadd(keys=["chan3_col_name","label"],spatial_size=maxSize) ,
-            DivisiblePadd(keys=["chan3_col_name_val","label_name_val"],k=32) ,
+            #DivisiblePadd(keys=["chan3_col_name_val","label_name_val"],k=32) ,
             #ResizeWithPadOrCropd(keys=["chan3_col_name","label_name_val"],spatial_size=centerCropSize ),
 
             #*decide_if_whole_image_train(is_whole_to_train,"chan3_col_name_val","label_name_val"),
