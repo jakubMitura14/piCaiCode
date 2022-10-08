@@ -44,6 +44,8 @@ from monai.transforms import (
 )
 from monai.config import KeysCollection
 
+
+
 import torchio
 import numpy as np
 
@@ -113,7 +115,7 @@ def get_train_transforms(RandGaussianNoised_prob
             AsDiscreted(keys=["label"],to_onehot=2),
             Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
             Spacingd(keys=["t2w","adc","hbv"], pixdim=(
-                1.0, 1.0, 1.0), mode="bilinear"),      
+                1.0, 1.0, 1.0), mode=monai.utils.SplineMode(3)),      
             Spacingd(keys=["label"], pixdim=(
                 1.0, 1.0, 1.0), mode="nearest"),     
             # Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
@@ -155,13 +157,14 @@ def get_val_transforms(is_whole_to_train,spatial_size):
             EnsureTyped(keys=["t2w","hbv","adc" ,"label_name_val"]),
             Orientationd(keys=["t2w","adc", "hbv","label_name_val"], axcodes="RAS"),
             Spacingd(keys=["t2w","adc","hbv"], pixdim=(
-                1.0, 1.0, 1.0), mode="bilinear"),      
+                1.0, 1.0, 1.0), mode=monai.utils.SplineMode(3)),      
             Spacingd(keys=["label_name_val"], pixdim=(
                 1.0, 1.0, 1.0), mode="nearest"),  
-            #AsDiscreted(keys=["label_name_val"], to_onehot=2),
             #ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label_name_val"], spatial_size=spatial_size,),
             ConcatItemsd(["t2w","adc","hbv","adc" ], "chan3_col_name_val"),
             standardizeLabels(keys=["label_name_val"]),
+            AsDiscreted(keys=["label_name_val"], to_onehot=2),
+
             #torchio.transforms.OneHot(include=["label"] ),#num_classes=3
             #AsChannelFirstd(keys=["chan3_col_name","label"]]),
             # Orientationd(keys=["chan3_col_name","label_name_val"], axcodes="RAS"),

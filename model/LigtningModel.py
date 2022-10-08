@@ -315,8 +315,8 @@ def processDice(i,postProcess,y_det,y_true):
     try:
         hatPost=postProcess(y_det[i])
         # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
-        #locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i])
-        locDice=0.0
+        locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i])
+        #locDice=0.0
         return (locDice,hatPost.numpy())
     except:
         return (0.0,np.zeros_like(y_det[i]))
@@ -584,7 +584,7 @@ class Model(pl.LightningModule):
     def validation_epoch_end(self, outputs):
         print("validation_epoch_end")
 
-        #self.log('dice', np.mean(self.dices))
+        self.log('dice', np.mean(self.dices))
         # self.dice_metric.reset()
 
  
