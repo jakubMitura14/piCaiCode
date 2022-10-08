@@ -312,8 +312,8 @@ def getNext(i,results,TIMEOUT):
         # return it.next(timeout=TIMEOUT)
         return results[i].get(TIMEOUT)
 
-    except(error):
-        print("timed outt {error}")
+    except Exception as e:
+        print("timed outt {e}")
         return None    
 
 
