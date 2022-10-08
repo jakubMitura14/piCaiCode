@@ -110,11 +110,11 @@ def get_train_transforms(RandGaussianNoised_prob
             EnsureTyped(keys=["t2w","hbv","adc" ,"label"]),
             Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
             Spacingd(keys=["t2w"], pixdim=(
-                1.0, 1.0, 1.0), mode=("bilinear", "nearest")),     
+                1.0, 1.0, 1.0), mode="bilinear"),     
             Spacingd(keys=["adc"], pixdim=(
-                1.0, 1.0, 1.0), mode=("bilinear", "nearest")),     
+                1.0, 1.0, 1.0), mode="bilinear"),     
             Spacingd(keys=["label"], pixdim=(
-                1.0, 1.0, 1.0), mode=("bilinear", "nearest")),     
+                1.0, 1.0, 1.0), mode="nearest"),     
             # Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
             #     1.0, 1.0, 1.0), mode=("bilinear", "nearest")),
             EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label"]),
