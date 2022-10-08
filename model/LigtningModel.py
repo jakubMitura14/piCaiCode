@@ -215,7 +215,8 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
     # print(f"uniq gold { gold_arr.shape  }   yhat { y_hat_arr.shape }   yhat maxes  {np.maximum(y_hat_arr)}  hyat min {np.minimum(y_hat_arr)} ")
     # gold_arr=gold_arr[1,:,:,:].numpy()
-    gold_arr=gold_arr[0,:,:,:].numpy()
+    # gold_arr=gold_arr[0,:,:,:].numpy()
+    gold_arr=imageArr[3,:,:,:].numpy()
     y_hat_arr=y_hat_arr[1,:,:,:].numpy()
 
     gold_arr=np.swapaxes(gold_arr,0,2)
@@ -454,7 +455,7 @@ class Model(pl.LightningModule):
         
         #seg_hat, reg_hat = self.modelRegression(x)        
         # seg_hat, reg_hat = self.modelRegression(x)        
-        seg_hat = self.net(x).cpu().detach()
+        seg_hat = self.net(x[:,0:2,:,:,:]).cpu().detach()
         seg_hat=torch.sigmoid(seg_hat).cpu().detach()
 
         #loss= self.criterion(seg_hat,y_true)# self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)      
