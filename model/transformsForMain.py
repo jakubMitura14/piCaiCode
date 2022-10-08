@@ -110,6 +110,9 @@ def get_train_transforms(RandGaussianNoised_prob
             EnsureTyped(keys=["t2w","hbv","adc" ,"label"]),
             EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label"]),
             AsDiscreted(keys=["label"],to_onehot=2),
+            Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
+            Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
+                1.0, 1.0, 1.0), mode=("bilinear", "nearest")),     
             ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label"], spatial_size=spatial_size,),
             ConcatItemsd(keys=["t2w","adc","hbv","adc" ],name="chan3_col_name"),
 
@@ -117,9 +120,7 @@ def get_train_transforms(RandGaussianNoised_prob
             #torchio.transforms.OneHot(include=["label"] ), #num_classes=3,
             #AsDiscreted(keys=["label"],to_onehot=2,threshold=0.5),
             #AsChannelFirstd(keys=["t2w","adc", "hbv","label"]),
-            #Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
-            #Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
-            #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),            
+       
             #CropForegroundd(keys=["t2w","adc", "hbv","label"], source_key="image"),
             # SelectItemsd(keys=["chan3_col_name","label"]),
             #DivisiblePadd(keys=["chan3_col_name","label"],k=32) ,            
@@ -146,17 +147,19 @@ def get_val_transforms(is_whole_to_train,spatial_size):
             LoadImaged(keys=["t2w","hbv","adc" ,"label_name_val"]),
             EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label_name_val"]),
             EnsureTyped(keys=["t2w","hbv","adc" ,"label_name_val"]),
+            Orientationd(keys=["t2w","adc", "hbv","label_name_val"], axcodes="RAS"),
+            Spacingd(keys=["t2w","adc", "hbv","label_name_val"], pixdim=(
+                1.0, 1.0, 1.0), mode=("bilinear", "nearest")), 
             #AsDiscreted(keys=["label_name_val"], to_onehot=2),
             #ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label_name_val"], spatial_size=spatial_size,),
-            ConcatItemsd(["t2w","adc","hbv","adc","label_name_val" ], "chan3_col_name_val"),
-            #standardizeLabels(keys=["label_name_val"]),
-
+            ConcatItemsd(["t2w","adc","hbv","adc" ], "chan3_col_name_val"),
+            standardizeLabels(keys=["label_name_val"]),
             #torchio.transforms.OneHot(include=["label"] ),#num_classes=3
             #AsDiscreted(keys=["label"],to_onehot=2,threshold=0.5),
             #AsChannelFirstd(keys=["chan3_col_name","label"]]),
-            #Orientationd(keys=["chan3_col_name","label"]], axcodes="RAS"),
-            # Spacingd(keys=["chan3_col_name","label"]], pixdim=(
-            #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
+            # Orientationd(keys=["chan3_col_name","label_name_val"], axcodes="RAS"),
+            # Spacingd(keys=["chan3_col_name","label_name_val"], pixdim=(
+            #     1.0, 1.0, 1.0), mode=("bilinear", "nearest")),
             #SpatialPadd(keys=["chan3_col_name","label"],spatial_size=maxSize) ,
             DivisiblePadd(keys=["chan3_col_name_val","label_name_val"],k=32) ,
             #ResizeWithPadOrCropd(keys=["chan3_col_name","label_name_val"],spatial_size=centerCropSize ),
