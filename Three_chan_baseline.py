@@ -112,6 +112,7 @@ def mainTrain(options,df,physical_size ):
     # hbvColName="hbv"+spacing_keyword
 
     df=df.loc[df[t2wColName] != ' ']
+    df=df.head(40)
     label_name="reSampledPath"
     # label_name="label"+spacing_keyword
     label_name_val=label_name
