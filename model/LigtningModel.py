@@ -201,6 +201,8 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     """
     saves arrays in given directory and return paths to them
     """
+
+
     # gold_im_path = join(directory, patId+ "_gold.npy" )
     # yHat_im_path = join(directory, patId+ "_hat.npy" )
     # np.save(gold_im_path, gold_arr)
@@ -210,43 +212,51 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     image_path =join(directory, patId+ "image.nii.gz" )
     imageB_path =join(directory, patId+ "imageB.nii.gz" )
     hatPostA_path =join(directory, patId+ "hatPostA.nii.gz" )
+
+
     print(f"suum hat  {np.sum( y_hat_arr.numpy())} hatPostA {np.sum(hatPostA)} hatPostA uniqq {np.unique(hatPostA) } hatpostA shape {hatPostA.shape} y_hat_arr sh {y_hat_arr.shape} gold_arr shape {gold_arr.shape} ")
+    monai.transforms.SaveImage(output_dir=gold_im_path)(gold_arr[1,:,:,:])
+    monai.transforms.SaveImage(output_dir=yHat_im_path)(y_hat_arr[1,:,:,:])
+    monai.transforms.SaveImage(output_dir=image_path)(imageArr[0,:,:,:])
+    monai.transforms.SaveImage(output_dir=imageB_path)(imageArr[1,:,:,:])
+    monai.transforms.SaveImage(output_dir=hatPostA_path)(hatPostA[1,:,:,:])
+
     # gold_arr=np.swapaxes(gold_arr,0,2)
     # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
     # print(f"uniq gold { gold_arr.shape  }   yhat { y_hat_arr.shape }   yhat maxes  {np.maximum(y_hat_arr)}  hyat min {np.minimum(y_hat_arr)} ")
     # gold_arr=gold_arr[1,:,:,:].numpy()
     # gold_arr=gold_arr[0,:,:,:].numpy()
-    gold_arr=imageArr[3,:,:,:].numpy()
-    y_hat_arr=y_hat_arr[1,:,:,:].numpy()
+    # gold_arr=imageArr[3,:,:,:].numpy()
+    # y_hat_arr=y_hat_arr[1,:,:,:].numpy()
 
-    gold_arr=np.swapaxes(gold_arr,0,2)
-    y_hat_arr=np.swapaxes(y_hat_arr,0,2)
+    # gold_arr=np.swapaxes(gold_arr,0,2)
+    # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
     
-    image = sitk.GetImageFromArray(gold_arr)
-    writer = sitk.ImageFileWriter()
-    writer.SetFileName(gold_im_path)
-    writer.Execute(image)
+    # image = sitk.GetImageFromArray(gold_arr)
+    # writer = sitk.ImageFileWriter()
+    # writer.SetFileName(gold_im_path)
+    # writer.Execute(image)
 
 
-    image = sitk.GetImageFromArray(y_hat_arr)
-    writer = sitk.ImageFileWriter()
-    writer.SetFileName(yHat_im_path)
-    writer.Execute(image) 
+    # image = sitk.GetImageFromArray(y_hat_arr)
+    # writer = sitk.ImageFileWriter()
+    # writer.SetFileName(yHat_im_path)
+    # writer.Execute(image) 
 
-    image = sitk.GetImageFromArray(np.swapaxes(imageArr[0,:,:,:].numpy(),0,2))
-    writer = sitk.ImageFileWriter()
-    writer.SetFileName(image_path)
-    writer.Execute(image)
+    # image = sitk.GetImageFromArray(np.swapaxes(imageArr[0,:,:,:].numpy(),0,2))
+    # writer = sitk.ImageFileWriter()
+    # writer.SetFileName(image_path)
+    # writer.Execute(image)
 
-    image = sitk.GetImageFromArray(np.swapaxes(imageArr[1,:,:,:].numpy(),0,2))
-    writer = sitk.ImageFileWriter()
-    writer.SetFileName(imageB_path)
-    writer.Execute(image)
+    # image = sitk.GetImageFromArray(np.swapaxes(imageArr[1,:,:,:].numpy(),0,2))
+    # writer = sitk.ImageFileWriter()
+    # writer.SetFileName(imageB_path)
+    # writer.Execute(image)
 
-    image = sitk.GetImageFromArray(np.swapaxes(hatPostA[1,:,:,:],0,2))
-    writer = sitk.ImageFileWriter()
-    writer.SetFileName(hatPostA_path)
-    writer.Execute(image)
+    # image = sitk.GetImageFromArray(np.swapaxes(hatPostA[1,:,:,:],0,2))
+    # writer = sitk.ImageFileWriter()
+    # writer.SetFileName(hatPostA_path)
+    # writer.Execute(image)
 
     return(gold_im_path,yHat_im_path)
 
