@@ -586,7 +586,7 @@ class Model(pl.LightningModule):
     def validation_epoch_end(self, outputs):
         print("validation_epoch_end")
 
-        self.log('dice', np.mean(self.dices))
+        #self.log('dice', np.mean(self.dices))
         # self.dice_metric.reset()
 
  
@@ -604,7 +604,7 @@ class Model(pl.LightningModule):
             # dices=list(map(partial(calcDiceFromPaths,list_yHat_val=self.list_yHat_val,list_gold_val=self.list_gold_val   ),list(range(0,len(self.list_yHat_val)))))
             # meanDice=torch.mean(torch.stack( dices)).item()
             
-            #self.log('meanDice',torch.mean(torch.stack( self.dices)).item() )
+            self.log('meanDice',torch.mean(torch.stack( self.dices)).item() )
             
             
             # print('meanDice',np.mean( np.array(self.dices ).flatten()))
