@@ -164,7 +164,9 @@ def get_val_transforms(is_whole_to_train,spatial_size):
             EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label_name_val"]),
             EnsureTyped(keys=["t2w","hbv","adc" ,"label_name_val"]),
             Orientationd(keys=["t2w","adc", "hbv","label_name_val"], axcodes="RAS"),
-            standardizeLabels(keys=["label_name_val"],ref= "t2w"),
+           
+            #standardizeLabels(keys=["label_name_val"],ref= "t2w"),
+           
             # Spacingd(keys=["t2w","adc","hbv"], pixdim=(
             #     1.0, 1.0, 1.0), mode="bilinear"),      
             # Spacingd(keys=["label_name_val"], pixdim=(
