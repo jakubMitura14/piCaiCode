@@ -218,7 +218,7 @@ def get_debug_transforms():
             # Spacingd(keys=["t2w","adc","hbv","label_name_val"], pixdim=(
             #     1.0, 1.0, 1.0), mode=("bilinear","bilinear","bilinear","nearest") ),      #monai.utils.SplineMode.THREE
 
-            standardizeLabels(keys=["label_name_val"],ref= "t2w"),
+            standardizeLabels(keys=["label_name_val"]),#,ref= "t2w"
 
             ConcatItemsd(["t2w","label_name_val","hbv","adc" ], "dummy"),
 
