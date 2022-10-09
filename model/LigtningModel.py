@@ -215,6 +215,7 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
     # print(f"uniq gold { gold_arr.shape  }   yhat { y_hat_arr.shape }   yhat maxes  {np.maximum(y_hat_arr)}  hyat min {np.minimum(y_hat_arr)} ")
     gold_arr=gold_arr[1,:,:,:].numpy()
+    gold_arr=np.flip(gold_arr,(1,0))
     y_hat_arr=y_hat_arr[1,:,:,:].numpy()
 
     gold_arr=np.swapaxes(gold_arr,0,2)
@@ -231,7 +232,7 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     writer.SetFileName(yHat_im_path)
     writer.Execute(image) 
 
-    image = sitk.GetImageFromArray( np.flip( np.swapaxes(imageArr[0,:,:,:].numpy(),0,2),(0,1)) ) 
+    image = sitk.GetImageFromArray(  np.swapaxes(imageArr[0,:,:,:].numpy(),0,2) ) 
     writer = sitk.ImageFileWriter()
     writer.SetFileName(image_path)
     writer.Execute(image)
