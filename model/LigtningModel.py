@@ -282,7 +282,7 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     # SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "image")(imageArr[0,:,:,:])
     # SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "imageB")(imageArr[1,:,:,:])
     # SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "hatPostA")(hatPostA[1,:,:,:])
-    print(f"image suuum {imageArr[0,:,:,:].numpy()}  ")
+    print(f"image suuum {np.sum(imageArr[0,:,:,:].numpy())}  ")
     gold_arr=np.swapaxes(gold_arr,0,2)
     y_hat_arr=np.swapaxes(y_hat_arr,0,2)
     #print(f"uniq gold { gold_arr.shape  }   yhat { y_hat_arr.shape }   yhat sum  {np.sum(y_hat_arr)}  image sum {np.sum(imageArr[0,:,:,:])} ")
