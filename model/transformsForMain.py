@@ -113,7 +113,6 @@ def get_train_transforms(RandGaussianNoised_prob
             EnsureTyped(keys=["t2w","hbv","adc" ,"label"]),
             EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label"]),
             standardizeLabels(keys=["label"]),
-            AsDiscreted(keys=["label"],to_onehot=2),
             Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
             Spacingd(keys=["t2w","adc","hbv"], pixdim=(
                 1.0, 1.0, 1.0), mode="bilinear" ),      #monai.utils.SplineMode.THREE
@@ -125,6 +124,7 @@ def get_train_transforms(RandGaussianNoised_prob
             ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label"], spatial_size=spatial_size,),
             ConcatItemsd(keys=["t2w","adc","hbv","adc" ],name="chan3_col_name"),
             SelectItemsd(keys=["chan3_col_name","label","num_lesions_to_retain","isAnythingInAnnotated"]),
+            AsDiscreted(keys=["label"],to_onehot=2),
 
             # standardizeLabels(keys=["label"]),
             # torchio.transforms.OneHot(include=["label"] ), #num_classes=3,
@@ -162,6 +162,8 @@ def get_val_transforms(is_whole_to_train,spatial_size):
                 1.0, 1.0, 1.0), mode="bilinear"),      
             Spacingd(keys=["label_name_val"], pixdim=(
                 1.0, 1.0, 1.0), mode="nearest"),  
+            ConcatItemsd(["t2w","label_name_val","hbv","adc" ], "dummy"),
+
             ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label_name_val"], spatial_size=spatial_size,),
             ConcatItemsd(["t2w","adc","hbv","adc" ], "chan3_col_name_val"),
             standardizeLabels(keys=["label_name_val"]),
