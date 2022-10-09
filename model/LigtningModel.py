@@ -243,6 +243,9 @@ def divide_chunks(l, n):
     for i in range(0, len(l), n):
         yield l[i:i + n]
 
+def monaiSaveFile(directory,name,arr):
+    return Compose(EnsureChannelFirst(),SaveImage(output_dir=directory,separate_folder=False,output_postfix =name) )(arr)
+
 def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     """
     saves arrays in given directory and return paths to them
@@ -266,11 +269,13 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
 
 
     print(f"suum hat  {np.sum( y_hat_arr.numpy())} hatPostA {np.sum(hatPostA)} hatPostA uniqq {np.unique(hatPostA) } hatpostA shape {hatPostA.shape} y_hat_arr sh {y_hat_arr.shape} gold_arr shape {gold_arr.shape} ")
-    SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "_gold")(EnsureChannelFirst()(gold_arr[1,:,:,:]))
-    SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "_hat")(EnsureChannelFirst()(y_hat_arr[1,:,:,:]))
-    SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "image")(EnsureChannelFirst()(imageArr[0,:,:,:]))
-    SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "imageB")(EnsureChannelFirst()(imageArr[1,:,:,:]))
-    SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "hatPostA")(EnsureChannelFirst()(hatPostA[1,:,:,:]))
+
+    monaiSaveFile(directory,patId+ "_gold",gold_arr[1,:,:,:])
+    monaiSaveFile(directory,patId+ "_hat",y_hat_arr[1,:,:,:])
+    monaiSaveFile(directory,patId+ "image",imageArr[0,:,:,:])
+    monaiSaveFile(directory,patId+ "imageB",imageArr[1,:,:,:])
+    monaiSaveFile(directory,patId+ "hatPostA",hatPostA[1,:,:,:])
+
     # SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "_gold")(gold_arr[1,:,:,:])
     # SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "_hat")(y_hat_arr[1,:,:,:])
     # SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "image")(imageArr[0,:,:,:])
