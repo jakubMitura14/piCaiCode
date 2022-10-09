@@ -282,13 +282,13 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     # SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "image")(imageArr[0,:,:,:])
     # SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "imageB")(imageArr[1,:,:,:])
     # SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "hatPostA")(hatPostA[1,:,:,:])
-    print(f"image suuum {np.sum(imageArr[0,:,:,:].numpy()) } imageArr Shape {imageArr.numpy().shape}  ")
-    gold_arr=np.swapaxes(gold_arr,0,2)
-    y_hat_arr=np.swapaxes(y_hat_arr,0,2)
+
     #print(f"uniq gold { gold_arr.shape  }   yhat { y_hat_arr.shape }   yhat sum  {np.sum(y_hat_arr)}  image sum {np.sum(imageArr[0,:,:,:])} ")
     gold_arr=gold_arr[1,:,:,:].numpy()
-
     y_hat_arr=y_hat_arr[1,:,:,:].numpy()
+
+    print(f"   image suuum {np.sum(imageArr[0,:,:,:].numpy()) } imageArr Shape {imageArr.numpy().shape}  ")
+
 
     gold_arr=np.swapaxes(gold_arr,0,2)
     y_hat_arr=np.swapaxes(y_hat_arr,0,2)
@@ -535,10 +535,6 @@ class Model(pl.LightningModule):
         
         
 
-#         #we want only first channel
-#         y_true=y_true[:,1,:,:,:].cpu().detach()
-#         y_det=seg_hat[:,1,:,:,:].cpu().detach()
-
         y_det = decollate_batch(seg_hat.cpu().detach())
         # y_background = decollate_batch(seg_hat[:,0,:,:,:].cpu().detach())
         y_true = decollate_batch(y_true.cpu().detach())
@@ -667,7 +663,7 @@ class Model(pl.LightningModule):
             
             # self.log('meanDice',torch.mean(torch.stack( self.dices)).item() )
             self.log('meanDice',np.mean( self.dices))
-            
+            print(f"meanDice {np.mean( self.dices)}")
             
             # print('meanDice',np.mean( np.array(self.dices ).flatten()))
             # self.log('mean_surface_distance',torch.mean(torch.stack( self.surfDists)).item())

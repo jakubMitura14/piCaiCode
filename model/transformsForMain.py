@@ -17,7 +17,7 @@ from monai.transforms import (
     Resize,
     Resized,
     RandSpatialCropd,
-        AsDiscrete,
+    AsDiscrete,
     AsDiscreted,
     CropForegroundd,
     LoadImaged,
@@ -55,11 +55,11 @@ class standardizeLabels(MapTransform):
     def __init__(
         self,
         keys: KeysCollection,
-        ref,
+        #ref,
         allow_missing_keys: bool = False,
     ):
         super().__init__(keys, allow_missing_keys)
-        self.ref=ref
+        #self.ref=ref
 
     def __call__(self, data):
 
@@ -67,7 +67,7 @@ class standardizeLabels(MapTransform):
         for key in self.keys:
             #print(f"in standd {d[key].meta} rrrrrrrrrrrrrrref {d[self.ref].meta}  ")
             d[key].set_array((d[key].get_array() > 0.5).astype('int8'))
-            d[key].meta['pixdim']=d[self.ref].meta['spacing']
+            #d[key].meta['pixdim']=d[self.ref].meta['spacing']
             #update_meta(pixdim=d[self.ref].pixdim
             #print(f" {d['study_id']} label size {d[key].get_array().shape}  imSize  {d[self.ref].get_array().shape} labels_spac {d[key].pixdim} im_spac {d[self.ref].pixdim} ")
             # print(f" d[key].pixdim {d[key].pixdim} d[self.ref].pixdim {d[self.ref].pixdim} label size {d[key].get_array().shape}  imSize  {d[self.ref].get_array().shape} ")
@@ -119,7 +119,7 @@ def get_train_transforms(RandGaussianNoised_prob
             LoadImaged(keys=["t2w","hbv","adc" ,"label"]),
             EnsureTyped(keys=["t2w","hbv","adc" ,"label"]),
             EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label"]),
-            standardizeLabels(keys=["label"],ref= "t2w"),
+            standardizeLabels(keys=["label"]),#,ref= "t2w"
             Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
             Spacingd(keys=["t2w","adc","hbv","label"], pixdim=(
                 1.0, 1.0, 1.0), mode=("bilinear","bilinear","bilinear","nearest") ),      #monai.utils.SplineMode.THREE
@@ -165,7 +165,7 @@ def get_val_transforms(is_whole_to_train,spatial_size):
             EnsureTyped(keys=["t2w","hbv","adc" ,"label_name_val"]),
             Orientationd(keys=["t2w","adc", "hbv","label_name_val"], axcodes="RAS"),
            
-            standardizeLabels(keys=["label_name_val"],ref= "t2w"),
+            standardizeLabels(keys=["label_name_val"]),#,ref= "t2w"
            
             # Spacingd(keys=["t2w","adc","hbv"], pixdim=(
             #     1.0, 1.0, 1.0), mode="bilinear"),      
