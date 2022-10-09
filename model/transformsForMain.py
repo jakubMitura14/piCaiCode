@@ -65,9 +65,9 @@ class standardizeLabels(MapTransform):
 
         d = dict(data)
         for key in self.keys:
-            print(f"in standd {d[key].meta} rrrrrrrrrrrrrrref {d[self.ref].meta}  ")
+            #print(f"in standd {d[key].meta} rrrrrrrrrrrrrrref {d[self.ref].meta}  ")
             d[key].set_array((d[key].get_array() > 0.5).astype('int8'))
-            d[key].meta['pixdim']=d[self.ref].meta['pixdim']
+            d[key].meta['pixdim']=d[self.ref].meta['spacing']
             #update_meta(pixdim=d[self.ref].pixdim
             print(f" d[key].pixdim {d[key].pixdim} d[self.ref].pixdim {d[self.ref].pixdim} ")
         return d
