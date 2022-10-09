@@ -556,8 +556,6 @@ class Model(pl.LightningModule):
         #     self.dices.append(locDice)
         #     # self.surfDists.append(avSurface_dist_loc)
         #     hatPostA.append(hatPost[1,:,:,:])
-
-
         #     self.dices.append(locDice)
 
 
