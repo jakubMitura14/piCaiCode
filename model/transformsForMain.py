@@ -69,7 +69,7 @@ class standardizeLabels(MapTransform):
             d[key].set_array((d[key].get_array() > 0.5).astype('int8'))
             d[key].meta['pixdim']=d[self.ref].meta['spacing']
             #update_meta(pixdim=d[self.ref].pixdim
-            print(f" {d['study_id']} label size {d[key].get_array().shape}  imSize  {d[self.ref].get_array().shape} ")
+            print(f" {d['study_id']} label size {d[key].get_array().shape}  imSize  {d[self.ref].get_array().shape} labels_spac {d[key].pixdim} im_spac {d[self.ref].pixdim} ")
             # print(f" d[key].pixdim {d[key].pixdim} d[self.ref].pixdim {d[self.ref].pixdim} label size {d[key].get_array().shape}  imSize  {d[self.ref].get_array().shape} ")
         return d
 
