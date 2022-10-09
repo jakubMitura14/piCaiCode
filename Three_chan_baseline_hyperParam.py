@@ -173,17 +173,17 @@ subjects = list(map(lambda row: DataModule.getMonaiSubjectDataFromDataFrame(row[
             ,t2wColName, adcColName,hbvColName )   , list(df.iterrows())))
 
 def debugTransforms(subject):
-    debValls(subject)
-
-
+    try:
+        debValls(subject)
+        return True
+    except:
+        return False
+resList=[]
 with mp.Pool(processes = mp.cpu_count()) as pool:
-    pool.map(debugTransforms,subjects)
-
-
-
-
-
-
+    resList=pool.map(debugTransforms,subjects)
+df['isOkTransforms']=resList
+print(f"transformes failed in {np.sum( resList)}")
+df=df.loc[df['isOkTransforms']]
 
 
 
