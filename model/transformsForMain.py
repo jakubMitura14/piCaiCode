@@ -170,7 +170,9 @@ def get_val_transforms(is_whole_to_train,spatial_size):
             # Spacingd(keys=["label_name_val"], pixdim=(
             #     1.0, 1.0, 1.0), mode="nearest"),  
             Spacingd(keys=["t2w","adc","hbv","label_name_val"], pixdim=(
-                1.0, 1.0, 1.0), mode=("bilinear","bilinear","bilinear","nearest") ),      #monai.utils.SplineMode.THREE
+                1.0, 1.0, 1.0), mode=("bilinear","bilinear","bilinear","bilinear") ),      #monai.utils.SplineMode.THREE
+            # Spacingd(keys=["t2w","adc","hbv","label_name_val"], pixdim=(
+            #     1.0, 1.0, 1.0), mode=("bilinear","bilinear","bilinear","nearest") ),      #monai.utils.SplineMode.THREE
 
             standardizeLabels(keys=["label_name_val"],ref= "t2w"),
 
