@@ -82,7 +82,7 @@ from model import transformsForMain as transformsForMain
 
 
 
-def getMonaiSubjectDataFromDataFrame(row,chan3_col_name,label_name,chan3_col_name_val,label_name_val,t2wColName
+def getMonaiSubjectDataFromDataFrame(row,label_name,label_name_val,t2wColName
 ,adcColName,hbvColName ):
         """
         given row from data frame prepares Subject object from it
@@ -195,7 +195,7 @@ class PiCaiDataModule(pl.LightningDataModule):
     def setup(self, stage=None):
         set_determinism(seed=0)
         self.subjects = list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1]
-        ,self.chan3_col_name,self.label_name,self.chan3_col_name_val,self.label_name_val
+        ,self.label_name,self.label_name_val
             ,self.t2wColName, self.adcColName,self.hbvColName )   , list(self.df.iterrows())))
         train_set, valid_set,test_set = self.splitDataSet(self.subjects , self.trainSizePercent,True)
         

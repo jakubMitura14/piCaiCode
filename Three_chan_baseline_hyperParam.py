@@ -2,6 +2,7 @@
 from comet_ml import Experiment
 from pytorch_lightning.loggers import CometLogger
 from comet_ml import Optimizer
+import multiprocessing as mp
 
 import time
 from pathlib import Path
@@ -54,7 +55,8 @@ def loadLib(name,path):
     sys.modules[name] = res
     spec.loader.exec_module(res)
     return res
-
+import model.transformsForMain as transformsForMain
+import model.DataModule as DataModule
 manageMetaData =loadLib("ManageMetadata", "/home/sliceruser/data/piCaiCode/preprocessing/ManageMetadata.py")
 dataUtils =loadLib("dataUtils", "/home/sliceruser/data/piCaiCode/dataManag/utils/dataUtils.py")
 
@@ -146,6 +148,50 @@ config = {
 }
 
 df = pd.read_csv("/home/sliceruser/data/metadata/processedMetaData_current_b.csv")
+
+t2wColName='t2w'
+adcColName='registered_'+'adc'
+hbvColName='registered_'+'hbv'
+# t2wColName="t2w"+spacing_keyword 
+# adcColName="adc"+spacing_keyword
+# hbvColName="hbv"+spacing_keyword
+
+# df=df.head(40)
+label_name="reSampledPath"
+# label_name="label"+spacing_keyword
+label_name_val=label_name
+df=df.loc[df[label_name_val] != ' ']
+df=df.loc[df[t2wColName] != ' ']
+df=df.loc[df[adcColName] != ' ']
+df=df.loc[df[hbvColName] != ' ']
+df=df.loc[df['isAnythingInAnnotated']>0]
+
+debValls=transformsForMain.get_debug_transforms()
+
+subjects = list(map(lambda row: DataModule.getMonaiSubjectDataFromDataFrame(row[1]
+        ,label_name,label_name_val
+            ,t2wColName, adcColName,hbvColName )   , list(df.iterrows())))
+
+def debugTransforms(subject):
+    debValls(subject)
+
+
+with mp.Pool(processes = mp.cpu_count()) as pool:
+    pool.map(debugTransforms,subjects)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # df=df.head(50)
 # maxSize=manageMetaData.getMaxSize("t2w_med_spac",df)
 

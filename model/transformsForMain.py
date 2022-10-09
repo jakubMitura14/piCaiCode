@@ -69,7 +69,7 @@ class standardizeLabels(MapTransform):
             d[key].set_array((d[key].get_array() > 0.5).astype('int8'))
             d[key].meta['pixdim']=d[self.ref].meta['spacing']
             #update_meta(pixdim=d[self.ref].pixdim
-            print(f" {d['study_id']} label size {d[key].get_array().shape}  imSize  {d[self.ref].get_array().shape} labels_spac {d[key].pixdim} im_spac {d[self.ref].pixdim} ")
+            #print(f" {d['study_id']} label size {d[key].get_array().shape}  imSize  {d[self.ref].get_array().shape} labels_spac {d[key].pixdim} im_spac {d[self.ref].pixdim} ")
             # print(f" d[key].pixdim {d[key].pixdim} d[self.ref].pixdim {d[self.ref].pixdim} label size {d[key].get_array().shape}  imSize  {d[self.ref].get_array().shape} ")
         return d
 
@@ -174,11 +174,6 @@ def get_val_transforms(is_whole_to_train,spatial_size):
             # Spacingd(keys=["t2w","adc","hbv","label_name_val"], pixdim=(
             #     1.0, 1.0, 1.0), mode=("bilinear","bilinear","bilinear","nearest") ),      #monai.utils.SplineMode.THREE
 
-            standardizeLabels(keys=["label_name_val"],ref= "t2w"),
-
-            ConcatItemsd(["t2w","label_name_val","hbv","adc" ], "dummy"),
-
-
             ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label_name_val"], spatial_size=spatial_size,),
             ConcatItemsd(["t2w","adc","hbv","adc" ], "chan3_col_name_val"),
             AsDiscreted(keys=["label_name_val"], to_onehot=2),
@@ -203,3 +198,45 @@ def get_val_transforms(is_whole_to_train,spatial_size):
 
 
 
+def get_debug_transforms():
+    spatial_size=(64,64,32)
+    val_transforms = Compose(
+        [
+            LoadImaged(keys=["t2w","hbv","adc" ,"label_name_val"]),
+            EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label_name_val"]),
+            EnsureTyped(keys=["t2w","hbv","adc" ,"label_name_val"]),
+            Orientationd(keys=["t2w","adc", "hbv","label_name_val"], axcodes="RAS"),
+            standardizeLabels(keys=["label_name_val"],ref= "t2w"),
+            # Spacingd(keys=["t2w","adc","hbv"], pixdim=(
+            #     1.0, 1.0, 1.0), mode="bilinear"),      
+            # Spacingd(keys=["label_name_val"], pixdim=(
+            #     1.0, 1.0, 1.0), mode="nearest"),  
+            Spacingd(keys=["t2w","adc","hbv","label_name_val"], pixdim=(
+                1.0, 1.0, 1.0), mode=("bilinear","bilinear","bilinear","bilinear") ),      #monai.utils.SplineMode.THREE
+            # Spacingd(keys=["t2w","adc","hbv","label_name_val"], pixdim=(
+            #     1.0, 1.0, 1.0), mode=("bilinear","bilinear","bilinear","nearest") ),      #monai.utils.SplineMode.THREE
+
+            standardizeLabels(keys=["label_name_val"],ref= "t2w"),
+
+            ConcatItemsd(["t2w","label_name_val","hbv","adc" ], "dummy"),
+
+
+            ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label_name_val"], spatial_size=spatial_size,),
+            ConcatItemsd(["t2w","adc","hbv","adc" ], "chan3_col_name_val"),
+            AsDiscreted(keys=["label_name_val"], to_onehot=2),
+
+            #torchio.transforms.OneHot(include=["label"] ),#num_classes=3
+            #AsChannelFirstd(keys=["chan3_col_name","label"]]),
+            # Orientationd(keys=["chan3_col_name","label_name_val"], axcodes="RAS"),
+            # Spacingd(keys=["chan3_col_name","label_name_val"], pixdim=(
+            #     1.0, 1.0, 1.0), mode=("bilinear", "nearest")),
+            #SpatialPadd(keys=["chan3_col_name","label"],spatial_size=maxSize) ,
+            #DivisiblePadd(keys=["chan3_col_name_val","label_name_val"],k=32) ,
+            #ResizeWithPadOrCropd(keys=["chan3_col_name","label_name_val"],spatial_size=centerCropSize ),
+
+            #*decide_if_whole_image_train(is_whole_to_train,"chan3_col_name_val","label_name_val"),
+            SelectItemsd(keys=["chan3_col_name_val","label_name_val","study_id","num_lesions_to_retain","isAnythingInAnnotated"]),
+            # ConcatItemsd(keys=["t2w","adc","hbv"],name="chan3_col_name")
+        ]
+    )
+    return val_transforms
