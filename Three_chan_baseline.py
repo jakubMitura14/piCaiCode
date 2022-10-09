@@ -106,7 +106,9 @@ def mainTrain(options,df,physical_size ):
     chan3_col_name_val=chan3_col_name 
     label_name="reSampledPath"
     label_name_val=label_name
-
+    t2wColName='t2w'
+    adcColName='registered_'+'adc'
+    hbvColName='registered_'+'hbv'
     print(df)
     cacheDir =  f"/home/sliceruser/preprocess/monai_persistent_Dataset/{spacing_keyword}/{sizeWord}"
 
