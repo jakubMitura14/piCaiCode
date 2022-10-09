@@ -124,6 +124,7 @@ def get_train_transforms(RandGaussianNoised_prob
       
             ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label"], spatial_size=spatial_size,),
             ConcatItemsd(keys=["t2w","adc","hbv","adc" ],name="chan3_col_name"),
+            SelectItemsd(keys=["chan3_col_name","label","num_lesions_to_retain","isAnythingInAnnotated"]),
 
             # standardizeLabels(keys=["label"]),
             # torchio.transforms.OneHot(include=["label"] ), #num_classes=3,
@@ -176,7 +177,7 @@ def get_val_transforms(is_whole_to_train,spatial_size):
             #ResizeWithPadOrCropd(keys=["chan3_col_name","label_name_val"],spatial_size=centerCropSize ),
 
             #*decide_if_whole_image_train(is_whole_to_train,"chan3_col_name_val","label_name_val"),
-            #SelectItemsd(keys=["chan3_col_name","label"]),
+            SelectItemsd(keys=["chan3_col_name_val","label_name_val","study_id","num_lesions_to_retain","isAnythingInAnnotated"]),
             # ConcatItemsd(keys=["t2w","adc","hbv"],name="chan3_col_name")
         ]
     )
