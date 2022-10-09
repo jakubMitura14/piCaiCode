@@ -303,7 +303,7 @@ def processDice(i,postProcess,y_det,y_true):
     try:
         hatPost=postProcess(y_det[i])
         # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
-        locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i])
+        locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i]).item()
         return (locDice,hatPost.numpy())
     except:
         return (0.0,np.zeros_like(y_det[i]))
@@ -469,7 +469,7 @@ class Model(pl.LightningModule):
         y_det = decollate_batch(seg_hat.cpu().detach())
         # y_background = decollate_batch(seg_hat[:,0,:,:,:].cpu().detach())
         y_true = decollate_batch(y_true.cpu().detach())
-        patIds = decollate_batch(batch['patient_id'])
+        patIds = decollate_batch(batch['study_id'])
 
         images = decollate_batch(x.cpu().detach()) 
 #         # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
@@ -587,9 +587,10 @@ class Model(pl.LightningModule):
             # with mp.Pool(processes = mp.cpu_count()) as pool:
             #     dices=pool.map(partial(calcDiceFromPaths,list_yHat_val=self.list_yHat_val,list_gold_val=self.list_gold_val   ),list(range(0,len(self.list_yHat_val))))
             # dices=list(map(partial(calcDiceFromPaths,list_yHat_val=self.list_yHat_val,list_gold_val=self.list_gold_val   ),list(range(0,len(self.list_yHat_val)))))
-            # meanDice=torch.mean(torch.stack( dices)).item()
+            #meanDice=torch.mean(torch.stack( dices)).item()
             
-            self.log('meanDice',torch.mean(torch.stack( self.dices)).item() )
+            self.log('meanDice',np.mean( self.dices))
+            # self.log('meanDice',torch.mean(torch.stack( self.dices)).item() )
             # print('meanDice',np.mean( np.array(self.dices ).flatten()))
             # self.log('mean_surface_distance',torch.mean(torch.stack( self.surfDists)).item())
 
