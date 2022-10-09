@@ -542,6 +542,8 @@ class Model(pl.LightningModule):
         #patIds = decollate_batch(batch['patient_id'])
 
         images = decollate_batch(x.cpu().detach()) 
+        for image in images:
+            print(f"suuum imageee {torch.sum( image )}  ")
 #         # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
         # hatPostA=[]
         # for i in range(0,len(y_det)):
