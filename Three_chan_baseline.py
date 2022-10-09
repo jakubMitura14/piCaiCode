@@ -104,11 +104,18 @@ def mainTrain(options,df,physical_size ):
     sizeWord= "_maxSize_" #config["sizeWord")
     chan3_col_name=f"t2w{spacing_keyword}_3Chan{sizeWord}" 
     chan3_col_name_val=chan3_col_name 
-    label_name="reSampledPath"
+    t2wColName="t2w"+spacing_keyword 
+    adcColName="adc"+spacing_keyword
+    hbvColName="hbv"+spacing_keyword
+
+    df=df.loc[df[t2wColName] != ' ']
+    label_name="label"+spacing_keyword
     label_name_val=label_name
-    t2wColName='t2w'
-    adcColName='registered_'+'adc'
-    hbvColName='registered_'+'hbv'
+    df=df.loc[df[label_name_val] != ' ']
+    df=df.loc[df[t2wColName] != ' ']
+    df=df.loc[df[adcColName] != ' ']
+    df=df.loc[df[hbvColName] != ' ']
+    df=df.loc[df['isAnythingInAnnotated']>0]
     print(df)
     cacheDir =  f"/home/sliceruser/preprocess/monai_persistent_Dataset/{spacing_keyword}/{sizeWord}"
 
