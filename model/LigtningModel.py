@@ -1,6 +1,5 @@
 ### Define Data Handling
 
-from distutils.log import error
 import time
 from pathlib import Path
 from datetime import datetime
@@ -91,52 +90,7 @@ from torch.nn.intrinsic.qat import ConvBnReLU3d
 
 import multiprocessing as mp
 import time
-from monai.transforms import (
-    EnsureChannelFirstd,
-    Orientationd,
-    AsDiscrete,
-    AddChanneld,
-    Spacingd,
-    Compose,
-    CropForegroundd,
-    LoadImaged,
-    Orientationd,
-    RandCropByPosNegLabeld,
-    ScaleIntensityRanged,
-    Spacingd,
-    EnsureTyped,
-    EnsureType,
-    Resize,
-    Resized,
-    RandSpatialCropd,
-        AsDiscrete,
-    AsDiscreted,
-    CropForegroundd,
-    LoadImaged,
-    Orientationd,
-    RandCropByPosNegLabeld,
-    SaveImaged,
-    ScaleIntensityRanged,
-    SelectItemsd,
-    Invertd,
-    DivisiblePadd,
-    SpatialPadd,
-    RandGaussianNoised,
-    RandAdjustContrastd,
-    RandGaussianSmoothd,
-    RandRicianNoised,
-    RandFlipd,
-    RandAffined,
-    ConcatItemsd,
-    RandCoarseDropoutd,
-    AsDiscreted,
-    MapTransform,
-    ResizeWithPadOrCropd,
-    EnsureChannelFirstd,
-    SaveImage,
-    EnsureChannelFirst
-    
-)
+
 
 
 
@@ -243,52 +197,25 @@ def divide_chunks(l, n):
     for i in range(0, len(l), n):
         yield l[i:i + n]
 
-def monaiSaveFile(directory,name,arr):
-    #Compose(EnsureChannelFirst(),SaveImage(output_dir=directory,separate_folder=False,output_postfix =name) )(arr)
-    SaveImage(output_dir=directory,separate_folder=False,output_postfix =name)(arr)
-
 def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     """
     saves arrays in given directory and return paths to them
     """
-
-
     # gold_im_path = join(directory, patId+ "_gold.npy" )
     # yHat_im_path = join(directory, patId+ "_hat.npy" )
     # np.save(gold_im_path, gold_arr)
     # np.save(yHat_im_path, y_hat_arr)
-    # gold_im_path = join(directory,'0_'+ patId+ "_gold.nii.gz" )
-    # yHat_im_path =join(directory, '0_'+patId+ "_hat.nii.gz" )
-    # image_path =join(directory, '0_'+patId+ "image.nii.gz" )
-    # imageB_path =join(directory, '0_'+patId+ "imageB.nii.gz" )
-    # hatPostA_path =join(directory, '0_'+patId+ "hatPostA.nii.gz" )
     gold_im_path = join(directory, patId+ "_gold.nii.gz" )
     yHat_im_path =join(directory, patId+ "_hat.nii.gz" )
     image_path =join(directory, patId+ "image.nii.gz" )
     imageB_path =join(directory, patId+ "imageB.nii.gz" )
     hatPostA_path =join(directory, patId+ "hatPostA.nii.gz" )
-
-
-    # print(f"suum hat  {np.sum( y_hat_arr.numpy())} hatPostA {np.sum(hatPostA)} hatPostA uniqq {np.unique(hatPostA) } hatpostA shape {hatPostA.shape} y_hat_arr sh {y_hat_arr.shape} gold_arr shape {gold_arr.shape} ")
-
-    # monaiSaveFile(directory,patId+ "_gold",gold_arr[1,:,:,:])
-    # monaiSaveFile(directory,patId+ "_hat",y_hat_arr[1,:,:,:])
-    # monaiSaveFile(directory,patId+ "image",imageArr[0,:,:,:])
-    # monaiSaveFile(directory,patId+ "imageB",imageArr[1,:,:,:])
-    # monaiSaveFile(directory,patId+ "hatPostA",hatPostA[1,:,:,:])
-
-    # SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "_gold")(gold_arr[1,:,:,:])
-    # SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "_hat")(y_hat_arr[1,:,:,:])
-    # SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "image")(imageArr[0,:,:,:])
-    # SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "imageB")(imageArr[1,:,:,:])
-    # SaveImage(output_dir=directory,separate_folder=False,output_postfix = patId+ "hatPostA")(hatPostA[1,:,:,:])
-
-    #print(f"uniq gold { gold_arr.shape  }   yhat { y_hat_arr.shape }   yhat sum  {np.sum(y_hat_arr)}  image sum {np.sum(imageArr[0,:,:,:])} ")
+    print(f"suuum image {torch.sum(imageArr)}    suum hat  {np.sum( y_hat_arr.numpy())} hatPostA {np.sum(hatPostA)} hatPostA uniqq {np.unique(hatPostA) } hatpostA shape {hatPostA.shape} y_hat_arr sh {y_hat_arr.shape} gold_arr shape {gold_arr.shape} ")
+    # gold_arr=np.swapaxes(gold_arr,0,2)
+    # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
+    # print(f"uniq gold { gold_arr.shape  }   yhat { y_hat_arr.shape }   yhat maxes  {np.maximum(y_hat_arr)}  hyat min {np.minimum(y_hat_arr)} ")
     gold_arr=gold_arr[1,:,:,:].numpy()
     y_hat_arr=y_hat_arr[1,:,:,:].numpy()
-
-    print(f"   image suuum {np.sum(imageArr[0,:,:,:].numpy()) } imageArr Shape {imageArr.numpy().shape}  ")
-
 
     gold_arr=np.swapaxes(gold_arr,0,2)
     y_hat_arr=np.swapaxes(y_hat_arr,0,2)
@@ -319,7 +246,8 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     writer.SetFileName(hatPostA_path)
     writer.Execute(image)
 
-    return( gold_im_path ,yHat_im_path )
+    return(gold_im_path,yHat_im_path)
+
 
 # def saveToValidate(i,y_det,regress_res_cpu,temp_val_dir,y_true,patIds):
 #     y_det_curr=y_det[i]
@@ -366,8 +294,8 @@ def getNext(i,results,TIMEOUT):
         # return it.next(timeout=TIMEOUT)
         return results[i].get(TIMEOUT)
 
-    except Exception as e:
-        print(f"timed outt {e}")
+    except:
+        print("timed outt ")
         return None    
 
 
@@ -375,8 +303,7 @@ def processDice(i,postProcess,y_det,y_true):
     try:
         hatPost=postProcess(y_det[i])
         # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
-        locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i]).item()
-        #locDice=0.0
+        locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i])
         return (locDice,hatPost.numpy())
     except:
         return (0.0,np.zeros_like(y_det[i]))
@@ -535,15 +462,16 @@ class Model(pl.LightningModule):
         
         
 
+#         #we want only first channel
+#         y_true=y_true[:,1,:,:,:].cpu().detach()
+#         y_det=seg_hat[:,1,:,:,:].cpu().detach()
+
         y_det = decollate_batch(seg_hat.cpu().detach())
         # y_background = decollate_batch(seg_hat[:,0,:,:,:].cpu().detach())
         y_true = decollate_batch(y_true.cpu().detach())
-        patIds = decollate_batch(batch['study_id'])
-        #patIds = decollate_batch(batch['patient_id'])
+        patIds = decollate_batch(batch['patient_id'])
 
         images = decollate_batch(x.cpu().detach()) 
-        for image in images:
-            print(f"suuum imageee {torch.sum( image )}  ")
 #         # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
         # hatPostA=[]
         # for i in range(0,len(y_det)):
@@ -556,6 +484,8 @@ class Model(pl.LightningModule):
         #     self.dices.append(locDice)
         #     # self.surfDists.append(avSurface_dist_loc)
         #     hatPostA.append(hatPost[1,:,:,:])
+
+
         #     self.dices.append(locDice)
 
 
@@ -569,11 +499,9 @@ class Model(pl.LightningModule):
 
         hatPostA=list(map(lambda tupl: tupl[1],dicesList ))
         dicees=list(map(lambda tupl: tupl[0],dicesList ))
-
-        pathssList=list(map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,images=images,hatPostA=hatPostA),list(range(0,len(y_true))))
-)        
-        # with mp.Pool(processes = mp.cpu_count()) as pool:        
-        #     pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,images=images,hatPostA=hatPostA),list(range(0,len(y_true))))
+        
+        with mp.Pool(processes = mp.cpu_count()) as pool:        
+            pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,images=images,hatPostA=hatPostA),list(range(0,len(y_true))))
 
         forGoldVal=list(map(lambda tupl :tupl[0] ,pathssList  ))
         fory_hatVal=list(map(lambda tupl :tupl[1] ,pathssList  ))
@@ -661,10 +589,7 @@ class Model(pl.LightningModule):
             # dices=list(map(partial(calcDiceFromPaths,list_yHat_val=self.list_yHat_val,list_gold_val=self.list_gold_val   ),list(range(0,len(self.list_yHat_val)))))
             # meanDice=torch.mean(torch.stack( dices)).item()
             
-            # self.log('meanDice',torch.mean(torch.stack( self.dices)).item() )
-            self.log('meanDice',np.mean( self.dices))
-            print(f"meanDice {np.mean( self.dices)}")
-            
+            self.log('meanDice',torch.mean(torch.stack( self.dices)).item() )
             # print('meanDice',np.mean( np.array(self.dices ).flatten()))
             # self.log('mean_surface_distance',torch.mean(torch.stack( self.surfDists)).item())
 
