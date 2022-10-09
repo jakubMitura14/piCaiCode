@@ -104,6 +104,7 @@ def mainTrain(options,df,physical_size ):
     sizeWord= "_maxSize_" #config["sizeWord")
     chan3_col_name=f"t2w{spacing_keyword}_3Chan{sizeWord}" 
     chan3_col_name_val=chan3_col_name 
+    label_name="reSampledPath"
     label_name_val=label_name
 
     print(df)
