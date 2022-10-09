@@ -244,7 +244,7 @@ def divide_chunks(l, n):
         yield l[i:i + n]
 
 def monaiSaveFile(directory,name,arr):
-    return Compose(EnsureChannelFirst(),SaveImage(output_dir=directory,separate_folder=False,output_postfix =name) )(arr)
+    Compose(EnsureChannelFirst(),SaveImage(output_dir=directory,separate_folder=False,output_postfix =name) )(arr)
 
 def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     """
