@@ -182,7 +182,7 @@ resList=[]
 with mp.Pool(processes = mp.cpu_count()) as pool:
     resList=pool.map(debugTransforms,subjects)
 df['isOkTransforms']=resList
-print(f"transformes failed in {np.sum( resList)}")
+print(f"transformes not failed in {np.sum( resList)} failed in {len(resList)-np.sum( resList) }  ")
 df=df.loc[df['isOkTransforms']]
 
 
