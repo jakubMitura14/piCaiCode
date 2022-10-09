@@ -54,17 +54,21 @@ class standardizeLabels(MapTransform):
 
     def __init__(
         self,
-        keys: KeysCollection = "label",
+        keys: KeysCollection,
+        ref,
         allow_missing_keys: bool = False,
     ):
         super().__init__(keys, allow_missing_keys)
+        self.ref=ref
 
     def __call__(self, data):
 
         d = dict(data)
         for key in self.keys:
             print(f"in standd {type(d[key])}")
-            d[key] = (d[key] > 0.5).astype('int8')
+            d[key].set_array((d[key].get_array() > 0.5).astype('int8'))
+            d[key].pixdim=d[self.ref].pixdim
+            print(f" d[key].pixdim {d[key].pixdim} d[self.ref].pixdim {d[self.ref].pixdim} ")
         return d
 
 
@@ -113,7 +117,7 @@ def get_train_transforms(RandGaussianNoised_prob
             LoadImaged(keys=["t2w","hbv","adc" ,"label"]),
             EnsureTyped(keys=["t2w","hbv","adc" ,"label"]),
             EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label"]),
-            standardizeLabels(keys=["label"]),
+            standardizeLabels(keys=["label"],ref= "t2w"),
             Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
             Spacingd(keys=["t2w","adc","hbv"], pixdim=(
                 1.0, 1.0, 1.0), mode="bilinear" ),      #monai.utils.SplineMode.THREE
@@ -158,6 +162,7 @@ def get_val_transforms(is_whole_to_train,spatial_size):
             EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label_name_val"]),
             EnsureTyped(keys=["t2w","hbv","adc" ,"label_name_val"]),
             Orientationd(keys=["t2w","adc", "hbv","label_name_val"], axcodes="RAS"),
+            standardizeLabels(keys=["label_name_val"],ref= "t2w"),
             Spacingd(keys=["t2w","adc","hbv"], pixdim=(
                 1.0, 1.0, 1.0), mode="bilinear"),      
             Spacingd(keys=["label_name_val"], pixdim=(
@@ -166,7 +171,6 @@ def get_val_transforms(is_whole_to_train,spatial_size):
 
             ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label_name_val"], spatial_size=spatial_size,),
             ConcatItemsd(["t2w","adc","hbv","adc" ], "chan3_col_name_val"),
-            standardizeLabels(keys=["label_name_val"]),
             AsDiscreted(keys=["label_name_val"], to_onehot=2),
 
             #torchio.transforms.OneHot(include=["label"] ),#num_classes=3
