@@ -217,8 +217,8 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     gold_arr=gold_arr[1,:,:,:].numpy()
     y_hat_arr=y_hat_arr[1,:,:,:].numpy()
 
-    # gold_arr=np.swapaxes(gold_arr,0,2)
-    # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
+    gold_arr=np.swapaxes(gold_arr,0,2)
+    y_hat_arr=np.swapaxes(y_hat_arr,0,2)
     
     image = sitk.GetImageFromArray(gold_arr)
     writer = sitk.ImageFileWriter()
@@ -231,17 +231,17 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     writer.SetFileName(yHat_im_path)
     writer.Execute(image) 
 
-    image = sitk.GetImageFromArray(imageArr[0,:,:,:].numpy())
+    image = sitk.GetImageFromArray( np.flip( np.swapaxes(imageArr[0,:,:,:].numpy(),0,2),1 )) 
     writer = sitk.ImageFileWriter()
     writer.SetFileName(image_path)
     writer.Execute(image)
 
-    image = sitk.GetImageFromArray(imageArr[1,:,:,:].numpy())
+    image = sitk.GetImageFromArray(  np.swapaxes(imageArr[1,:,:,:].numpy(),0,2) )
     writer = sitk.ImageFileWriter()
     writer.SetFileName(imageB_path)
     writer.Execute(image)
 
-    image = sitk.GetImageFromArray(hatPostA[1,:,:,:])
+    image = sitk.GetImageFromArray(np.swapaxes(hatPostA[1,:,:,:],0,2))
     writer = sitk.ImageFileWriter()
     writer.SetFileName(hatPostA_path)
     writer.Execute(image)
