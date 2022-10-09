@@ -500,8 +500,10 @@ class Model(pl.LightningModule):
         hatPostA=list(map(lambda tupl: tupl[1],dicesList ))
         dicees=list(map(lambda tupl: tupl[0],dicesList ))
         
-        with mp.Pool(processes = mp.cpu_count()) as pool:        
-            pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,images=images,hatPostA=hatPostA),list(range(0,len(y_true))))
+        # with mp.Pool(processes = mp.cpu_count()) as pool:        
+        #     pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,images=images,hatPostA=hatPostA),list(range(0,len(y_true))))
+
+        pathssList=list(map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,images=images,hatPostA=hatPostA),list(range(0,len(y_true)))))
 
         forGoldVal=list(map(lambda tupl :tupl[0] ,pathssList  ))
         fory_hatVal=list(map(lambda tupl :tupl[1] ,pathssList  ))
