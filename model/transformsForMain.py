@@ -120,10 +120,10 @@ def get_train_transforms(RandGaussianNoised_prob
             EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label"]),
             standardizeLabels(keys=["label"],ref= "t2w"),
             Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
-            Spacingd(keys=["t2w","adc","hbv"], pixdim=(
-                1.0, 1.0, 1.0), mode="bilinear" ),      #monai.utils.SplineMode.THREE
-            Spacingd(keys=["label"], pixdim=(
-                1.0, 1.0, 1.0), mode="nearest"),     
+            Spacingd(keys=["t2w","adc","hbv","label"], pixdim=(
+                1.0, 1.0, 1.0), mode=("bilinear","bilinear","bilinear","nearest") ),      #monai.utils.SplineMode.THREE
+            # Spacingd(keys=["label"], pixdim=(
+            #     1.0, 1.0, 1.0), mode="nearest"),     
             # Spacingd(keys=["t2w","adc", "hbv","label"], pixdim=(
             #     1.0, 1.0, 1.0), mode=("bilinear", "nearest")),
             ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label"], spatial_size=spatial_size,),
@@ -164,11 +164,16 @@ def get_val_transforms(is_whole_to_train,spatial_size):
             EnsureTyped(keys=["t2w","hbv","adc" ,"label_name_val"]),
             Orientationd(keys=["t2w","adc", "hbv","label_name_val"], axcodes="RAS"),
             standardizeLabels(keys=["label_name_val"],ref= "t2w"),
-            Spacingd(keys=["t2w","adc","hbv"], pixdim=(
-                1.0, 1.0, 1.0), mode="bilinear"),      
-            Spacingd(keys=["label_name_val"], pixdim=(
-                1.0, 1.0, 1.0), mode="nearest"),  
+            # Spacingd(keys=["t2w","adc","hbv"], pixdim=(
+            #     1.0, 1.0, 1.0), mode="bilinear"),      
+            # Spacingd(keys=["label_name_val"], pixdim=(
+            #     1.0, 1.0, 1.0), mode="nearest"),  
+            Spacingd(keys=["t2w","adc","hbv","label_name_val"], pixdim=(
+                1.0, 1.0, 1.0), mode=("bilinear","bilinear","bilinear","nearest") ),      #monai.utils.SplineMode.THREE
+
+
             ConcatItemsd(["t2w","label_name_val","hbv","adc" ], "dummy"),
+
 
             ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label_name_val"], spatial_size=spatial_size,),
             ConcatItemsd(["t2w","adc","hbv","adc" ], "chan3_col_name_val"),
