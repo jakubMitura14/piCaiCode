@@ -247,7 +247,7 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
 
             join = sitk.JoinSeriesImageFilter()
             joined_image = join.Execute(imgT2w, imgHbv,imgAdc,imgHbv)
-            joined_image=Standardize.padToSize(joined_image,targetSize,paddValue)
+            # joined_image=Standardize.padToSize(joined_image,targetSize,paddValue)
 
             writer = sitk.ImageFileWriter()
             writer.SetFileName(outPath)
