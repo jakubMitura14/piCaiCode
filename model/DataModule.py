@@ -197,11 +197,14 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.subjects = list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1]
         ,self.label_name,self.label_name_val
             ,self.t2wColName, self.adcColName,self.hbvColName )   , list(self.df.iterrows())))
-        train_set, valid_set,test_set = self.splitDataSet(self.subjects , self.trainSizePercent,True)
+        #train_set, valid_set,test_set = self.splitDataSet(self.subjects , self.trainSizePercent,True)
         
-        self.train_subjects = train_set
-        self.val_subjects = valid_set
-        self.test_subjects = test_set
+        print(self.subjects)
+        train_subjects=self.subjects[0:179]
+        val_subjects=self.subjects[180:200]
+        # self.train_subjects = train_set
+        # self.val_subjects = valid_set
+        # self.test_subjects = test_set
         train_transforms=transformsForMain.get_train_transforms(
             self.RandGaussianNoised_prob
             ,self.RandAdjustContrastd_prob
@@ -217,8 +220,8 @@ class PiCaiDataModule(pl.LightningDataModule):
         # self.val_ds=     PersistentDataset(data=self.val_subjects, transform=val_transforms,cache_dir=self.cache_dir)
         # self.test_ds=    PersistentDataset(data=self.test_subjects, transform=val_transforms,cache_dir=self.cache_dir)    
 
-        self.val_ds=     SmartCacheDataset(data=self.val_subjects, transform=val_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
-        self.train_ds=     SmartCacheDataset(data=self.train_subjects, transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+        self.val_ds=     SmartCacheDataset(data=val_subjects, transform=val_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+        self.train_ds=     SmartCacheDataset(data=train_subjects, transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
 
 
         # self.train_ds =  Dataset(data=self.train_subjects, transform=train_transforms)
