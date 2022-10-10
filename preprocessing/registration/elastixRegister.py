@@ -23,11 +23,11 @@ def reg_adc_hbv_to_t2w_sitk(row,colName,t2wColName,outPathh=""):
     we do it in multiple threads at once and we waiteach time the process finished
     """
 
-    study_id=str(row[1]['study_id'])
+    study_id=str(row['study_id'])
     
-    patId=str(row[1]['patient_id'])
+    patId=str(row['patient_id'])
     print(patId)
-    path=str(row[1][colName])
+    path=str(row[colName])
     outPath=outPathh
     if(outPath==""):
         outPath = path.replace(".mha","_reg.mha")
@@ -38,7 +38,7 @@ def reg_adc_hbv_to_t2w_sitk(row,colName,t2wColName,outPathh=""):
     else:
         if(len(path)>2):
             #creating the folder if none is present
-            fixed_image = sitk.ReadImage(row[1][t2wColName])
+            fixed_image = sitk.ReadImage(row[t2wColName])
             moving_image = sitk.ReadImage(path)
             fixed_image=sitk.Cast(fixed_image, sitk.sitkFloat32)
             moving_image=sitk.Cast(moving_image, sitk.sitkFloat32)
@@ -120,10 +120,10 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
     we do it in multiple threads at once and we waiteach time the process finished
     """
 
-    study_id=str(row[1]['study_id'])
+    study_id=str(row['study_id'])
     
-    patId=str(row[1]['patient_id'])
-    path=str(row[1][colName])
+    patId=str(row['patient_id'])
+    path=str(row[colName])
     outPath = path.replace(".mha","_for_"+colName)
     result=pathOs.join(outPath,"result.0.mha")
     logPath=pathOs.join(outPath,"elastix.log")
@@ -144,12 +144,12 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
                 p = Popen(cmd, shell=True)
                 p.wait()
             print(f"**********  ***********  ****************  registering {patId}  ")
-            #euler_sitk(sitk.ReadImage(row[1][t2wColName]), sitk.ReadImage(path))
+            #euler_sitk(sitk.ReadImage(row[t2wColName]), sitk.ReadImage(path))
 
             # parameterMap = sitk.GetDefaultParameterMap('translation')
             # parameterMap['MaximumNumberOfIterations'] = ['1']
             # parameterMap['Interpolator'] = ['BSplineInterpolator']
-            # resultImage = sitk.Elastix(sitk.ReadImage(row[1][t2wColName]),  \
+            # resultImage = sitk.Elastix(sitk.ReadImage(row[t2wColName]),  \
             #                         sitk.ReadImage(path), \
             #                         parameterMap)
             # writer = sitk.ImageFileWriter()
@@ -159,7 +159,7 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
 
 
 
-            cmd=f"{elacticPath} -f {row[1][t2wColName]} -m {path} -out {outPath} -p {reg_prop} -threads 1"
+            cmd=f"{elacticPath} -f {row[t2wColName]} -m {path} -out {outPath} -p {reg_prop} -threads 1"
             print(cmd)
             p = Popen(cmd, shell=True)#,stdout=subprocess.PIPE , stderr=subprocess.PIPE
             p.wait()
