@@ -449,12 +449,20 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 
 
 
+
     label_name=f"label_{spacing_keyword}" 
 
     t2wColName="t2w"+spacing_keyword+"cropped"
     adcColName="adc"+spacing_keyword+"cropped"
     hbvColName="hbv"+spacing_keyword+"cropped"
     joinedColName="joined"+spacing_keyword+"cropped"
+
+    df[label_name]=   df.apply(lambda row : row['multiPaths'][0], axis=1).compute()
+    df[t2wColName]=   df.apply(lambda row : row['multiPaths'][1], axis=1).compute()
+    df[adcColName]=   df.apply(lambda row : row['multiPaths'][2], axis=1).compute()
+    df[hbvColName]=   df.apply(lambda row : row['multiPaths'][3], axis=1).compute()
+    df[joinedColName]=   df.apply(lambda row : row['multiPaths'][4], axis=1).compute()
+
 
     # df[[label_name, t2wColName, adcColName,hbvColName,joinedColName  ]] = df['multiPaths'].apply(pd.Series)
 
@@ -524,8 +532,10 @@ preprocess_diffrent_spacings(df,(1.0,1.0,1.0),"_one_spac_c")
 
 
 print("fiiiniiished")
-os.remove('/home/sliceruser/data/metadata/processedMetaData_current_b.csv') 
-df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current_b.csv').compute()
+filePath='/home/sliceruser/data/metadata/processedMetaData_current_b.csv'
+if os.path.exists(filePath):
+    os.remove(filePath) 
+df.to_csv(filePath).compute()
 print(df['num_lesions_to_retain'])
 
 
