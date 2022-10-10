@@ -196,29 +196,29 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
     size will be padded to targetSize
     """
     ##row=row[1]
-    print(f"resize_and_join labelColName {labelColName} labb {str(row[1][labelColName]) !=' '} source {str(row[1][labelColName])} ")
-    outPath = str(row[1][colNameT2w]).replace('.mha',sizeWord+ '_34Chan_ee.mha')
-    outLabelPath=str(row[1][labelColName]).replace('.nii.gz',sizeWord+ 'labeee.nii.gz')
-    outt2wPath=str(row[1][colNameT2w]).replace('.mha',sizeWord+ 't2weee.mha')
-    outadcPath=str(row[1][colNameAdc]).replace('.mha',sizeWord+ 'adceee.mha')
-    outhbvPath=str(row[1][colNameHbv]).replace('.mha',sizeWord+ 'hbveee.mha')
+    print(f"resize_and_join labelColName {labelColName} labb {str(row[labelColName]) !=' '} source {str(row[labelColName])} ")
+    outPath = str(row[colNameT2w]).replace('.mha',sizeWord+ '_34Chan_ee.mha')
+    outLabelPath=str(row[labelColName]).replace('.nii.gz',sizeWord+ 'labeee.nii.gz')
+    outt2wPath=str(row[colNameT2w]).replace('.mha',sizeWord+ 't2weee.mha')
+    outadcPath=str(row[colNameAdc]).replace('.mha',sizeWord+ 'adceee.mha')
+    outhbvPath=str(row[colNameHbv]).replace('.mha',sizeWord+ 'hbveee.mha')
     
     
 
-    if(str(row[1][colNameT2w])!= " " and str(row[1][colNameT2w])!="" 
-        and str(row[1][colNameAdc])!= " " and str(row[1][colNameAdc])!="" 
-        and str(row[1][colNameHbv])!= " " and str(row[1][colNameHbv])!=""
-        and str(row[1][labelColName])!= " " and str(row[1][labelColName])!=""
+    if(str(row[colNameT2w])!= " " and str(row[colNameT2w])!="" 
+        and str(row[colNameAdc])!= " " and str(row[colNameAdc])!="" 
+        and str(row[colNameHbv])!= " " and str(row[colNameHbv])!=""
+        and str(row[labelColName])!= " " and str(row[labelColName])!=""
         ):
         #if(not pathOs.exists(outPath)):
         if(True):
             # print(f" pathDebugT2w {pathDebugT2w} outLabelPath {outLabelPath} ")
-            patId=str(row[1]['patient_id'])
-            # print(f" {str(row[1][colNameAdc])}  str(row[1][colNameHbv]) {str(row[1][colNameHbv])}"    )
-            imgT2w=sitk.ReadImage(str(row[1][colNameT2w]))
-            imgAdc=sitk.ReadImage(str(row[1][colNameAdc]))
-            imgHbv=sitk.ReadImage(str(row[1][colNameHbv]))
-            imgLabel=sitk.ReadImage(str(row[1][labelColName]))
+            patId=str(row['patient_id'])
+            # print(f" {str(row[colNameAdc])}  str(row[colNameHbv]) {str(row[colNameHbv])}"    )
+            imgT2w=sitk.ReadImage(str(row[colNameT2w]))
+            imgAdc=sitk.ReadImage(str(row[colNameAdc]))
+            imgHbv=sitk.ReadImage(str(row[colNameHbv]))
+            imgLabel=sitk.ReadImage(str(row[labelColName]))
 
             imgT2w=sitk.Cast(imgT2w, sitk.sitkFloat32)
             imgAdc=sitk.Cast(imgAdc, sitk.sitkFloat32)
