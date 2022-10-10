@@ -23,7 +23,7 @@ from os import path as pathOs
 import numpy as np
 import pandas as pd
 from functools import partial
-
+import swifter
 
 @dataclass
 class Gleason_score(object):
@@ -89,9 +89,11 @@ def get_numb_ofLesions_toRetain(row):
 iterates over all metadata and saves the number of lesions we are intrested to retain
 """
 def iterate_and_addLesionNumber(df):
-    with mp.Pool(processes = mp.cpu_count()) as pool:
-        resList=pool.map(get_numb_ofLesions_toRetain ,list(df.iterrows())) 
-    df["num_lesions_to_retain"]=resList
+
+    df["num_lesions_to_retain"] = df.swifter.apply(get_numb_ofLesions_toRetain)
+    # with mp.Pool(processes = mp.cpu_count()) as pool:
+    #     resList=pool.map(get_numb_ofLesions_toRetain ,list(df.iterrows())) 
+    # df["num_lesions_to_retain"]=resList
     return df
 
 

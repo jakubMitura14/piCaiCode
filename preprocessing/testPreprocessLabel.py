@@ -205,7 +205,7 @@ def join_and_save_3Channel(row,colNameT2w,colNameAdc,colNameHbv):
     """
     join 3 images into 1 3 channel image
     """
-    row=row[1]
+    #row=row[1]
     # print(row)
     print(str(row[colNameT2w]))
     print(str(row[colNameAdc]))
@@ -250,7 +250,7 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
     and targetSize will be ignored if will be false
     size will be padded to targetSize
     """
-    #row=row[1]
+    ##row=row[1]
     print(f"resize_and_join colNameT2w {colNameT2w} row[1] str(row[colNameT2w]) {str(row[1][colNameT2w])}  ")
     outPath = str(row[1][colNameT2w]).replace('.mha',sizeWord+ '_34Chan.mha')
     if(str(row[1][colNameT2w])!= " " and str(row[1][colNameT2w])!="" 

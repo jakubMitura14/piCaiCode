@@ -54,7 +54,7 @@ import model.LigtningModel as LigtningModel
 
 
 def isAnnytingInAnnotatedInner(row,colName):
-    row=row[1]
+    #row=row[1]
     path=row[colName]
     image1 = sitk.ReadImage(path)
     #image1 = sitk.Cast(image1, sitk.sitkFloat32)

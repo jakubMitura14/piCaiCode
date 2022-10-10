@@ -58,7 +58,7 @@ def loadLib(name,path):
 
 
 def get_size_meta(row,colName):
-    row=row[1]
+    #row=row[1]
     patId=str(row['patient_id'])
     path=str(row[colName])
     try:

@@ -140,7 +140,7 @@ def padToSize(image1,targetSize, paddValue):
 
     padded= sitk.ConstantPad(image1, halfDiffSize_to_pad, rest_to_pad, paddValue)
     res= sitk.Crop(padded, halfDiffSize_to_crop,rest_to_crop )
-    print(f"result size {res.GetSize()} target size {targetSize}")
+    # print(f"result size {res.GetSize()} target size {targetSize}")
     
     return res
     #return sitk.ConstantPad(image1, (1,1,1), (1,1,1), paddValue)
@@ -158,7 +158,7 @@ def padToDivisibleBy32(image1,paddValue):
     
 
 def padToAndSaveLabel(row,colname,targetSize, paddValue,keyword,isTobeDiv):
-    row=row[1]
+    #row=row[1]
     writer = sitk.ImageFileWriter()
     path = str(row[colname])
     if(path!=" "):
@@ -180,7 +180,7 @@ def padToAndSaveLabel(row,colname,targetSize, paddValue,keyword,isTobeDiv):
         writer.SetFileName(outPath)
         writer.Execute(image)
 
-        print(f"result label size {image.GetSize()}  target size {targetSize}")
+        # print(f"result label size {image.GetSize()}  target size {targetSize}")
         return outPath 
     return " "                     
                 
@@ -250,6 +250,7 @@ def iterateAndStandardize(seriesString,df,trainedModelsBasicPath,numberOfSamples
     #reloading from disk just for debugging
     nyul_normalizer.load_standard_histogram(pathToSave)
     
+    
     results=[]
     with mp.Pool(processes = mp.cpu_count()) as pool:
         results=pool.map(partial(standardizeFromPathAndOverwrite,nyul_normalizer=nyul_normalizer ),train_patientsPaths)
@@ -262,7 +263,7 @@ def changeLabelToOnes(row):
     """
     as in the labels or meaningfull ones are greater then 0 so we need to process it and change any nymber grater to 0 to 1...
     """
-    row=row[1]
+    #row=row[1]
     path=row['reSampledPath']
     path_t2w=row['t2w']
     if(path!= " " and path!=""):

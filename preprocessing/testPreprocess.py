@@ -19,6 +19,7 @@ from registration.elastixRegister import (reg_adc_hbv_to_t2w,
                                           reg_adc_hbv_to_t2w_sitk)
 from utilsPreProcessing import write_to_modif_path
 import math
+import swifter
 
 experiment = Experiment(
     api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
@@ -79,7 +80,7 @@ for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:
 registered images were already resampled now time for t2w and labels
 """
 def resample_ToMedianSpac(row,colName,targetSpacing,spacing_keyword):
-    row=row[1]    
+    #row=row[1]    
     path=row[colName]
     print(f" pathhhh {path} ")
     if(path!= " " and path!=""):
@@ -139,7 +140,7 @@ def resample_labels(row,targetSpacing,spacing_keyword):
     """
     performs labels resampling  to the target 
     """
-    row=row[1]    
+    #row=row[1]    
     path=row['reSampledPath']
 
     print(f"lllll lab path {path} t2wPath {row['t2w']}")
@@ -190,7 +191,7 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
     and targetSize will be ignored if will be false
     size will be padded to targetSize
     """
-    #row=row[1]
+    ##row=row[1]
     print(f"resize_and_join labelColName {labelColName} labb {str(row[1][labelColName]) !=' '} source {str(row[1][labelColName])} ")
     outPath = str(row[1][colNameT2w]).replace('.mha',sizeWord+ '_34Chan_ee.mha')
     outLabelPath=str(row[1][labelColName]).replace('.nii.gz',sizeWord+ 'labeee.nii.gz')
@@ -313,27 +314,37 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     #needs to be on single thread as resampling GAN is acting on GPU
     # we save the metadata to main pandas data frame 
 
-    resList=[]
-    with mp.Pool(processes = mp.cpu_count()) as pool:
-        resList=pool.map(partial(resample_ToMedianSpac,colName='registered_'+'adc',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ),list(df.iterrows()))    
-    df["adc"+spacing_keyword]=resList
-
-
-    resList=[]
-    with mp.Pool(processes = mp.cpu_count()) as pool:
-        resList=pool.map(partial(resample_ToMedianSpac,colName='registered_'+'hbv',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ),list(df.iterrows()))    
-    df["hbv"+spacing_keyword]=resList
-
-    resList=[]
-    with mp.Pool(processes = mp.cpu_count()) as pool:
-        resList=pool.map(partial(resample_ToMedianSpac,colName='t2w',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ),list(df.iterrows()))    
-    df["t2w"+spacing_keyword]=resList
-
-    resList=[]
-    with mp.Pool(processes = mp.cpu_count()) as pool:
-        resList=pool.map(partial(resample_labels,targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ),list(df.iterrows()))    
+# data['out'] = data['in'].swifter.apply(some_function)
     labelColName="label"+spacing_keyword
-    df[labelColName]=resList
+
+
+    df["adc"+spacing_keyword]=   df.swifter.apply(partial(resample_ToMedianSpac,colName='registered_'+'adc',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ))
+    df["hbv"+spacing_keyword]=   df.swifter.apply(partial(resample_ToMedianSpac,colName='registered_'+'hbv',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ))
+    df["t2w"+spacing_keyword]=   df.swifter.apply(partial(resample_ToMedianSpac,colName='t2w',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ))
+    df[labelColName]=   df.swifter.apply(partial(resample_labels,targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ))
+    
+    
+    
+    # resList=[]
+    # with mp.Pool(processes = mp.cpu_count()) as pool:
+    #     resList=pool.map(partial(resample_ToMedianSpac,colName='registered_'+'adc',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ),list(df.iterrows()))    
+    # df["adc"+spacing_keyword]=resList
+
+
+    # resList=[]
+    # with mp.Pool(processes = mp.cpu_count()) as pool:
+    #     resList=pool.map(partial(resample_ToMedianSpac,colName='registered_'+'hbv',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ),list(df.iterrows()))    
+    # df["hbv"+spacing_keyword]=resList
+
+    # resList=[]
+    # with mp.Pool(processes = mp.cpu_count()) as pool:
+    #     resList=pool.map(partial(resample_ToMedianSpac,colName='t2w',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ),list(df.iterrows()))    
+    # df["t2w"+spacing_keyword]=resList
+
+    # resList=[]
+    # with mp.Pool(processes = mp.cpu_count()) as pool:
+    #     resList=pool.map(partial(resample_labels,targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ),list(df.iterrows()))    
+    # df[labelColName]=resList
 
     # df["adc"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_'+'adc',targetSpacingg,spacing_keyword)   , axis = 1) 
     # df["hbv"+spacing_keyword]=df.apply(lambda row : resample_ToMedianSpac(row, 'registered_'+'hbv',targetSpacingg,spacing_keyword)   , axis = 1) 
@@ -386,8 +397,8 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     
     sizeWord="_maxSize_"
     resList=[]
-    with mp.Pool(processes = mp.cpu_count()) as pool:
-        resList=pool.map(partial(resize_and_join
+
+    df['multiPaths']=   df.swifter.apply(partial(resize_and_join
                                 ,colNameT2w=t2wKeyWord
                                 ,colNameAdc="adc"+spacing_keyword
                                 ,colNameHbv="hbv"+spacing_keyword
@@ -395,7 +406,20 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
                                 ,targetSize=targetSize
                                 ,ToBedivisibleBy32=False
                                 ,labelColName=labelColName
-                                )  ,list(df.iterrows())) 
+                                ))
+
+
+
+    # with mp.Pool(processes = mp.cpu_count()) as pool:
+    #     resList=pool.map(partial(resize_and_join
+    #                             ,colNameT2w=t2wKeyWord
+    #                             ,colNameAdc="adc"+spacing_keyword
+    #                             ,colNameHbv="hbv"+spacing_keyword
+    #                             ,sizeWord=""
+    #                             ,targetSize=targetSize
+    #                             ,ToBedivisibleBy32=False
+    #                             ,labelColName=labelColName
+    #                             )  ,list(df.iterrows())) 
     # resList=list(map(partial(resize_and_join
     #                         ,colNameT2w=t2wKeyWord
     #                         ,colNameAdc="adc"+spacing_keyword
@@ -406,11 +430,14 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     #                         ,labelColName="label"+spacing_keyword
     #                         )  ,list(df.iterrows())) )
 
-    pathsLabels = list(map(lambda tupl: tupl[0], resList ))
-    pathst2w = list(map(lambda tupl: tupl[1], resList ))
-    pathsadc = list(map(lambda tupl: tupl[2], resList ))
-    pathshbv = list(map(lambda tupl: tupl[3], resList ))
-    pathsJoined = list(map(lambda tupl: tupl[4], resList ))
+    # pathsLabels = list(map(lambda tupl: tupl[0], resList ))
+    # pathst2w = list(map(lambda tupl: tupl[1], resList ))
+    # pathsadc = list(map(lambda tupl: tupl[2], resList ))
+    # pathshbv = list(map(lambda tupl: tupl[3], resList ))
+    # pathsJoined = list(map(lambda tupl: tupl[4], resList ))
+
+
+
 
     label_name=f"label_{spacing_keyword}" 
 
@@ -419,12 +446,13 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     hbvColName="hbv"+spacing_keyword+"cropped"
     joinedColName="joined"+spacing_keyword+"cropped"
 
+    df[[label_name, t2wColName, adcColName,hbvColName,joinedColName  ]] = df['multiPaths'].apply(pd.Series)
 
-    df[label_name]=pathsLabels
-    df[t2wColName]=pathst2w
-    df[adcColName]=pathsadc
-    df[hbvColName]=pathshbv
-    df[joinedColName]=pathsJoined
+    # df[label_name]=pathsLabels
+    # df[t2wColName]=pathst2w
+    # df[adcColName]=pathsadc
+    # df[hbvColName]=pathshbv
+    # df[joinedColName]=pathsJoined
 
 
     # Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,targetSize, 0.0,spacing_keyword+sizeWord+'_3Chan',False)
@@ -455,11 +483,15 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 #### 
 #now registration of adc and hbv to t2w
 for keyWord in ['adc','hbv']:
-    resList=[]     
-    with mp.Pool(processes = mp.cpu_count()) as pool:
-        resList=pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'),list(df.iterrows()))    
+    df['registered_'+keyWord] = df.swifter.apply(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'))
 
-    df['registered_'+keyWord]=resList      
+
+
+    # resList=[]     
+    # with mp.Pool(processes = mp.cpu_count()) as pool:
+    #     resList=pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'),list(df.iterrows()))    
+
+    # df['registered_'+keyWord]=resList      
     # pathss = list(map(lambda tupl :tupl[0],resList   ))
     # reg_values = list(map(lambda tupl :tupl[1],resList   ))
 

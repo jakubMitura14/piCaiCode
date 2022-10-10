@@ -87,7 +87,7 @@ print(dirDict)
 
 #create a dictionary of directories where key is the patient_id
 def findPathh(row,dirDictt,keyWord,targetDir):
-    row=row[1]
+    #row=row[1]
     patId=str(row['patient_id'])
     study_id=str(row['study_id'])
     #first check is such key present
@@ -128,7 +128,7 @@ def findResampledLabel(row,labelsFiles):
 df["reSampledPath"] =  df.apply(lambda row : findResampledLabel(row,labelsFiles )   , axis = 1)  
 
 def isAnythingInAnnotated(row):
-    row=row[1]
+    #row=row[1]
     reSampledPath=str(row['reSampledPath'])
     if(len(reSampledPath)>1):
         image = sitk.ReadImage(reSampledPath)
@@ -151,7 +151,7 @@ def ifShortReturnMinus(tupl, patId,colName):
     return tupl    
 #getting sizes and spacings ...
 def get_spatial_meta(row,colName):
-    row=row[1]
+    #row=row[1]
     patId=str(row['patient_id'])
     path=str(row[colName])
     if(len(path)>1):
