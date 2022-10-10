@@ -443,7 +443,6 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 Standardize.iterateAndchangeLabelToOnes(df)
 
 #### 
-
 #now registration of adc and hbv to t2w
 for keyWord in ['adc','hbv']:
     resList=[]     
