@@ -68,16 +68,16 @@ and displaying minimal maximal and rounded mean spacing and median
 in my case median and mean values are close - and using the median values will lead to a bit less interpolations later
 """
 
-spacingDict={}
-for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]: 
-    for addedKey in ['_spac_x','_spac_y','_spac_z']:   
-        colName = keyWord+addedKey
-        liist = list(filter(lambda it: it>0 ,df[colName].to_numpy() ))
-        minn=np.min(liist)                
-        maxx=np.max(liist)
-        meanRounded = round((minn+maxx)/2,1)
-        medianRounded = round(np.median(liist),1)
-        spacingDict[colName]=(minn,maxx,meanRounded,medianRounded)
+# spacingDict={}
+# for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]: 
+#     for addedKey in ['_spac_x','_spac_y','_spac_z']:   
+#         colName = keyWord+addedKey
+#         liist = list(filter(lambda it: it>0 ,df[colName].to_numpy() ))
+#         minn=np.min(liist)                
+#         maxx=np.max(liist)
+#         meanRounded = round((minn+maxx)/2,1)
+#         medianRounded = round(np.median(liist),1)
+#         spacingDict[colName]=(minn,maxx,meanRounded,medianRounded)
 
 
 """
@@ -515,7 +515,7 @@ df=semisuperPreprosess.iterate_and_addLesionNumber(df)
 
 
 #######      
-targetSpacinggg=(spacingDict['t2w_spac_x'][3],spacingDict['t2w_spac_y'][3],spacingDict['t2w_spac_z'][3])
+# targetSpacinggg=(spacingDict['t2w_spac_x'][3],spacingDict['t2w_spac_y'][3],spacingDict['t2w_spac_z'][3])
 #preprocess_diffrent_spacings(df,targetSpacinggg,"_med_spac_b")
 preprocess_diffrent_spacings(df,(1.0,1.0,1.0),"_one_spac_c")
 # preprocess_diffrent_spacings(df,(1.5,1.5,1.5),"_one_and_half_spac_b")
