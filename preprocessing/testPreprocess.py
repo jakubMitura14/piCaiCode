@@ -368,9 +368,9 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     ######Now we need to retrieve the maximum dimensions of resampled images
 
     #getting maximum size - so one can pad to uniform size if needed (for example in validetion test set)
-    maxSize = ManageMetadata.getMaxSize(t2wKeyWord,df)
-    maxSize=(maxSize[0]+1,maxSize[1]+1,maxSize[2]+1 )
-    print(f" max sizee {maxSize}")
+    # maxSize = ManageMetadata.getMaxSize(t2wKeyWord,df)
+    # maxSize=(maxSize[0]+1,maxSize[1]+1,maxSize[2]+1 )
+    # print(f" max sizee {maxSize}")
     ###now we join it into 3 channel image we save two versions one is divisible by 32 other is set to max size ...
 
     # sizeWord="_div32_"
@@ -397,7 +397,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     #                             )  ,list(df.iterrows())) 
     # df[t2wKeyWord+"_3Chan"+sizeWord]=resList
     #setting padding to labels
-    Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,maxSize, 0.0,spacing_keyword,True)
+    Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,(2,2,2), 0.0,spacing_keyword,True)
     sizzX= physical_size[0]/targetSpacingg[0]
     sizzY= physical_size[1]/targetSpacingg[1]
     sizzZ= physical_size[2]/targetSpacingg[2]
