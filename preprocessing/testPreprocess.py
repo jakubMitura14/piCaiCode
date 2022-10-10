@@ -205,10 +205,10 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
     
     
 
-    if(str(row[colNameT2w])!= " " and str(row[colNameT2w])!="" 
-        and str(row[colNameAdc])!= " " and str(row[colNameAdc])!="" 
-        and str(row[colNameHbv])!= " " and str(row[colNameHbv])!=""
-        and str(row[labelColName])!= " " and str(row[labelColName])!=""
+    if(str(row[colNameT2w])!= " " and str(row[colNameT2w])!="" and len(str(row[colNameT2w]))>5 
+        and str(row[colNameAdc])!= " " and str(row[colNameAdc])!=""  and len(str(row[colNameAdc]))>5 
+        and str(row[colNameHbv])!= " " and str(row[colNameHbv])!="" and len(str(row[colNameHbv]))>5 
+        and str(row[labelColName])!= " " and str(row[labelColName])!="" and len(str(row[labelColName]))>5 
         ):
         #if(not pathOs.exists(outPath)):
         if(True):
