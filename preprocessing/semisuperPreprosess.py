@@ -70,6 +70,7 @@ in the image
 def get_numb_ofLesions_toRetain(row):
     # grab lesion Gleason scores scores
     gleason_scores = []
+    print(f"gggg {row['lesion_GS']}")
     if isinstance(row['lesion_GS'], float) and np.isnan(row['lesion_GS']):
         gleason_scores = []
     else:
