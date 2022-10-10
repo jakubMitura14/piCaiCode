@@ -188,7 +188,7 @@ def resample_labels(row,targetSpacing,spacing_keyword):
 
 
 def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
-,sizeWord,targetSize,ToBedivisibleBy32,labelColName,paddValue=0.0):
+,sizeWord,targetSize,ToBedivisibleBy32,labelColName,tuplNum,paddValue=0.0):
     """
     resizes and join images into 3 channel images 
     if ToBedivisibleBy32 is set to true size will be set to be divisible to 32 
@@ -210,8 +210,8 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
         and str(row[colNameHbv])!= " " and str(row[colNameHbv])!="" and len(str(row[colNameHbv]))>5 
         and str(row[labelColName])!= " " and str(row[labelColName])!="" and len(str(row[labelColName]))>5 
         ):
-        #if(not pathOs.exists(outPath)):
-        if(True):
+        if(not pathOs.exists(outt2wPath)):
+        #if(True):
             # print(f" pathDebugT2w {pathDebugT2w} outLabelPath {outLabelPath} ")
             patId=str(row['patient_id'])
             # print(f" {str(row[colNameAdc])}  str(row[colNameHbv]) {str(row[colNameHbv])}"    )
@@ -408,15 +408,6 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     sizeWord="_maxSize_"
     resList=[]
 
-    df['multiPaths']=   df.apply(partial(resize_and_join
-                                ,colNameT2w=t2wKeyWord
-                                ,colNameAdc="adc"+spacing_keyword
-                                ,colNameHbv="hbv"+spacing_keyword
-                                ,sizeWord=""
-                                ,targetSize=targetSize
-                                ,ToBedivisibleBy32=False
-                                ,labelColName=labelColName
-                                ), axis=1).compute()
 
 
 
@@ -458,11 +449,66 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     joinedColName="joined"+spacing_keyword+"cropped"
     print("*********************")
     print(df['multiPaths'])
-    df[label_name]=   df.apply(lambda row : row['multiPaths'][0], axis=1).compute()
-    df[t2wColName]=   df.apply(lambda row : row['multiPaths'][1], axis=1).compute()
-    df[adcColName]=   df.apply(lambda row : row['multiPaths'][2], axis=1).compute()
-    df[hbvColName]=   df.apply(lambda row : row['multiPaths'][3], axis=1).compute()
-    df[joinedColName]=   df.apply(lambda row : row['multiPaths'][4], axis=1).compute()
+
+    df['label_name']=   df.apply(partial(resize_and_join
+                                ,colNameT2w=t2wKeyWord
+                                ,colNameAdc="adc"+spacing_keyword
+                                ,colNameHbv="hbv"+spacing_keyword
+                                ,sizeWord=""
+                                ,targetSize=targetSize
+                                ,ToBedivisibleBy32=False
+                                ,labelColName=labelColName
+                                ,tuplNum=0
+                                ), axis=1).compute()
+    df['t2wColName']=   df.apply(partial(resize_and_join
+                                ,colNameT2w=t2wKeyWord
+                                ,colNameAdc="adc"+spacing_keyword
+                                ,colNameHbv="hbv"+spacing_keyword
+                                ,sizeWord=""
+                                ,targetSize=targetSize
+                                ,ToBedivisibleBy32=False
+                                ,labelColName=labelColName
+                                ,tuplNum=1
+                                ), axis=1).compute()
+    df['adcColName']=   df.apply(partial(resize_and_join
+                                ,colNameT2w=t2wKeyWord
+                                ,colNameAdc="adc"+spacing_keyword
+                                ,colNameHbv="hbv"+spacing_keyword
+                                ,sizeWord=""
+                                ,targetSize=targetSize
+                                ,ToBedivisibleBy32=False
+                                ,labelColName=labelColName
+                                ,tuplNum=2
+                                ), axis=1).compute()
+    df['hbvColName']=   df.apply(partial(resize_and_join
+                                ,colNameT2w=t2wKeyWord
+                                ,colNameAdc="adc"+spacing_keyword
+                                ,colNameHbv="hbv"+spacing_keyword
+                                ,sizeWord=""
+                                ,targetSize=targetSize
+                                ,ToBedivisibleBy32=False
+                                ,labelColName=labelColName
+                                ,tuplNum=3
+                                ), axis=1).compute()
+    df['joinedColName']=   df.apply(partial(resize_and_join
+                                ,colNameT2w=t2wKeyWord
+                                ,colNameAdc="adc"+spacing_keyword
+                                ,colNameHbv="hbv"+spacing_keyword
+                                ,sizeWord=""
+                                ,targetSize=targetSize
+                                ,ToBedivisibleBy32=False
+                                ,labelColName=labelColName
+                                ,tuplNum=4
+                                ), axis=1).compute()
+
+
+
+
+    # df[label_name]=   df.apply(lambda row : row['multiPaths'][0], axis=1).compute()
+    # df[t2wColName]=   df.apply(lambda row : row['multiPaths'][1], axis=1).compute()
+    # df[adcColName]=   df.apply(lambda row : row['multiPaths'][2], axis=1).compute()
+    # df[hbvColName]=   df.apply(lambda row : row['multiPaths'][3], axis=1).compute()
+    # df[joinedColName]=   df.apply(lambda row : row['multiPaths'][4], axis=1).compute()
 
 
     # df[[label_name, t2wColName, adcColName,hbvColName,joinedColName  ]] = df['multiPaths'].apply(pd.Series)
