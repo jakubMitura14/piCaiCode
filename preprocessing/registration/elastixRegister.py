@@ -120,6 +120,7 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
     we do it in multiple threads at once and we waiteach time the process finished
     """
     print(f"wwwwwwwwwwwwwwwww {row}")
+    
     study_id=str(row['study_id'])
     
     patId=str(row['patient_id'])
