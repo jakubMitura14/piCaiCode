@@ -66,7 +66,7 @@ class standardizeLabels(MapTransform):
 
         d = dict(data)
         for key in self.keys:
-            
+            print(f"in standdd {(d[key].get_array().shape}")
             #print(f"in standd {d[key].meta} rrrrrrrrrrrrrrref {d[self.ref].meta}  ")
             d[key].set_array(  np.flip((d[key].get_array() > 0.5).astype('int8'), (1, 0))   )
             # d[key].set_array(   (d[key].get_array() > 0.5).astype('int8')   )
@@ -140,11 +140,12 @@ def get_train_transforms(RandGaussianNoised_prob
             LoadImaged(keys=["t2w","hbv","adc" ,"label"]),
             EnsureTyped(keys=["t2w","hbv","adc" ,"label"]),
             EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label"]),
+            standardizeLabels(keys=["label"]),
+
             AsDiscreted(keys=["label"],to_onehot=2),
             #ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label"], spatial_size=spatial_size,),
             ConcatItemsd(keys=["t2w","adc","hbv","adc" ],name="chan3_col_name"),
 
-            standardizeLabels(keys=["label"]),
             #torchio.transforms.OneHot(include=["label"] ), #num_classes=3,
             #AsDiscreted(keys=["label"],to_onehot=2,threshold=0.5),
             #AsChannelFirstd(keys=["t2w","adc", "hbv","label"]),
@@ -178,10 +179,10 @@ def get_val_transforms(is_whole_to_train,spatial_size):
             LoadImaged(keys=["t2w","hbv","adc" ,"label_name_val"]),
             EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label_name_val"]),
             EnsureTyped(keys=["t2w","hbv","adc" ,"label_name_val"]),
+            standardizeLabels(keys=["label_name_val"]),
             AsDiscreted(keys=["label_name_val"], to_onehot=2),
             #ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label_name_val"], spatial_size=spatial_size,),
             ConcatItemsd(["t2w","adc","hbv","adc"], "chan3_col_name_val"),
-            standardizeLabels(keys=["label_name_val"]),
 
             #torchio.transforms.OneHot(include=["label"] ),#num_classes=3
             #AsDiscreted(keys=["label"],to_onehot=2,threshold=0.5),
