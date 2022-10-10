@@ -164,6 +164,7 @@ df=df.loc[df[label_name_val] != ' ']
 df=df.loc[df[t2wColName] != ' ']
 df=df.loc[df[adcColName] != ' ']
 df=df.loc[df[hbvColName] != ' ']
+df=df.loc[df['num_lesions_to_retain']>-1]#correct gleason ...
 df=df.loc[df['isAnythingInAnnotated']>0]
 
 # debValls=transformsForMain.get_debug_transforms()
