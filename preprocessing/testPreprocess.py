@@ -246,7 +246,7 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
             print(f"pre imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
 
             join = sitk.JoinSeriesImageFilter()
-            joined_image = join.Execute(imgT2w, imgHbv,imgAdc,imgLabel)
+            joined_image = join.Execute(imgT2w, imgHbv,imgAdc,imgHbv)
             joined_image=Standardize.padToSize(joined_image,targetSize,paddValue)
 
             writer = sitk.ImageFileWriter()
