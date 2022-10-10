@@ -273,7 +273,7 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
     # print(f"uniq gold { gold_arr.shape  }   yhat { y_hat_arr.shape }   yhat maxes  {np.maximum(y_hat_arr)}  hyat min {np.minimum(y_hat_arr)} ")
     gold_arr=gold_arr[1,:,:,:].numpy()
-    gold_arr=np.flip(gold_arr,(1,0))
+    # gold_arr=np.flip(gold_arr,(1,0))
     y_hat_arr=y_hat_arr[1,:,:,:].numpy()
 
     gold_arr=np.swapaxes(gold_arr,0,2)
@@ -364,7 +364,7 @@ def getNext(i,results,TIMEOUT):
 def processDice(i,postProcess,y_det,y_true):
     hatPost=postProcess(y_det[i])
     # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
-    locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i])
+    locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i])[1].item()
     print(f"locDice {locDice}")
     return (locDice,hatPost.numpy())
 
@@ -660,8 +660,8 @@ class Model(pl.LightningModule):
             # dices=list(map(partial(calcDiceFromPaths,list_yHat_val=self.list_yHat_val,list_gold_val=self.list_gold_val   ),list(range(0,len(self.list_yHat_val)))))
             #meanDice=torch.mean(torch.stack( dices)).item()
             
-            #self.log('meanDice',np.mean( self.dices))
-            self.log('meanDice',torch.mean(torch.stack( self.dices)).item() )
+            self.log('meanDice',np.mean( self.dices))
+            # self.log('meanDice',torch.mean(torch.stack( self.dices)).item() )
             # print('meanDice',np.mean( np.array(self.dices ).flatten()))
             # self.log('mean_surface_distance',torch.mean(torch.stack( self.surfDists)).item())
 
