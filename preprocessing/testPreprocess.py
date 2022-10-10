@@ -239,19 +239,19 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
             writer.Execute(imgLabel)            
 
 
-            # print(f"pre patient id  {patId} ")
-            # print(f"pre t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
-            # print(f"pre adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
-            # print(f"pre hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
-            # print(f"pre imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
+            print(f"pre patient id  {patId} ")
+            print(f"pre t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
+            print(f"pre adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
+            print(f"pre hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
+            print(f"pre imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
 
-            # join = sitk.JoinSeriesImageFilter()
-            # joined_image = join.Execute(imgT2w, imgHbv,imgAdc,imgLabel)
-            # joined_image=Standardize.padToSize(joined_image,targetSize,paddValue)
+            join = sitk.JoinSeriesImageFilter()
+            joined_image = join.Execute(imgT2w, imgHbv,imgAdc,imgLabel)
+            joined_image=Standardize.padToSize(joined_image,targetSize,paddValue)
 
-            # writer = sitk.ImageFileWriter()
-            # writer.SetFileName(pathDebugT2w)
-            # writer.Execute(imgT2w)
+            writer = sitk.ImageFileWriter()
+            writer.SetFileName(outPath)
+            writer.Execute(joined_image)
 
             # select = sitk.VectorIndexSelectionCastImageFilter()
             # imgT2w = select.Execute(joined_image, 0, sitk.sitkFloat32)
@@ -286,9 +286,9 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
 
 
 
-            return (outLabelPath,outt2wPath,outadcPath,outhbvPath)
+            return (outLabelPath,outt2wPath,outadcPath,outhbvPath,outPath)
                    
-    return (" ", " ", " ", " ")
+    return (" "," "," "," "," ")
 
 
 
@@ -405,22 +405,25 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     pathsLabels = list(map(lambda tupl: tupl[0], resList ))
     pathst2w = list(map(lambda tupl: tupl[1], resList ))
     pathsadc = list(map(lambda tupl: tupl[2], resList ))
-    pathshbv = list(map(lambda tupl: tupl[1], resList ))
+    pathshbv = list(map(lambda tupl: tupl[3], resList ))
+    pathsJoined = list(map(lambda tupl: tupl[4], resList ))
 
     label_name=f"label_{spacing_keyword}{sizeWord}" 
 
     t2wColName="t2w"+spacing_keyword+sizeWord+"cropped"
     adcColName="adc"+spacing_keyword+sizeWord+"cropped"
     hbvColName="hbv"+spacing_keyword+sizeWord+"cropped"
+    joinedColName="joined"+spacing_keyword+sizeWord+"cropped"
 
 
     df[label_name]=pathsLabels
     df[t2wColName]=pathst2w
     df[adcColName]=pathsadc
     df[hbvColName]=pathshbv
+    df[joinedColName]=pathsJoined
 
 
-    Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,targetSize, 0.0,spacing_keyword+sizeWord+'_3Chan',False)
+    # Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,targetSize, 0.0,spacing_keyword+sizeWord+'_3Chan',False)
 
 
 
