@@ -372,7 +372,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     #                             )  ,list(df.iterrows())) 
     # df[t2wKeyWord+"_3Chan"+sizeWord]=resList
     #setting padding to labels
-    Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,maxSize, 0.0,spacing_keyword+sizeWord,True)
+    Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,maxSize, 0.0,spacing_keyword,True)
     sizzX= physical_size[0]/targetSpacingg[0]
     sizzY= physical_size[1]/targetSpacingg[1]
     sizzZ= physical_size[2]/targetSpacingg[2]
@@ -387,7 +387,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
                                 ,colNameT2w=t2wKeyWord
                                 ,colNameAdc="adc"+spacing_keyword
                                 ,colNameHbv="hbv"+spacing_keyword
-                                ,sizeWord=sizeWord
+                                ,sizeWord=""
                                 ,targetSize=targetSize
                                 ,ToBedivisibleBy32=False
                                 ,labelColName=labelColName
@@ -408,12 +408,12 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     pathshbv = list(map(lambda tupl: tupl[3], resList ))
     pathsJoined = list(map(lambda tupl: tupl[4], resList ))
 
-    label_name=f"label_{spacing_keyword}{sizeWord}" 
+    label_name=f"label_{spacing_keyword}" 
 
-    t2wColName="t2w"+spacing_keyword+sizeWord+"cropped"
-    adcColName="adc"+spacing_keyword+sizeWord+"cropped"
-    hbvColName="hbv"+spacing_keyword+sizeWord+"cropped"
-    joinedColName="joined"+spacing_keyword+sizeWord+"cropped"
+    t2wColName="t2w"+spacing_keyword+"cropped"
+    adcColName="adc"+spacing_keyword+"cropped"
+    hbvColName="hbv"+spacing_keyword+"cropped"
+    joinedColName="joined"+spacing_keyword+"cropped"
 
 
     df[label_name]=pathsLabels
