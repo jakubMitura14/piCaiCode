@@ -219,11 +219,8 @@ class PiCaiDataModule(pl.LightningDataModule):
         # self.train_ds =  PersistentDataset(data=self.train_subjects, transform=train_transforms,cache_dir=self.cache_dir)
         # self.val_ds=     PersistentDataset(data=self.val_subjects, transform=val_transforms,cache_dir=self.cache_dir)
         # self.test_ds=    PersistentDataset(data=self.test_subjects, transform=val_transforms,cache_dir=self.cache_dir)    
-
         self.val_ds=     SmartCacheDataset(data=val_subjects, transform=val_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
         self.train_ds=     SmartCacheDataset(data=train_subjects, transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
-
-
         # self.train_ds =  Dataset(data=self.train_subjects, transform=train_transforms)
         # self.val_ds=     Dataset(data=self.val_subjects, transform=val_transforms)
         #self.test_ds=    Dataset(data=self.test_subjects, transform=val_transforms)
