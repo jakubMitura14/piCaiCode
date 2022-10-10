@@ -295,9 +295,9 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
 
 
 
-            return (outLabelPath,outt2wPath,outadcPath,outhbvPath,outPath)
+            return (outLabelPath,outt2wPath,outadcPath,outhbvPath,outPath)[tuplNum]
                    
-    return (" "," "," "," "," ")
+    return (" "," "," "," "," ")[tuplNum]
 
 
 
@@ -448,9 +448,8 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     hbvColName="hbv"+spacing_keyword+"cropped"
     joinedColName="joined"+spacing_keyword+"cropped"
     print("*********************")
-    print(df['multiPaths'])
 
-    df['label_name']=   df.apply(partial(resize_and_join
+    df[label_name]=   df.apply(partial(resize_and_join
                                 ,colNameT2w=t2wKeyWord
                                 ,colNameAdc="adc"+spacing_keyword
                                 ,colNameHbv="hbv"+spacing_keyword
@@ -460,7 +459,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
                                 ,labelColName=labelColName
                                 ,tuplNum=0
                                 ), axis=1).compute()
-    df['t2wColName']=   df.apply(partial(resize_and_join
+    df[t2wColName]=   df.apply(partial(resize_and_join
                                 ,colNameT2w=t2wKeyWord
                                 ,colNameAdc="adc"+spacing_keyword
                                 ,colNameHbv="hbv"+spacing_keyword
@@ -470,7 +469,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
                                 ,labelColName=labelColName
                                 ,tuplNum=1
                                 ), axis=1).compute()
-    df['adcColName']=   df.apply(partial(resize_and_join
+    df[adcColName]=   df.apply(partial(resize_and_join
                                 ,colNameT2w=t2wKeyWord
                                 ,colNameAdc="adc"+spacing_keyword
                                 ,colNameHbv="hbv"+spacing_keyword
@@ -480,7 +479,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
                                 ,labelColName=labelColName
                                 ,tuplNum=2
                                 ), axis=1).compute()
-    df['hbvColName']=   df.apply(partial(resize_and_join
+    df[hbvColName]=   df.apply(partial(resize_and_join
                                 ,colNameT2w=t2wKeyWord
                                 ,colNameAdc="adc"+spacing_keyword
                                 ,colNameHbv="hbv"+spacing_keyword
@@ -490,7 +489,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
                                 ,labelColName=labelColName
                                 ,tuplNum=3
                                 ), axis=1).compute()
-    df['joinedColName']=   df.apply(partial(resize_and_join
+    df[joinedColName]=   df.apply(partial(resize_and_join
                                 ,colNameT2w=t2wKeyWord
                                 ,colNameAdc="adc"+spacing_keyword
                                 ,colNameHbv="hbv"+spacing_keyword
