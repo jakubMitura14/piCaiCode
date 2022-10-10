@@ -119,7 +119,7 @@ def reg_adc_hbv_to_t2w(row,colName,elacticPath,reg_prop,t2wColName,experiment=No
     then we suply hbv and adc as moving images and t2w as static one - and register in reference to it
     we do it in multiple threads at once and we waiteach time the process finished
     """
-
+    print(f"wwwwwwwwwwwwwwwww {row}")
     study_id=str(row['study_id'])
     
     patId=str(row['patient_id'])

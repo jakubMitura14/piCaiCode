@@ -470,11 +470,11 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 # Standardize.iterateAndBiasCorrect('t2w',df)
 # Standarization
 
-for keyWord in ['t2w','adc', 'hbv']: #'cor',,'sag'
-    # denoising
-    # Standardize.iterateAndDenoise(keyWord,df)
-    # standarization
-    Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,110)   
+# for keyWord in ['t2w','adc', 'hbv']: #'cor',,'sag'
+#     # denoising
+#     # Standardize.iterateAndDenoise(keyWord,df)
+#     # standarization
+#     Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,110)   
 
 
 # standardize labels
