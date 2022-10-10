@@ -38,7 +38,7 @@ physical_size =(81.0, 160.0, 192.0)#taken from picai used to crop image so only 
 df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData.csv')
 #currently We want only imagfes with associated masks
 # df = df.loc[df['isAnyMissing'] ==False]
-# df = df.loc[df['isAnythingInAnnotated']>0 ]
+df = df.loc[df['isAnythingInAnnotated']>0 ]
 # # ignore all with deficient spacing
 # for keyWord in ['t2w','adc', 'cor','hbv','sag'  ]:    
 #     colName=keyWord+ "_spac_x"
@@ -47,7 +47,7 @@ df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData.csv')
 # df = df.loc[df['isAnyMissing'] ==False]
 # df = df.loc[df['isAnythingInAnnotated']>0 ]    
 #just for testing    
-df= df.head(25)
+# df= df.head(25)
 ##df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
 print(df)    
 
@@ -211,7 +211,7 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
             imgAdc=sitk.ReadImage(str(row[1][colNameAdc]))
             imgHbv=sitk.ReadImage(str(row[1][colNameHbv]))
             imgLabel=sitk.ReadImage(str(row[1][labelColName]))
-            
+
             imgT2w=sitk.Cast(imgT2w, sitk.sitkFloat32)
             imgAdc=sitk.Cast(imgAdc, sitk.sitkFloat32)
             imgHbv=sitk.Cast(imgHbv, sitk.sitkFloat32)
@@ -437,12 +437,12 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 
 # bias field correction
 # Standardize.iterateAndBiasCorrect('t2w',df)
-#Standarization
-# for keyWord in ['t2w','adc', 'hbv']: #'cor',,'sag'
-#     # denoising
-#     # Standardize.iterateAndDenoise(keyWord,df)
-#     # standarization
-#     Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,110)   
+# Standarization
+for keyWord in ['t2w','adc', 'hbv']: #'cor',,'sag'
+    # denoising
+    # Standardize.iterateAndDenoise(keyWord,df)
+    # standarization
+    Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,110)   
 # standardize labels
 Standardize.iterateAndchangeLabelToOnes(df)
 
