@@ -456,7 +456,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     adcColName="adc"+spacing_keyword+"cropped"
     hbvColName="hbv"+spacing_keyword+"cropped"
     joinedColName="joined"+spacing_keyword+"cropped"
-
+    print("*********************")
     print(df['multiPaths'])
     df[label_name]=   df.apply(lambda row : row['multiPaths'][0], axis=1).compute()
     df[t2wColName]=   df.apply(lambda row : row['multiPaths'][1], axis=1).compute()
