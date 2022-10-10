@@ -363,7 +363,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 
 
 
-    ManageMetadata.addSizeMetaDataToDf(t2wKeyWord,df)
+    # ManageMetadata.addSizeMetaDataToDf(t2wKeyWord,df)
 
     ######Now we need to retrieve the maximum dimensions of resampled images
 
