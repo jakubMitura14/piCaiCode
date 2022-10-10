@@ -109,7 +109,7 @@ def mainTrain(options,df,physical_size ):
     hbvColName="hbv"+spacing_keyword+"cropped"
     joinedColName="joined"+spacing_keyword+"cropped"
     chan3_col_name=joinedColName
-
+    chan3_col_name_val=joinedColName
     df=df.loc[df[t2wColName] != ' ']
     label_name_val=label_name
     df=df.loc[df[label_name_val] != ' ']
