@@ -568,7 +568,6 @@ df=semisuperPreprosess.iterate_and_addLesionNumber(df)
 
 #checking registration by reading from logs the metrics so we will get idea how well it went
 
-
 #######      
 # targetSpacinggg=(spacingDict['t2w_spac_x'][3],spacingDict['t2w_spac_y'][3],spacingDict['t2w_spac_z'][3])
 #preprocess_diffrent_spacings(df,targetSpacinggg,"_med_spac_b")
