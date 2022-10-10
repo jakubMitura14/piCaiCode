@@ -159,8 +159,8 @@ def resample_labels(row,targetSpacing,spacing_keyword):
     
         
         newPath = outPath.replace(".mha",spacing_keyword+"lab_.nii.gz" )
-        #if(not pathOs.exists(newPath)):         
-        if(True):         
+        if(not pathOs.exists(newPath) and 'nii' in path ):         
+        #if(True):         
             # try:
             print(" resampling label A ")
             #experiment.log_text(f" new resample label {study_id}")
