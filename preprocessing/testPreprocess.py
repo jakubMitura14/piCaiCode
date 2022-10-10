@@ -322,10 +322,10 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     labelColName="label"+spacing_keyword
 
 
-    df["adc"+spacing_keyword]=   df.apply(partial(resample_ToMedianSpac,colName='registered_'+'adc',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  )).compute()
-    df["hbv"+spacing_keyword]=   df.apply(partial(resample_ToMedianSpac,colName='registered_'+'hbv',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  )).compute()
-    df["t2w"+spacing_keyword]=   df.apply(partial(resample_ToMedianSpac,colName='t2w',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  )).compute()
-    df[labelColName]=   df.apply(partial(resample_labels,targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  )).compute()
+    df["adc"+spacing_keyword]=   df.apply(partial(resample_ToMedianSpac,colName='registered_'+'adc',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ), axis=1).compute()
+    df["hbv"+spacing_keyword]=   df.apply(partial(resample_ToMedianSpac,colName='registered_'+'hbv',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ), axis=1).compute()
+    df["t2w"+spacing_keyword]=   df.apply(partial(resample_ToMedianSpac,colName='t2w',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ), axis=1).compute()
+    df[labelColName]=   df.apply(partial(resample_labels,targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ), axis=1).compute()
     
     
     # df["adc"+spacing_keyword]=   df.swifter.apply(partial(resample_ToMedianSpac,colName='registered_'+'adc',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ))
@@ -416,7 +416,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
                                 ,targetSize=targetSize
                                 ,ToBedivisibleBy32=False
                                 ,labelColName=labelColName
-                                )).compute()
+                                ), axis=1).compute()
 
 
 
@@ -494,7 +494,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 #now registration of adc and hbv to t2w
 for keyWord in ['adc','hbv']:
     # df['registered_'+keyWord] = df.swifter.apply(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'))
-    df['registered_'+keyWord] = df.apply(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w')).compute()
+    df['registered_'+keyWord] = df.apply(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'), axis=1).compute()
 
 
 
