@@ -24,6 +24,8 @@ import numpy as np
 import pandas as pd
 from functools import partial
 import swifter
+import dask
+import dask.dataframe as dd
 
 @dataclass
 class Gleason_score(object):
@@ -90,7 +92,8 @@ iterates over all metadata and saves the number of lesions we are intrested to r
 """
 def iterate_and_addLesionNumber(df):
 
-    df["num_lesions_to_retain"] = df.swifter.apply(get_numb_ofLesions_toRetain)
+    # df["num_lesions_to_retain"] = df.swifter.apply(get_numb_ofLesions_toRetain)
+    df["num_lesions_to_retain"] = df.apply(get_numb_ofLesions_toRetain).compute()
     # with mp.Pool(processes = mp.cpu_count()) as pool:
     #     resList=pool.map(get_numb_ofLesions_toRetain ,list(df.iterrows())) 
     # df["num_lesions_to_retain"]=resList

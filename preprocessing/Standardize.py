@@ -13,7 +13,8 @@ import numpy as np
 import pandas as pd
 import SimpleITK as sitk
 from intensity_normalization.normalize.nyul import NyulNormalize
-
+import dask
+import dask.dataframe as dd
 
 def removeOutliersBiasFieldCorrect(path,numberOfStandardDeviations = 4):
     """

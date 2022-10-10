@@ -20,6 +20,8 @@ from registration.elastixRegister import (reg_adc_hbv_to_t2w,
 from utilsPreProcessing import write_to_modif_path
 import math
 import swifter
+import dask
+import dask.dataframe as dd
 
 experiment = Experiment(
     api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
@@ -52,7 +54,9 @@ df = df.loc[df['isAnythingInAnnotated']>0 ]
 ##df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
 print(df)    
 
-########## Standarization
+
+df = dd.from_pandas(df, npartitions=os.cpu_count())
+
 
 
 
@@ -318,10 +322,16 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     labelColName="label"+spacing_keyword
 
 
-    df["adc"+spacing_keyword]=   df.swifter.apply(partial(resample_ToMedianSpac,colName='registered_'+'adc',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ))
-    df["hbv"+spacing_keyword]=   df.swifter.apply(partial(resample_ToMedianSpac,colName='registered_'+'hbv',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ))
-    df["t2w"+spacing_keyword]=   df.swifter.apply(partial(resample_ToMedianSpac,colName='t2w',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ))
-    df[labelColName]=   df.swifter.apply(partial(resample_labels,targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ))
+    df["adc"+spacing_keyword]=   df.apply(partial(resample_ToMedianSpac,colName='registered_'+'adc',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  )).compute()
+    df["hbv"+spacing_keyword]=   df.apply(partial(resample_ToMedianSpac,colName='registered_'+'hbv',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  )).compute()
+    df["t2w"+spacing_keyword]=   df.apply(partial(resample_ToMedianSpac,colName='t2w',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  )).compute()
+    df[labelColName]=   df.apply(partial(resample_labels,targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  )).compute()
+    
+    
+    # df["adc"+spacing_keyword]=   df.swifter.apply(partial(resample_ToMedianSpac,colName='registered_'+'adc',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ))
+    # df["hbv"+spacing_keyword]=   df.swifter.apply(partial(resample_ToMedianSpac,colName='registered_'+'hbv',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ))
+    # df["t2w"+spacing_keyword]=   df.swifter.apply(partial(resample_ToMedianSpac,colName='t2w',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ))
+    # df[labelColName]=   df.swifter.apply(partial(resample_labels,targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ))
     
     
     
@@ -398,7 +408,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     sizeWord="_maxSize_"
     resList=[]
 
-    df['multiPaths']=   df.swifter.apply(partial(resize_and_join
+    df['multiPaths']=   df.apply(partial(resize_and_join
                                 ,colNameT2w=t2wKeyWord
                                 ,colNameAdc="adc"+spacing_keyword
                                 ,colNameHbv="hbv"+spacing_keyword
@@ -406,7 +416,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
                                 ,targetSize=targetSize
                                 ,ToBedivisibleBy32=False
                                 ,labelColName=labelColName
-                                ))
+                                )).compute()
 
 
 
@@ -483,7 +493,8 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 #### 
 #now registration of adc and hbv to t2w
 for keyWord in ['adc','hbv']:
-    df['registered_'+keyWord] = df.swifter.apply(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'))
+    # df['registered_'+keyWord] = df.swifter.apply(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'))
+    df['registered_'+keyWord] = df.apply(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w')).compute()
 
 
 
