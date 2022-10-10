@@ -295,7 +295,7 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
 
 
 
-            return (outLabelPath,outt2wPath,outadcPath,outhbvPath,outPath)[tuplNum]
+        return (outLabelPath,outt2wPath,outadcPath,outhbvPath,outPath)[tuplNum]
                    
     return (" "," "," "," "," ")[tuplNum]
 
@@ -534,11 +534,11 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
 # Standardize.iterateAndBiasCorrect('t2w',df)
 # Standarization
 
-# for keyWord in ['t2w','adc', 'hbv']: #'cor',,'sag'
-#     # denoising
-#     # Standardize.iterateAndDenoise(keyWord,df)
-#     # standarization
-#     Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,110)   
+for keyWord in ['t2w','adc', 'hbv']: #'cor',,'sag'
+    # denoising
+    # Standardize.iterateAndDenoise(keyWord,df)
+    # standarization
+    Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,110)   
 
 
 # standardize labels
