@@ -141,6 +141,9 @@ def resample_labels(row,targetSpacing,spacing_keyword):
     """
     row=row[1]    
 
+    print(f"lllll lab path {path} t2wPath {row['t2w']}")
+
+
     path=row['reSampledPath']
     if(path!= " " and path!=""):
         path_t2w=row['t2w']
@@ -240,11 +243,11 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
             writer.Execute(imgLabel)            
 
 
-            print(f"pre patient id  {patId} ")
-            print(f"pre t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
-            print(f"pre adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
-            print(f"pre hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
-            print(f"pre imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
+            # print(f"pre patient id  {patId} ")
+            # print(f"pre t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
+            # print(f"pre adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
+            # print(f"pre hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
+            # print(f"pre imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
 
             join = sitk.JoinSeriesImageFilter()
             joined_image = join.Execute(imgT2w, imgHbv,imgAdc,imgHbv)
@@ -274,11 +277,11 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
             #     imgHbv=Standardize.padToSize(imgHbv,targetSize,paddValue)
             #     imgLabel=Standardize.padToSize(imgLabel,targetSize,paddValue)
 
-            print(f"post patient id  {patId} ")
-            print(f"post t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
-            print(f"post adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
-            print(f"post hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
-            print(f"post imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
+            # print(f"post patient id  {patId} ")
+            # print(f"post t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
+            # print(f"post adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
+            # print(f"post hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
+            # print(f"post imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
 
 
             
@@ -444,7 +447,7 @@ for keyWord in ['t2w','adc', 'hbv']: #'cor',,'sag'
     # standarization
     Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,110)   
 # standardize labels
-Standardize.iterateAndchangeLabelToOnes(df)
+# Standardize.iterateAndchangeLabelToOnes(df)
 
 #### 
 #now registration of adc and hbv to t2w

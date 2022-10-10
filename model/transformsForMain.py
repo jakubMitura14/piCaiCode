@@ -66,7 +66,7 @@ class standardizeLabels(MapTransform):
 
         d = dict(data)
         for key in self.keys:
-            print(f"in standdd {d[key].get_array().shape}")
+            #print(f"in standdd {d[key].get_array().shape}")
             #print(f"in standd {d[key].meta} rrrrrrrrrrrrrrref {d[self.ref].meta}  ")
             d[key].set_array(  np.flip((d[key].get_array() > 0.5).astype('int8'), (1, 0))   )
             # d[key].set_array(   (d[key].get_array() > 0.5).astype('int8')   )
