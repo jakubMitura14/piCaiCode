@@ -102,14 +102,15 @@ def mainTrain(options,df,physical_size ):
     # print(f"************    maxSize {maxSize}   ***************")
     spacing_keyword="_one_spac_c" 
     sizeWord= "_maxSize_" #config["sizeWord")
-    chan3_col_name=f"t2w{spacing_keyword}_3Chan{sizeWord}" 
-    chan3_col_name_val=chan3_col_name 
-    t2wColName="t2w"+spacing_keyword 
-    adcColName="adc"+spacing_keyword
-    hbvColName="hbv"+spacing_keyword
+    label_name=f"label_{spacing_keyword}" 
+
+    t2wColName="t2w"+spacing_keyword+"cropped"
+    adcColName="adc"+spacing_keyword+"cropped"
+    hbvColName="hbv"+spacing_keyword+"cropped"
+    joinedColName="joined"+spacing_keyword+"cropped"
+    chan3_col_name=joinedColName
 
     df=df.loc[df[t2wColName] != ' ']
-    label_name="label"+spacing_keyword
     label_name_val=label_name
     df=df.loc[df[label_name_val] != ' ']
     df=df.loc[df[t2wColName] != ' ']

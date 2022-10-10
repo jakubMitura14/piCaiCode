@@ -138,7 +138,7 @@ def get_train_transforms(RandGaussianNoised_prob
             EnsureTyped(keys=["t2w","hbv","adc" ,"label"]),
             EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label"]),
             AsDiscreted(keys=["label"],to_onehot=2),
-            ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label"], spatial_size=spatial_size,),
+            #ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label"], spatial_size=spatial_size,),
             ConcatItemsd(keys=["t2w","adc","hbv","adc" ],name="chan3_col_name"),
 
             standardizeLabels(keys=["label"]),
@@ -188,7 +188,7 @@ def get_val_transforms(is_whole_to_train,spatial_size):
             #     1.5, 1.5, 2.0), mode=("bilinear", "nearest")),
             #SpatialPadd(keys=["chan3_col_name","label"],spatial_size=maxSize) ,
             #DivisiblePadd(keys=["chan3_col_name_val","label_name_val"],k=32) ,
-            ResizeWithPadOrCropd(keys=["chan3_col_name_val","label_name_val"],spatial_size=spatial_size ),
+            #ResizeWithPadOrCropd(keys=["chan3_col_name_val","label_name_val"],spatial_size=spatial_size ),
             SelectItemsd(keys=["chan3_col_name_val","label_name_val","study_id","num_lesions_to_retain","isAnythingInAnnotated"]),
             #*decide_if_whole_image_train(is_whole_to_train,"chan3_col_name_val","label_name_val"),
             #SelectItemsd(keys=["chan3_col_name","label"]),

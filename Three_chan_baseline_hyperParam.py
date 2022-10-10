@@ -166,24 +166,24 @@ df=df.loc[df[adcColName] != ' ']
 df=df.loc[df[hbvColName] != ' ']
 df=df.loc[df['isAnythingInAnnotated']>0]
 
-debValls=transformsForMain.get_debug_transforms()
+# debValls=transformsForMain.get_debug_transforms()
 
-subjects = list(map(lambda row: DataModule.getMonaiSubjectDataFromDataFrame(row[1]
-        ,label_name,label_name_val
-            ,t2wColName, adcColName,hbvColName )   , list(df.iterrows())))
+# subjects = list(map(lambda row: DataModule.getMonaiSubjectDataFromDataFrame(row[1]
+#         ,label_name,label_name_val
+#             ,t2wColName, adcColName,hbvColName )   , list(df.iterrows())))
 
-def debugTransforms(subject):
-    try:
-        debValls(subject)
-        return True
-    except:
-        return False
-resList=[]
-with mp.Pool(processes = mp.cpu_count()) as pool:
-    resList=pool.map(debugTransforms,subjects)
-df['isOkTransforms']=resList
-print(f"transformes not failed in {np.sum( resList)} failed in {len(resList)-np.sum( resList) }  ")
-df=df.loc[df['isOkTransforms']]
+# def debugTransforms(subject):
+#     try:
+#         debValls(subject)
+#         return True
+#     except:
+#         return False
+# resList=[]
+# with mp.Pool(processes = mp.cpu_count()) as pool:
+#     resList=pool.map(debugTransforms,subjects)
+# df['isOkTransforms']=resList
+# print(f"transformes not failed in {np.sum( resList)} failed in {len(resList)-np.sum( resList) }  ")
+# df=df.loc[df['isOkTransforms']]
 
 
 
@@ -217,7 +217,7 @@ df=df.loc[df['isOkTransforms']]
 #opt = Optimizer(config)
 # opt = Optimizer("7f2a2ec647dc499086a7affb7578b574", api_key="yB0irIjdk9t7gbpTlSUPnXBd4"
 # ,trials=500)
-opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4",trials=500)
+# opt = Optimizer(config, api_key="yB0irIjdk9t7gbpTlSUPnXBd4",trials=500)
 # print("zzzzzzzzz")
 #  print(opt.get_experiments(
 #          api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
