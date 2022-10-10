@@ -581,7 +581,7 @@ print("fiiiniiished")
 filePath='/home/sliceruser/data/metadata/processedMetaData_current_b.csv'
 if os.path.exists(filePath):
     os.remove(filePath) 
-df.to_csv(filePath)#.compute()
+df.compute().to_csv(filePath)#.compute()
 print(df['num_lesions_to_retain'])
 
 
