@@ -397,7 +397,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     #                             )  ,list(df.iterrows())) 
     # df[t2wKeyWord+"_3Chan"+sizeWord]=resList
     #setting padding to labels
-    Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,(2,2,2), 0.0,spacing_keyword,True)
+    # df= Standardize.iterateAndpadLabels(df,"label"+spacing_keyword,(2,2,2), 0.0,spacing_keyword,True)
     sizzX= physical_size[0]/targetSpacingg[0]
     sizzY= physical_size[1]/targetSpacingg[1]
     sizzZ= physical_size[2]/targetSpacingg[2]

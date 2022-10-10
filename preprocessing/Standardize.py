@@ -191,14 +191,15 @@ def padToAndSaveLabel(row,colname,targetSize, paddValue,keyword,isTobeDiv):
 
 
 def iterateAndpadLabels(df,colname,targetSize, paddValue,keyword,isTobeDiv):
-    reslist=[]
-    
-    with mp.Pool(processes = mp.cpu_count()) as pool:
-        reslist=pool.map(partial(padToAndSaveLabel,colname=colname,targetSize=targetSize,paddValue=paddValue,keyword=keyword,isTobeDiv=isTobeDiv ),list(df.iterrows()))
-    #reslist=list(map(partial(padToAndSaveLabel,colname=colname,targetSize=targetSize,paddValue=paddValue,keyword=keyword,isTobeDiv=isTobeDiv ),list(df.iterrows())))
+    # reslist=[]
+    df["label"+keyword]=   df.apply(partial(padToAndSaveLabel,colname=colname,targetSize=targetSize,paddValue=paddValue,keyword=keyword,isTobeDiv=isTobeDiv ), axis=1).compute()
 
+    # with mp.Pool(processes = mp.cpu_count()) as pool:
+    #     reslist=pool.map(partial(padToAndSaveLabel,colname=colname,targetSize=targetSize,paddValue=paddValue,keyword=keyword,isTobeDiv=isTobeDiv ),list(df.iterrows()))
+    # #reslist=list(map(partial(padToAndSaveLabel,colname=colname,targetSize=targetSize,paddValue=paddValue,keyword=keyword,isTobeDiv=isTobeDiv ),list(df.iterrows())))
 
-    df["label"+keyword]=reslist
+    return df
+    # df["label"+keyword]=reslist
 
 
 def iterateAndBiasCorrect(seriesString,df):
