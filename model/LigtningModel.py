@@ -362,13 +362,19 @@ def getNext(i,results,TIMEOUT):
 
 
 def processDice(i,postProcess,y_det,y_true):
-    try:
-        hatPost=postProcess(y_det[i])
-        # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
-        locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i]).item()
-        return (locDice,hatPost.numpy())
-    except:
-        return (0.0,np.zeros_like(y_det[i]))
+    hatPost=postProcess(y_det[i])
+    # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
+    locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i]).item()
+    return (locDice,hatPost.numpy())
+
+
+    # try:
+    #     hatPost=postProcess(y_det[i])
+    #     # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
+    #     locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i]).item()
+    #     return (locDice,hatPost.numpy())
+    # except:
+    #     return (0.0,np.zeros_like(y_det[i].numpy()))
     # avSurface_dist_loc=monai.metrics.compute_average_surface_distance(hatPost, y_true[i])
     #monai.metrics.compute_generalized_dice(
     # self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
