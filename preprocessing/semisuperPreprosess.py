@@ -68,7 +68,6 @@ analyzing data about gleason from metadata to get idea how many lesions should b
 in the image
 """
 def get_numb_ofLesions_toRetain(row):
-    row = row[1]
     # grab lesion Gleason scores scores
     gleason_scores = []
     if isinstance(row['lesion_GS'], float) and np.isnan(row['lesion_GS']):
