@@ -140,11 +140,11 @@ def resample_labels(row,targetSpacing,spacing_keyword):
     performs labels resampling  to the target 
     """
     row=row[1]    
+    path=row['reSampledPath']
 
     print(f"lllll lab path {path} t2wPath {row['t2w']}")
 
 
-    path=row['reSampledPath']
     if(path!= " " and path!=""):
         path_t2w=row['t2w']
 
