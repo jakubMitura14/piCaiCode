@@ -199,7 +199,6 @@ class PiCaiDataModule(pl.LightningDataModule):
             ,self.t2wColName, self.adcColName,self.hbvColName )   , list(self.df.iterrows())))
         #train_set, valid_set,test_set = self.splitDataSet(self.subjects , self.trainSizePercent,True)
         
-        print(self.subjects)
         train_subjects=self.subjects[0:179]
         val_subjects=self.subjects[180:200]
         # self.train_subjects = train_set
