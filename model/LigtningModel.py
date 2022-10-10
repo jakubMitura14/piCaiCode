@@ -1,5 +1,6 @@
 ### Define Data Handling
 
+from distutils.log import error
 import time
 from pathlib import Path
 from datetime import datetime
@@ -90,7 +91,52 @@ from torch.nn.intrinsic.qat import ConvBnReLU3d
 
 import multiprocessing as mp
 import time
-
+from monai.transforms import (
+    EnsureChannelFirstd,
+    Orientationd,
+    AsDiscrete,
+    AddChanneld,
+    Spacingd,
+    Compose,
+    CropForegroundd,
+    LoadImaged,
+    Orientationd,
+    RandCropByPosNegLabeld,
+    ScaleIntensityRanged,
+    Spacingd,
+    EnsureTyped,
+    EnsureType,
+    Resize,
+    Resized,
+    RandSpatialCropd,
+        AsDiscrete,
+    AsDiscreted,
+    CropForegroundd,
+    LoadImaged,
+    Orientationd,
+    RandCropByPosNegLabeld,
+    SaveImaged,
+    ScaleIntensityRanged,
+    SelectItemsd,
+    Invertd,
+    DivisiblePadd,
+    SpatialPadd,
+    RandGaussianNoised,
+    RandAdjustContrastd,
+    RandGaussianSmoothd,
+    RandRicianNoised,
+    RandFlipd,
+    RandAffined,
+    ConcatItemsd,
+    RandCoarseDropoutd,
+    AsDiscreted,
+    MapTransform,
+    ResizeWithPadOrCropd,
+    EnsureChannelFirstd,
+    SaveImage,
+    EnsureChannelFirst
+    
+)
 
 
 
@@ -162,6 +208,7 @@ from picai_eval.metrics import Metrics
 from picai_eval.eval import evaluate_case
 
 
+
 class UNetToRegresion(nn.Module):
     def __init__(self,
         in_channels,
@@ -197,10 +244,21 @@ def divide_chunks(l, n):
     for i in range(0, len(l), n):
         yield l[i:i + n]
 
+def monaiSaveFile(directory,name,arr):
+    #Compose(EnsureChannelFirst(),SaveImage(output_dir=directory,separate_folder=False,output_postfix =name) )(arr)
+    SaveImage(output_dir=directory,separate_folder=False,output_postfix =name)(arr)
+
+
 def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     """
     saves arrays in given directory and return paths to them
     """
+    monaiSaveFile(directory,patId+ "_gold",gold_arr)
+    monaiSaveFile(directory,patId+ "_hat",y_hat_arr)
+    monaiSaveFile(directory,patId+ "image",imageArr)
+    monaiSaveFile(directory,patId+ "imageB",imageArr)
+    monaiSaveFile(directory,patId+ "hatPostA",hatPostA)
+
     # gold_im_path = join(directory, patId+ "_gold.npy" )
     # yHat_im_path = join(directory, patId+ "_hat.npy" )
     # np.save(gold_im_path, gold_arr)
@@ -246,6 +304,9 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     writer = sitk.ImageFileWriter()
     writer.SetFileName(hatPostA_path)
     writer.Execute(image)
+
+
+
 
     return(gold_im_path,yHat_im_path)
 
