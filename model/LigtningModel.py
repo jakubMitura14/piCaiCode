@@ -269,7 +269,7 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     imageB_path =join(directory, patId+ "imageB.nii.gz" )
     hatPostA_path =join(directory, patId+ "hatPostA.nii.gz" )
     # print(f"suuum image {torch.sum(imageArr)}    suum hat  {np.sum( y_hat_arr.numpy())} hatPostA {np.sum(hatPostA)} hatPostA uniqq {np.unique(hatPostA) } hatpostA shape {hatPostA.shape} y_hat_arr sh {y_hat_arr.shape} gold_arr shape {gold_arr.shape} ")
-    print(f" suum hat  {np.sum( y_hat_arr.numpy())} gold_arr chan 0 sum  {np.sum(gold_arr[0,:,:,:].numpy())} chan 1 sum {np.sum(gold_arr[1,:,:,:].numpy())}")
+    print(f" suum hat  {np.sum( y_hat_arr.numpy())} gold_arr chan 0 sum  {np.sum(gold_arr[0,:,:,:].numpy())} chan 1 sum {np.sum(gold_arr[1,:,:,:].numpy())} hatPostA chan 0 sum  {np.sum(hatPostA[0,:,:,:])} chan 1 sum {np.sum(hatPostA[1,:,:,:])}    ")
     # gold_arr=np.swapaxes(gold_arr,0,2)
     # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
     # print(f"uniq gold { gold_arr.shape  }   yhat { y_hat_arr.shape }   yhat maxes  {np.maximum(y_hat_arr)}  hyat min {np.minimum(y_hat_arr)} ")
