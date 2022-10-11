@@ -416,7 +416,7 @@ class Model(pl.LightningModule):
         self.picaiLossArr_AP_final=picaiLossArr_AP_final
         self.picaiLossArr_score_final=picaiLossArr_score_final
         #temporary directory for validation images and their labels
-        self.temp_val_dir= '/home/sliceruser/data/tempF' #tempfile.mkdtemp()
+        self.temp_val_dir= '/home/sliceruser/data/tempH' #tempfile.mkdtemp()
         self.list_gold_val=[]
         self.list_yHat_val=[]
         self.list_back_yHat_val=[]
@@ -823,7 +823,7 @@ class Model(pl.LightningModule):
         #clearing and recreatin temporary directory
         #shutil.rmtree(self.temp_val_dir)   
         #self.temp_val_dir=tempfile.mkdtemp() 
-        self.temp_val_dir=pathOs.join('/home/sliceruser/data/tempF',str(self.trainer.current_epoch))
+        self.temp_val_dir=pathOs.join('/home/sliceruser/data/tempH',str(self.trainer.current_epoch))
         os.makedirs(self.temp_val_dir,  exist_ok = True)  
 
 
