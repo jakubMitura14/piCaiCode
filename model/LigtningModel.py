@@ -207,7 +207,7 @@ from picai_eval.metrics import Metrics
 
 from picai_eval.eval import evaluate_case
 
-
+import modelUtlils
 
 class UNetToRegresion(nn.Module):
     def __init__(self,
@@ -246,14 +246,14 @@ def divide_chunks(l, n):
 
 def monaiSaveFile(directory,name,arr):
     #Compose(EnsureChannelFirst(),SaveImage(output_dir=directory,separate_folder=False,output_postfix =name) )(arr)
-    SaveImage(output_dir=directory,separate_folder=False,output_postfix =name)(arr)
+    SaveImage(output_dir=directory,separate_folder=False,output_postfix =name,writer="ITKWriter")(arr)
 
 
 def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     """
     saves arrays in given directory and return paths to them
     """
-    adding='_a'
+    adding='_e'
     monaiSaveFile(directory,patId+ "_gold"+adding,gold_arr)
     monaiSaveFile(directory,patId+ "_hat"+adding,y_hat_arr)
     monaiSaveFile(directory,patId+ "image"+adding,imageArr)
@@ -313,12 +313,6 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     return(gold_im_path,yHat_im_path)
 
 
-# def saveToValidate(i,y_det,regress_res_cpu,temp_val_dir,y_true,patIds):
-#     y_det_curr=y_det[i]
-#     #TODO unhash
-#     if(np.rint(regress_res_cpu[i])==0):
-#         y_det_curr=np.zeros_like(y_det_curr)
-#     return saveFilesInDir(y_true[i],y_det_curr, temp_val_dir, patIds[i])
 
 def getArrayFromPath(path):
     image1=sitk.ReadImage(path)
@@ -331,21 +325,6 @@ def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,images,hatPostA):
 # def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,reg_hat):
     return saveFilesInDir(y_true[i],y_det[i], temp_val_dir, patIds[i],images[i],hatPostA[i])
     
-    # if(reg_hat[i]>0):
-    #     return saveFilesInDir(y_true[i],y_det[i], temp_val_dir, patIds[i])
-    # #when it is equal 0 we zero out the result
-    # return saveFilesInDir(y_true[i],np.zeros_like(y_det[i]), temp_val_dir, patIds[i])    
-
-# def calcDiceFromPaths(i,list_yHat_val,list_gold_val):
-
-#     y_hat= monai.transforms.LoadImage()(list_yHat_val[i])
-#     gold_val= monai.transforms.LoadImage()(list_gold_val[i])
-
-#     print(f" yHat_val {y_hat[0]} gold_val {gold_val[0]} ")
-    
-#     postProcessHat=monai.transforms.Compose([EnsureType(),  monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])
-#     load_true=monai.transforms.Compose([AsDiscrete( to_onehot=2)])
-#     return monai.metrics.compute_generalized_dice( postProcessHat(y_hat) ,load_true(gold_val))
 
 def evaluate_case_for_map(i,y_det,y_true):
     pred=sitk.GetArrayFromImage(sitk.ReadImage(y_det[i]))
@@ -378,19 +357,26 @@ def processDice(i,postProcess,y_det,y_true):
     return (locDice,hatPost.numpy())
 
 
-    # try:
-    #     hatPost=postProcess(y_det[i])
-    #     # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
-    #     locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i]).item()
-    #     return (locDice,hatPost.numpy())
-    # except:
-    #     return (0.0,np.zeros_like(y_det[i].numpy()))
-    # avSurface_dist_loc=monai.metrics.compute_average_surface_distance(hatPost, y_true[i])
-    #monai.metrics.compute_generalized_dice(
-    # self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
-    # self.dices.append(locDice)
-    # # self.surfDists.append(avSurface_dist_loc)
-    # hatPostA.append(hatPost[1,:,:,:])    
+
+def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experiment,postProcess,epoch):
+    curr_studyId=studyId[i]
+    gold_arr_loc=gold_arr[i].numpy()
+    extracted=extract_lesion_candidates(y_hat_arr[i][1,:,:,:].numpy(), threshold='dynamic')[0]
+    extractedBinary= extracted>0 #binarized version
+    diceLoc=monai.metrics.compute_generalized_dice( postProcess(extractedBinary) ,gold_arr_loc)[1].item()
+    print(f"diceee loc {diceLoc}")
+    from_case=evaluate_case(y_det=extracted,y_true=gold_arr_loc[1,:,:,:])
+    
+    ### visualizations
+    maxSlice = max(list(range(0,gold_arr_loc.shape[2])),key=lambda ind : np.sum(gold_arr_loc[:,:,ind].flatten())  )
+    experiment.log_image(gold_arr_loc[:,:,maxSlice], name=f"gold_{curr_studyId}_{epoch}.png")
+    experiment.log_image(extracted[:,:,maxSlice], name=f"extracted_{curr_studyId}_{epoch}.png")
+    experiment.log_image(imageArr[i][0,:,:,maxSlice], name=f"t2w_{curr_studyId}_{epoch}.png")
+    experiment.log_image(imageArr[i][1,:,:,maxSlice], name=f"adc_{curr_studyId}_{epoch}.png")
+
+    return (diceLoc,from_case)
+
+
 
 class Model(pl.LightningModule):
     def __init__(self
@@ -525,6 +511,7 @@ class Model(pl.LightningModule):
         # self.list_yHat_val.append(tupl[1])
 
 
+
     def validation_step(self, batch, batch_idx):
         x, y_true, numLesions,isAnythingInAnnotated = batch['chan3_col_name_val'], batch['label_name_val'], batch['num_lesions_to_retain'], batch['isAnythingInAnnotated']
         
@@ -535,77 +522,48 @@ class Model(pl.LightningModule):
 
         #loss= self.criterion(seg_hat,y_true)# self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)      
 
-        # locDice = np.mean(monai.metrics.compute_generalized_dice( self.postProcess(seg_hat) ,  y_true  ).numpy())
-        # print(f"locDice {locDice}")
-        
-        
-
-#         #we want only first channel
-#         y_true=y_true[:,1,:,:,:].cpu().detach()
-#         y_det=seg_hat[:,1,:,:,:].cpu().detach()
 
         y_det = decollate_batch(seg_hat.cpu().detach())
         # y_background = decollate_batch(seg_hat[:,0,:,:,:].cpu().detach())
         y_true = decollate_batch(y_true.cpu().detach())
         patIds = decollate_batch(batch['study_id'])
-
         images = decollate_batch(x.cpu().detach()) 
-#         # dice_metric = DiceMetric(include_background=False, reduction="mean", get_not_nans=False)
+
+        processedCases=list(map(partial(processDecolated,gold_arr=y_true,y_hat_arr=y_det,directory= self.temp_val_dir,studyId= patIds
+                    ,images=images, experiment=self.logger.experiment,postProcess=self.postProcess,epoch=self.current_epoch)))
+        dices = list(map(lambda tupl: tupl[0] ,processedCases))
+        extrCases = list(map(lambda tupl: tupl[1] ,processedCases ))
+        return {'dices': dices, 'extrCases':extrCases}
+        # pathssList=[]
+        # dicesList=[]
         # hatPostA=[]
-        # for i in range(0,len(y_det)):
-        #     hatPost=self.postProcess(y_det[i])
-        #     # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
-        #     locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i])
-        #     # avSurface_dist_loc=monai.metrics.compute_average_surface_distance(hatPost, y_true[i])
-        #     #monai.metrics.compute_generalized_dice(
-        #     # self.rocAuc(hatPost.cpu() ,y_true[i].cpu())
-        #     self.dices.append(locDice)
-        #     # self.surfDists.append(avSurface_dist_loc)
-        #     hatPostA.append(hatPost[1,:,:,:])
+        # # with mp.Pool(processes = mp.cpu_count()) as pool:
+        # #     # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
+        # #     dicesList=pool.map(partial(processDice,postProcess=self.postProcess,y_det=y_det, y_true=y_true ),list(range(0,len(y_true))))
+        # dicesList=list(map(partial(processDice,postProcess=self.postProcess,y_det=y_det, y_true=y_true ),list(range(0,len(y_true)))))
 
+        # hatPostA=list(map(lambda tupl: tupl[1],dicesList ))
+        # dicees=list(map(lambda tupl: tupl[0],dicesList ))
+        # # self.logger.experiment.
 
-        #     self.dices.append(locDice)
+        # # with mp.Pool(processes = mp.cpu_count()) as pool:        
+        # #     pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,images=images,hatPostA=hatPostA),list(range(0,len(y_true))))
 
+        # pathssList=list(map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,images=images,hatPostA=hatPostA),list(range(0,len(y_true)))))
 
-        pathssList=[]
-        dicesList=[]
-        hatPostA=[]
-        # with mp.Pool(processes = mp.cpu_count()) as pool:
-        #     # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
-        #     dicesList=pool.map(partial(processDice,postProcess=self.postProcess,y_det=y_det, y_true=y_true ),list(range(0,len(y_true))))
-        dicesList=list(map(partial(processDice,postProcess=self.postProcess,y_det=y_det, y_true=y_true ),list(range(0,len(y_true)))))
+        # forGoldVal=list(map(lambda tupl :tupl[0] ,pathssList  ))
+        # fory_hatVal=list(map(lambda tupl :tupl[1] ,pathssList  ))
+        # # fory__bach_hatVal=list(map(lambda tupl :tupl[2] ,pathssList  ))
 
-        hatPostA=list(map(lambda tupl: tupl[1],dicesList ))
-        dicees=list(map(lambda tupl: tupl[0],dicesList ))
-        
-        # with mp.Pool(processes = mp.cpu_count()) as pool:        
-        #     pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,images=images,hatPostA=hatPostA),list(range(0,len(y_true))))
-
-        pathssList=list(map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,images=images,hatPostA=hatPostA),list(range(0,len(y_true)))))
-
-        forGoldVal=list(map(lambda tupl :tupl[0] ,pathssList  ))
-        fory_hatVal=list(map(lambda tupl :tupl[1] ,pathssList  ))
-        # fory__bach_hatVal=list(map(lambda tupl :tupl[2] ,pathssList  ))
-
-        
-
-
-
-        
-
-
-# #         # self.list_gold_val=self.list_gold_val+forGoldVal
-# #         # self.list_yHat_val=self.list_gold_val+fory_hatVal
-
-# # # save_candidates_to_dir(y_true,y_det,patIds,i,temp_val_dir)
-        for i in range(0,len(y_true)):
-            # tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
-            # print("saving entry   ")
-            # self.list_gold_val.append(tupl[0])
-            # self.list_yHat_val.append(tupl[1])
-            self.list_gold_val.append(forGoldVal[i])
-            self.list_yHat_val.append(fory_hatVal[i])
-            self.dices.append(dicees[i])
+        # for i in range(0,len(y_true)):
+            
+        #     # tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
+        #     # print("saving entry   ")
+        #     # self.list_gold_val.append(tupl[0])
+        #     # self.list_yHat_val.append(tupl[1])
+        #     self.list_gold_val.append(forGoldVal[i])
+        #     self.list_yHat_val.append(fory_hatVal[i])
+        #     self.dices.append(dicees[i])
             # self.list_back_yHat_val.append(fory__bach_hatVal[i])
 # #         self.log('val_loss', loss )
 
@@ -648,228 +606,191 @@ class Model(pl.LightningModule):
         # self.picaiLossArr_score_final.append(total_loss1.item())
         # return {'val_acc': total_loss1.item(), 'val_loss':val_losss}
 
+
+    #return {'dices': dices, 'extrCases':extrCases}
+    
     def validation_epoch_end(self, outputs):
         print("validation_epoch_end")
+        allDices = np.array(([x['dices'] for x in outputs])).flatten() 
+        allforEval = (([x['extrCases'] for x in outputs]))
+        allforEval = [item for sublist in allforEval for item in sublist]
+        meanPiecaiMetr_auroc,meanPiecaiMetr_AP,meanPiecaiMetr_score= modelUtlils.evaluate_all_cases(allforEval)
+        if(len(allDices)>0):
+            self.log('dice', np.mean(allDices))
 
-        #self.log('dice', np.mean(self.dices))
-        # self.dice_metric.reset()
+        print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
+
+        self.log('val_mean_auroc', meanPiecaiMetr_auroc)
+        self.log('val_mean_AP', meanPiecaiMetr_AP)
+        self.log('mean_val_acc', meanPiecaiMetr_score)
+        # tensorss = [torch.as_tensor(x['loc_dice']) for x in outputs]
+        # if( len(tensorss)>0):
+        #     avg_dice = torch.mean(torch.stack(tensorss))
+
+        self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
+        self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
+        self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
 
  
-        # print( f"rocAuc  {self.rocAuc.aggregate().item()}"  )
-        # #self.log('precision ', monai.metrics.compute_confusion_matrix_metric("precision", confusion_matrix) )
-        # self.rocAuc.reset()        
+#         # print( f"rocAuc  {self.rocAuc.aggregate().item()}"  )
+#         # #self.log('precision ', monai.metrics.compute_confusion_matrix_metric("precision", confusion_matrix) )
+#         # self.rocAuc.reset()        
 
 
         
-        #print(f" self.list_yHat_val {self.list_yHat_val} ")
-        if(len(self.list_yHat_val)>1 and (not self.isAnyNan)):
-        # if(False):
-            # with mp.Pool(processes = mp.cpu_count()) as pool:
-            #     dices=pool.map(partial(calcDiceFromPaths,list_yHat_val=self.list_yHat_val,list_gold_val=self.list_gold_val   ),list(range(0,len(self.list_yHat_val))))
-            # dices=list(map(partial(calcDiceFromPaths,list_yHat_val=self.list_yHat_val,list_gold_val=self.list_gold_val   ),list(range(0,len(self.list_yHat_val)))))
-            #meanDice=torch.mean(torch.stack( dices)).item()
-            meanDice=np.mean( self.dices)
-            self.log('meanDice',np.mean( self.dices))
-            print(f"meanDice {meanDice} ")
-            # self.log('meanDice',torch.mean(torch.stack( self.dices)).item() )
-            # print('meanDice',np.mean( np.array(self.dices ).flatten()))
-            # self.log('mean_surface_distance',torch.mean(torch.stack( self.surfDists)).item())
+#         print(f" num to validate  { len(self.list_yHat_val)} ")
+#         if(len(self.list_yHat_val)>0 ): #and (not self.isAnyNan)
+#         # if(False):
+#             # with mp.Pool(processes = mp.cpu_count()) as pool:
+#             #     dices=pool.map(partial(calcDiceFromPaths,list_yHat_val=self.list_yHat_val,list_gold_val=self.list_gold_val   ),list(range(0,len(self.list_yHat_val))))
+#             # dices=list(map(partial(calcDiceFromPaths,list_yHat_val=self.list_yHat_val,list_gold_val=self.list_gold_val   ),list(range(0,len(self.list_yHat_val)))))
+#             #meanDice=torch.mean(torch.stack( dices)).item()
+#             meanDice=np.mean( self.dices)
+#             self.log('meanDice',np.mean( self.dices))
+#             print(f"meanDice {meanDice} ")
+#             # self.log('meanDice',torch.mean(torch.stack( self.dices)).item() )
+#             # print('meanDice',np.mean( np.array(self.dices ).flatten()))
+#             # self.log('mean_surface_distance',torch.mean(torch.stack( self.surfDists)).item())
 
-            lenn=len(self.list_yHat_val)
-            numPerIter=1
-            numIters=math.ceil(lenn/numPerIter)-1
+#             lenn=len(self.list_yHat_val)
+#             numPerIter=1
+#             numIters=math.ceil(lenn/numPerIter)-1
 
 
 
-            meanPiecaiMetr_auroc_list=[]
-            meanPiecaiMetr_AP_list=[]
-            meanPiecaiMetr_score_list=[]
-            print(f" numIters {numIters} ")
+#             meanPiecaiMetr_auroc_list=[]
+#             meanPiecaiMetr_AP_list=[]
+#             meanPiecaiMetr_score_list=[]
+#             print(f" numIters {numIters} ")
             
-            pool = mp.Pool()
-            listPerEval=[None] * lenn
+#             pool = mp.Pool()
+#             listPerEval=[None] * lenn
 
-            # #timeout based on https://stackoverflow.com/questions/66051638/set-a-time-limit-on-the-pool-map-operation-when-using-multiprocessing
-            my_task=partial(evaluate_case_for_map,y_det= self.list_yHat_val,y_true=self.list_gold_val)
-            # def my_callback(t):
-            #     print(f"tttttt  {t}")
-            #     s, i = t
-            #     listPerEval[i] = s
-            # results=[pool.apply_async(my_task, args=(i,), callback=my_callback) for i in list(range(0,lenn))]
-            # TIMEOUT = 300# second timeout
-            # time.sleep(TIMEOUT)
-            # pool.terminate()
-            # #filtering out those that timed out
-            # listPerEval=list(filter(lambda it:it!=None,listPerEval))
-            # print(f" results timed out {lenn-len(listPerEval)} from all {lenn} ")
+#             # #timeout based on https://stackoverflow.com/questions/66051638/set-a-time-limit-on-the-pool-map-operation-when-using-multiprocessing
+#             my_task=partial(evaluate_case_for_map,y_det= self.list_yHat_val,y_true=self.list_gold_val)
+#             # def my_callback(t):
+#             #     print(f"tttttt  {t}")
+#             #     s, i = t
+#             #     listPerEval[i] = s
+#             # results=[pool.apply_async(my_task, args=(i,), callback=my_callback) for i in list(range(0,lenn))]
+#             # TIMEOUT = 300# second timeout
+#             # time.sleep(TIMEOUT)
+#             # pool.terminate()
+#             # #filtering out those that timed out
+#             # listPerEval=list(filter(lambda it:it!=None,listPerEval))
+#             # print(f" results timed out {lenn-len(listPerEval)} from all {lenn} ")
 
-            TIMEOUT = 50# second timeout
+#             TIMEOUT = 50# second timeout
 
 
-# TIMEOUT = 2# second timeout
-# with mp.Pool(processes = mp.cpu_count()) as pool:
-#     results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
+# # TIMEOUT = 2# second timeout
+# # with mp.Pool(processes = mp.cpu_count()) as pool:
+# #     results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
     
-#     for i in range(lenn):
-#         try:
-#             return_value = results[i].get(2) # wait for up to time_to_wait seconds
-#         except mp.TimeoutError:
-#             print('Timeout for v = ', i)
-#         else:
-#             squares[i]=return_value
-#             print(f'Return value for v = {i} is {return_value}')
+# #     for i in range(lenn):
+# #         try:
+# #             return_value = results[i].get(2) # wait for up to time_to_wait seconds
+# #         except mp.TimeoutError:
+# #             print('Timeout for v = ', i)
+# #         else:
+# #             squares[i]=return_value
+# #             print(f'Return value for v = {i} is {return_value}')
 
 
-#     # it = pool.imap(my_task, range(lenn))
-#     # squares=list(map(lambda ind :getNext(it,TIMEOUT) ,list(range(lenn)) ))
-# print(squares)
+# #     # it = pool.imap(my_task, range(lenn))
+# #     # squares=list(map(lambda ind :getNext(it,TIMEOUT) ,list(range(lenn)) ))
+# # print(squares)
 
 
-            with mp.Pool(processes = mp.cpu_count()) as pool:
-                #it = pool.imap(my_task, range(lenn))
-                results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
-                time.sleep(TIMEOUT)
-                listPerEval=list(map(lambda ind :getNext(ind,results,5) ,list(range(lenn)) ))
-            #filtering out those that timed out
-            listPerEval=list(filter(lambda it:it!=None,listPerEval))
-            print(f" results timed out {lenn-len(listPerEval)} from all {lenn} ")                
-                    # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
-                # listPerEval=pool.map( partial(evaluate_case_for_map,y_det= self.list_yHat_val,y_true=self.list_gold_val) , list(range(0,lenn)))
+#             with mp.Pool(processes = mp.cpu_count()) as pool:
+#                 #it = pool.imap(my_task, range(lenn))
+#                 results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
+#                 time.sleep(TIMEOUT)
+#                 listPerEval=list(map(lambda ind :getNext(ind,results,5) ,list(range(lenn)) ))
+#             #filtering out those that timed out
+#             listPerEval=list(filter(lambda it:it!=None,listPerEval))
+#             print(f" results timed out {lenn-len(listPerEval)} from all {lenn} ")                
+#                     # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
+#                 # listPerEval=pool.map( partial(evaluate_case_for_map,y_det= self.list_yHat_val,y_true=self.list_gold_val) , list(range(0,lenn)))
 
 
-            # listPerEval=list(map( partial(evaluate_case_for_map,y_det= self.list_yHat_val,y_true=self.list_gold_val) , list(range(0,lenn))))
+#             # listPerEval=list(map( partial(evaluate_case_for_map,y_det= self.list_yHat_val,y_true=self.list_gold_val) , list(range(0,lenn))))
 
 
-            # initialize placeholders
-            case_target: Dict[Hashable, int] = {}
-            case_weight: Dict[Hashable, float] = {}
-            case_pred: Dict[Hashable, float] = {}
-            lesion_results: Dict[Hashable, List[Tuple[int, float, float]]] = {}
-            lesion_weight: Dict[Hashable, List[float]] = {}
+#             # initialize placeholders
 
-            meanPiecaiMetr_auroc=0.0
-            meanPiecaiMetr_AP=0.0
-            meanPiecaiMetr_score=0.0
-
-            idx=0
-            if(len(listPerEval)>0):
-                for pairr in listPerEval:
-                    idx+=1
-                    lesion_results_case, case_confidence = pairr
-
-                    case_weight[idx] = 1.0
-                    case_pred[idx] = case_confidence
-                    if len(lesion_results_case):
-                        case_target[idx] = np.max([a[0] for a in lesion_results_case])
-                    else:
-                        case_target[idx] = 0
-
-                    # accumulate outputs
-                    lesion_results[idx] = lesion_results_case
-                    lesion_weight[idx] = [1.0] * len(lesion_results_case)
-
-                # collect results in a Metrics object
-                valid_metrics = Metrics(
-                    lesion_results=lesion_results,
-                    case_target=case_target,
-                    case_pred=case_pred,
-                    case_weight=case_weight,
-                    lesion_weight=lesion_weight
-                )
-
-
-
-
-                # for i in range(0,numIters):
-                #     valid_metrics = evaluate(y_det=self.list_yHat_val[i*numPerIter:min((i+1)*numPerIter,lenn)],
-                #                         y_true=self.list_gold_val[i*numPerIter:min((i+1)*numPerIter,lenn)],
-                #                         num_parallel_calls= min(numPerIter,os.cpu_count())
-                #                         ,verbose=1
-                #                         #,y_true_postprocess_func=lambda pred: pred[1,:,:,:]
-                #                         #y_true=iter(y_true),
-                #                         ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
-                #                         #,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
-                #                         )
-                # meanPiecaiMetr_auroc_list.append(valid_metrics.auroc)
-                # meanPiecaiMetr_AP_list.append(valid_metrics.AP)
-                # meanPiecaiMetr_score_list.append((-1)*valid_metrics.score)
-                #print("finished evaluating")
-
-                meanPiecaiMetr_auroc=valid_metrics.auroc
-                meanPiecaiMetr_AP=valid_metrics.AP
-                meanPiecaiMetr_score=(-1)*valid_metrics.score
-            # meanPiecaiMetr_auroc=np.nanmean(meanPiecaiMetr_auroc_list)
-            # meanPiecaiMetr_AP=np.nanmean(meanPiecaiMetr_AP_list)
-            # meanPiecaiMetr_score=np.nanmean(meanPiecaiMetr_score_list)
+#             # meanPiecaiMetr_auroc=np.nanmean(meanPiecaiMetr_auroc_list)
+#             # meanPiecaiMetr_AP=np.nanmean(meanPiecaiMetr_AP_list)
+#             # meanPiecaiMetr_score=np.nanmean(meanPiecaiMetr_score_list)
         
 
       
-            print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
+#             print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
 
-            self.log('val_mean_auroc', meanPiecaiMetr_auroc)
-            self.log('val_mean_AP', meanPiecaiMetr_AP)
-            self.log('mean_val_acc', meanPiecaiMetr_score)
-            # tensorss = [torch.as_tensor(x['loc_dice']) for x in outputs]
-            # if( len(tensorss)>0):
-            #     avg_dice = torch.mean(torch.stack(tensorss))
+#             self.log('val_mean_auroc', meanPiecaiMetr_auroc)
+#             self.log('val_mean_AP', meanPiecaiMetr_AP)
+#             self.log('mean_val_acc', meanPiecaiMetr_score)
+#             # tensorss = [torch.as_tensor(x['loc_dice']) for x in outputs]
+#             # if( len(tensorss)>0):
+#             #     avg_dice = torch.mean(torch.stack(tensorss))
 
-            self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
-            self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
-            self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
+#             self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
+#             self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
+#             self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
 
-            #resetting to 0 
-            self.picaiLossArr_auroc=[]
-            self.picaiLossArr_AP=[]
-            self.picaiLossArr_score=[]
-
-
+#             #resetting to 0 
+#             self.picaiLossArr_auroc=[]
+#             self.picaiLossArr_AP=[]
+#             self.picaiLossArr_score=[]
 
 
 
 
 
-        #clearing and recreatin temporary directory
-        #shutil.rmtree(self.temp_val_dir)   
-        #self.temp_val_dir=tempfile.mkdtemp() 
-        self.temp_val_dir=pathOs.join('/home/sliceruser/data/tempH',str(self.trainer.current_epoch))
-        os.makedirs(self.temp_val_dir,  exist_ok = True)  
 
 
-        self.list_gold_val=[]
-        self.list_yHat_val=[]
-        self.list_back_yHat_val=[]
-
-        #in case we have Nan values training is unstable and we want to terminate it     
-        # if(self.isAnyNan):
-        #     self.log('val_mean_score', -0.2)
-        #     self.picaiLossArr_score_final=[-0.2]
-        #     self.picaiLossArr_AP_final=[-0.2]
-        #     self.picaiLossArr_auroc_final=[-0.2]
-        #     print(" naans in outputt  ")
-
-        #self.isAnyNan=False
-        #return {"mean_val_acc": self.log}
+#         #clearing and recreatin temporary directory
+#         #shutil.rmtree(self.temp_val_dir)   
+#         #self.temp_val_dir=tempfile.mkdtemp() 
+#         self.temp_val_dir=pathOs.join('/home/sliceruser/data/tempH',str(self.trainer.current_epoch))
+#         os.makedirs(self.temp_val_dir,  exist_ok = True)  
 
 
-        # # avg_loss = torch.mean(torch.stack([torch.as_tensor(x['val_loss']) for x in outputs]))
-        # # print(f"mean_val_loss { avg_loss}")
-        # # avg_acc = torch.mean(torch.stack([torch.as_tensor(x['val_acc']) for x in outputs]))
-        # #val_accs=list(map(lambda x : x['val_acc'],outputs))
-        # val_accs=list(map(lambda x : x['val_acc'].cpu().detach().numpy(),outputs))
-        # #print(f" a  val_accs {val_accs} ")
-        # val_accs=np.nanmean(np.array( val_accs).flatten())
-        # #print(f" b  val_accs {val_accs} mean {np.mean(val_accs)}")
+#         self.list_gold_val=[]
+#         self.list_yHat_val=[]
+#         self.list_back_yHat_val=[]
 
-        # #avg_acc = np.mean(np.array(([x['val_acc'].cpu().detach().numpy() for x in outputs])).flatten() )
+#         #in case we have Nan values training is unstable and we want to terminate it     
+#         # if(self.isAnyNan):
+#         #     self.log('val_mean_score', -0.2)
+#         #     self.picaiLossArr_score_final=[-0.2]
+#         #     self.picaiLossArr_AP_final=[-0.2]
+#         #     self.picaiLossArr_auroc_final=[-0.2]
+#         #     print(" naans in outputt  ")
 
-        # # self.log("mean_val_loss", avg_loss)
-        # self.log("mean_val_acc", np.mean(val_accs))
+#         #self.isAnyNan=False
+#         #return {"mean_val_acc": self.log}
 
-        # # self.log('ptl/val_loss', avg_loss)
-        # # self.log('ptl/val_accuracy', avg_acc)
-        # #return {'mean_val_loss': avg_loss, 'mean_val_acc':avg_acc}
 
-#self.postProcess
+#         # # avg_loss = torch.mean(torch.stack([torch.as_tensor(x['val_loss']) for x in outputs]))
+#         # # print(f"mean_val_loss { avg_loss}")
+#         # # avg_acc = torch.mean(torch.stack([torch.as_tensor(x['val_acc']) for x in outputs]))
+#         # #val_accs=list(map(lambda x : x['val_acc'],outputs))
+#         # val_accs=list(map(lambda x : x['val_acc'].cpu().detach().numpy(),outputs))
+#         # #print(f" a  val_accs {val_accs} ")
+#         # val_accs=np.nanmean(np.array( val_accs).flatten())
+#         # #print(f" b  val_accs {val_accs} mean {np.mean(val_accs)}")
 
-#             image1=sitk.ReadImage(path)
-# #     data = sitk.GetArrayFromImage(image1)
+#         # #avg_acc = np.mean(np.array(([x['val_acc'].cpu().detach().numpy() for x in outputs])).flatten() )
+
+#         # # self.log("mean_val_loss", avg_loss)
+#         # self.log("mean_val_acc", np.mean(val_accs))
+
+#         # # self.log('ptl/val_loss', avg_loss)
+#         # # self.log('ptl/val_accuracy', avg_acc)
+#         # #return {'mean_val_loss': avg_loss, 'mean_val_acc':avg_acc}
+
+# #self.postProcess
+
+# #             image1=sitk.ReadImage(path)
+# # #     data = sitk.GetArrayFromImage(image1)
