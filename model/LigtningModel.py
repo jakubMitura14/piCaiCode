@@ -256,7 +256,7 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     monaiSaveFile(directory,patId+ "image"+adding,imageArr)
     monaiSaveFile(directory,patId+ "imageB"+adding,imageArr)
     monaiSaveFile(directory,patId+ "hatPostA"+adding,hatPostA)
-    preddA=extract_lesion_candidates(y_hat_arr)
+    preddA=extract_lesion_candidates(torch.from_numpy(y_hat_arr))
     # preddA=extract_lesion_candidates(y_hat_arr[1,:,:,:])
     #preddB=extract_lesion_candidates(y_hat_arr[0,:,:,:])
     monaiSaveFile(directory,patId+ "preddA"+adding,preddA)
@@ -371,7 +371,7 @@ def getNext(i,results,TIMEOUT):
 def processDice(i,postProcess,y_det,y_true):
     hatPost=postProcess(y_det[i])
     # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
-    locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i])[1].item()
+    locDice=monai.metrics.compute_meandice( hatPost ,y_true[i]).item()
     print(f"locDice {locDice}")
     return (locDice,hatPost.numpy())
 
@@ -408,7 +408,7 @@ class Model(pl.LightningModule):
         self.optimizer_class = optimizer_class
         self.best_val_dice = 0
         self.best_val_epoch = 0
-        self.dice_metric = monai.metrics.GeneralizedDiceScore()
+        self.dice_metric = monai.metrics.DiceMetric()
         #self.rocAuc=monai.metrics.ROCAUCMetric()
         self.picaiLossArr=[]
         self.post_pred = Compose([ AsDiscrete( to_onehot=2)])
