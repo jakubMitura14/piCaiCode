@@ -349,7 +349,7 @@ def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,images,hatPostA):
 
 def evaluate_case_for_map(i,y_det,y_true):
     pred=sitk.GetArrayFromImage(sitk.ReadImage(y_det[i]))
-    pred=extract_lesion_candidates(pred[1,:,:,:])[0]
+    pred=extract_lesion_candidates(pred)[0]
     image = sitk.GetImageFromArray(  np.swapaxes(pred,0,2) )
     writer = sitk.ImageFileWriter()
     writer.SetFileName(y_det[i].replace(".nii.gz", "_extracted.nii.gz   "))
