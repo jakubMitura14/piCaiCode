@@ -256,16 +256,17 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     monaiSaveFile(directory,patId+ "image"+adding,imageArr)
     monaiSaveFile(directory,patId+ "imageB"+adding,imageArr)
     monaiSaveFile(directory,patId+ "hatPostA"+adding,hatPostA)
-    preddA=extract_lesion_candidates(torch.from_numpy(y_hat_arr))
     # preddA=extract_lesion_candidates(y_hat_arr[1,:,:,:])
     #preddB=extract_lesion_candidates(y_hat_arr[0,:,:,:])
-    monaiSaveFile(directory,patId+ "preddA"+adding,preddA)
     #monaiSaveFile(directory,patId+ "preddB"+adding,preddB)
     
     gold_im_path = join(directory, patId+ "_gold.npy" )
     yHat_im_path = join(directory, patId+ "_hat.npy" )
-    np.save(gold_im_path, gold_arr)
-    np.save(yHat_im_path, y_hat_arr)
+
+    np.save(gold_im_path, gold_arr[1,:,:,:])
+    np.save(yHat_im_path, y_hat_arr[1,:,:,:])
+    preddA=extract_lesion_candidates(np.load(yHat_im_path))
+    monaiSaveFile(directory,patId+ "preddA"+adding,preddA)
 
     # gold_im_path = join(directory, patId+ "_gold.nii.gz" )
     # yHat_im_path =join(directory, patId+ "_hat.nii.gz" )
