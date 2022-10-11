@@ -238,11 +238,7 @@ class UNetToRegresion(nn.Module):
 
 # torch.autograd.set_detect_anomaly(True)
 
-def divide_chunks(l, n):
-     
-    # looping till length l
-    for i in range(0, len(l), n):
-        yield l[i:i + n]
+
 
 def monaiSaveFile(directory,name,arr):
     #Compose(EnsureChannelFirst(),SaveImage(output_dir=directory,separate_folder=False,output_postfix =name) )(arr)
@@ -325,8 +321,6 @@ def getArrayFromPath(path):
     image1=sitk.ReadImage(path)
     return sitk.GetArrayFromImage(image1)
 
-def extractLesions_my(x):
-    return extract_lesion_candidates(x)[0]
 
 def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,images,hatPostA):
 # def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,reg_hat):
@@ -352,7 +346,10 @@ def evaluate_case_for_map(i,y_det,y_true):
     print("evaluate_case_for_map") 
     return evaluate_case(y_det=y_det[i] 
                         ,y_true=y_true[i] 
-                        ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0])
+                        ,y_true_postprocess_func=lambda pred: pred[1,:,:,:]
+                        ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred[1,:,:,:])[0])
+
+
 
 def getNext(i,results,TIMEOUT):
     try:
