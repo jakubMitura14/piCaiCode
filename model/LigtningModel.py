@@ -253,7 +253,7 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     """
     saves arrays in given directory and return paths to them
     """
-    adding='_a'
+    adding='_c'
     monaiSaveFile(directory,patId+ "_gold"+adding,gold_arr)
     monaiSaveFile(directory,patId+ "_hat"+adding,y_hat_arr)
     monaiSaveFile(directory,patId+ "image"+adding,imageArr)
@@ -275,7 +275,7 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
     # print(f"uniq gold { gold_arr.shape  }   yhat { y_hat_arr.shape }   yhat maxes  {np.maximum(y_hat_arr)}  hyat min {np.minimum(y_hat_arr)} ")
     gold_arr=gold_arr[1,:,:,:].numpy()
-    gold_arr=np.flip(gold_arr,(1,0))
+    #gold_arr=np.flip(gold_arr,(1,0))
     y_hat_arr=y_hat_arr[1,:,:,:].numpy()
 
     gold_arr=np.swapaxes(gold_arr,0,2)
