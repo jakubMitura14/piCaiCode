@@ -255,7 +255,7 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     """
     saves arrays in given directory and return paths to them
     """
-    adding='_c'
+    adding='_d'
     gold_im_path=monaiSaveFile(directory,patId+ "_gold"+adding,gold_arr)
     yHat_im_path=monaiSaveFile(directory,patId+ "_hat"+adding,y_hat_arr)
     monaiSaveFile(directory,patId+ "image"+adding,imageArr)
