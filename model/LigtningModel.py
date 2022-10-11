@@ -238,80 +238,74 @@ class UNetToRegresion(nn.Module):
 
 # torch.autograd.set_detect_anomaly(True)
 
-
+def divide_chunks(l, n):
+     
+    # looping till length l
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
 
 def monaiSaveFile(directory,name,arr):
     #Compose(EnsureChannelFirst(),SaveImage(output_dir=directory,separate_folder=False,output_postfix =name) )(arr)
-    SaveImage(output_dir=directory,separate_folder=False,output_postfix =name,writer="ITKWriter")(arr)
-    res=join(directory,f"0_{name}.nii.gz" )
-    return res
+    SaveImage(output_dir=directory,separate_folder=False,output_postfix =name)(arr)
+
 
 def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     """
     saves arrays in given directory and return paths to them
     """
-    adding='_d'
-    gold_im_path=monaiSaveFile(directory,patId+ "_gold"+adding,gold_arr)
-    yHat_im_path=monaiSaveFile(directory,patId+ "_hat"+adding,y_hat_arr)
+    adding='_a'
+    monaiSaveFile(directory,patId+ "_gold"+adding,gold_arr)
+    monaiSaveFile(directory,patId+ "_hat"+adding,y_hat_arr)
     monaiSaveFile(directory,patId+ "image"+adding,imageArr)
     monaiSaveFile(directory,patId+ "imageB"+adding,imageArr)
     monaiSaveFile(directory,patId+ "hatPostA"+adding,hatPostA)
-    # preddA=extract_lesion_candidates(y_hat_arr[1,:,:,:])
-    #preddB=extract_lesion_candidates(y_hat_arr[0,:,:,:])
-    #monaiSaveFile(directory,patId+ "preddB"+adding,preddB)
-    
-    gold_im_path = join(directory, patId+ "_gold.npy" )
-    yHat_im_path = join(directory, patId+ "_hat.npy" )
 
-    np.save(gold_im_path, gold_arr[1,:,:,:])
-    np.save(yHat_im_path, y_hat_arr[1,:,:,:])
-    try:
-        preddA=extract_lesion_candidates(np.load(yHat_im_path))[0]
-        monaiSaveFile(directory,patId+ "preddA"+adding,preddA)
-    except:
-        print("error in getting lesion candidates")
-    # gold_im_path = join(directory, patId+ "_gold.nii.gz" )
-    # yHat_im_path =join(directory, patId+ "_hat.nii.gz" )
-    # image_path =join(directory, patId+ "image.nii.gz" )
-    # imageB_path =join(directory, patId+ "imageB.nii.gz" )
-    # hatPostA_path =join(directory, patId+ "hatPostA.nii.gz" )
-    # # print(f"suuum image {torch.sum(imageArr)}    suum hat  {np.sum( y_hat_arr.numpy())} hatPostA {np.sum(hatPostA)} hatPostA uniqq {np.unique(hatPostA) } hatpostA shape {hatPostA.shape} y_hat_arr sh {y_hat_arr.shape} gold_arr shape {gold_arr.shape} ")
-    # print(f" suum hat  {np.sum( y_hat_arr.numpy())} gold_arr chan 0 sum  {np.sum(gold_arr[0,:,:,:].numpy())} chan 1 sum {np.sum(gold_arr[1,:,:,:].numpy())} hatPostA chan 0 sum  {np.sum(hatPostA[0,:,:,:])} chan 1 sum {np.sum(hatPostA[1,:,:,:])}    ")
-    # # gold_arr=np.swapaxes(gold_arr,0,2)
-    # # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
-    # # print(f"uniq gold { gold_arr.shape  }   yhat { y_hat_arr.shape }   yhat maxes  {np.maximum(y_hat_arr)}  hyat min {np.minimum(y_hat_arr)} ")
-    # gold_arr=gold_arr[1,:,:,:].numpy()
-    # #gold_arr=np.flip(gold_arr,(1,0))
-    # y_hat_arr=y_hat_arr[1,:,:,:].numpy()
-
+    # gold_im_path = join(directory, patId+ "_gold.npy" )
+    # yHat_im_path = join(directory, patId+ "_hat.npy" )
+    # np.save(gold_im_path, gold_arr)
+    # np.save(yHat_im_path, y_hat_arr)
+    gold_im_path = join(directory, patId+ "_gold.nii.gz" )
+    yHat_im_path =join(directory, patId+ "_hat.nii.gz" )
+    image_path =join(directory, patId+ "image.nii.gz" )
+    imageB_path =join(directory, patId+ "imageB.nii.gz" )
+    hatPostA_path =join(directory, patId+ "hatPostA.nii.gz" )
+    # print(f"suuum image {torch.sum(imageArr)}    suum hat  {np.sum( y_hat_arr.numpy())} hatPostA {np.sum(hatPostA)} hatPostA uniqq {np.unique(hatPostA) } hatpostA shape {hatPostA.shape} y_hat_arr sh {y_hat_arr.shape} gold_arr shape {gold_arr.shape} ")
+    print(f" suum hat  {np.sum( y_hat_arr.numpy())} gold_arr chan 0 sum  {np.sum(gold_arr[0,:,:,:].numpy())} chan 1 sum {np.sum(gold_arr[1,:,:,:].numpy())} hatPostA chan 0 sum  {np.sum(hatPostA[0,:,:,:])} chan 1 sum {np.sum(hatPostA[1,:,:,:])}    ")
     # gold_arr=np.swapaxes(gold_arr,0,2)
     # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
+    # print(f"uniq gold { gold_arr.shape  }   yhat { y_hat_arr.shape }   yhat maxes  {np.maximum(y_hat_arr)}  hyat min {np.minimum(y_hat_arr)} ")
+    gold_arr=gold_arr[1,:,:,:].numpy()
+    # gold_arr=np.flip(gold_arr,(1,0))
+    y_hat_arr=y_hat_arr[1,:,:,:].numpy()
+
+    gold_arr=np.swapaxes(gold_arr,0,2)
+    y_hat_arr=np.swapaxes(y_hat_arr,0,2)
     
-    # image = sitk.GetImageFromArray(gold_arr)
-    # writer = sitk.ImageFileWriter()
-    # writer.SetFileName(gold_im_path)
-    # writer.Execute(image)
+    image = sitk.GetImageFromArray(gold_arr)
+    writer = sitk.ImageFileWriter()
+    writer.SetFileName(gold_im_path)
+    writer.Execute(image)
 
 
-    # image = sitk.GetImageFromArray(y_hat_arr)
-    # writer = sitk.ImageFileWriter()
-    # writer.SetFileName(yHat_im_path)
-    # writer.Execute(image) 
+    image = sitk.GetImageFromArray(y_hat_arr)
+    writer = sitk.ImageFileWriter()
+    writer.SetFileName(yHat_im_path)
+    writer.Execute(image) 
 
-    # image = sitk.GetImageFromArray(  np.swapaxes(imageArr[0,:,:,:].numpy(),0,2) ) 
-    # writer = sitk.ImageFileWriter()
-    # writer.SetFileName(image_path)
-    # writer.Execute(image)
+    image = sitk.GetImageFromArray(  np.swapaxes(imageArr[0,:,:,:].numpy(),0,2) ) 
+    writer = sitk.ImageFileWriter()
+    writer.SetFileName(image_path)
+    writer.Execute(image)
 
-    # image = sitk.GetImageFromArray(  np.swapaxes(imageArr[1,:,:,:].numpy(),0,2) )
-    # writer = sitk.ImageFileWriter()
-    # writer.SetFileName(imageB_path)
-    # writer.Execute(image)
+    image = sitk.GetImageFromArray(  np.swapaxes(imageArr[1,:,:,:].numpy(),0,2) )
+    writer = sitk.ImageFileWriter()
+    writer.SetFileName(imageB_path)
+    writer.Execute(image)
 
-    # image = sitk.GetImageFromArray(np.swapaxes(hatPostA[1,:,:,:],0,2))
-    # writer = sitk.ImageFileWriter()
-    # writer.SetFileName(hatPostA_path)
-    # writer.Execute(image)
+    image = sitk.GetImageFromArray(np.swapaxes(hatPostA[1,:,:,:],0,2))
+    writer = sitk.ImageFileWriter()
+    writer.SetFileName(hatPostA_path)
+    writer.Execute(image)
 
 
 
@@ -330,6 +324,8 @@ def getArrayFromPath(path):
     image1=sitk.ReadImage(path)
     return sitk.GetArrayFromImage(image1)
 
+def extractLesions_my(x):
+    return extract_lesion_candidates(x)[0]
 
 def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,images,hatPostA):
 # def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,reg_hat):
@@ -352,14 +348,17 @@ def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,images,hatPostA):
 #     return monai.metrics.compute_generalized_dice( postProcessHat(y_hat) ,load_true(gold_val))
 
 def evaluate_case_for_map(i,y_det,y_true):
+    pred=sitk.GetArrayFromImage(sitk.ReadImage(y_det[i]))
+    pred=extract_lesion_candidates(pred[1,:,:,:])[0]
+    image = sitk.GetImageFromArray(  np.swapaxes(pred,0,2) )
+    writer = sitk.ImageFileWriter()
+    writer.SetFileName(y_det[i].replace(".nii.gz", "_extracted.nii.gz   "))
+    writer.Execute(image)
+
     print("evaluate_case_for_map") 
     return evaluate_case(y_det=y_det[i] 
                         ,y_true=y_true[i] 
-                        ,y_true_postprocess_func=lambda pred: pred[1,:,:,:]
-                        ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred[1,:,:,:])[0])
-
-
-
+                        ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0])
 
 def getNext(i,results,TIMEOUT):
     try:
@@ -411,7 +410,7 @@ class Model(pl.LightningModule):
         self.optimizer_class = optimizer_class
         self.best_val_dice = 0
         self.best_val_epoch = 0
-        self.dice_metric = monai.metrics.DiceMetric()
+        self.dice_metric = monai.metrics.GeneralizedDiceScore()
         #self.rocAuc=monai.metrics.ROCAUCMetric()
         self.picaiLossArr=[]
         self.post_pred = Compose([ AsDiscrete( to_onehot=2)])
@@ -425,7 +424,7 @@ class Model(pl.LightningModule):
         self.picaiLossArr_AP_final=picaiLossArr_AP_final
         self.picaiLossArr_score_final=picaiLossArr_score_final
         #temporary directory for validation images and their labels
-        self.temp_val_dir= '/home/sliceruser/data/tempI' #tempfile.mkdtemp()
+        self.temp_val_dir= '/home/sliceruser/data/tempH' #tempfile.mkdtemp()
         self.list_gold_val=[]
         self.list_yHat_val=[]
         self.list_back_yHat_val=[]
@@ -832,7 +831,7 @@ class Model(pl.LightningModule):
         #clearing and recreatin temporary directory
         #shutil.rmtree(self.temp_val_dir)   
         #self.temp_val_dir=tempfile.mkdtemp() 
-        self.temp_val_dir=pathOs.join('/home/sliceruser/data/tempI',str(self.trainer.current_epoch))
+        self.temp_val_dir=pathOs.join('/home/sliceruser/data/tempH',str(self.trainer.current_epoch))
         os.makedirs(self.temp_val_dir,  exist_ok = True)  
 
 
