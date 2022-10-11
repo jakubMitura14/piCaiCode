@@ -253,11 +253,12 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     """
     saves arrays in given directory and return paths to them
     """
-    monaiSaveFile(directory,patId+ "_gold",gold_arr)
-    monaiSaveFile(directory,patId+ "_hat",y_hat_arr)
-    monaiSaveFile(directory,patId+ "image",imageArr)
-    monaiSaveFile(directory,patId+ "imageB",imageArr)
-    monaiSaveFile(directory,patId+ "hatPostA",hatPostA)
+    adding='_a'
+    monaiSaveFile(directory,patId+ "_gold"+adding,gold_arr)
+    monaiSaveFile(directory,patId+ "_hat"+adding,y_hat_arr)
+    monaiSaveFile(directory,patId+ "image"+adding,imageArr)
+    monaiSaveFile(directory,patId+ "imageB"+adding,imageArr)
+    monaiSaveFile(directory,patId+ "hatPostA"+adding,hatPostA)
 
     # gold_im_path = join(directory, patId+ "_gold.npy" )
     # yHat_im_path = join(directory, patId+ "_hat.npy" )
