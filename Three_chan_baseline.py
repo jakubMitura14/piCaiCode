@@ -93,9 +93,9 @@ def mainTrain(options,df,physical_size ):
     #TODO(remove)
     comet_logger = CometLogger(
         api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
-        #workspace="OPI", # Optional
-        # project_name="pi", # Optional
-        experiment_name="picai-hyperparam-search-44" # Optional
+        workspace="OPI", # Optional
+        project_name="pi", # Optional
+        #experiment_name="picai-hyperparam-search-44" # Optional
     )
     #############loading meta data 
     #maxSize=manageMetaData.getMaxSize(getParam(experiment,options,"dirs")["chan3_col_name"],df)
