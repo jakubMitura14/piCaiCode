@@ -265,7 +265,7 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
 
     np.save(gold_im_path, gold_arr[1,:,:,:])
     np.save(yHat_im_path, y_hat_arr[1,:,:,:])
-    preddA=extract_lesion_candidates(np.load(yHat_im_path))
+    preddA=extract_lesion_candidates(np.load(yHat_im_path))[0]
     monaiSaveFile(directory,patId+ "preddA"+adding,preddA)
 
     # gold_im_path = join(directory, patId+ "_gold.nii.gz" )
