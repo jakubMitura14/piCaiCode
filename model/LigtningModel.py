@@ -371,7 +371,7 @@ def getNext(i,results,TIMEOUT):
 def processDice(i,postProcess,y_det,y_true):
     hatPost=postProcess(y_det[i])
     # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
-    locDice=monai.metrics.compute_meandice( hatPost ,y_true[i]).item()
+    locDice=monai.metrics.compute_meandice( hatPost ,y_true[i])[1].item()
     print(f"locDice {locDice}")
     return (locDice,hatPost.numpy())
 
