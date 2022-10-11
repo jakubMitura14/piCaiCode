@@ -247,7 +247,9 @@ def divide_chunks(l, n):
 def monaiSaveFile(directory,name,arr):
     #Compose(EnsureChannelFirst(),SaveImage(output_dir=directory,separate_folder=False,output_postfix =name) )(arr)
     SaveImage(output_dir=directory,separate_folder=False,output_postfix =name)(arr)
-
+    res=join(directory,f"0_{name}.nii.gz" )
+    print(f"monai pathh {res}  ")
+    return res
 
 def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
     """
