@@ -460,7 +460,8 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experime
 
 
 
-    return (diceLoc,from_case)
+    # return (diceLoc,from_case)
+    return (0.0,from_case)
 
 
 
@@ -700,6 +701,7 @@ class Model(pl.LightningModule):
     
     def validation_epoch_end(self, outputs):
         print("validation_epoch_end")
+        print(f"outputs {outputs[0]['dices'] }")
         allDices = np.array(([x['dices'].cpu().detach().numpy() for x in outputs])).flatten() 
         allforEval = (([x['extrCases'].cpu().detach().numpy() for x in outputs]))
         allforEval = [item for sublist in allforEval for item in sublist]
