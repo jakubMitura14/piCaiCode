@@ -94,7 +94,7 @@ def mainTrain(options,df,physical_size ):
     comet_logger = CometLogger(
         api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
         #workspace="OPI", # Optional
-        project_name="piii", # Optional
+        #project_name="piii", # Optional
         #experiment_name="picai-hyperparam-search-44" # Optional
     )
     #############loading meta data 
