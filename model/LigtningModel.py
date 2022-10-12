@@ -413,7 +413,7 @@ def processDice(i,postProcess,y_det,y_true):
 
 def save_heatmap(arr,dir,name):
     path = join(dir,name+'.png')
-    arr =np.swapaxes(arr,0,2)
+    arr =np.transpose(arr)
     plt.imshow(arr , interpolation = 'nearest' , cmap= 'gray')
     plt.title( name)
     plt.savefig(path)
