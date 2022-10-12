@@ -270,16 +270,17 @@ def changeLabelToOnes(row):
     path_t2w=row['t2w']
     if(path!= " " and path!=""and len(path)>4):
         image1 = sitk.ReadImage(path)
-        image1 = sitk.DICOMOrient(image1, 'RAS')
+        # image1 = sitk.DICOMOrient(image1, 'RAS')
+        imageT2w= sitk.ReadImage(path_t2w)
         #image1 = sitk.Cast(image1, sitk.sitkFloat32)
         data = sitk.GetArrayFromImage(image1)
         data = (data > 0.5).astype('int8')
         print(f" at begining unique   {np.unique(data)}"  )
         #recreating image keeping relevant metadata
         image = sitk.GetImageFromArray(data)
-        image.SetSpacing(image1.GetSpacing())
-        image.SetOrigin(image1.GetOrigin())
-        image.SetDirection(image1.GetDirection())
+        image.SetSpacing(imageT2w.GetSpacing())
+        image.SetOrigin(imageT2w.GetOrigin())
+        image.SetDirection(imageT2w.GetDirection())
         #standardazing orientation
         writer = sitk.ImageFileWriter()
         writer.KeepOriginalImageUIDOn()
