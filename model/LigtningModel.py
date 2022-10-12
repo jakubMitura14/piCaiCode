@@ -567,7 +567,7 @@ class Model(pl.LightningModule):
         images = decollate_batch(x.cpu().detach()) 
 
         print(f"val num batches {numBatches} t2wb {t2wb} patIds {patIds} labelB {labelB}")
-        TIMEOUT=70
+        TIMEOUT=180
         lenn=numBatches
         processedCases=[]
         my_task=partial(processDecolated,gold_arr=y_true,y_hat_arr=y_det,directory= self.temp_val_dir,studyId= patIds
@@ -584,11 +584,11 @@ class Model(pl.LightningModule):
         #             ,imageArr=images, experiment=self.logger.experiment,postProcess=self.postProcess,epoch=self.current_epoch)
         #             ,range(0,numBatches)))
 
-
-        dices = list(map(lambda tupl: tupl[0] ,processedCases))
-        from_case = list(map(lambda tupl: tupl[1] ,processedCases ))
-        # gold = list(map(lambda tupl: tupl[2] ,processedCases ))
-        print(f"single from_case {from_case}")
+        if(type(processedCases) is not None):
+            dices = list(map(lambda tupl: tupl[0] ,processedCases))
+            from_case = list(map(lambda tupl: tupl[1] ,processedCases ))
+            # gold = list(map(lambda tupl: tupl[2] ,processedCases ))
+            print(f"single from_case {from_case}")
 
         return {'dices': dices, 'from_case':from_case }
 
