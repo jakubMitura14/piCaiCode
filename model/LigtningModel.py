@@ -461,7 +461,7 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experime
 
 
 
-    return (diceLoc,from_case[0],from_case[1],from_case[2])
+    return (diceLoc,from_case)
 
 
 
@@ -621,11 +621,10 @@ class Model(pl.LightningModule):
                     ,imageArr=images, experiment=self.logger.experiment,postProcess=self.postProcess,epoch=self.current_epoch)
                     ,range(0,numBatches)))
         dices = list(map(lambda tupl: tupl[0] ,processedCases))
-        extrCases0 = list(map(lambda tupl: tupl[0] ,processedCases ))
-        extrCases1 = list(map(lambda tupl: tupl[1] ,processedCases ))
-        extrCases2 = list(map(lambda tupl: tupl[2] ,processedCases ))
+        extrCases = list(map(lambda tupl: tupl[1] ,processedCases ))
 
-        return {'dices': dices, 'extrCases0':extrCases0,'extrCases1':extrCases1, 'extrCases2':extrCases2 }
+
+        return {'dices': dices, 'extrCases':extrCases }
 
         # pathssList=[]
         # dicesList=[]
@@ -704,15 +703,25 @@ class Model(pl.LightningModule):
     
 
         # return {'dices': dices, 'extrCases0':extrCases0,'extrCases1':extrCases1, 'extrCases2':extrCases2 }
+    def processOutputs(self,outputs):
+        listt = [x['extrCases'] for x in outputs] 
+        listt = list(map(lambda innerList : list(map( lambda entry: entry.cpu().detach().numpy() ,innerList ))  ,listt))
+        print(f"listt a {listt}" )
+        listt = np.array(listt).flatten()
+        print(f"listt b {listt}" )
+
+        return listt
 
     def validation_epoch_end(self, outputs):
         print("validation_epoch_end")
         print(f"outputs {outputs[0]['extrCases'] }")
+        
         allDices = np.array(([torch.stack(x['dices']).cpu().detach().numpy() for x in outputs])).flatten() 
-        allforEval = (([torch.stack(x['extrCases']) for x in outputs]))
+        allforEval=self.processOutputs(outputs)
+        # allforEval = (([torch.stack(x['extrCases']) for x in outputs]))
         print(f"allforEval a {allforEval}")
-        allforEval = torch.stack([item for sublist in allforEval for item in sublist]).numpy()
-        print(f"allforEval b {allforEval}")
+        # allforEval = torch.stack([item for sublist in allforEval for item in sublist]).numpy()
+        # print(f"allforEval b {allforEval}")
         meanPiecaiMetr_auroc,meanPiecaiMetr_AP,meanPiecaiMetr_score= evaluate_all_cases(allforEval)
         if(len(allDices)>0):
             self.log('dice', np.mean(allDices))
