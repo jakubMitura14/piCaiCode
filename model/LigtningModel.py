@@ -423,12 +423,13 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experime
     print(f"diceee loc {diceLoc}")
     from_case=evaluate_case(y_det=extracted,y_true=gold_arr_loc[1,:,:,:].numpy())
     
+    gold_arr_loc=gold_arr_loc.numpy()
     ### visualizations
-    maxSlice = max(list(range(0,gold_arr_loc.shape[2])),key=lambda ind : np.sum(gold_arr_loc[:,:,ind].numpy().flatten())  )
-    experiment.log_image(gold_arr_loc[:,:,maxSlice].numpy(), name=f"gold_{curr_studyId}_{epoch}.png")
+    maxSlice = max(list(range(0,gold_arr_loc.shape[2])),key=lambda ind : np.sum(gold_arr_loc[:,:,ind].flatten())  )
+    experiment.log_image(gold_arr_loc[1,:,:,maxSlice], name=f"gold_{curr_studyId}_{epoch}.png")
     experiment.log_image(extracted[:,:,maxSlice], name=f"extracted_{curr_studyId}_{epoch}.png")
-    experiment.log_image(imageArr[i][0,:,:,maxSlice].numpy(), name=f"t2w_{curr_studyId}_{epoch}.png")
-    experiment.log_image(imageArr[i][1,:,:,maxSlice].numpy(), name=f"adc_{curr_studyId}_{epoch}.png")
+    experiment.log_image(imageArr[i].numpy()[0,:,:,maxSlice], name=f"t2w_{curr_studyId}_{epoch}.png")
+    experiment.log_image(imageArr[i].numpy()[1,:,:,maxSlice], name=f"adc_{curr_studyId}_{epoch}.png")
 
     return (diceLoc,from_case)
 
