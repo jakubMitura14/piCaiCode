@@ -425,10 +425,12 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experime
     
     gold_arr_loc=gold_arr_loc.numpy()
     ### visualizations
+    t2w = imageArr[i].numpy()[0,:,:,maxSlice]
+    print(f"image ")
     maxSlice = max(list(range(0,gold_arr_loc.shape[2])),key=lambda ind : np.sum(gold_arr_loc[:,:,ind].flatten())  )
-    experiment.log_image(gold_arr_loc[1,:,:,maxSlice], name=f"gold_{curr_studyId}_{epoch}.png")
+    experiment.log_image((gold_arr_loc[1,:,:,maxSlice] >0).astype('int8'), name=f"gold_{curr_studyId}_{epoch}.png")
     experiment.log_image(extracted[:,:,maxSlice], name=f"extracted_{curr_studyId}_{epoch}.png")
-    experiment.log_image(imageArr[i].numpy()[0,:,:,maxSlice], name=f"t2w_{curr_studyId}_{epoch}.png")
+    experiment.log_image(t2w, name=f"t2w_{curr_studyId}_{epoch}.png")
     experiment.log_image(imageArr[i].numpy()[1,:,:,maxSlice], name=f"adc_{curr_studyId}_{epoch}.png")
 
     return (diceLoc,from_case)
