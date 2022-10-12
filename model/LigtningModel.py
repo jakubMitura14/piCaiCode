@@ -359,7 +359,7 @@ def processDice(i,postProcess,y_det,y_true):
 
 
 def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experiment,postProcess,epoch):
-    curr_studyId=studyId[i]
+    curr_studyId=studyId[i].numpy()
     gold_arr_loc=gold_arr[i].numpy()
     extracted=extract_lesion_candidates(y_hat_arr[i][1,:,:,:].numpy(), threshold='dynamic')[0]
     extractedBinary= extracted>0 #binarized version
@@ -371,8 +371,8 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experime
     maxSlice = max(list(range(0,gold_arr_loc.shape[2])),key=lambda ind : np.sum(gold_arr_loc[:,:,ind].flatten())  )
     experiment.log_image(gold_arr_loc[:,:,maxSlice], name=f"gold_{curr_studyId}_{epoch}.png")
     experiment.log_image(extracted[:,:,maxSlice], name=f"extracted_{curr_studyId}_{epoch}.png")
-    experiment.log_image(imageArr[i][0,:,:,maxSlice], name=f"t2w_{curr_studyId}_{epoch}.png")
-    experiment.log_image(imageArr[i][1,:,:,maxSlice], name=f"adc_{curr_studyId}_{epoch}.png")
+    experiment.log_image(imageArr[i][0,:,:,maxSlice].numpy(), name=f"t2w_{curr_studyId}_{epoch}.png")
+    experiment.log_image(imageArr[i][1,:,:,maxSlice].numpy(), name=f"adc_{curr_studyId}_{epoch}.png")
 
     return (diceLoc,from_case)
 
@@ -534,6 +534,7 @@ class Model(pl.LightningModule):
         dices = list(map(lambda tupl: tupl[0] ,processedCases))
         extrCases = list(map(lambda tupl: tupl[1] ,processedCases ))
         return {'dices': dices, 'extrCases':extrCases}
+
         # pathssList=[]
         # dicesList=[]
         # hatPostA=[]
