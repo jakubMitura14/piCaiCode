@@ -434,15 +434,14 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experime
     print(f"diceee loc {diceLoc}")
     from_case=evaluate_case(y_det=extracted,y_true=gold_arr_loc[1,:,:,:].numpy())
 
-    maxSliceb = max(list(range(0,gold_arr_loc.size(dim=3))),key=lambda ind : torch.sum(gold_arr_loc[1,:,:,ind]).item() )
+    maxSlice = max(list(range(0,gold_arr_loc.size(dim=3))),key=lambda ind : torch.sum(gold_arr_loc[1,:,:,ind]).item() )
     
     gold_arr_loc=gold_arr_loc.numpy()
     ### visualizations
-    maxSlice=40
     t2w = imageArr[i][0,:,:,maxSlice].numpy()
-    print(f"maxSlice {maxSliceb} gold shape {gold_arr_loc.shape} t2w {t2w.shape} max {torch.max(t2w)} bigger {torch.max(imageArr[i])} goldd {np.max(gold_arr_loc.flatten())}")
+    print(f"maxSlice {maxSlice} gold shape {gold_arr_loc.shape} t2w {t2w.shape}  goldd {np.max(gold_arr_loc.flatten())}")
     
-    experiment.log_image( save_heatmap((gold_arr_loc[1,:,:,maxSliceb] >0).astype('int8'),directory,"gold_{curr_studyId}_{epoch}"))
+    experiment.log_image( save_heatmap((gold_arr_loc[1,:,:,maxSlice] >0).astype('int8'),directory,"gold_{curr_studyId}_{epoch}"))
     experiment.log_image( save_heatmap(extracted[:,:,maxSlice],directory,"extracted_{curr_studyId}_{epoch}"))
     experiment.log_image( save_heatmap(t2w,directory,"t2w_{curr_studyId}_{epoch}"))
     experiment.log_image( save_heatmap(imageArr[i].numpy()[1,:,:,maxSlice],directory,"adc_{curr_studyId}_{epoch}"))
