@@ -210,6 +210,15 @@ class UNetToRegresion(nn.Module):
 
 # torch.autograd.set_detect_anomaly(True)
 
+def getNext(i,results,TIMEOUT):
+    try:
+        # return it.next(timeout=TIMEOUT)
+        return results[i].get(TIMEOUT)
+
+    except:
+        print("timed outt ")
+        return None    
+
 def divide_chunks(l, n):
      
     # looping till length l
@@ -558,10 +567,22 @@ class Model(pl.LightningModule):
         images = decollate_batch(x.cpu().detach()) 
 
         print(f"val num batches {numBatches} t2wb {t2wb} patIds {patIds} labelB {labelB}")
-
-        processedCases=list(map(partial(processDecolated,gold_arr=y_true,y_hat_arr=y_det,directory= self.temp_val_dir,studyId= patIds
+        TIMEOUT=70
+        lenn=numBatches
+        processedCases=[]
+        my_task=partial(processDecolated,gold_arr=y_true,y_hat_arr=y_det,directory= self.temp_val_dir,studyId= patIds
                     ,imageArr=images, experiment=self.logger.experiment,postProcess=self.postProcess,epoch=self.current_epoch)
-                    ,range(0,numBatches)))
+        with mp.Pool(processes = mp.cpu_count()) as pool:
+            #it = pool.imap(my_task, range(lenn))
+            results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
+            time.sleep(TIMEOUT)
+            processedCases=list(map(lambda ind :getNext(ind,results,5) ,list(range(lenn)) ))
+
+
+
+        # processedCases=list(map(partial(processDecolated,gold_arr=y_true,y_hat_arr=y_det,directory= self.temp_val_dir,studyId= patIds
+        #             ,imageArr=images, experiment=self.logger.experiment,postProcess=self.postProcess,epoch=self.current_epoch)
+        #             ,range(0,numBatches)))
 
 
         dices = list(map(lambda tupl: tupl[0] ,processedCases))
