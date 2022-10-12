@@ -567,7 +567,7 @@ class Model(pl.LightningModule):
         images = decollate_batch(x.cpu().detach()) 
 
         print(f"val num batches {numBatches} t2wb {t2wb} patIds {patIds} labelB {labelB}")
-        TIMEOUT=300
+        TIMEOUT=200
         lenn=numBatches
         processedCases=[]
         my_task=partial(processDecolated,gold_arr=y_true,y_hat_arr=y_det,directory= self.temp_val_dir,studyId= patIds
