@@ -461,7 +461,7 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experime
 
 
 
-    return (diceLoc,from_case)
+    return (diceLoc,from_case[0],from_case[1],from_case[2])
 
 
 
@@ -621,8 +621,11 @@ class Model(pl.LightningModule):
                     ,imageArr=images, experiment=self.logger.experiment,postProcess=self.postProcess,epoch=self.current_epoch)
                     ,range(0,numBatches)))
         dices = list(map(lambda tupl: tupl[0] ,processedCases))
-        extrCases = list(map(lambda tupl: tupl[1] ,processedCases ))
-        return {'dices': dices, 'extrCases':extrCases}
+        extrCases0 = list(map(lambda tupl: tupl[0] ,processedCases ))
+        extrCases1 = list(map(lambda tupl: tupl[1] ,processedCases ))
+        extrCases2 = list(map(lambda tupl: tupl[2] ,processedCases ))
+
+        return {'dices': dices, 'extrCases0':extrCases0,'extrCases1':extrCases1, 'extrCases2':extrCases2 }
 
         # pathssList=[]
         # dicesList=[]
@@ -699,6 +702,9 @@ class Model(pl.LightningModule):
 
     #return {'dices': dices, 'extrCases':extrCases}
     
+
+        # return {'dices': dices, 'extrCases0':extrCases0,'extrCases1':extrCases1, 'extrCases2':extrCases2 }
+
     def validation_epoch_end(self, outputs):
         print("validation_epoch_end")
         print(f"outputs {outputs[0]['extrCases'] }")

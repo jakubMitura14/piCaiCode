@@ -268,7 +268,7 @@ def changeLabelToOnes(row):
     #row=row[1]
     path=row['reSampledPath']
     path_t2w=row['t2w']
-    if(path!= " " and path!=""):
+    if(path!= " " and path!=""and len(path)>4):
         image1 = sitk.ReadImage(path)
         image1 = sitk.DICOMOrient(image1, 'RAS')
         #image1 = sitk.Cast(image1, sitk.sitkFloat32)
@@ -287,6 +287,7 @@ def changeLabelToOnes(row):
         writer.SetFileName(newPath)
         writer.Execute(image)   
         return newPath
+    return ' '    
     
 def iterateAndchangeLabelToOnes(df):
     """
