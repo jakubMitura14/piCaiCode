@@ -281,7 +281,7 @@ def changeLabelToOnes(row):
         image = sitk.GetImageFromArray(data)
         image.SetSpacing(imageT2w.GetSpacing())
         image.SetOrigin(imageT2w.GetOrigin())
-        image.SetDirection(imageT2w.GetDirection())
+        # image.SetDirection(imageT2w.GetDirection())
         #image = sitk.DICOMOrient(image, 'RAS')
         #from https://stackoverflow.com/questions/60024404/how-to-change-the-orientation-of-simpleitk-image-in-python
         # image.SetDirection((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0))
