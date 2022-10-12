@@ -376,23 +376,23 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experime
     gold_arr_loc=gold_arr[i]
     print(f"extracting {curr_studyId}")
     extracted=extract_lesion_candidates(y_hat_arr[i][1,:,:,:].cpu().detach().numpy(), threshold='dynamic')[0]
-    print(f"extracted {curr_studyId}")
-    extractedBinary= torch.from_numpy((extracted>0).astype('int8')) #binarized version
-    diceLoc=monai.metrics.compute_generalized_dice( postProcess(extractedBinary) ,gold_arr_loc)[1].item()
-    print(f"diceee loc {diceLoc}")
-    goldChannel=1
-    from_case=evaluate_case(y_det=extracted,y_true=gold_arr_loc[goldChannel,:,:,:].numpy())
-    maxSlice = max(list(range(0,gold_arr_loc.size(dim=3))),key=lambda ind : torch.sum(gold_arr_loc[goldChannel,:,:,ind]).item() )
+    # print(f"extracted {curr_studyId}")
+    # extractedBinary= torch.from_numpy((extracted>0).astype('int8')) #binarized version
+    # diceLoc=monai.metrics.compute_generalized_dice( postProcess(extractedBinary) ,gold_arr_loc)[1].item()
+    # print(f"diceee loc {diceLoc}")
+    # goldChannel=1
+    # from_case=evaluate_case(y_det=extracted,y_true=gold_arr_loc[goldChannel,:,:,:].numpy())
+    # maxSlice = max(list(range(0,gold_arr_loc.size(dim=3))),key=lambda ind : torch.sum(gold_arr_loc[goldChannel,:,:,ind]).item() )
     
-    gold_arr_loc=gold_arr_loc.cpu().detach().numpy()
-    print(f"gold arr shape { gold_arr_loc.shape}")
+    # gold_arr_loc=gold_arr_loc.cpu().detach().numpy()
+    # print(f"gold arr shape { gold_arr_loc.shape}")
 
-    ### visualizations
-    t2w = imageArr[i][0,:,:,maxSlice].cpu().detach().numpy()
-    t2wMax= np.max(t2w.flatten())
-    gold = (gold_arr_loc[goldChannel,:,:,maxSlice] >0).astype('int8')
+    # ### visualizations
+    # t2w = imageArr[i][0,:,:,maxSlice].cpu().detach().numpy()
+    # t2wMax= np.max(t2w.flatten())
+    # gold = (gold_arr_loc[goldChannel,:,:,maxSlice] >0).astype('int8')
 
-    print(f"maxSlice {maxSlice} gold shape {gold_arr_loc.shape}  extracted shape {extracted[:,:,maxSlice].shape} t2w {t2w.shape}  goldd {np.max(gold_arr_loc.flatten())}")
+    # print(f"maxSlice {maxSlice} gold shape {gold_arr_loc.shape}  extracted shape {extracted[:,:,maxSlice].shape} t2w {t2w.shape}  goldd {np.max(gold_arr_loc.flatten())}")
     
 
     # experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}"))
