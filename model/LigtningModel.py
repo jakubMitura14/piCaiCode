@@ -138,35 +138,6 @@ from monai.transforms import (
     
 )
 
-
-
-# def my_task(v):
-#     time.sleep(v)
-#     return v ** 2
-
-
-# lenn=8
-# squares=[None] * lenn
-
-# TIMEOUT = 2# second timeout
-# with mp.Pool(processes = mp.cpu_count()) as pool:
-#     results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
-    
-#     for i in range(lenn):
-#         try:
-#             return_value = results[i].get(2) # wait for up to time_to_wait seconds
-#         except mp.TimeoutError:
-#             print('Timeout for v = ', i)
-#         else:
-#             squares[i]=return_value
-#             print(f'Return value for v = {i} is {return_value}')
-
-#     # it = pool.imap(my_task, range(lenn))
-#     # squares=list(map(lambda ind :getNext(it,TIMEOUT) ,list(range(lenn)) ))
-# print(squares)
-
-
-
 import time
 from functools import partial
 from torchmetrics.functional import precision_recall
@@ -376,40 +347,6 @@ def getArrayFromPath(path):
 def extractLesions_my(x):
     return extract_lesion_candidates(x)[0]
 
-def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,images,hatPostA):
-# def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,reg_hat):
-    return saveFilesInDir(y_true[i],y_det[i], temp_val_dir, patIds[i],images[i],hatPostA[i])
-    
-
-def evaluate_case_for_map(i,y_det,y_true):
-    pred=sitk.GetArrayFromImage(sitk.ReadImage(y_det[i]))
-    pred=extract_lesion_candidates(pred)[0]
-    image = sitk.GetImageFromArray(  np.swapaxes(pred,0,2) )
-    writer = sitk.ImageFileWriter()
-    writer.SetFileName(y_det[i].replace(".nii.gz", "_extracted.nii.gz   "))
-    writer.Execute(image)
-
-    print("evaluate_case_for_map") 
-    return evaluate_case(y_det=y_det[i] 
-                        ,y_true=y_true[i] 
-                        ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0])
-
-def getNext(i,results,TIMEOUT):
-    try:
-        # return it.next(timeout=TIMEOUT)
-        return results[i].get(TIMEOUT)
-
-    except:
-        print("timed outt ")
-        return None    
-
-
-def processDice(i,postProcess,y_det,y_true):
-    hatPost=postProcess(y_det[i])
-    # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
-    locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i])[1].item()
-    print(f"locDice {locDice}")
-    return (locDice,hatPost.numpy())
 
 def save_heatmap(arr,dir,name,cmapp='gray'):
     path = join(dir,name+'.png')
@@ -505,7 +442,7 @@ class Model(pl.LightningModule):
         self.temp_val_dir= '/home/sliceruser/data/tempH' #tempfile.mkdtemp()
         self.list_gold_val=[]
         self.list_yHat_val=[]
-        self.list_back_yHat_val=[]
+        self.ldiceLocst_back_yHat_val=[]
         self.isAnyNan=False
         #os.makedirs('/home/sliceruser/data/temp')
         # self.postProcess=monai.transforms.Compose([EnsureType(), monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])#, monai.transforms.KeepLargestConnectedComponent()
@@ -714,7 +651,7 @@ class Model(pl.LightningModule):
 
         # return {'dices': dices, 'extrCases0':extrCases0,'extrCases1':extrCases1, 'extrCases2':extrCases2 }
     def processOutputs(self,outputs):
-        listt = [x['extrCases'] for x in outputs] 
+        listt = [x['from_case'] for x in outputs] 
         listt =[item for sublist in listt for item in sublist]
         print(f"listt b {listt}" )
         listt= list(map(iterOverAndCheckType, listt))
@@ -723,7 +660,7 @@ class Model(pl.LightningModule):
 
     def validation_epoch_end(self, outputs):
         print("validation_epoch_end")
-        print(f"outputs {outputs[0]['extrCases'] }")
+        print(f"outputs {outputs[0]['from_case'] }")
         
         allforEval=self.processOutputs(outputs)
         
@@ -923,3 +860,40 @@ class Model(pl.LightningModule):
 
 # #             image1=sitk.ReadImage(path)
 # # #     data = sitk.GetArrayFromImage(image1)
+
+
+
+# def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,images,hatPostA):
+# # def save_candidates_to_dir(i,y_true,y_det,patIds,temp_val_dir,reg_hat):
+#     return saveFilesInDir(y_true[i],y_det[i], temp_val_dir, patIds[i],images[i],hatPostA[i])
+    
+
+# def evaluate_case_for_map(i,y_det,y_true):
+#     pred=sitk.GetArrayFromImage(sitk.ReadImage(y_det[i]))
+#     pred=extract_lesion_candidates(pred)[0]
+#     image = sitk.GetImageFromArray(  np.swapaxes(pred,0,2) )
+#     writer = sitk.ImageFileWriter()
+#     writer.SetFileName(y_det[i].replace(".nii.gz", "_extracted.nii.gz   "))
+#     writer.Execute(image)
+
+#     print("evaluate_case_for_map") 
+#     return evaluate_case(y_det=y_det[i] 
+#                         ,y_true=y_true[i] 
+#                         ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0])
+
+# def getNext(i,results,TIMEOUT):
+#     try:
+#         # return it.next(timeout=TIMEOUT)
+#         return results[i].get(TIMEOUT)
+
+#     except:
+#         print("timed outt ")
+#         return None    
+
+
+# def processDice(i,postProcess,y_det,y_true):
+#     hatPost=postProcess(y_det[i])
+#     # print( f" hatPost {hatPost.size()}  y_true {y_true[i].cpu().size()} " )
+#     locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i])[1].item()
+#     print(f"locDice {locDice}")
+#     return (locDice,hatPost.numpy())
