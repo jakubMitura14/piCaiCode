@@ -567,7 +567,7 @@ class Model(pl.LightningModule):
         dices = list(map(lambda tupl: tupl[0] ,processedCases))
         from_case = list(map(lambda tupl: tupl[1] ,processedCases ))
         # gold = list(map(lambda tupl: tupl[2] ,processedCases ))
-
+        print(f"single from_case {from_case}")
 
         return {'dices': dices, 'from_case':from_case }
 
