@@ -88,7 +88,8 @@ def getMonaiSubjectDataFromDataFrame(row,label_name,label_name_val,t2wColName
         given row from data frame prepares Subject object from it
         """
         subject= {#"chan3_col_name": str(row[chan3_col_name])
-        "t2w": str(row[t2wColName])        
+        "t2w": str(row[t2wColName]),        
+        "t2wb": str(row[t2wColName])        
         ,"hbv": str(row[adcColName])        
         ,"adc": str(row[hbvColName])        
         

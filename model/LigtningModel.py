@@ -600,18 +600,19 @@ class Model(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         x, y_true, numLesions,isAnythingInAnnotated = batch['chan3_col_name_val'], batch['label_name_val'], batch['num_lesions_to_retain'], batch['isAnythingInAnnotated']
         numBatches = y_true.size(dim=0)
-        print(f"val num batches {numBatches} batch size {y_true.size()}")
         #seg_hat, reg_hat = self.modelRegression(x)        
         # seg_hat, reg_hat = self.modelRegression(x)        
         seg_hat = self.net(x).cpu().detach()
         seg_hat=torch.sigmoid(seg_hat).cpu().detach()
-
+        t2wb=decollate_batch(batch['study_id'])
         #loss= self.criterion(seg_hat,y_true)# self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)      
         y_det = decollate_batch(seg_hat.cpu().detach())
         # y_background = decollate_batch(seg_hat[:,0,:,:,:].cpu().detach())
         y_true = decollate_batch(y_true.cpu().detach())
         patIds = decollate_batch(batch['study_id'])
         images = decollate_batch(x.cpu().detach()) 
+        
+        print(f"val num batches {numBatches} batch size {y_true.size()} t2wb {t2wb} patIds {patIds}")
 
         processedCases=list(map(partial(processDecolated,gold_arr=y_true,y_hat_arr=y_det,directory= self.temp_val_dir,studyId= patIds
                     ,imageArr=images, experiment=self.logger.experiment,postProcess=self.postProcess,epoch=self.current_epoch)
@@ -697,8 +698,8 @@ class Model(pl.LightningModule):
     
     def validation_epoch_end(self, outputs):
         print("validation_epoch_end")
-        allDices = np.array(([x['dices'] for x in outputs])).flatten() 
-        allforEval = (([x['extrCases'] for x in outputs]))
+        allDices = np.array(([x['dices'].cpu().detach().numpy() for x in outputs])).flatten() 
+        allforEval = (([x['extrCases'].cpu().detach().numpy() for x in outputs]))
         allforEval = [item for sublist in allforEval for item in sublist]
         meanPiecaiMetr_auroc,meanPiecaiMetr_AP,meanPiecaiMetr_score= evaluate_all_cases(allforEval)
         if(len(allDices)>0):
