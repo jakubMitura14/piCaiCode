@@ -605,6 +605,7 @@ class Model(pl.LightningModule):
         seg_hat = self.net(x).cpu().detach()
         seg_hat=torch.sigmoid(seg_hat).cpu().detach()
         t2wb=decollate_batch(batch['t2wb'])
+        labelB=decollate_batch(batch['labelB'])
         #loss= self.criterion(seg_hat,y_true)# self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)      
         y_det = decollate_batch(seg_hat.cpu().detach())
         # y_background = decollate_batch(seg_hat[:,0,:,:,:].cpu().detach())
@@ -612,7 +613,7 @@ class Model(pl.LightningModule):
         patIds = decollate_batch(batch['study_id'])
         images = decollate_batch(x.cpu().detach()) 
 
-        print(f"val num batches {numBatches} t2wb {t2wb} patIds {patIds}")
+        print(f"val num batches {numBatches} t2wb {t2wb} patIds {patIds} labelB {labelB}")
 
         processedCases=list(map(partial(processDecolated,gold_arr=y_true,y_hat_arr=y_det,directory= self.temp_val_dir,studyId= patIds
                     ,imageArr=images, experiment=self.logger.experiment,postProcess=self.postProcess,epoch=self.current_epoch)

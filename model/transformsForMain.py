@@ -194,7 +194,7 @@ def get_val_transforms(is_whole_to_train,spatial_size):
             #SpatialPadd(keys=["chan3_col_name","label"],spatial_size=maxSize) ,
             #DivisiblePadd(keys=["chan3_col_name_val","label_name_val"],k=32) ,
             #ResizeWithPadOrCropd(keys=["chan3_col_name_val","label_name_val"],spatial_size=spatial_size ),
-            SelectItemsd(keys=["t2wb","chan3_col_name_val","label_name_val","study_id","num_lesions_to_retain","isAnythingInAnnotated"]),
+            SelectItemsd(keys=["labelB","t2wb","chan3_col_name_val","label_name_val","study_id","num_lesions_to_retain","isAnythingInAnnotated"]),
             #*decide_if_whole_image_train(is_whole_to_train,"chan3_col_name_val","label_name_val"),
             #SelectItemsd(keys=["chan3_col_name","label"]),
             # ConcatItemsd(keys=["t2w","adc","hbv"],name="chan3_col_name")

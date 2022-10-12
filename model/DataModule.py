@@ -91,7 +91,8 @@ def getMonaiSubjectDataFromDataFrame(row,label_name,label_name_val,t2wColName
         "t2w": str(row[t2wColName]),        
         "t2wb": str(row[t2wColName])        
         ,"hbv": str(row[adcColName])        
-        ,"adc": str(row[hbvColName])        
+        ,"adc": str(row[hbvColName]) 
+        ,"labelB"    :str(row[label_name])    
         
        , "isAnythingInAnnotated":int(row['isAnythingInAnnotated'])
         , "study_id":str(row['study_id'])
