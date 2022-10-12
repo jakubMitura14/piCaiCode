@@ -68,9 +68,9 @@ class standardizeLabels(MapTransform):
         for key in self.keys:
             #print(f"in standdd {d[key].get_array().shape}")
             #print(f"in standd {d[key].meta} rrrrrrrrrrrrrrref {d[self.ref].meta}  ")
-            d[key].set_array(  np.flip((d[key].get_array() > 0.5).astype('int8'), (0, 1))   )
+            #d[key].set_array(  np.flip((d[key].get_array() > 0.5).astype('int8'), (0, 1))   )
             #d[key].set_array(  np.flip((d[key].get_array() > 0.5).astype('int8'), (1, 0))   )
-            #d[key].set_array(   (d[key].get_array() > 0.5).astype('int8')   )
+            d[key].set_array(   (d[key].get_array() > 0.5).astype('int8')   )
             #d[key].meta['pixdim']=d[self.ref].meta['spacing']
             #update_meta(pixdim=d[self.ref].pixdim
             #print(f" {d['study_id']} label size {d[key].get_array().shape}  imSize  {d[self.ref].get_array().shape} labels_spac {d[key].pixdim} im_spac {d[self.ref].pixdim} ")
@@ -139,6 +139,7 @@ def get_train_transforms(RandGaussianNoised_prob
     train_transforms = Compose(
         [
             LoadImaged(keys=["t2w","hbv","adc" ,"label"],reader="ITKReader"),
+            Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
             EnsureTyped(keys=["t2w","hbv","adc" ,"label"]),
             EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label"]),
             standardizeLabels(keys=["label"]),
@@ -178,6 +179,7 @@ def get_val_transforms(is_whole_to_train,spatial_size):
     val_transforms = Compose(
         [
             LoadImaged(keys=["t2w","hbv","adc" ,"label_name_val"],reader="ITKReader"),
+            Orientationd(keys=["t2w","adc", "hbv","label_name_val"], axcodes="RAS"),
             EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label_name_val"]),
             EnsureTyped(keys=["t2w","hbv","adc" ,"label_name_val"]),
             standardizeLabels(keys=["label_name_val"]),
