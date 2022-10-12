@@ -207,7 +207,7 @@ from picai_eval.metrics import Metrics
 
 from picai_eval.eval import evaluate_case
 
-import modelUtlils
+# import modelUtlils
 
 class UNetToRegresion(nn.Module):
     def __init__(self,
@@ -312,7 +312,61 @@ def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
 
     return(gold_im_path,yHat_im_path)
 
+def evaluate_all_cases(listPerEval):
+    case_target: Dict[Hashable, int] = {}
+    case_weight: Dict[Hashable, float] = {}
+    case_pred: Dict[Hashable, float] = {}
+    lesion_results: Dict[Hashable, List[Tuple[int, float, float]]] = {}
+    lesion_weight: Dict[Hashable, List[float]] = {}
 
+    meanPiecaiMetr_auroc=0.0
+    meanPiecaiMetr_AP=0.0
+    meanPiecaiMetr_score=0.0
+
+    idx=0
+    if(len(listPerEval)>0):
+        for pairr in listPerEval:
+            idx+=1
+            lesion_results_case, case_confidence = pairr
+
+            case_weight[idx] = 1.0
+            case_pred[idx] = case_confidence
+            if len(lesion_results_case):
+                case_target[idx] = np.max([a[0] for a in lesion_results_case])
+            else:
+                case_target[idx] = 0
+
+            # accumulate outputs
+            lesion_results[idx] = lesion_results_case
+            lesion_weight[idx] = [1.0] * len(lesion_results_case)
+
+        # collect results in a Metrics object
+        valid_metrics = Metrics(
+            lesion_results=lesion_results,
+            case_target=case_target,
+            case_pred=case_pred,
+            case_weight=case_weight,
+            lesion_weight=lesion_weight
+        )
+        # for i in range(0,numIters):
+        #     valid_metrics = evaluate(y_det=self.list_yHat_val[i*numPerIter:min((i+1)*numPerIter,lenn)],
+        #                         y_true=self.list_gold_val[i*numPerIter:min((i+1)*numPerIter,lenn)],
+        #                         num_parallel_calls= min(numPerIter,os.cpu_count())
+        #                         ,verbose=1
+        #                         #,y_true_postprocess_func=lambda pred: pred[1,:,:,:]
+        #                         #y_true=iter(y_true),
+        #                         ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+        #                         #,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+        #                         )
+        # meanPiecaiMetr_auroc_list.append(valid_metrics.auroc)
+        # meanPiecaiMetr_AP_list.append(valid_metrics.AP)
+        # meanPiecaiMetr_score_list.append((-1)*valid_metrics.score)
+        #print("finished evaluating")
+
+        meanPiecaiMetr_auroc=valid_metrics.auroc
+        meanPiecaiMetr_AP=valid_metrics.AP
+        meanPiecaiMetr_score=(-1)*valid_metrics.score
+    return (meanPiecaiMetr_auroc,meanPiecaiMetr_AP,meanPiecaiMetr_score )    
 
 def getArrayFromPath(path):
     image1=sitk.ReadImage(path)
@@ -615,7 +669,7 @@ class Model(pl.LightningModule):
         allDices = np.array(([x['dices'] for x in outputs])).flatten() 
         allforEval = (([x['extrCases'] for x in outputs]))
         allforEval = [item for sublist in allforEval for item in sublist]
-        meanPiecaiMetr_auroc,meanPiecaiMetr_AP,meanPiecaiMetr_score= modelUtlils.evaluate_all_cases(allforEval)
+        meanPiecaiMetr_auroc,meanPiecaiMetr_AP,meanPiecaiMetr_score= evaluate_all_cases(allforEval)
         if(len(allDices)>0):
             self.log('dice', np.mean(allDices))
 
