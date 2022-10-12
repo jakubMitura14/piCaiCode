@@ -425,7 +425,7 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experime
     
     gold_arr_loc=gold_arr_loc.numpy()
     ### visualizations
-    maxSlice = max(list(range(0,gold_arr_loc.shape[2])),key=lambda ind : np.sum(gold_arr_loc[:,:,ind].flatten()),image_colormap='Greys'  )
+    maxSlice = max(list(range(0,gold_arr_loc.shape[2])),key=lambda ind : np.sum(gold_arr_loc[:,:,ind].flatten()) )
     t2w = imageArr[i].numpy()[0,:,:,maxSlice]
     # print(f"image ")
     experiment.log_image((gold_arr_loc[1,:,:,maxSlice] >0).astype('int8'), name=f"gold_{curr_studyId}_{epoch}.png",image_colormap='Greys')
