@@ -567,7 +567,6 @@ class Model(pl.LightningModule):
         images = decollate_batch(x.cpu().detach()) 
 
         print(f"val num batches {numBatches} t2wb {t2wb} patIds {patIds} labelB {labelB}")
-        TIMEOUT=200
         lenn=numBatches
         processedCases=[]
         my_task=partial(processDecolated,gold_arr=y_true,y_hat_arr=y_det,directory= self.temp_val_dir,studyId= patIds
@@ -575,8 +574,8 @@ class Model(pl.LightningModule):
         with mp.Pool(processes = mp.cpu_count()) as pool:
             #it = pool.imap(my_task, range(lenn))
             results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
-            time.sleep(TIMEOUT)
-            processedCases=list(map(lambda ind :getNext(ind,results,5) ,list(range(lenn)) ))
+            # time.sleep(TIMEOUT)
+            processedCases=list(map(lambda ind :getNext(ind,results,200) ,list(range(lenn)) ))
 
 
 
