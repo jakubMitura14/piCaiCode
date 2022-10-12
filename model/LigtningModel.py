@@ -370,12 +370,12 @@ def myMaxSlice(arr):
     slicesNum = shape[2]
 
 
-def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experiment,postProcess,epoch):
+def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, postProcess,epoch):
     print("processDecolated")
     curr_studyId=studyId[i]
     gold_arr_loc=gold_arr[i]
     print(f"extracting {curr_studyId}")
-    extracted=extract_lesion_candidates(y_hat_arr[i][1,:,:,:].cpu().detach().numpy())[0] #, threshold='dynamic'
+    extracted=extract_lesion_candidates(y_hat_arr[i][1,:,:,:].cpu().detach().numpy(), threshold='dynamic')[0] #
     # print(f"extracted {curr_studyId}")
     # extractedBinary= torch.from_numpy((extracted>0).astype('int8')) #binarized version
     # diceLoc=monai.metrics.compute_generalized_dice( postProcess(extractedBinary) ,gold_arr_loc)[1].item()
@@ -571,13 +571,14 @@ class Model(pl.LightningModule):
         lenn=numBatches
         processedCases=[]
         my_task=partial(processDecolated,gold_arr=y_true,y_hat_arr=y_det,directory= self.temp_val_dir,studyId= patIds
-                    ,imageArr=images, experiment=self.logger.experiment,postProcess=self.postProcess,epoch=self.current_epoch)
+                    ,imageArr=images, postProcess=self.postProcess,epoch=self.current_epoch)
         with mp.Pool(processes = mp.cpu_count()) as pool:
             #it = pool.imap(my_task, range(lenn))
             results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
             # time.sleep(TIMEOUT)
             processedCases=list(map(lambda ind :getNext(ind,results,200) ,list(range(lenn)) ))
 
+        
 
 
         # processedCases=list(map(partial(processDecolated,gold_arr=y_true,y_hat_arr=y_det,directory= self.temp_val_dir,studyId= patIds
@@ -585,6 +586,7 @@ class Model(pl.LightningModule):
         #             ,range(0,numBatches)))
 
         if(type(processedCases) is not None):
+            experiment=self.logger.experiment
             dices = list(map(lambda tupl: tupl[0] ,processedCases))
             from_case = list(map(lambda tupl: tupl[1] ,processedCases ))
             # gold = list(map(lambda tupl: tupl[2] ,processedCases ))
