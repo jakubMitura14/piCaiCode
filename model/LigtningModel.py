@@ -584,7 +584,7 @@ class Model(pl.LightningModule):
         images = decollate_batch(x.cpu().detach()) 
 
         processedCases=list(map(partial(processDecolated,gold_arr=y_true,y_hat_arr=y_det,directory= self.temp_val_dir,studyId= patIds
-                    ,images=images, experiment=self.logger.experiment,postProcess=self.postProcess,epoch=self.current_epoch)))
+                    ,images=images, experiment=self.logger.experiment,postProcess=self.postProcess,epoch=self.current_epoch),range(0,len(patIds))))
         dices = list(map(lambda tupl: tupl[0] ,processedCases))
         extrCases = list(map(lambda tupl: tupl[1] ,processedCases ))
         return {'dices': dices, 'extrCases':extrCases}
