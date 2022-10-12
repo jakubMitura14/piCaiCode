@@ -591,7 +591,12 @@ class Model(pl.LightningModule):
             t2wMax=t2wMaxs[i]
             maxSlice=maxSlices[i]
             curr_studyId=patIds[i]
-
+            print(f" t2w {t2w.shape}  ")
+            print(f" gold {gold.shape}  ")
+            print(f" extracted {extracted.shape}  ")
+            print(f" t2wMax {t2wMax}  ")
+            print(f" maxSlice {maxSlice}  ")
+            print(f" curr_studyId {curr_studyId}  ")
             experiment.log_image( save_heatmap(np.add(t2w.astype('float'),(gold*(t2wMax)).astype('float')),directory,f"gold_plus_t2w_{curr_studyId}_{epoch}"))
             experiment.log_image( save_heatmap(np.add(gold,extracted[:,:,maxSlice]),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}"),'plasma' )
             experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}"))
