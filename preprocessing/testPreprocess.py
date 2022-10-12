@@ -144,7 +144,7 @@ def resample_labels(row,targetSpacing,spacing_keyword):
     performs labels resampling  to the target 
     """
     #row=row[1]    
-    path=row['reSampledPath']
+    path=row['label_stand']
 
     print(f"lllll lab path {path} t2wPath {row['t2w']}")
 
@@ -543,7 +543,7 @@ df = dd.from_pandas(df, npartitions=os.cpu_count())
 
 
 # standardize labels
-# Standardize.iterateAndchangeLabelToOnes(df)
+Standardize.iterateAndchangeLabelToOnes(df)
 
 #### 
 #now registration of adc and hbv to t2w

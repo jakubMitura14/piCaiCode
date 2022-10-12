@@ -273,7 +273,7 @@ def changeLabelToOnes(row):
         image1 = sitk.DICOMOrient(image1, 'RAS')
         #image1 = sitk.Cast(image1, sitk.sitkFloat32)
         data = sitk.GetArrayFromImage(image1)
-        data = (data > 0.5).astype('int32')
+        data = (data > 0.5).astype('int8')
         print(f" at begining unique   {np.unique(data)}"  )
         #recreating image keeping relevant metadata
         image = sitk.GetImageFromArray(data)
@@ -283,9 +283,10 @@ def changeLabelToOnes(row):
         #standardazing orientation
         writer = sitk.ImageFileWriter()
         writer.KeepOriginalImageUIDOn()
-        newPath= path_t2w.replace(".mha","_stand_label.mha")
+        newPath= path_t2w.replace(".mha","_stand_label.nii.gz")
         writer.SetFileName(newPath)
         writer.Execute(image)   
+        return newPath
     
 def iterateAndchangeLabelToOnes(df):
     """
@@ -295,9 +296,12 @@ def iterateAndchangeLabelToOnes(df):
     #paralelize https://medium.com/python-supply/map-reduce-and-multiprocessing-8d432343f3e7
     # train_patientsPaths=df['reSampledPath'].dropna().astype('str').to_numpy()
     # train_patientsPaths=list(filter(lambda path: len(path)>2 ,train_patientsPaths))
-    with mp.Pool(processes = mp.cpu_count()) as pool:
-        pool.map(changeLabelToOnes,list(df.iterrows()))
-    return df
+    df["label_stand"]= df.apply(changeLabelToOnes, axis=1).compute()
+
+    
+    # with mp.Pool(processes = mp.cpu_count()) as pool:
+    #     pool.map(changeLabelToOnes,list(df.iterrows()))
+    # return df
     # toUp=np.full(df.shape[0], False)#[0:3]=[True,True,True]
     # toUp[0:numRows]=np.full(numRows, True)
     #df['labels_to_one']=toUp    
