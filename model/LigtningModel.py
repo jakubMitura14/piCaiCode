@@ -376,9 +376,9 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, postProc
     print(f"extracting {curr_studyId}")
     extracted=extract_lesion_candidates(y_hat_arr[i][1,:,:,:].cpu().detach().numpy())[0] #, threshold='dynamic'
     print(f"extracted {curr_studyId}")
-    extractedBinary= torch.from_numpy((extracted>0).astype('int8')) #binarized version
-    diceLoc=monai.metrics.compute_generalized_dice( postProcess(extractedBinary) ,gold_arr_loc)[1].item()
-    print(f"diceee loc {diceLoc} {curr_studyId}")
+    # extractedBinary= torch.from_numpy((extracted>0).astype('int8')) #binarized version
+    # diceLoc=monai.metrics.compute_generalized_dice( postProcess(extractedBinary) ,gold_arr_loc)[1].item()
+    # print(f"diceee loc {diceLoc} {curr_studyId}")
     goldChannel=1
     from_case=evaluate_case(y_det=extracted,y_true=gold_arr_loc[goldChannel,:,:,:].numpy())
     maxSlice = max(list(range(0,gold_arr_loc.size(dim=3))),key=lambda ind : torch.sum(gold_arr_loc[goldChannel,:,:,ind]).item() )
@@ -406,7 +406,8 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, postProc
     # experiment.log_image( save_heatmap(np.add(t2w.astype('float'),(gold*(t2wMax)).astype('float')),directory,f"gold_plus_t2w_{curr_studyId}_{epoch}"))
     # experiment.log_image( save_heatmap(np.add(gold,extracted[:,:,maxSlice]),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}"),'plasma' )
     # experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}"))
-    return (diceLoc,from_case,gold,extracted,t2w, t2wMax,maxSlice)#extracted,gold_arr_loc[goldChannel,:,:,:])
+    # return (diceLoc,from_case,gold,extracted,t2w, t2wMax,maxSlice)#extracted,gold_arr_loc[goldChannel,:,:,:])
+    return (0,0,from_case,gold,extracted,t2w, t2wMax,maxSlice)#extracted,gold_arr_loc[goldChannel,:,:,:])
 
 def iterOverAndCheckType(itemm):
     if(type(itemm) is tuple):
