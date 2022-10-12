@@ -69,8 +69,8 @@ class standardizeLabels(MapTransform):
             #print(f"in standdd {d[key].get_array().shape}")
             #print(f"in standd {d[key].meta} rrrrrrrrrrrrrrref {d[self.ref].meta}  ")
             #d[key].set_array(  np.flip((d[key].get_array() > 0.5).astype('int8'), (0, 1))   )
-            #d[key].set_array(  np.flip((d[key].get_array() > 0.5).astype('int8'), (1, 0))   )
-            d[key].set_array(   (d[key].get_array() > 0.5).astype('int8')   )
+            d[key].set_array(  np.flip((d[key].get_array() > 0.5).astype('int8'), (1, 0))   )
+            #d[key].set_array(   (d[key].get_array() > 0.5).astype('int8')   )
             #d[key].meta['pixdim']=d[self.ref].meta['spacing']
             #update_meta(pixdim=d[self.ref].pixdim
             #print(f" {d['study_id']} label size {d[key].get_array().shape}  imSize  {d[self.ref].get_array().shape} labels_spac {d[key].pixdim} im_spac {d[self.ref].pixdim} ")
@@ -180,8 +180,8 @@ def get_val_transforms(is_whole_to_train,spatial_size):
             LoadImaged(keys=["t2w","hbv","adc" ,"label_name_val"],reader="ITKReader"),
             EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label_name_val"]),
             EnsureTyped(keys=["t2w","hbv","adc" ,"label_name_val"]),
-            #standardizeLabels(keys=["label_name_val"]),
-            #AsDiscreted(keys=["label_name_val"], to_onehot=2),
+            standardizeLabels(keys=["label_name_val"]),
+            AsDiscreted(keys=["label_name_val"], to_onehot=2),
             #ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label_name_val"], spatial_size=spatial_size,),
             ConcatItemsd(["t2w","adc","hbv","adc"], "chan3_col_name_val"),
 
