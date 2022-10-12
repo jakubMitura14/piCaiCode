@@ -141,9 +141,9 @@ def get_train_transforms(RandGaussianNoised_prob
             LoadImaged(keys=["t2w","hbv","adc" ,"label"],reader="ITKReader"),
             EnsureTyped(keys=["t2w","hbv","adc" ,"label"]),
             EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label"]),
-            standardizeLabels(keys=["label"]),
+            #standardizeLabels(keys=["label"]),
 
-            AsDiscreted(keys=["label"],to_onehot=2),
+            #AsDiscreted(keys=["label"],to_onehot=2),
             #ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label"], spatial_size=spatial_size,),
             ConcatItemsd(keys=["t2w","adc","hbv","adc" ],name="chan3_col_name"),
 

@@ -431,17 +431,18 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experime
     extracted=extract_lesion_candidates(y_hat_arr[i][1,:,:,:].numpy(), threshold='dynamic')[0]
     print(f"extracted {curr_studyId}")
     extractedBinary= torch.from_numpy((extracted>0).astype('int8')) #binarized version
-    diceLoc=monai.metrics.compute_generalized_dice( postProcess(extractedBinary) ,gold_arr_loc)[1].item()
-    print(f"diceee loc {diceLoc}")
-    from_case=evaluate_case(y_det=extracted,y_true=gold_arr_loc[1,:,:,:].numpy())
+    #diceLoc=monai.metrics.compute_generalized_dice( postProcess(extractedBinary) ,gold_arr_loc)[1].item()
+    #print(f"diceee loc {diceLoc}")
+    goldChannel=0
+    from_case=evaluate_case(y_det=extracted,y_true=gold_arr_loc[goldChannel,:,:,:].numpy())
 
-    maxSlice = max(list(range(0,gold_arr_loc.size(dim=3))),key=lambda ind : torch.sum(gold_arr_loc[1,:,:,ind]).item() )
+    maxSlice = max(list(range(0,gold_arr_loc.size(dim=3))),key=lambda ind : torch.sum(gold_arr_loc[goldChannel,:,:,ind]).item() )
     
     gold_arr_loc=gold_arr_loc.numpy()
     ### visualizations
     t2w = imageArr[i][0,:,:,maxSlice].numpy()
     t2wMax= np.max(t2w.flatten())
-    gold = (gold_arr_loc[1,:,:,maxSlice] >0).astype('int8')
+    gold = (gold_arr_loc[goldChannel,:,:,maxSlice] >0).astype('int8')
 
     print(f"maxSlice {maxSlice} gold shape {gold_arr_loc.shape}  extracted shape {extracted[:,:,maxSlice].shape} t2w {t2w.shape}  goldd {np.max(gold_arr_loc.flatten())}")
     
