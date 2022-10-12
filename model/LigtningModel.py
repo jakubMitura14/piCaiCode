@@ -208,6 +208,7 @@ from picai_eval.metrics import Metrics
 from picai_eval.eval import evaluate_case
 
 # import modelUtlils
+import matplotlib.pyplot as plt
 
 class UNetToRegresion(nn.Module):
     def __init__(self,
@@ -410,6 +411,10 @@ def processDice(i,postProcess,y_det,y_true):
     print(f"locDice {locDice}")
     return (locDice,hatPost.numpy())
 
+def save_heatmap(arr,dir,name):
+    path = join(dir,name+'.png')
+
+    plt.savefig('books_read.png')
 
 
 def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experiment,postProcess,epoch):
@@ -427,7 +432,7 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experime
     ### visualizations
     maxSlice = max(list(range(0,gold_arr_loc.shape[2])),key=lambda ind : np.sum(gold_arr_loc[:,:,ind].flatten()) )
     t2w = imageArr[i][0,:,:,maxSlice]
-    print(f"t2w {t2w.shape} max {torch.max(t2w)}  ")
+    print(f"maxSlice {maxSlice} t2w {t2w.shape} max {torch.max(t2w)} bigger {torch.max(imageArr[i])} ")
     experiment.log_image((gold_arr_loc[1,:,:,maxSlice] >0).astype('int8'), name=f"gold_{curr_studyId}_{epoch}",image_colormap='Greys')
     experiment.log_image(extracted[:,:,maxSlice], name=f"extracted_{curr_studyId}_{epoch}",image_colormap='Greys')
     experiment.log_image(t2w, name=f"t2w_{curr_studyId}_{epoch}",image_colormap='Greys')
