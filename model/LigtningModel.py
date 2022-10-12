@@ -413,7 +413,7 @@ def processDice(i,postProcess,y_det,y_true):
 
 def save_heatmap(arr,dir,name,cmapp='gray'):
     path = join(dir,name+'.png')
-    arr =np.transpose(arr)
+    arr = np.flip(np.transpose(arr),1 )
     plt.imshow(arr , interpolation = 'nearest' , cmap= cmapp)
     plt.title( name)
     plt.savefig(path)
@@ -428,7 +428,7 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experime
     curr_studyId=studyId[i]
     gold_arr_loc=gold_arr[i]
     print(f"extracting {curr_studyId}")
-    extracted=extract_lesion_candidates(y_hat_arr[i][1,:,:,:].numpy(), threshold='dynamic')[0]
+    extracted=extract_lesion_candidates(y_hat_arr[i][1,:,:,:].cpu().detach().numpy(), threshold='dynamic')[0]
     print(f"extracted {curr_studyId}")
     extractedBinary= torch.from_numpy((extracted>0).astype('int8')) #binarized version
     diceLoc=monai.metrics.compute_generalized_dice( postProcess(extractedBinary) ,gold_arr_loc)[1].item()
@@ -437,11 +437,11 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experime
     # from_case=evaluate_case(y_det=extracted,y_true=gold_arr_loc[goldChannel,:,:,:].numpy())
     maxSlice = max(list(range(0,gold_arr_loc.size(dim=3))),key=lambda ind : torch.sum(gold_arr_loc[goldChannel,:,:,ind]).item() )
     
-    gold_arr_loc=gold_arr_loc.numpy()
+    gold_arr_loc=gold_arr_loc.cpu().detach().numpy()
     print(f"gold arr shape { gold_arr_loc.shape}")
 
     ### visualizations
-    t2w = imageArr[i][0,:,:,maxSlice].numpy()
+    t2w = imageArr[i][0,:,:,maxSlice].cpu().detach().numpy()
     t2wMax= np.max(t2w.flatten())
     gold = (gold_arr_loc[goldChannel,:,:,maxSlice] >0).astype('int8')
 
@@ -451,7 +451,7 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experime
     experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}"))
     experiment.log_image( save_heatmap(extracted[:,:,maxSlice],directory,f"extracted_{curr_studyId}_{epoch}"))
     experiment.log_image( save_heatmap(t2w,directory,f"t2w_{curr_studyId}_{epoch}"))
-    experiment.log_image( save_heatmap(imageArr[i].numpy()[1,:,:,maxSlice],directory,f"adc_{curr_studyId}_{epoch}"))
+    experiment.log_image( save_heatmap(imageArr[i].cpu().detach().numpy()[1,:,:,maxSlice],directory,f"adc_{curr_studyId}_{epoch}"))
     experiment.log_image( save_heatmap(np.add(t2w.astype('float'),(gold*(t2wMax)).astype('float')),directory,f"gold_plus_t2w_{curr_studyId}_{epoch}"))
     experiment.log_image( save_heatmap(np.add(gold,extracted[:,:,maxSlice]),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}"),'plasma' )
 
@@ -461,7 +461,7 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experime
 
 
 
-    return (diceLoc,torch.from_numpy(extracted),gold_arr_loc[goldChannel,:,:,:])
+    return (diceLoc,extracted,gold_arr_loc[goldChannel,:,:,:])
 
 
 
