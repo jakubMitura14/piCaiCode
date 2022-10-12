@@ -432,7 +432,7 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experime
     print(f"diceee loc {diceLoc}")
     from_case=evaluate_case(y_det=extracted,y_true=gold_arr_loc[1,:,:,:].numpy())
 
-    maxSliceb = max(list(range(0,gold_arr_loc.size(dim=2))),key=lambda ind : torch.sum(gold_arr_loc[:,:,ind]).item() )
+    maxSliceb = max(list(range(0,gold_arr_loc.size(dim=3))),key=lambda ind : torch.sum(gold_arr_loc[:,:,ind]).item() )
     
     gold_arr_loc=gold_arr_loc.numpy()
     ### visualizations
