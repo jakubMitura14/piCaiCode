@@ -602,110 +602,51 @@ class Model(pl.LightningModule):
             experiment.log_image( save_heatmap(np.add(gold,extracted[:,:,maxSlice]),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}"),'plasma' )
             experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}"))
 
-        if(len(processedCases)>0):
-            experiment=self.logger.experiment
-            directory= self.temp_val_dir
-            dices = list(map(lambda tupl: tupl[0] ,processedCases))
-            # from_case = list(map(lambda tupl: tupl[1] ,processedCases))
-            golds = list(map(lambda tupl: tupl[1] ,processedCases ))
-            extracteds = list(map(lambda tupl: tupl[2] ,processedCases ))
-            t2ws = list(map(lambda tupl: tupl[3] ,processedCases ))
-            t2wMaxs = list(map(lambda tupl: tupl[4] ,processedCases ))
-            maxSlices = list(map(lambda tupl: tupl[5] ,processedCases ))
-            epoch=self.current_epoch
-            valid_metrics = evaluate(y_det=extracteds,
-                                    y_true=golds,
-                                    num_parallel_calls= os.cpu_count()
-                                    ,verbose=1)
+        # if(len(processedCases)>0):
+        #     experiment=self.logger.experiment
+        #     directory= self.temp_val_dir
+        #     dices = list(map(lambda tupl: tupl[0] ,processedCases))
+        #     # from_case = list(map(lambda tupl: tupl[1] ,processedCases))
+        #     golds = list(map(lambda tupl: tupl[1] ,processedCases ))
+        #     extracteds = list(map(lambda tupl: tupl[2] ,processedCases ))
+        #     t2ws = list(map(lambda tupl: tupl[3] ,processedCases ))
+        #     t2wMaxs = list(map(lambda tupl: tupl[4] ,processedCases ))
+        #     maxSlices = list(map(lambda tupl: tupl[5] ,processedCases ))
+        #     epoch=self.current_epoch
+        #     valid_metrics = evaluate(y_det=extracteds,
+        #                             y_true=golds,
+        #                             num_parallel_calls= os.cpu_count()
+        #                             ,verbose=1)
             
-            meanPiecaiMetr_auroc=valid_metrics.auroc
-            meanPiecaiMetr_AP=valid_metrics.AP
-            meanPiecaiMetr_score= valid_metrics.meanPiecaiMetr_score
+        #     meanPiecaiMetr_auroc=valid_metrics.auroc
+        #     meanPiecaiMetr_AP=valid_metrics.AP
+        #     meanPiecaiMetr_score= valid_metrics.meanPiecaiMetr_score
                                                    
-            list(map(partial(log_images
-                ,experiment=experiment,golds=golds,extracteds=extracteds 
-                ,t2ws=t2ws, t2wMaxs=t2wMaxs,directory=directory,maxSlices=maxSlices
-                ,patIds=patIds,epoch=epoch),range(lenn)))
+        #     list(map(partial(log_images
+        #         ,experiment=experiment,golds=golds,extracteds=extracteds 
+        #         ,t2ws=t2ws, t2wMaxs=t2wMaxs,directory=directory,maxSlices=maxSlices
+        #         ,patIds=patIds,epoch=epoch),range(lenn)))
 
-            # gold = list(map(lambda tupl: tupl[2] ,processedCases ))
+        #     # gold = list(map(lambda tupl: tupl[2] ,processedCases ))
 
-            return {'dices': dices, 'meanPiecaiMetr_auroc':meanPiecaiMetr_auroc
-                    ,'meanPiecaiMetr_AP' :meanPiecaiMetr_AP,meanPiecaiMetr_score: 'meanPiecaiMetr_score'}
-
-        # pathssList=[]
-        # dicesList=[]
-        # hatPostA=[]
-        # # with mp.Pool(processes = mp.cpu_count()) as pool:
-        # #     # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
-        # #     dicesList=pool.map(partial(processDice,postProcess=self.postProcess,y_det=y_det, y_true=y_true ),list(range(0,len(y_true))))
-        # dicesList=list(map(partial(processDice,postProcess=self.postProcess,y_det=y_det, y_true=y_true ),list(range(0,len(y_true)))))
-
-        # hatPostA=list(map(lambda tupl: tupl[1],dicesList ))
-        # dicees=list(map(lambda tupl: tupl[0],dicesList ))
-        # # self.logger.experiment.
-
-        # # with mp.Pool(processes = mp.cpu_count()) as pool:        
-        # #     pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,images=images,hatPostA=hatPostA),list(range(0,len(y_true))))
-
-        # pathssList=list(map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,images=images,hatPostA=hatPostA),list(range(0,len(y_true)))))
-
-        # forGoldVal=list(map(lambda tupl :tupl[0] ,pathssList  ))
-        # fory_hatVal=list(map(lambda tupl :tupl[1] ,pathssList  ))
-        # # fory__bach_hatVal=list(map(lambda tupl :tupl[2] ,pathssList  ))
-
-        # for i in range(0,len(y_true)):
-            
-        #     # tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
-        #     # print("saving entry   ")
-        #     # self.list_gold_val.append(tupl[0])
-        #     # self.list_yHat_val.append(tupl[1])
-        #     self.list_gold_val.append(forGoldVal[i])
-        #     self.list_yHat_val.append(fory_hatVal[i])
-        #     self.dices.append(dicees[i])
-            # self.list_back_yHat_val.append(fory__bach_hatVal[i])
-# #         self.log('val_loss', loss )
-
-#        # return {'loss' :loss,'loc_dice': diceVall }
-
-        #TODO probably this [1,:,:,:] could break the evaluation ...
-        # y_det=[x.cpu().detach().numpy()[1,:,:,:][0] for x in y_det]
-        # y_true=[x.cpu().detach().numpy() for x in y_true]
-        # y_det= list(map(self.postProcess  , y_det))
-        # y_true= list(map(self.postTrue , y_det))
+        #     return {'dices': dices, 'meanPiecaiMetr_auroc':meanPiecaiMetr_auroc
+        #             ,'meanPiecaiMetr_AP' :meanPiecaiMetr_AP,meanPiecaiMetr_score: 'meanPiecaiMetr_score'}
 
 
-        # if(torch.sum(torch.isnan( y_det))>0):
-        #     self.isAnyNan=True
-
-        # regress_res2= torch.flatten(reg_hat) 
-        # regress_res3=list(map(lambda el:round(el) ,torch.flatten(regress_res2).cpu().detach().numpy() ))
-
-        # total_loss=precision_recall(torch.Tensor(regress_res3).int(), torch.Tensor(numLesions).cpu().int(), average='macro', num_classes=4)
-        # total_loss1=torch.mean(torch.stack([total_loss[0],total_loss[1]] ))#self.F1Score
-        
-        # if(torch.sum(isAnythingInAnnotated)>0):
-        #     dice = DiceMetric()
-        #     for i in range(0,len( y_det)):
-        #         if(isAnythingInAnnotated[i]>0):
-        #             y_det_i=self.postProcess(y_det[i])[0,:,:,:].cpu()
-        #             y_true_i=self.postTrue(y_true[i])[1,:,:,:].cpu()
-        #             if(torch.sum(y_det_i).item()>0 and torch.sum(y_true_i).item()>0 ):
-        #                 dice(y_det_i,y_true_i)
-
-        #     self.log("dice", dice.aggregate())
-        #     #print(f" total loss a {total_loss1} val_loss {val_losss}  dice.aggregate() {dice.aggregate()}")
-        #     total_loss2= torch.add(total_loss1,dice.aggregate())
-        #     print(f" total loss b {total_loss2}  total_loss,dice.aggregate() {dice.aggregate()}")
-            
-        #     self.picaiLossArr_score_final.append(total_loss2.item())
-        #     return {'val_acc': total_loss2.item(), 'val_loss':val_losss}
-        
-        # #in case no positive segmentation information is available
-        # self.picaiLossArr_score_final.append(total_loss1.item())
-        # return {'val_acc': total_loss1.item(), 'val_loss':val_losss}
 
 
-    #return {'dices': dices, 'extrCases':extrCases}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -721,51 +662,82 @@ class Model(pl.LightningModule):
 
     def validation_epoch_end(self, outputs):
         print("validation_epoch_end")
-        print(f"outputs {outputs[0]['from_case'] }")
-        allDices = np.array(([torch.stack(x['dices']).cpu().detach().numpy() for x in outputs])).flatten() 
-        allmeanPiecaiMetr_auroc = np.array(([torch.stack(x['meanPiecaiMetr_auroc']).cpu().detach().numpy() for x in outputs])).flatten() 
-        allmeanPiecaiMetr_AP = np.array(([torch.stack(x['meanPiecaiMetr_AP']).cpu().detach().numpy() for x in outputs])).flatten() 
-        allmeanPiecaiMetr_score = np.array(([torch.stack(x['meanPiecaiMetr_score']).cpu().detach().numpy() for x in outputs])).flatten() 
+        # print(f"outputs {outputs[0]['from_case'] }")
+        # allDices = np.array(([torch.stack(x['dices']).cpu().detach().numpy() for x in outputs])).flatten() 
+        # allmeanPiecaiMetr_auroc = np.array(([torch.stack(x['meanPiecaiMetr_auroc']).cpu().detach().numpy() for x in outputs])).flatten() 
+        # allmeanPiecaiMetr_AP = np.array(([torch.stack(x['meanPiecaiMetr_AP']).cpu().detach().numpy() for x in outputs])).flatten() 
+        # allmeanPiecaiMetr_score = np.array(([torch.stack(x['meanPiecaiMetr_score']).cpu().detach().numpy() for x in outputs])).flatten() 
         
       
         
         
-        if(len(allDices)>0):            
-            allforEval=self.processOutputs(outputs)
-            self.log('dice', np.mean(allDices))
-            print(f"allgold a {allforEval}")
-            # allforEval = torch.stack([item for sublist in allforEval for item in sublist]).numpy()
-            # print(f"allforEval b {allforEval}")
-            # meanPiecaiMetr_auroc,meanPiecaiMetr_AP,meanPiecaiMetr_score= evaluate_all_cases(allforEval)
-                    # for i in range(0,numIters):
-            # valid_metrics = evaluate(y_det=allextracted,
-            #                         y_true=allgold,
-            #                         num_parallel_calls= os.cpu_count()
-            #                         ,verbose=1
-            #                            )
+        # if(len(allDices)>0):            
+        #     allforEval=self.processOutputs(outputs)
+        #     self.log('dice', np.mean(allDices))
+        #     print(f"allgold a {allforEval}")
+        #     # allforEval = torch.stack([item for sublist in allforEval for item in sublist]).numpy()
+        #     # print(f"allforEval b {allforEval}")
+        #     # meanPiecaiMetr_auroc,meanPiecaiMetr_AP,meanPiecaiMetr_score= evaluate_all_cases(allforEval)
+        #             # for i in range(0,numIters):
+        #     # valid_metrics = evaluate(y_det=allextracted,
+        #     #                         y_true=allgold,
+        #     #                         num_parallel_calls= os.cpu_count()
+        #     #                         ,verbose=1
+        #     #                            )
 
-            meanPiecaiMetr_auroc=np.mean(allmeanPiecaiMetr_auroc)
-            meanPiecaiMetr_AP=np.mean(allmeanPiecaiMetr_AP)
-            meanPiecaiMetr_score= np.mean(allmeanPiecaiMetr_score)
-            # print("finished evaluating")
+        #     meanPiecaiMetr_auroc=np.mean(allmeanPiecaiMetr_auroc)
+        #     meanPiecaiMetr_AP=np.mean(allmeanPiecaiMetr_AP)
+        #     meanPiecaiMetr_score= np.mean(allmeanPiecaiMetr_score)
+        #     # print("finished evaluating")
             
-            # if(len(allDices)>0):
-            #     self.log('dice', np.mean(allDices))
+        #     # if(len(allDices)>0):
+        #     #     self.log('dice', np.mean(allDices))
 
-            # print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
+        #     # print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
 
-            # self.log('val_mean_auroc', meanPiecaiMetr_auroc)
-            # self.log('val_mean_AP', meanPiecaiMetr_AP)
-            # self.log('mean_val_acc', meanPiecaiMetr_score)
-            # # tensorss = [torch.as_tensor(x['loc_dice']) for x in outputs]
-            # # if( len(tensorss)>0):
-            #     avg_dice = torch.mean(torch.stack(tensorss))
+        #     # self.log('val_mean_auroc', meanPiecaiMetr_auroc)
+        #     # self.log('val_mean_AP', meanPiecaiMetr_AP)
+        #     # self.log('mean_val_acc', meanPiecaiMetr_score)
+        #     # # tensorss = [torch.as_tensor(x['loc_dice']) for x in outputs]
+        #     # # if( len(tensorss)>0):
+        #     #     avg_dice = torch.mean(torch.stack(tensorss))
 
-            self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
-            self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
-            self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
+        #     self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
+        #     self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
+        #     self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
 
  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #         # print( f"rocAuc  {self.rocAuc.aggregate().item()}"  )
 #         # #self.log('precision ', monai.metrics.compute_confusion_matrix_metric("precision", confusion_matrix) )
 #         # self.rocAuc.reset()        
@@ -965,3 +937,81 @@ class Model(pl.LightningModule):
 #     locDice=monai.metrics.compute_generalized_dice( hatPost ,y_true[i])[1].item()
 #     print(f"locDice {locDice}")
 #     return (locDice,hatPost.numpy())
+
+
+
+
+        # pathssList=[]
+        # dicesList=[]
+        # hatPostA=[]
+        # # with mp.Pool(processes = mp.cpu_count()) as pool:
+        # #     # pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,reg_hat=reg_hat),list(range(0,len(y_true))))
+        # #     dicesList=pool.map(partial(processDice,postProcess=self.postProcess,y_det=y_det, y_true=y_true ),list(range(0,len(y_true))))
+        # dicesList=list(map(partial(processDice,postProcess=self.postProcess,y_det=y_det, y_true=y_true ),list(range(0,len(y_true)))))
+
+        # hatPostA=list(map(lambda tupl: tupl[1],dicesList ))
+        # dicees=list(map(lambda tupl: tupl[0],dicesList ))
+        # # self.logger.experiment.
+
+        # # with mp.Pool(processes = mp.cpu_count()) as pool:        
+        # #     pathssList=pool.map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,images=images,hatPostA=hatPostA),list(range(0,len(y_true))))
+
+        # pathssList=list(map(partial(save_candidates_to_dir,y_true=y_true,y_det=y_det,patIds=patIds,temp_val_dir=self.temp_val_dir,images=images,hatPostA=hatPostA),list(range(0,len(y_true)))))
+
+        # forGoldVal=list(map(lambda tupl :tupl[0] ,pathssList  ))
+        # fory_hatVal=list(map(lambda tupl :tupl[1] ,pathssList  ))
+        # # fory__bach_hatVal=list(map(lambda tupl :tupl[2] ,pathssList  ))
+
+        # for i in range(0,len(y_true)):
+            
+        #     # tupl=saveFilesInDir(y_true[i],y_det[i], self.temp_val_dir, patIds[i])
+        #     # print("saving entry   ")
+        #     # self.list_gold_val.append(tupl[0])
+        #     # self.list_yHat_val.append(tupl[1])
+        #     self.list_gold_val.append(forGoldVal[i])
+        #     self.list_yHat_val.append(fory_hatVal[i])
+        #     self.dices.append(dicees[i])
+            # self.list_back_yHat_val.append(fory__bach_hatVal[i])
+# #         self.log('val_loss', loss )
+
+#        # return {'loss' :loss,'loc_dice': diceVall }
+
+        #TODO probably this [1,:,:,:] could break the evaluation ...
+        # y_det=[x.cpu().detach().numpy()[1,:,:,:][0] for x in y_det]
+        # y_true=[x.cpu().detach().numpy() for x in y_true]
+        # y_det= list(map(self.postProcess  , y_det))
+        # y_true= list(map(self.postTrue , y_det))
+
+
+        # if(torch.sum(torch.isnan( y_det))>0):
+        #     self.isAnyNan=True
+
+        # regress_res2= torch.flatten(reg_hat) 
+        # regress_res3=list(map(lambda el:round(el) ,torch.flatten(regress_res2).cpu().detach().numpy() ))
+
+        # total_loss=precision_recall(torch.Tensor(regress_res3).int(), torch.Tensor(numLesions).cpu().int(), average='macro', num_classes=4)
+        # total_loss1=torch.mean(torch.stack([total_loss[0],total_loss[1]] ))#self.F1Score
+        
+        # if(torch.sum(isAnythingInAnnotated)>0):
+        #     dice = DiceMetric()
+        #     for i in range(0,len( y_det)):
+        #         if(isAnythingInAnnotated[i]>0):
+        #             y_det_i=self.postProcess(y_det[i])[0,:,:,:].cpu()
+        #             y_true_i=self.postTrue(y_true[i])[1,:,:,:].cpu()
+        #             if(torch.sum(y_det_i).item()>0 and torch.sum(y_true_i).item()>0 ):
+        #                 dice(y_det_i,y_true_i)
+
+        #     self.log("dice", dice.aggregate())
+        #     #print(f" total loss a {total_loss1} val_loss {val_losss}  dice.aggregate() {dice.aggregate()}")
+        #     total_loss2= torch.add(total_loss1,dice.aggregate())
+        #     print(f" total loss b {total_loss2}  total_loss,dice.aggregate() {dice.aggregate()}")
+            
+        #     self.picaiLossArr_score_final.append(total_loss2.item())
+        #     return {'val_acc': total_loss2.item(), 'val_loss':val_losss}
+        
+        # #in case no positive segmentation information is available
+        # self.picaiLossArr_score_final.append(total_loss1.item())
+        # return {'val_acc': total_loss1.item(), 'val_loss':val_losss}
+
+
+    #return {'dices': dices, 'extrCases':extrCases}
