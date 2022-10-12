@@ -433,7 +433,7 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experime
     extractedBinary= torch.from_numpy((extracted>0).astype('int8')) #binarized version
     #diceLoc=monai.metrics.compute_generalized_dice( postProcess(extractedBinary) ,gold_arr_loc)[1].item()
     #print(f"diceee loc {diceLoc}")
-    goldChannel=0
+    goldChannel=1
     from_case=evaluate_case(y_det=extracted,y_true=gold_arr_loc[goldChannel,:,:,:].numpy())
     maxSlice = max(list(range(0,gold_arr_loc.size(dim=3))),key=lambda ind : torch.sum(gold_arr_loc[goldChannel,:,:,ind]).item() )
     
