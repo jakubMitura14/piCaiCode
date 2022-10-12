@@ -435,10 +435,11 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experime
     #print(f"diceee loc {diceLoc}")
     goldChannel=0
     from_case=evaluate_case(y_det=extracted,y_true=gold_arr_loc[goldChannel,:,:,:].numpy())
-
     maxSlice = max(list(range(0,gold_arr_loc.size(dim=3))),key=lambda ind : torch.sum(gold_arr_loc[goldChannel,:,:,ind]).item() )
     
     gold_arr_loc=gold_arr_loc.numpy()
+    print(f"gold arr shape { gold_arr_loc.shape}")
+
     ### visualizations
     t2w = imageArr[i][0,:,:,maxSlice].numpy()
     t2wMax= np.max(t2w.flatten())
