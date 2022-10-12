@@ -199,12 +199,12 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.subjects = list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1]
         ,self.label_name,self.label_name_val
             ,self.t2wColName, self.adcColName,self.hbvColName )   , list(self.df.iterrows())))
-        #train_set, valid_set,test_set = self.splitDataSet(self.subjects , self.trainSizePercent,True)
+        train_set, valid_set,test_set = self.splitDataSet(self.subjects , self.trainSizePercent,True)
         
-        train_subjects=self.subjects[0:179]
-        val_subjects=self.subjects[180:200]
-        # self.train_subjects = train_set
-        # self.val_subjects = valid_set
+        #train_subjects=self.subjects[0:179]
+        #val_subjects=self.subjects[180:200]
+        train_subjects = train_set
+        val_subjects = valid_set+test_set
         # self.test_subjects = test_set
         train_transforms=transformsForMain.get_train_transforms(
             self.RandGaussianNoised_prob
