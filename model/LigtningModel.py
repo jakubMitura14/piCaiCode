@@ -376,39 +376,38 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, postProc
     gold_arr_loc=gold_arr[i]
     print(f"extracting {curr_studyId}")
     extracted=extract_lesion_candidates(y_hat_arr[i][1,:,:,:].cpu().detach().numpy(), threshold='dynamic')[0] #
-    # print(f"extracted {curr_studyId}")
-    # extractedBinary= torch.from_numpy((extracted>0).astype('int8')) #binarized version
-    # diceLoc=monai.metrics.compute_generalized_dice( postProcess(extractedBinary) ,gold_arr_loc)[1].item()
-    # print(f"diceee loc {diceLoc}")
-    # goldChannel=1
-    # from_case=evaluate_case(y_det=extracted,y_true=gold_arr_loc[goldChannel,:,:,:].numpy())
-    # maxSlice = max(list(range(0,gold_arr_loc.size(dim=3))),key=lambda ind : torch.sum(gold_arr_loc[goldChannel,:,:,ind]).item() )
+    print(f"extracted {curr_studyId}")
+    extractedBinary= torch.from_numpy((extracted>0).astype('int8')) #binarized version
+    diceLoc=monai.metrics.compute_generalized_dice( postProcess(extractedBinary) ,gold_arr_loc)[1].item()
+    print(f"diceee loc {diceLoc}")
+    goldChannel=1
+    from_case=evaluate_case(y_det=extracted,y_true=gold_arr_loc[goldChannel,:,:,:].numpy())
+    maxSlice = max(list(range(0,gold_arr_loc.size(dim=3))),key=lambda ind : torch.sum(gold_arr_loc[goldChannel,:,:,ind]).item() )
     
-    # gold_arr_loc=gold_arr_loc.cpu().detach().numpy()
-    # print(f"gold arr shape { gold_arr_loc.shape}")
+    gold_arr_loc=gold_arr_loc.cpu().detach().numpy()
+    print(f"gold arr shape { gold_arr_loc.shape}")
 
-    # ### visualizations
-    # t2w = imageArr[i][0,:,:,maxSlice].cpu().detach().numpy()
-    # t2wMax= np.max(t2w.flatten())
-    # gold = (gold_arr_loc[goldChannel,:,:,maxSlice] >0).astype('int8')
+    ### visualizations
+    t2w = imageArr[i][0,:,:,maxSlice].cpu().detach().numpy()
+    t2wMax= np.max(t2w.flatten())
+    gold = (gold_arr_loc[goldChannel,:,:,maxSlice] >0).astype('int8')
 
     # print(f"maxSlice {maxSlice} gold shape {gold_arr_loc.shape}  extracted shape {extracted[:,:,maxSlice].shape} t2w {t2w.shape}  goldd {np.max(gold_arr_loc.flatten())}")
     
 
-    # experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}"))
     # # experiment.log_image( save_heatmap(extracted[:,:,maxSlice],directory,f"extracted_{curr_studyId}_{epoch}"))
     # # experiment.log_image( save_heatmap(t2w,directory,f"t2w_{curr_studyId}_{epoch}"))
     # # experiment.log_image( save_heatmap(imageArr[i].cpu().detach().numpy()[1,:,:,maxSlice],directory,f"adc_{curr_studyId}_{epoch}"))
-    # experiment.log_image( save_heatmap(np.add(t2w.astype('float'),(gold*(t2wMax)).astype('float')),directory,f"gold_plus_t2w_{curr_studyId}_{epoch}"))
-    # experiment.log_image( save_heatmap(np.add(gold,extracted[:,:,maxSlice]),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}"),'plasma' )
 
     # experiment.log_image(extracted[:,:,maxSlice], name=f"extracted_{curr_studyId}_{epoch}",image_colormap='Greys')
     # experiment.log_image(t2w, name=f"t2w_{curr_studyId}_{epoch}",image_colormap='Greys')
     # experiment.log_image(imageArr[i].numpy()[1,:,:,maxSlice], name=f"adc_{curr_studyId}_{epoch}",image_colormap='Greys')
 
 
-
-    return (diceLoc,from_case)#extracted,gold_arr_loc[goldChannel,:,:,:])
+    # experiment.log_image( save_heatmap(np.add(t2w.astype('float'),(gold*(t2wMax)).astype('float')),directory,f"gold_plus_t2w_{curr_studyId}_{epoch}"))
+    # experiment.log_image( save_heatmap(np.add(gold,extracted[:,:,maxSlice]),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}"),'plasma' )
+    # experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}"))
+    return (diceLoc,from_case,gold,extracted,t2w, t2wMax,maxSlice)#extracted,gold_arr_loc[goldChannel,:,:,:])
 
 def iterOverAndCheckType(itemm):
     if(type(itemm) is tuple):
@@ -584,11 +583,36 @@ class Model(pl.LightningModule):
         # processedCases=list(map(partial(processDecolated,gold_arr=y_true,y_hat_arr=y_det,directory= self.temp_val_dir,studyId= patIds
         #             ,imageArr=images, experiment=self.logger.experiment,postProcess=self.postProcess,epoch=self.current_epoch)
         #             ,range(0,numBatches)))
+        
+        def log_images(i,experiment,golds,extracteds ,t2ws, t2wMaxs,directory,maxSlices,patIds,epoch):
+            t2w=t2ws[i]
+            gold=golds[i]
+            extracted=extracteds[i]
+            t2wMax=t2wMaxs[i]
+            maxSlice=maxSlices[i]
+            curr_studyId=patIds[i]
+
+            experiment.log_image( save_heatmap(np.add(t2w.astype('float'),(gold*(t2wMax)).astype('float')),directory,f"gold_plus_t2w_{curr_studyId}_{epoch}"))
+            experiment.log_image( save_heatmap(np.add(gold,extracted[:,:,maxSlice]),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}"),'plasma' )
+            experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}"))
 
         if(type(processedCases) is not None):
             experiment=self.logger.experiment
+            directory= self.temp_val_dir
             dices = list(map(lambda tupl: tupl[0] ,processedCases))
-            from_case = list(map(lambda tupl: tupl[1] ,processedCases ))
+            from_case = list(map(lambda tupl: tupl[1] ,processedCases))
+            golds = list(map(lambda tupl: tupl[2] ,processedCases ))
+            extracteds = list(map(lambda tupl: tupl[3] ,processedCases ))
+            t2ws = list(map(lambda tupl: tupl[4] ,processedCases ))
+            t2wMaxs = list(map(lambda tupl: tupl[5] ,processedCases ))
+            maxSlices = list(map(lambda tupl: tupl[6] ,processedCases ))
+            epoch=self.current_epoch
+
+            list(map(partial(log_images
+                ,experiment=experiment,golds=golds,extracteds=extracteds 
+                ,t2ws=t2ws, t2wMaxs=t2wMaxs,directory=directory,maxSlices=maxSlices
+                ,patIds=patIds,epoch=epoch),range(lenn)))
+
             # gold = list(map(lambda tupl: tupl[2] ,processedCases ))
             print(f"single from_case {from_case}")
 
