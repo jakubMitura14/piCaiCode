@@ -371,11 +371,10 @@ def myMaxSlice(arr):
 
 
 def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, postProcess,epoch):
-    print("processDecolated")
     curr_studyId=studyId[i]
     gold_arr_loc=gold_arr[i]
     print(f"extracting {curr_studyId}")
-    extracted=extract_lesion_candidates(y_hat_arr[i][1,:,:,:].cpu().detach().numpy(), threshold='dynamic')[0] #
+    extracted=extract_lesion_candidates(y_hat_arr[i][1,:,:,:].cpu().detach().numpy())[0] #, threshold='dynamic'
     print(f"extracted {curr_studyId}")
     extractedBinary= torch.from_numpy((extracted>0).astype('int8')) #binarized version
     diceLoc=monai.metrics.compute_generalized_dice( postProcess(extractedBinary) ,gold_arr_loc)[1].item()
@@ -577,7 +576,7 @@ class Model(pl.LightningModule):
             # time.sleep(TIMEOUT)
             processedCases=list(map(lambda ind :getNext(ind,results,200) ,list(range(lenn)) ))
 
-        
+        processedCases=list(filter(lambda it:it!=None,processedCases))
 
 
         # processedCases=list(map(partial(processDecolated,gold_arr=y_true,y_hat_arr=y_det,directory= self.temp_val_dir,studyId= patIds
@@ -596,7 +595,7 @@ class Model(pl.LightningModule):
             experiment.log_image( save_heatmap(np.add(gold,extracted[:,:,maxSlice]),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}"),'plasma' )
             experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}"))
 
-        if(type(processedCases) is not None):
+        if(len(processedCases)>0):
             experiment=self.logger.experiment
             directory= self.temp_val_dir
             dices = list(map(lambda tupl: tupl[0] ,processedCases))
@@ -708,41 +707,41 @@ class Model(pl.LightningModule):
     def validation_epoch_end(self, outputs):
         print("validation_epoch_end")
         print(f"outputs {outputs[0]['from_case'] }")
-        
-        allforEval=self.processOutputs(outputs)
-        
-        print(f"allgold a {allforEval}")
-        # allforEval = torch.stack([item for sublist in allforEval for item in sublist]).numpy()
-        # print(f"allforEval b {allforEval}")
-        meanPiecaiMetr_auroc,meanPiecaiMetr_AP,meanPiecaiMetr_score= evaluate_all_cases(allforEval)
-                # for i in range(0,numIters):
-        # valid_metrics = evaluate(y_det=allextracted,
-        #                         y_true=allgold,
-        #                         num_parallel_calls= os.cpu_count()
-        #                         ,verbose=1
-        #                            )
-
-        # meanPiecaiMetr_auroc=valid_metrics.auroc
-        # meanPiecaiMetr_AP=valid_metrics.AP
-        # meanPiecaiMetr_score= valid_metrics.meanPiecaiMetr_score
-        print("finished evaluating")
         allDices = np.array(([torch.stack(x['dices']).cpu().detach().numpy() for x in outputs])).flatten() 
-        
-        if(len(allDices)>0):
-            self.log('dice', np.mean(allDices))
+        if(len(allDices)>0):            
+            allforEval=self.processOutputs(outputs)
+            
+            print(f"allgold a {allforEval}")
+            # allforEval = torch.stack([item for sublist in allforEval for item in sublist]).numpy()
+            # print(f"allforEval b {allforEval}")
+            meanPiecaiMetr_auroc,meanPiecaiMetr_AP,meanPiecaiMetr_score= evaluate_all_cases(allforEval)
+                    # for i in range(0,numIters):
+            # valid_metrics = evaluate(y_det=allextracted,
+            #                         y_true=allgold,
+            #                         num_parallel_calls= os.cpu_count()
+            #                         ,verbose=1
+            #                            )
 
-        print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
+            # meanPiecaiMetr_auroc=valid_metrics.auroc
+            # meanPiecaiMetr_AP=valid_metrics.AP
+            # meanPiecaiMetr_score= valid_metrics.meanPiecaiMetr_score
+            print("finished evaluating")
+            
+            if(len(allDices)>0):
+                self.log('dice', np.mean(allDices))
 
-        self.log('val_mean_auroc', meanPiecaiMetr_auroc)
-        self.log('val_mean_AP', meanPiecaiMetr_AP)
-        self.log('mean_val_acc', meanPiecaiMetr_score)
-        # tensorss = [torch.as_tensor(x['loc_dice']) for x in outputs]
-        # if( len(tensorss)>0):
-        #     avg_dice = torch.mean(torch.stack(tensorss))
+            print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
 
-        self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
-        self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
-        self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
+            self.log('val_mean_auroc', meanPiecaiMetr_auroc)
+            self.log('val_mean_AP', meanPiecaiMetr_AP)
+            self.log('mean_val_acc', meanPiecaiMetr_score)
+            # tensorss = [torch.as_tensor(x['loc_dice']) for x in outputs]
+            # if( len(tensorss)>0):
+            #     avg_dice = torch.mean(torch.stack(tensorss))
+
+            self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
+            self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
+            self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
 
  
 #         # print( f"rocAuc  {self.rocAuc.aggregate().item()}"  )
