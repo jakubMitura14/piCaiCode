@@ -413,8 +413,10 @@ def processDice(i,postProcess,y_det,y_true):
 
 def save_heatmap(arr,dir,name):
     path = join(dir,name+'.png')
-
-    plt.savefig('books_read.png')
+    plt.imshow(arr , interpolation = 'nearest' , cmap= 'Greys')
+    plt.title( name)
+    plt.savefig(path)
+    return path
 
 def myMaxSlice(arr):
     shape = arr.shape
@@ -439,10 +441,11 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experime
     maxSlice=40
     t2w = imageArr[i][0,:,:,maxSlice]
     print(f"maxSlice {maxSliceb} gold shape {gold_arr_loc.shape} t2w {t2w.shape} max {torch.max(t2w)} bigger {torch.max(imageArr[i])} goldd {np.max(gold_arr_loc.flatten())}")
-    experiment.log_image((gold_arr_loc[1,:,:,maxSlice] >0).astype('int8'), name=f"gold_{curr_studyId}_{epoch}",image_colormap='Greys')
-    experiment.log_image(extracted[:,:,maxSlice], name=f"extracted_{curr_studyId}_{epoch}",image_colormap='Greys')
-    experiment.log_image(t2w, name=f"t2w_{curr_studyId}_{epoch}",image_colormap='Greys')
-    experiment.log_image(imageArr[i].numpy()[1,:,:,maxSlice], name=f"adc_{curr_studyId}_{epoch}",image_colormap='Greys')
+    
+    experiment.log_image( save_heatmap((gold_arr_loc[1,:,:,maxSliceb] >0).astype('int8'),directory,"gold_{curr_studyId}_{epoch}"))
+    # experiment.log_image(extracted[:,:,maxSlice], name=f"extracted_{curr_studyId}_{epoch}",image_colormap='Greys')
+    # experiment.log_image(t2w, name=f"t2w_{curr_studyId}_{epoch}",image_colormap='Greys')
+    # experiment.log_image(imageArr[i].numpy()[1,:,:,maxSlice], name=f"adc_{curr_studyId}_{epoch}",image_colormap='Greys')
 
 
 
