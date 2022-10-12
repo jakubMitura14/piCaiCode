@@ -413,7 +413,7 @@ def processDice(i,postProcess,y_det,y_true):
 
 
 def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experiment,postProcess,epoch):
-    curr_studyId=studyId[i].numpy()
+    curr_studyId=studyId[i]
     gold_arr_loc=gold_arr[i].numpy()
     extracted=extract_lesion_candidates(y_hat_arr[i][1,:,:,:].numpy(), threshold='dynamic')[0]
     extractedBinary= extracted>0 #binarized version
