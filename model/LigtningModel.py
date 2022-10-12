@@ -450,7 +450,7 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experime
     experiment.log_image( save_heatmap(extracted[:,:,maxSlice],directory,f"extracted_{curr_studyId}_{epoch}"))
     experiment.log_image( save_heatmap(t2w,directory,f"t2w_{curr_studyId}_{epoch}"))
     experiment.log_image( save_heatmap(imageArr[i].numpy()[1,:,:,maxSlice],directory,f"adc_{curr_studyId}_{epoch}"))
-    experiment.log_image( save_heatmap(np.add((t2w*t2wMax).astype('float'),gold.astype('float')),directory,f"gold_plus_t2w_{curr_studyId}_{epoch}"))
+    experiment.log_image( save_heatmap(np.add(t2w.astype('float'),(gold*(t2wMax)).astype('float')),directory,f"gold_plus_t2w_{curr_studyId}_{epoch}"))
     experiment.log_image( save_heatmap(np.add(gold,extracted[:,:,maxSlice]),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}"),'plasma' )
 
     # experiment.log_image(extracted[:,:,maxSlice], name=f"extracted_{curr_studyId}_{epoch}",image_colormap='Greys')
@@ -599,7 +599,8 @@ class Model(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         x, y_true, numLesions,isAnythingInAnnotated = batch['chan3_col_name_val'], batch['label_name_val'], batch['num_lesions_to_retain'], batch['isAnythingInAnnotated']
-        
+        numBatches = y_true.size(dim=0)
+        print("val num batches {numBatches}")
         #seg_hat, reg_hat = self.modelRegression(x)        
         # seg_hat, reg_hat = self.modelRegression(x)        
         seg_hat = self.net(x).cpu().detach()
@@ -613,7 +614,8 @@ class Model(pl.LightningModule):
         images = decollate_batch(x.cpu().detach()) 
 
         processedCases=list(map(partial(processDecolated,gold_arr=y_true,y_hat_arr=y_det,directory= self.temp_val_dir,studyId= patIds
-                    ,imageArr=images, experiment=self.logger.experiment,postProcess=self.postProcess,epoch=self.current_epoch),range(0,len(patIds))))
+                    ,imageArr=images, experiment=self.logger.experiment,postProcess=self.postProcess,epoch=self.current_epoch)
+                    ,range(0,numBatches)))
         dices = list(map(lambda tupl: tupl[0] ,processedCases))
         extrCases = list(map(lambda tupl: tupl[1] ,processedCases ))
         return {'dices': dices, 'extrCases':extrCases}
