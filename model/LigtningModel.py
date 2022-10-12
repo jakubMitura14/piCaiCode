@@ -411,10 +411,10 @@ def processDice(i,postProcess,y_det,y_true):
     print(f"locDice {locDice}")
     return (locDice,hatPost.numpy())
 
-def save_heatmap(arr,dir,name):
+def save_heatmap(arr,dir,name,cmapp='gray'):
     path = join(dir,name+'.png')
     arr =np.transpose(arr)
-    plt.imshow(arr , interpolation = 'nearest' , cmap= 'gray')
+    plt.imshow(arr , interpolation = 'nearest' , cmap= cmapp)
     plt.title( name)
     plt.savefig(path)
     return path
@@ -442,14 +442,15 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experime
     t2w = imageArr[i][0,:,:,maxSlice].numpy()
     gold = (gold_arr_loc[1,:,:,maxSlice] >0).astype('int8')
 
-    print(f"maxSlice {maxSlice} gold shape {gold_arr_loc.shape} t2w {t2w.shape}  goldd {np.max(gold_arr_loc.flatten())}")
+    print(f"maxSlice {maxSlice} gold shape {gold_arr_loc.shape}  extracted shape {extracted[:,:,maxSlice].shape} t2w {t2w.shape}  goldd {np.max(gold_arr_loc.flatten())}")
     
 
     experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}"))
     experiment.log_image( save_heatmap(extracted[:,:,maxSlice],directory,f"extracted_{curr_studyId}_{epoch}"))
     experiment.log_image( save_heatmap(t2w,directory,f"t2w_{curr_studyId}_{epoch}"))
     experiment.log_image( save_heatmap(imageArr[i].numpy()[1,:,:,maxSlice],directory,f"adc_{curr_studyId}_{epoch}"))
-    experiment.log_image( save_heatmap(np.add((t2w / np.linalg.norm(t2w.flatten())).astype('float'),gold.astype('float')),directory,f"added_{curr_studyId}_{epoch}"))
+    experiment.log_image( save_heatmap(np.add((t2w / np.linalg.norm(t2w.flatten())).astype('float'),gold.astype('float')),directory,f"gold_plus_t2w_{curr_studyId}_{epoch}"))
+    experiment.log_image( save_heatmap(np.add(gold,extracted[:,:,maxSlice]),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}"),'plasma' )
 
     # experiment.log_image(extracted[:,:,maxSlice], name=f"extracted_{curr_studyId}_{epoch}",image_colormap='Greys')
     # experiment.log_image(t2w, name=f"t2w_{curr_studyId}_{epoch}",image_colormap='Greys')
