@@ -701,10 +701,11 @@ class Model(pl.LightningModule):
     
     def validation_epoch_end(self, outputs):
         print("validation_epoch_end")
-        print(f"outputs {outputs[0]['dices'] }")
-        allDices = np.array(([x['dices'].cpu().detach().numpy() for x in outputs])).flatten() 
-        allforEval = (([x['extrCases'].cpu().detach().numpy() for x in outputs]))
+        print(f"outputs {outputs[0]['extrCases'] }")
+        allDices = np.array(([torch.stack(x['dices']).cpu().detach().numpy() for x in outputs])).flatten() 
+        allforEval = (([torch.stack(x['extrCases']).cpu().detach().numpy().flatten()  for x in outputs]))
         allforEval = [item for sublist in allforEval for item in sublist]
+        print(f"allforEval {allforEval}")
         meanPiecaiMetr_auroc,meanPiecaiMetr_AP,meanPiecaiMetr_score= evaluate_all_cases(allforEval)
         if(len(allDices)>0):
             self.log('dice', np.mean(allDices))
