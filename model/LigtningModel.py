@@ -414,18 +414,18 @@ def processDice(i,postProcess,y_det,y_true):
 
 def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experiment,postProcess,epoch):
     curr_studyId=studyId[i]
-    gold_arr_loc=gold_arr[i].numpy()
+    gold_arr_loc=gold_arr[i]
     print(f"extracting {curr_studyId}")
     extracted=extract_lesion_candidates(y_hat_arr[i][1,:,:,:].numpy(), threshold='dynamic')[0]
     print(f"extracted {curr_studyId}")
     extractedBinary= torch.from_numpy((extracted>0).astype('int8')) #binarized version
     diceLoc=monai.metrics.compute_generalized_dice( postProcess(extractedBinary) ,gold_arr_loc)[1].item()
     print(f"diceee loc {diceLoc}")
-    from_case=evaluate_case(y_det=extracted,y_true=gold_arr_loc[1,:,:,:])
+    from_case=evaluate_case(y_det=extracted,y_true=gold_arr_loc[1,:,:,:].numpy())
     
     ### visualizations
     maxSlice = max(list(range(0,gold_arr_loc.shape[2])),key=lambda ind : np.sum(gold_arr_loc[:,:,ind].flatten())  )
-    experiment.log_image(gold_arr_loc[:,:,maxSlice], name=f"gold_{curr_studyId}_{epoch}.png")
+    experiment.log_image(gold_arr_loc[:,:,maxSlice].numpy(), name=f"gold_{curr_studyId}_{epoch}.png")
     experiment.log_image(extracted[:,:,maxSlice], name=f"extracted_{curr_studyId}_{epoch}.png")
     experiment.log_image(imageArr[i][0,:,:,maxSlice].numpy(), name=f"t2w_{curr_studyId}_{epoch}.png")
     experiment.log_image(imageArr[i][1,:,:,maxSlice].numpy(), name=f"adc_{curr_studyId}_{epoch}.png")
