@@ -215,8 +215,8 @@ def getNext(i,results,TIMEOUT):
         # return it.next(timeout=TIMEOUT)
         return results[i].get(TIMEOUT)
 
-    except:
-        print("timed outt ")
+    except Exception as e:
+        print(f"timed outt {e} ")
         return None    
 
 def divide_chunks(l, n):
@@ -371,6 +371,7 @@ def myMaxSlice(arr):
 
 
 def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experiment,postProcess,epoch):
+    print("processDecolated")
     curr_studyId=studyId[i]
     gold_arr_loc=gold_arr[i]
     print(f"extracting {curr_studyId}")
