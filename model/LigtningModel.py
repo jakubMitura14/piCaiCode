@@ -705,10 +705,10 @@ class Model(pl.LightningModule):
         # return {'dices': dices, 'extrCases0':extrCases0,'extrCases1':extrCases1, 'extrCases2':extrCases2 }
     def processOutputs(self,outputs):
         listt = [x['extrCases'] for x in outputs] 
-        listt = list(map(lambda innerList : list(map( lambda entry: entry.cpu().detach().numpy() ,innerList ))  ,listt))
-        print(f"listt a {listt}" )
-        listt = np.array(listt).flatten()
         print(f"listt b {listt}" )
+        listt = list(map(lambda innerList : list(map( lambda entry: list(map(lambda inEntr: inEntr,entry.cpu().detach().numpy(),entry))    ,innerList ))  ,listt))
+        listt = np.array(listt).flatten()
+        print(f"listt c {listt}" )
 
         return listt
 
