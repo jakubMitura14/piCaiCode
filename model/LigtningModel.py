@@ -415,7 +415,9 @@ def processDice(i,postProcess,y_det,y_true):
 def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experiment,postProcess,epoch):
     curr_studyId=studyId[i]
     gold_arr_loc=gold_arr[i].numpy()
+    print(f"extracting {curr_studyId}")
     extracted=extract_lesion_candidates(y_hat_arr[i][1,:,:,:].numpy(), threshold='dynamic')[0]
+    print(f"extracted {curr_studyId}")
     extractedBinary= extracted>0 #binarized version
     diceLoc=monai.metrics.compute_generalized_dice( postProcess(extractedBinary) ,gold_arr_loc)[1].item()
     print(f"diceee loc {diceLoc}")
