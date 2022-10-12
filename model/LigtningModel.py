@@ -386,9 +386,9 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experime
     
 
     experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}"))
-    experiment.log_image( save_heatmap(extracted[:,:,maxSlice],directory,f"extracted_{curr_studyId}_{epoch}"))
-    experiment.log_image( save_heatmap(t2w,directory,f"t2w_{curr_studyId}_{epoch}"))
-    experiment.log_image( save_heatmap(imageArr[i].cpu().detach().numpy()[1,:,:,maxSlice],directory,f"adc_{curr_studyId}_{epoch}"))
+    # experiment.log_image( save_heatmap(extracted[:,:,maxSlice],directory,f"extracted_{curr_studyId}_{epoch}"))
+    # experiment.log_image( save_heatmap(t2w,directory,f"t2w_{curr_studyId}_{epoch}"))
+    # experiment.log_image( save_heatmap(imageArr[i].cpu().detach().numpy()[1,:,:,maxSlice],directory,f"adc_{curr_studyId}_{epoch}"))
     experiment.log_image( save_heatmap(np.add(t2w.astype('float'),(gold*(t2wMax)).astype('float')),directory,f"gold_plus_t2w_{curr_studyId}_{epoch}"))
     experiment.log_image( save_heatmap(np.add(gold,extracted[:,:,maxSlice]),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}"),'plasma' )
 
