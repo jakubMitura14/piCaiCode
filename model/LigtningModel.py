@@ -463,7 +463,12 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experime
 
     return (diceLoc,from_case)#extracted,gold_arr_loc[goldChannel,:,:,:])
 
-
+def iterOverAndCheckType(itemm):
+    if(type(itemm) is tuple):
+        return list(map(lambda en: en.cpu().detach().numpy(),itemm )) 
+    if(torch.is_tensor(itemm)):
+        return itemm.cpu().detach().numpy()
+    return itemm    
 
 class Model(pl.LightningModule):
     def __init__(self
@@ -703,34 +708,30 @@ class Model(pl.LightningModule):
 
 
     #return {'dices': dices, 'extrCases':extrCases}
-    
+
+
+
 
         # return {'dices': dices, 'extrCases0':extrCases0,'extrCases1':extrCases1, 'extrCases2':extrCases2 }
     def processOutputs(self,outputs):
         listt = [x['extrCases'] for x in outputs] 
+        listt =[item for sublist in listt for item in sublist]
         print(f"listt b {listt}" )
-        listt = list(map(lambda innerList : list(map( lambda entry: list(map(lambda inEntr: inEntr,entry.cpu().detach().numpy(),entry))    ,innerList ))  ,listt))
-        listt = np.array(listt).flatten()
+        listt= list(map(iterOverAndCheckType, listt))
         print(f"listt c {listt}" )
-
         return listt
 
     def validation_epoch_end(self, outputs):
         print("validation_epoch_end")
         print(f"outputs {outputs[0]['extrCases'] }")
         
-        allDices = np.array(([torch.stack(x['dices']).cpu().detach().numpy() for x in outputs])).flatten() 
-        # allextracted = np.array(([torch.stack(x['extracted']).cpu().detach().numpy() for x in outputs])).flatten() 
-        # allgold = np.array(([torch.stack(x['gold']).cpu().detach().numpy() for x in outputs])).flatten() 
+        allforEval=self.processOutputs(outputs)
         
-        
-        # # allforEval=self.processOutputs(outputs)
-        # # allforEval = (([allgold.stack(x['extrCases']) for x in outputs]))
-        # print(f"allgold a {allgold}")
-        # # allforEval = torch.stack([item for sublist in allforEval for item in sublist]).numpy()
-        # # print(f"allforEval b {allforEval}")
-        # # meanPiecaiMetr_auroc,meanPiecaiMetr_AP,meanPiecaiMetr_score= evaluate_all_cases(allforEval)
-        #         # for i in range(0,numIters):
+        print(f"allgold a {allforEval}")
+        # allforEval = torch.stack([item for sublist in allforEval for item in sublist]).numpy()
+        # print(f"allforEval b {allforEval}")
+        meanPiecaiMetr_auroc,meanPiecaiMetr_AP,meanPiecaiMetr_score= evaluate_all_cases(allforEval)
+                # for i in range(0,numIters):
         # valid_metrics = evaluate(y_det=allextracted,
         #                         y_true=allgold,
         #                         num_parallel_calls= os.cpu_count()
@@ -740,33 +741,26 @@ class Model(pl.LightningModule):
         # meanPiecaiMetr_auroc=valid_metrics.auroc
         # meanPiecaiMetr_AP=valid_metrics.AP
         # meanPiecaiMetr_score= valid_metrics.meanPiecaiMetr_score
-        # print("finished evaluating")
+        print("finished evaluating")
+        allDices = np.array(([torch.stack(x['dices']).cpu().detach().numpy() for x in outputs])).flatten() 
         
         if(len(allDices)>0):
             self.log('dice', np.mean(allDices))
 
-        # print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
+        print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
 
-        # self.log('val_mean_auroc', meanPiecaiMetr_auroc)
-        # self.log('val_mean_AP', meanPiecaiMetr_AP)
-        # self.log('mean_val_acc', meanPiecaiMetr_score)
-        # # tensorss = [torch.as_tensor(x['loc_dice']) for x in outputs]
-        # # if( len(tensorss)>0):
-        # #     avg_dice = torch.mean(torch.stack(tensorss))
+        self.log('val_mean_auroc', meanPiecaiMetr_auroc)
+        self.log('val_mean_AP', meanPiecaiMetr_AP)
+        self.log('mean_val_acc', meanPiecaiMetr_score)
+        # tensorss = [torch.as_tensor(x['loc_dice']) for x in outputs]
+        # if( len(tensorss)>0):
+        #     avg_dice = torch.mean(torch.stack(tensorss))
 
-        # self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
-        # self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
-        # self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
+        self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
+        self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
+        self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
 
  
-
-
-
-
-
-
-
-
 #         # print( f"rocAuc  {self.rocAuc.aggregate().item()}"  )
 #         # #self.log('precision ', monai.metrics.compute_confusion_matrix_metric("precision", confusion_matrix) )
 #         # self.rocAuc.reset()        
