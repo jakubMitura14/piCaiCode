@@ -86,7 +86,7 @@ def standardizeFromPathAndOverwrite(path,nyul_normalizer):
     image.SetSpacing(image1.GetSpacing())
     image.SetOrigin(image1.GetOrigin())
     # image.SetDirection(image1.GetDirection())    
-    image.SetDirection((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0))
+    # image.SetDirection((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0))
     
     writer = sitk.ImageFileWriter()
     writer.KeepOriginalImageUIDOn()
@@ -284,7 +284,7 @@ def changeLabelToOnes(row):
         image.SetDirection(imageT2w.GetDirection())
         #image = sitk.DICOMOrient(image, 'RAS')
         #from https://stackoverflow.com/questions/60024404/how-to-change-the-orientation-of-simpleitk-image-in-python
-        image.SetDirection((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0))
+        # image.SetDirection((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0))
         
         #standardazing orientation
         writer = sitk.ImageFileWriter()

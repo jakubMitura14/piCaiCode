@@ -139,7 +139,7 @@ def get_train_transforms(RandGaussianNoised_prob
     train_transforms = Compose(
         [
             LoadImaged(keys=["t2w","hbv","adc" ,"label"],reader="ITKReader"),
-            Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
+            #Orientationd(keys=["t2w","adc", "hbv","label"], axcodes="RAS"),
             EnsureTyped(keys=["t2w","hbv","adc" ,"label"]),
             EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label"]),
             #standardizeLabels(keys=["label"]),
@@ -179,7 +179,7 @@ def get_val_transforms(is_whole_to_train,spatial_size):
     val_transforms = Compose(
         [
             LoadImaged(keys=["t2w","hbv","adc" ,"label_name_val"],reader="ITKReader"),
-            Orientationd(keys=["t2w","adc", "hbv","label_name_val"], axcodes="RAS"),
+            #Orientationd(keys=["t2w","adc", "hbv","label_name_val"], axcodes="RAS"),
             EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label_name_val"]),
             EnsureTyped(keys=["t2w","hbv","adc" ,"label_name_val"]),
             #standardizeLabels(keys=["label_name_val"]),
