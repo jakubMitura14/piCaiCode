@@ -418,7 +418,7 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experime
     print(f"extracting {curr_studyId}")
     extracted=extract_lesion_candidates(y_hat_arr[i][1,:,:,:].numpy(), threshold='dynamic')[0]
     print(f"extracted {curr_studyId}")
-    extractedBinary= (extracted>0).astype('int8') #binarized version
+    extractedBinary= torch.from_numpy((extracted>0).astype('int8')) #binarized version
     diceLoc=monai.metrics.compute_generalized_dice( postProcess(extractedBinary) ,gold_arr_loc)[1].item()
     print(f"diceee loc {diceLoc}")
     from_case=evaluate_case(y_det=extracted,y_true=gold_arr_loc[1,:,:,:])
