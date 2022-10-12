@@ -281,6 +281,7 @@ def changeLabelToOnes(row):
         image.SetSpacing(imageT2w.GetSpacing())
         image.SetOrigin(imageT2w.GetOrigin())
         image.SetDirection(imageT2w.GetDirection())
+        image = sitk.DICOMOrient(image, 'RAS')
         #standardazing orientation
         writer = sitk.ImageFileWriter()
         writer.KeepOriginalImageUIDOn()
