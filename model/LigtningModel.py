@@ -416,6 +416,10 @@ def save_heatmap(arr,dir,name):
 
     plt.savefig('books_read.png')
 
+def myMaxSlice(arr):
+    shape = arr.shape
+    slicesNum = shape[2]
+
 
 def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experiment,postProcess,epoch):
     curr_studyId=studyId[i]
@@ -427,13 +431,14 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, experime
     diceLoc=monai.metrics.compute_generalized_dice( postProcess(extractedBinary) ,gold_arr_loc)[1].item()
     print(f"diceee loc {diceLoc}")
     from_case=evaluate_case(y_det=extracted,y_true=gold_arr_loc[1,:,:,:].numpy())
+
+    maxSliceb = max(list(range(0,gold_arr_loc.size(dim=2))),key=lambda ind : torch.sum(gold_arr_loc[:,:,ind]).item() )
     
     gold_arr_loc=gold_arr_loc.numpy()
     ### visualizations
-    maxSliceb = np.max(list(range(0,gold_arr_loc.shape[2])),key=lambda ind : np.sum(gold_arr_loc[:,:,ind].flatten()) )
     maxSlice=40
     t2w = imageArr[i][0,:,:,maxSlice]
-    print(f"maxSlice {maxSliceb} t2w {t2w.shape} max {torch.max(t2w)} bigger {torch.max(imageArr[i])} goldd {np.max(gold_arr_loc.flatten())}")
+    print(f"maxSlice {maxSliceb} gold shape {gold_arr_loc.shape} t2w {t2w.shape} max {torch.max(t2w)} bigger {torch.max(imageArr[i])} goldd {np.max(gold_arr_loc.flatten())}")
     experiment.log_image((gold_arr_loc[1,:,:,maxSlice] >0).astype('int8'), name=f"gold_{curr_studyId}_{epoch}",image_colormap='Greys')
     experiment.log_image(extracted[:,:,maxSlice], name=f"extracted_{curr_studyId}_{epoch}",image_colormap='Greys')
     experiment.log_image(t2w, name=f"t2w_{curr_studyId}_{epoch}",image_colormap='Greys')
