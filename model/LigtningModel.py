@@ -474,7 +474,7 @@ class Model(pl.LightningModule):
         #os.makedirs('/home/sliceruser/data/temp')
         # self.postProcess=monai.transforms.Compose([EnsureType(), monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])#, monai.transforms.KeepLargestConnectedComponent()
         # self.postProcess=monai.transforms.Compose([EnsureType(),  monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])#, monai.transforms.KeepLargestConnectedComponent()
-        self.postProcess=monai.transforms.Compose([EnsureType(), AsDiscrete(argmax=True, to_onehot=2)])#, monai.transforms.KeepLargestConnectedComponent()
+        self.postProcess=monai.transforms.Compose([EnsureType(),EnsureChannelFirst(), AsDiscrete(argmax=True, to_onehot=2)])#, monai.transforms.KeepLargestConnectedComponent()
         self.postTrue = Compose([EnsureType()])
         #self.F1Score = torchmetrics.F1Score()
 
