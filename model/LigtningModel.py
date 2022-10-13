@@ -292,16 +292,11 @@ def log_images(i,experiment,golds,extracteds ,t2ws, directory,patIds,epoch,numLe
     t2w = t2ws[i][0,:,:,maxSlice].cpu().detach().numpy()
     t2wMax= np.max(t2w.flatten())
 
-    print(f" t2wMax {t2wMax}  ")
-    print(f" maxSlice {maxSlice}  ")
+
     curr_studyId=patIds[i]
     gold=golds[i][goldChannel,:,:,maxSlice].cpu().detach().numpy()
     extracted=extracteds[i]
-    print(f" t2w {t2w.shape}  ")
-    print(f" gold {gold.shape}  ")
-    print(f" extracted {extracted.shape}  ")
 
-    print(f" curr_studyId {curr_studyId}  ")
     experiment.log_image( save_heatmap(np.add(t2w.astype('float'),(gold*(t2wMax)).astype('float')),directory,f"gold_plus_t2w_{curr_studyId}_{epoch}",numLesions[i]))
     experiment.log_image( save_heatmap(np.add(gold,extracted[:,:,maxSlice]*2),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}",numLesions[i],'plasma'))
     experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}",numLesions[i]))
@@ -535,10 +530,10 @@ class Model(pl.LightningModule):
     def validation_epoch_end(self, outputs):
         print("validation_epoch_end")
         print(f"outputs {outputs[0]['dices'] }")
-        allDices = np.array(([torch.stack(x['dices']).cpu().detach().numpy() for x in outputs])).flatten() 
-        allmeanPiecaiMetr_auroc = np.array(([torch.stack(x['meanPiecaiMetr_auroc']).cpu().detach().numpy() for x in outputs])).flatten() 
-        allmeanPiecaiMetr_AP = np.array(([torch.stack(x['meanPiecaiMetr_AP']).cpu().detach().numpy() for x in outputs])).flatten() 
-        allmeanPiecaiMetr_score = np.array(([torch.stack(x['meanPiecaiMetr_score']).cpu().detach().numpy() for x in outputs])).flatten() 
+        allDices = np.array(([x['dices'].cpu().detach().numpy() for x in outputs])).flatten() 
+        allmeanPiecaiMetr_auroc = np.array(([x['meanPiecaiMetr_auroc'].cpu().detach().numpy() for x in outputs])).flatten() 
+        allmeanPiecaiMetr_AP = np.array(([x['meanPiecaiMetr_AP'].cpu().detach().numpy() for x in outputs])).flatten() 
+        allmeanPiecaiMetr_score = np.array(([x['meanPiecaiMetr_score'].cpu().detach().numpy() for x in outputs])).flatten() 
         
       
         
