@@ -633,12 +633,12 @@ class Model(pl.LightningModule):
 
             #golds=torch.stack(y_true).to(self.device)
             print("get dice")
-            diceLoc=monai.metrics.compute_generalized_dice( extracteds ,y_true_prim)[1].item()
+            diceLoc=monai.metrics.compute_generalized_dice( extracteds ,y_true_prim.to(self.device))[1].item()
             print(f"diceLoc {diceLoc}")
 
             # gold = list(map(lambda tupl: tupl[2] ,processedCases ))
 
-            return {'dices': [diceLoc], 'meanPiecaiMetr_auroc':meanPiecaiMetr_auroc
+            return {'dices': diceLoc, 'meanPiecaiMetr_auroc':meanPiecaiMetr_auroc
                     ,'meanPiecaiMetr_AP' :meanPiecaiMetr_AP,meanPiecaiMetr_score: 'meanPiecaiMetr_score'}
 
 
