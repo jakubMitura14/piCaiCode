@@ -613,6 +613,12 @@ class Model(pl.LightningModule):
             t2wMaxs = list(map(lambda tupl: tupl[4] ,processedCases ))
             maxSlices = list(map(lambda tupl: tupl[5] ,processedCases ))
             epoch=self.current_epoch
+                                                  
+            list(map(partial(log_images
+                ,experiment=experiment,golds=golds,extracteds=extracteds 
+                ,t2ws=t2ws, t2wMaxs=t2wMaxs,directory=directory,maxSlices=maxSlices
+                ,patIds=patIds,epoch=epoch),range(lenn)))
+
             valid_metrics = evaluate(y_det=extracteds,
                                     y_true=golds,
                                     num_parallel_calls= os.cpu_count()
@@ -621,11 +627,6 @@ class Model(pl.LightningModule):
             meanPiecaiMetr_auroc=valid_metrics.auroc
             meanPiecaiMetr_AP=valid_metrics.AP
             meanPiecaiMetr_score= valid_metrics.meanPiecaiMetr_score
-                                                   
-            list(map(partial(log_images
-                ,experiment=experiment,golds=golds,extracteds=extracteds 
-                ,t2ws=t2ws, t2wMaxs=t2wMaxs,directory=directory,maxSlices=maxSlices
-                ,patIds=patIds,epoch=epoch),range(lenn)))
 
             # gold = list(map(lambda tupl: tupl[2] ,processedCases ))
 
