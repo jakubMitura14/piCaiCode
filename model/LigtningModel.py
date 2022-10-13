@@ -586,13 +586,13 @@ class Model(pl.LightningModule):
         
         def log_images(i,experiment,golds,extracteds ,t2ws, t2wMaxs,directory,maxSlices,patIds,epoch):
             goldChannel=1
-            t2w=t2ws[i][0,:,:,maxSlice]
-            gold=golds[i][goldChannel,:,:,maxSlice]
-            
-            extracted=extracteds[i]
-            t2wMax=t2wMaxs[i]
             maxSlice=maxSlices[i]
             curr_studyId=patIds[i]
+            t2w=t2ws[i][0,:,:,maxSlice]
+            gold=golds[i][goldChannel,:,:,maxSlice]
+            extracted=extracteds[i]
+            t2wMax=t2wMaxs[i]
+
             print(f" t2w {t2w.shape}  ")
             print(f" gold {gold.shape}  ")
             print(f" extracted {extracted.shape}  ")
@@ -628,6 +628,8 @@ class Model(pl.LightningModule):
             meanPiecaiMetr_auroc=valid_metrics.auroc
             meanPiecaiMetr_AP=valid_metrics.AP
             meanPiecaiMetr_score= valid_metrics.meanPiecaiMetr_score
+
+            extracteds= list(map(lambda numpyEntry : torch.from_numpy(numpyEntry) ,extracteds  ))
 
             # gold = list(map(lambda tupl: tupl[2] ,processedCases ))
 
