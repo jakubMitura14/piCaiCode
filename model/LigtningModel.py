@@ -639,8 +639,8 @@ class Model(pl.LightningModule):
 
             # gold = list(map(lambda tupl: tupl[2] ,processedCases ))
 
-            return {'dices': diceLoc, 'meanPiecaiMetr_auroc':meanPiecaiMetr_auroc
-                    ,'meanPiecaiMetr_AP' :meanPiecaiMetr_AP,meanPiecaiMetr_score: 'meanPiecaiMetr_score'}
+            return {'dices': [diceLoc], 'meanPiecaiMetr_auroc':[meanPiecaiMetr_auroc]
+                    ,'meanPiecaiMetr_AP' :[meanPiecaiMetr_AP],[meanPiecaiMetr_score]: 'meanPiecaiMetr_score'}
 
 
 
@@ -695,9 +695,9 @@ class Model(pl.LightningModule):
             #                         ,verbose=1
             #                            )
 
-            meanPiecaiMetr_auroc=np.mean(allmeanPiecaiMetr_auroc)
-            meanPiecaiMetr_AP=np.mean(allmeanPiecaiMetr_AP)
-            meanPiecaiMetr_score= np.mean(allmeanPiecaiMetr_score)
+            meanPiecaiMetr_auroc=np.nanmean(allmeanPiecaiMetr_auroc)
+            meanPiecaiMetr_AP=np.nanmean(allmeanPiecaiMetr_AP)
+            meanPiecaiMetr_score= np.nanmean(allmeanPiecaiMetr_score)
             # print("finished evaluating")
             
             # if(len(allDices)>0):
