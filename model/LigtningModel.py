@@ -502,8 +502,10 @@ class Model(pl.LightningModule):
             extracteds= torch.stack(extracteds)
 
             # extracteds= self.postProcess(extracteds)#argmax=True,
+            y_true=list(filter(lambda tupl:  isTaken[tupl[0]] , enumerate(y_true)))
+            y_true=list(map(lambda tupl:  tupl[1] ,y_true))
 
-            golds=torch.stack(y_true[isTaken]).cpu()
+            golds=torch.stack(y_true).cpu()
             # print(f"get dice  extrrr {extracteds.cpu()}  Y true  {y_true_prim.cpu()}   ")
             diceLoc=monai.metrics.compute_generalized_dice( extracteds.cpu() ,golds)[1].item()
             print(f"diceLoc {diceLoc}")
