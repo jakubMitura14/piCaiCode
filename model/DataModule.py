@@ -118,18 +118,14 @@ def getMonaiSubjectDataFromDataFrame(row,label_name,label_name_val,t2wColName
 
 class PiCaiDataModule(pl.LightningDataModule):
     def __init__(self,trainSizePercent,batch_size,num_workers
-    ,drop_last,df,cache_dir,chan3_col_name,chan3_col_name_val
+    ,drop_last,df,chan3_col_name,chan3_col_name_val
     ,label_name,label_name_val,
     t2wColName,adcColName,hbvColName,
-    RandGaussianNoised_prob
     ,RandAdjustContrastd_prob
     ,RandGaussianSmoothd_prob
     ,RandRicianNoised_prob
     ,RandFlipd_prob
     ,RandAffined_prob
-    ,RandCoarseDropoutd_prob
-    ,is_whole_to_train
-    ,spatial_size
     ,RandomElasticDeformation_prob
     ,RandomAnisotropy_prob
     ,RandomMotion_prob
@@ -137,7 +133,6 @@ class PiCaiDataModule(pl.LightningDataModule):
     ,RandomSpike_prob
     ,RandomBiasField_prob  ):
         super().__init__()
-        self.cache_dir=cache_dir
         self.batch_size = batch_size
         self.df = df
         self.num_workers = num_workers
@@ -157,7 +152,6 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.chan3_col_name_val=chan3_col_name_val
         self.label_name=label_name
         self.label_name_val=label_name_val
-        self.spatial_size=spatial_size
         self.t2wColName=t2wColName
         self.adcColName=adcColName
         self.hbvColName=hbvColName
@@ -168,7 +162,6 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.RandFlipd_prob=RandFlipd_prob
         self.RandAffined_prob=RandAffined_prob
         self.RandCoarseDropoutd_prob=RandCoarseDropoutd_prob
-        self.is_whole_to_train=is_whole_to_train 
         self.RandomElasticDeformation_prob=RandomElasticDeformation_prob
         self.RandomAnisotropy_prob=RandomAnisotropy_prob
         self.RandomMotion_prob=RandomMotion_prob

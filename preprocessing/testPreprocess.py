@@ -302,9 +302,9 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
 
 
 
-        return (outLabelPath,outt2wPath,outadcPath,outhbvPath,outPath)[tuplNum]
+        return (outLabelPath,outt2wPath,outadcPath,outhbvPath)[tuplNum]
                    
-    return (" "," "," "," "," ")[tuplNum]
+    return (" "," "," "," ")[tuplNum]
 
 
 
@@ -489,16 +489,16 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
                                 ,labelColName=labelColName
                                 ,tuplNum=3
                                 ), axis=1).compute()
-    df[joinedColName]=   df.apply(partial(resize_and_join
-                                ,colNameT2w=t2wKeyWord
-                                ,colNameAdc="adc"+spacing_keyword
-                                ,colNameHbv="hbv"+spacing_keyword
-                                ,sizeWord=""
-                                ,targetSize=targetSize
-                                ,ToBedivisibleBy32=False
-                                ,labelColName=labelColName
-                                ,tuplNum=4
-                                ), axis=1).compute()
+    # df[joinedColName]=   df.apply(partial(resize_and_join
+    #                             ,colNameT2w=t2wKeyWord
+    #                             ,colNameAdc="adc"+spacing_keyword
+    #                             ,colNameHbv="hbv"+spacing_keyword
+    #                             ,sizeWord=""
+    #                             ,targetSize=targetSize
+    #                             ,ToBedivisibleBy32=False
+    #                             ,labelColName=labelColName
+    #                             ,tuplNum=4
+    #                             ), axis=1).compute()
 
 
 

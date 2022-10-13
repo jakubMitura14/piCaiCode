@@ -75,6 +75,7 @@ unets =loadLib("unets", "/home/sliceruser/data/piCaiCode/model/unets.py")
 DataModule =loadLib("DataModule", "/home/sliceruser/data/piCaiCode/model/DataModule.py")
 LigtningModel =loadLib("LigtningModel", "/home/sliceruser/data/piCaiCode/model/LigtningModel.py")
 Three_chan_baseline =loadLib("Three_chan_baseline", "/home/sliceruser/data/piCaiCode/Three_chan_baseline.py")
+ThreeChanNoExperiment =loadLib("ThreeChanNoExperiment", "/home/sliceruser/data/piCaiCode/ThreeChanNoExperiment.py")
 semisuperPreprosess =loadLib("semisuperPreprosess", "/home/sliceruser/data/piCaiCode/preprocessing/semisuperPreprosess.py")
 
 
@@ -176,38 +177,21 @@ options={
 "regression_channels":[[2,4,8],[10,16,32],[32,64,128]], #,
 "optimizer_class": [getOptNAdam] ,# ,torch.optim.LBFGS optim.AggMo,   look in https://pytorch-optimizer.readthedocs.io/en/latest/api.html
 # "centerCropSize":[(256, 256,32)],
+"spacing_keyword" : ["_half_spac_c", "_one_spac_c", "_one_and_half_spac_c", "_two_spac_c" ]# ,"_med_spac_b" #config['parameters']['spacing_keyword']["values"]
 
 }
 
-
-
-
-
 df = pd.read_csv("/home/sliceruser/data/metadata/processedMetaData_current_b.csv")
 
-t2wColName='t2w'
-adcColName='registered_'+'adc'
-hbvColName='registered_'+'hbv'
 # t2wColName="t2w"+spacing_keyword 
 # adcColName="adc"+spacing_keyword
 # hbvColName="hbv"+spacing_keyword
-
-# df=df.head(40)
-label_name="reSampledPath"
-# label_name="label"+spacing_keyword
-label_name_val=label_name
-df=df.loc[df[label_name_val] != ' ']
-df=df.loc[df[t2wColName] != ' ']
-df=df.loc[df[adcColName] != ' ']
-df=df.loc[df[hbvColName] != ' ']
-df=df.loc[df['num_lesions_to_retain']>-1]#correct gleason ...
-df['num_lesions_to_retain']=df.apply(lambda el: int(el['num_lesions_to_retain']>0))#binarizing the output
-spacings =  ["_half_spac_c", "_one_spac_c", "_one_and_half_spac_c", "_two_spac_c" ]# ,"_med_spac_b" #config['parameters']['spacing_keyword']["values"]
+spacings =  options['spacing_keyword']#["_half_spac_c", "_one_spac_c", "_one_and_half_spac_c", "_two_spac_c" ]# ,"_med_spac_b" #config['parameters']['spacing_keyword']["values"]
 
 def getDummy(spac):
     label_name=f"label{spac}_maxSize_" 
     imageRef_path=list(filter(lambda it: it!= '', df[label_name].to_numpy()))[0]
-    dummyLabelPath=f"/home/sliceruser/data/dummyData/zeroLabel{spac}.nii.gz"
+    dummyLabelPath=f"/home/sliceruser/dummyData/zeroLabel{spac}.nii.gz"
     sizz=semisuperPreprosess.writeDummyLabels(dummyLabelPath,imageRef_path)
     img_size = sizz#(sizz[2],sizz[1],sizz[0])
     return(dummyLabelPath,img_size)
@@ -219,12 +203,15 @@ physical_size =(81.0, 160.0, 192.0)#taken from picai used to crop image so only 
 
 experiment_name="picai_hp_35"
 expId='a1'
-Three_chan_baseline.mainTrain(options,df,physical_size,expId)
+percentSplit=0.85
+
+in_channels=4
+out_channels=2
+
 
 def objective(trial: optuna.trial.Trial) -> float:
 
-    return Three_chan_baseline.mainTrain(trial,df,experiment_name,dummyDict
-    ,num_workers,cpu_num ,default_root_dir,checkpoint_dir,options,num_cpus_per_worker)
+    return ThreeChanNoExperiment.mainTrain(trial,df,experiment_name,dummyDict,options)
 
 
 

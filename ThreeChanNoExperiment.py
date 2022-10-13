@@ -93,34 +93,6 @@ import time
 
 
 
-
-# def my_task(v):
-#     time.sleep(v)
-#     return v ** 2
-
-
-# lenn=8
-# squares=[None] * lenn
-
-# TIMEOUT = 2# second timeout
-# with mp.Pool(processes = mp.cpu_count()) as pool:
-#     results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
-    
-#     for i in range(lenn):
-#         try:
-#             return_value = results[i].get(2) # wait for up to time_to_wait seconds
-#         except mp.TimeoutError:
-#             print('Timeout for v = ', i)
-#         else:
-#             squares[i]=return_value
-#             print(f'Return value for v = {i} is {return_value}')
-
-#     # it = pool.imap(my_task, range(lenn))
-#     # squares=list(map(lambda ind :getNext(it,TIMEOUT) ,list(range(lenn)) ))
-# print(squares)
-
-
-
 import time
 from functools import partial
 from torchmetrics.functional import precision_recall
@@ -214,32 +186,47 @@ import model.DataModule as DataModule
 import model.LigtningModel as LigtningModel
 # import preprocessing.semisuperPreprosess
 
+def getParam(trial,options,key):
+    """
+    given integer returned from experiment 
+    it will look into options dictionary and return required object
+    """
+    lenn= len(options[key])
+    #print(f"  ")
+    integerr=trial.suggest_int(key, 0, lenn-1)
 
-def isAnnytingInAnnotatedInner(row,colName):
-    #row=row[1]
-    path=row[colName]
-    image1 = sitk.ReadImage(path)
-    #image1 = sitk.Cast(image1, sitk.sitkFloat32)
-    data = sitk.GetArrayFromImage(image1)
-    return np.sum(data)
+    return options[key][integerr]
 
 
 
 
-def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
-         ,chan3_col_name,chan3_col_name_val,label_name_val
-         ,RandGaussianNoised_prob,RandAdjustContrastd_prob,RandGaussianSmoothd_prob,
-         RandRicianNoised_prob,RandFlipd_prob, RandAffined_prob,RandCoarseDropoutd_prob
-         ,is_whole_to_train,centerCropSize,
-         num_res_units,act,norm,dropout
-         ,criterion, optimizer_class,max_epochs,accumulate_grad_batches,gradient_clip_val
-         ,picaiLossArr_auroc_final,picaiLossArr_AP_final,picaiLossArr_score_final
-          ,experiment_name,net    ,RandomElasticDeformation_prob
-    ,RandomAnisotropy_prob
-    ,RandomMotion_prob
-    ,RandomGhosting_prob
-    ,RandomSpike_prob
-    ,RandomBiasField_prob,regression_channels,num_workers,cpu_num ,default_root_dir,checkpoint_dir,lr,num_cpus_per_worker,trial):        
+
+def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_channels
+    ,out_channels):        
+
+    spacing_keyword=getParam(trial,options,"spacing_keyword")
+    label_name=f"label_{spacing_keyword}" 
+
+    
+    t2wColName="t2w"+spacing_keyword+"cropped"
+    adcColName="adc"+spacing_keyword+"cropped"
+    hbvColName="hbv"+spacing_keyword+"cropped"
+    dummyLabelPath,img_size=dummyDict[spacing_keyword]
+    chan3_col_name="joined"+spacing_keyword+"cropped"
+    
+    label_name_val=label_name
+    chan3_col_name_val=chan3_col_name
+
+
+
+
+    df=df.loc[df[label_name_val] != ' ']
+    df=df.loc[df[t2wColName] != ' ']
+    df=df.loc[df[adcColName] != ' ']
+    df=df.loc[df[hbvColName] != ' ']
+    df=df.loc[df['num_lesions_to_retain']>-1]#correct gleason ...
+    df['num_lesions_to_retain']=df.apply(lambda el: int(el['num_lesions_to_retain']>0))#binarizing the output
+
     #TODO(remove)
     comet_logger = CometLogger(
         api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
@@ -250,50 +237,33 @@ def train_model(label_name, dummyLabelPath, df,percentSplit,cacheDir
     
     data = DataModule.PiCaiDataModule(
         df= df,
-        batch_size=12,#
+        batch_size=40,#
         trainSizePercent=percentSplit,# 
         num_workers=os.cpu_count(),#os.cpu_count(),
         drop_last=False,#True,
         #we need to use diffrent cache folders depending on weather we are dividing data or not
-        cache_dir=cacheDir,
         chan3_col_name =chan3_col_name,
         chan3_col_name_val=chan3_col_name_val,
         label_name_val=label_name_val,
         label_name=label_name
         #maxSize=maxSize
-        ,RandGaussianNoised_prob=RandGaussianNoised_prob
-        ,RandAdjustContrastd_prob=RandAdjustContrastd_prob
-        ,RandGaussianSmoothd_prob=RandGaussianSmoothd_prob
-        ,RandRicianNoised_prob=RandRicianNoised_prob
-        ,RandFlipd_prob=RandFlipd_prob
-        ,RandAffined_prob=RandAffined_prob
-        ,RandCoarseDropoutd_prob=RandCoarseDropoutd_prob
-        ,is_whole_to_train=is_whole_to_train
-        ,centerCropSize=centerCropSize
-        ,RandomElasticDeformation_prob=RandomElasticDeformation_prob
-        ,RandomAnisotropy_prob=RandomAnisotropy_prob
-        ,RandomMotion_prob=RandomMotion_prob
-        ,RandomGhosting_prob=RandomGhosting_prob
-        ,RandomSpike_prob=RandomSpike_prob
-        ,RandomBiasField_prob=RandomBiasField_prob
+        ,RandAdjustContrastd_prob=trial.suggest_float("RandAdjustContrastd_prob", 0.0, 0.6)
+        ,RandGaussianSmoothd_prob=trial.suggest_float("RandGaussianSmoothd_prob", 0.0, 0.6)
+        ,RandRicianNoised_prob=trial.suggest_float("RandRicianNoised_prob", 0.0, 0.6)
+        ,RandFlipd_prob=trial.suggest_float("RandFlipd_prob", 0.0, 0.6)
+        ,RandAffined_prob=trial.suggest_float("RandAffined_prob", 0.0, 0.6)
+        ,RandomElasticDeformation_prob=trial.suggest_float("RandomElasticDeformation_prob", 0.0, 0.6)
+        ,RandomAnisotropy_prob=trial.suggest_float("RandomAnisotropy_prob", 0.0, 0.6)
+        ,RandomMotion_prob=trial.suggest_float("RandomMotion_prob", 0.0, 0.6)
+        ,RandomGhosting_prob=trial.suggest_float("RandomGhosting_prob", 0.0, 0.6)
+        ,RandomSpike_prob=trial.suggest_float("RandomSpike_prob", 0.0, 0.6)
+        ,RandomBiasField_prob=trial.suggest_float("RandomBiasField_prob", 0.0, 0.6)
     )
 
 
     data.prepare_data()
     data.setup()
-    # definition described in model folder
-    # from https://github.com/DIAGNijmegen/picai_baseline/blob/main/src/picai_baseline/unet/training_setup/neural_networks/unets.py
-    # unet= unets.UNet(
-    #     spatial_dims=3,
-    #     in_channels=3,
-    #     out_channels=2,
-    #     strides=strides,
-    #     channels=channels,
-    #     num_res_units= num_res_units,
-    #     act = act,
-    #     norm= norm,
-    #     dropout= dropout
-    # )
+
 
     model = LigtningModel.Model(
         net=net,
