@@ -49,6 +49,7 @@ from functools import partial
 import importlib.util
 import sys
 percentSplit=0.8
+from pytorch_lightning.callbacks import ModelCheckpoint
 
 def loadLib(name,path):
     spec = importlib.util.spec_from_file_location(name, path)
@@ -85,7 +86,7 @@ def isAnnytingInAnnotatedInner(row,colName):
     return np.sum(data)
 
 
-def mainTrain(options,df,physical_size ):
+def mainTrain(options,df,physical_size,expId ):
     picaiLossArr_auroc_final=[]
     picaiLossArr_AP_final=[]
     picaiLossArr_score_final=[]
@@ -200,23 +201,25 @@ def mainTrain(options,df,physical_size ):
         mode="max",
         divergence_threshold=(-0.1)
     )
-    #stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging()
+    checkpoint_callback = ModelCheckpoint(dirpath=f"/home/sliceruser/data/checkPoints/{expId}",mode='max', save_top_k=1, monitor="dice")
+    stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging()
+    
     trainer = pl.Trainer(
         #accelerator="cpu", #TODO(remove)
         max_epochs=5000,#experiment.get_parameter("max_epochs"),
         #gpus=1,
         #precision=experiment.get_parameter("precision"), 
-        #callbacks=[ early_stopping ],
+        callbacks=[ checkpoint_callback,stochasticAveraging ],
         logger=comet_logger,
         accelerator='auto',
         devices='auto',       
         default_root_dir= "/home/sliceruser/data/lightning_logs",
         # auto_scale_batch_size="binsearch",
         auto_lr_find=True,
-        check_val_every_n_epoch=10,
+        check_val_every_n_epoch=30,
         accumulate_grad_batches= 2,# experiment.get_parameter("accumulate_grad_batches"),
         gradient_clip_val=  0.9 ,#experiment.get_parameter("gradient_clip_val"),# 0.5,2.0
-        log_every_n_steps=30,
+        log_every_n_steps=10,
         strategy='dp'
     )
     trainer.logger._default_hp_metric = False

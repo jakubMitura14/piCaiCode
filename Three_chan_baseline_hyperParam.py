@@ -226,7 +226,8 @@ df=df.loc[df['isAnythingInAnnotated']>0]
 
 physical_size =(81.0, 160.0, 192.0)#taken from picai used to crop image so only center will remain
 
-Three_chan_baseline.mainTrain(options,df,physical_size)
+expId='a1'
+Three_chan_baseline.mainTrain(options,df,physical_size,expId)
 
 # for experiment in opt.get_experiments(
 #         project_name="picai-hyperparam-search-43"):
