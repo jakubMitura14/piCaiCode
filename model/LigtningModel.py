@@ -407,7 +407,7 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, postProc
     # experiment.log_image( save_heatmap(np.add(gold,extracted[:,:,maxSlice]),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}"),'plasma' )
     # experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}"))
     # return (diceLoc,from_case,gold,extracted,t2w, t2wMax,maxSlice)#extracted,gold_arr_loc[goldChannel,:,:,:])
-    return (0,0,gold_arr_loc,extracted, imageArr[i].cpu().detach().numpy(), t2wMax,maxSlice)#extracted,gold_arr_loc[goldChannel,:,:,:])
+    return extracted#extracted,gold_arr_loc[goldChannel,:,:,:])
 
 def iterOverAndCheckType(itemm):
     if(type(itemm) is tuple):
@@ -415,6 +415,28 @@ def iterOverAndCheckType(itemm):
     if(torch.is_tensor(itemm)):
         return itemm.cpu().detach().numpy()
     return itemm    
+def log_images(i,experiment,golds,extracteds ,t2ws, directory,patIds,epoch):
+    goldChannel=1
+    gold_arr_loc=golds[i]
+    maxSlice = max(list(range(0,gold_arr_loc.size(dim=3))),key=lambda ind : torch.sum(gold_arr_loc[goldChannel,:,:,ind]).item() )
+    t2w = t2ws[i][0,:,:,maxSlice].cpu().detach().numpy()
+    t2wMax= np.max(t2w.flatten())
+
+    print(f" t2wMax {t2wMax}  ")
+    print(f" maxSlice {maxSlice}  ")
+    curr_studyId=patIds[i]
+    t2w=t2ws[i][0,:,:,maxSlice]
+    gold=golds[i][goldChannel,:,:,maxSlice]
+    extracted=extracteds[i]
+    print(f" t2w {t2w.shape}  ")
+    print(f" gold {gold.shape}  ")
+    print(f" extracted {extracted.shape}  ")
+
+    print(f" curr_studyId {curr_studyId}  ")
+    experiment.log_image( save_heatmap(np.add(t2w.astype('float'),(gold*(t2wMax)).astype('float')),directory,f"gold_plus_t2w_{curr_studyId}_{epoch}"))
+    experiment.log_image( save_heatmap(np.add(gold,extracted[:,:,maxSlice]),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}"),'plasma' )
+    experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}"))
+
 
 class Model(pl.LightningModule):
     def __init__(self
@@ -577,49 +599,22 @@ class Model(pl.LightningModule):
             # time.sleep(TIMEOUT)
             processedCases=list(map(lambda ind :getNext(ind,results,200) ,list(range(lenn)) ))
 
-        processedCases=list(filter(lambda it:it!=None,processedCases))
+        extracteds=list(filter(lambda it:it!=None,processedCases))
 
 
         # processedCases=list(map(partial(processDecolated,gold_arr=y_true,y_hat_arr=y_det,directory= self.temp_val_dir,studyId= patIds
         #             ,imageArr=images, experiment=self.logger.experiment,postProcess=self.postProcess,epoch=self.current_epoch)
         #             ,range(0,numBatches)))
         
-        def log_images(i,experiment,golds,extracteds ,t2ws, t2wMaxs,directory,maxSlices,patIds,epoch):
-            goldChannel=1
-            maxSlice=maxSlices[i]
-            t2wMax=t2wMaxs[i]
 
-            print(f" t2wMax {t2wMax}  ")
-            print(f" maxSlice {maxSlice}  ")
-            curr_studyId=patIds[i]
-            t2w=t2ws[i][0,:,:,maxSlice]
-            gold=golds[i][goldChannel,:,:,maxSlice]
-            extracted=extracteds[i]
-            print(f" t2w {t2w.shape}  ")
-            print(f" gold {gold.shape}  ")
-            print(f" extracted {extracted.shape}  ")
-
-            print(f" curr_studyId {curr_studyId}  ")
-            experiment.log_image( save_heatmap(np.add(t2w.astype('float'),(gold*(t2wMax)).astype('float')),directory,f"gold_plus_t2w_{curr_studyId}_{epoch}"))
-            experiment.log_image( save_heatmap(np.add(gold,extracted[:,:,maxSlice]),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}"),'plasma' )
-            experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}"))
-
-        if(len(processedCases)>0):
+        if(len(extracteds)>0):
             experiment=self.logger.experiment
             directory= self.temp_val_dir
-            dices = list(map(lambda tupl: tupl[0] ,processedCases))
-            # from_case = list(map(lambda tupl: tupl[1] ,processedCases))
-            golds = list(map(lambda tupl: tupl[1] ,processedCases ))
-            extracteds = list(map(lambda tupl: tupl[2] ,processedCases ))
-            t2ws = list(map(lambda tupl: tupl[3] ,processedCases ))
-            t2wMaxs = list(map(lambda tupl: tupl[4] ,processedCases ))
-            maxSlices = list(map(lambda tupl: tupl[5] ,processedCases ))
             epoch=self.current_epoch
                                                   
             list(map(partial(log_images
-                ,experiment=experiment,golds=golds,extracteds=extracteds 
-                ,t2ws=t2ws, t2wMaxs=t2wMaxs,directory=directory,maxSlices=maxSlices
-                ,patIds=patIds,epoch=epoch),range(lenn)))
+                ,experiment=experiment,golds=y_true,extracteds=extracteds 
+                ,t2ws=images,directory=directory ,patIds=patIds,epoch=epoch),range(lenn)))
 
             valid_metrics = evaluate(y_det=extracteds,
                                     y_true=golds,
@@ -633,15 +628,15 @@ class Model(pl.LightningModule):
             extracteds= list(map(lambda numpyEntry : torch.from_numpy((numpyEntry>0).astype('int8')) ,extracteds  ))
             extracteds= list(map(lambda entry : EnsureChannelFirst()(entry) ,extracteds  ))
             extracteds= torch.stack(extracteds).to(self.device)
-            extracteds= AsDiscrete(argmax=True, to_onehot=2)(extracteds)
+            extracteds= AsDiscrete( to_onehot=2)(extracteds)#argmax=True,
 
             golds=torch.stack(golds).to(self.device)
-            diceLoc=monai.metrics.compute_generalized_dice( postProcess(extractedBinary) ,gold_arr_loc)[1].item()
+            diceLoc=monai.metrics.compute_generalized_dice( extracteds ,golds)[1].item()
 
 
             # gold = list(map(lambda tupl: tupl[2] ,processedCases ))
 
-            return {'dices': dices, 'meanPiecaiMetr_auroc':meanPiecaiMetr_auroc
+            return {'dices': [diceLoc], 'meanPiecaiMetr_auroc':meanPiecaiMetr_auroc
                     ,'meanPiecaiMetr_AP' :meanPiecaiMetr_AP,meanPiecaiMetr_score: 'meanPiecaiMetr_score'}
 
 
