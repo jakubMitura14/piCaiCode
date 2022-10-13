@@ -374,7 +374,7 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, postProc
     curr_studyId=studyId[i]
     gold_arr_loc=gold_arr[i]
     print(f"extracting {curr_studyId}")
-    extracted=extract_lesion_candidates(y_hat_arr[i][1,:,:,:].cpu().detach().numpy())[0] #, threshold='dynamic'
+    extracted=np.array(extract_lesion_candidates(y_hat_arr[i][1,:,:,:].cpu().detach().numpy())[0]) #, threshold='dynamic'
     print(f"extracted {curr_studyId}")
     # extractedBinary= torch.from_numpy((extracted>0).astype('int8')) #binarized version
     # diceLoc=monai.metrics.compute_generalized_dice( postProcess(extractedBinary) ,gold_arr_loc)[1].item()
