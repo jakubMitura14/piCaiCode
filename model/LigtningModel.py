@@ -623,7 +623,7 @@ class Model(pl.LightningModule):
             
             meanPiecaiMetr_auroc=valid_metrics.auroc
             meanPiecaiMetr_AP=valid_metrics.AP
-            meanPiecaiMetr_score= valid_metrics.meanPiecaiMetr_score
+            meanPiecaiMetr_score= valid_metrics.score
 
             extracteds= list(map(lambda numpyEntry : torch.from_numpy((numpyEntry>0).astype('int8')) ,extracteds  ))
             extracteds= list(map(lambda entry : EnsureChannelFirst()(entry) ,extracteds  ))
