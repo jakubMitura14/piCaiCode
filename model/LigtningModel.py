@@ -384,13 +384,13 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, postProc
     maxSlice = max(list(range(0,gold_arr_loc.size(dim=3))),key=lambda ind : torch.sum(gold_arr_loc[goldChannel,:,:,ind]).item() )
     
     gold_arr_loc=gold_arr_loc.cpu().detach().numpy()
-    print(f"gold arr shape { gold_arr_loc.shape}")
+    # print(f"gold arr shape { gold_arr_loc.shape}")
 
     ### visualizations
     t2w = imageArr[i][0,:,:,maxSlice].cpu().detach().numpy()
     t2wMax= np.max(t2w.flatten())
-    gold = gold_arr_loc[goldChannel,:,:,maxSlice]
-    print(f"fiin proc decol {curr_studyId}")
+    # gold = gold_arr_loc[goldChannel,:,:,maxSlice]
+    # print(f"fiin proc decol {curr_studyId} gold shape {gold.shape}")
     # print(f"maxSlice {maxSlice} gold shape {gold_arr_loc.shape}  extracted shape {extracted[:,:,maxSlice].shape} t2w {t2w.shape}  goldd {np.max(gold_arr_loc.flatten())}")
     
 
@@ -407,7 +407,7 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, postProc
     # experiment.log_image( save_heatmap(np.add(gold,extracted[:,:,maxSlice]),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}"),'plasma' )
     # experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}"))
     # return (diceLoc,from_case,gold,extracted,t2w, t2wMax,maxSlice)#extracted,gold_arr_loc[goldChannel,:,:,:])
-    return (0,0,gold,extracted,t2w, t2wMax,maxSlice)#extracted,gold_arr_loc[goldChannel,:,:,:])
+    return (0,0,gold_arr_loc,extracted, imageArr[i].cpu().detach().numpy(), t2wMax,maxSlice)#extracted,gold_arr_loc[goldChannel,:,:,:])
 
 def iterOverAndCheckType(itemm):
     if(type(itemm) is tuple):
@@ -585,8 +585,9 @@ class Model(pl.LightningModule):
         #             ,range(0,numBatches)))
         
         def log_images(i,experiment,golds,extracteds ,t2ws, t2wMaxs,directory,maxSlices,patIds,epoch):
-            t2w=t2ws[i]
-            gold=golds[i]
+            goldChannel=1
+            t2w=t2ws[i][0,:,:,maxSlice]
+            gold=golds[i][goldChannel,:,:,maxSlice]
             
             extracted=extracteds[i]
             t2wMax=t2wMaxs[i]
