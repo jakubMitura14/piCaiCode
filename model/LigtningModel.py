@@ -407,7 +407,7 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, postProc
     # experiment.log_image( save_heatmap(np.add(gold,extracted[:,:,maxSlice]),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}"),'plasma' )
     # experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}"))
     # return (diceLoc,from_case,gold,extracted,t2w, t2wMax,maxSlice)#extracted,gold_arr_loc[goldChannel,:,:,:])
-    return torch.from_numpy(extracted) #extracted,gold_arr_loc[goldChannel,:,:,:])
+    return extracted #extracted,gold_arr_loc[goldChannel,:,:,:])
 
 def iterOverAndCheckType(itemm):
     if(type(itemm) is tuple):
@@ -599,8 +599,8 @@ class Model(pl.LightningModule):
             # time.sleep(TIMEOUT)
             processedCases=list(map(lambda ind :getNext(ind,results,200) ,list(range(lenn)) ))
 
-        extracteds=list(filter(lambda it:torch.is_tensor(it),processedCases))
-        extracteds=list(filter(lambda it:it.numpy(),extracteds))
+        extracteds=list(filter(lambda it:type(it) != type(None),processedCases))
+        # extracteds=list(filter(lambda it:it.numpy(),extracteds))
 
 
         # processedCases=list(map(partial(processDecolated,gold_arr=y_true,y_hat_arr=y_det,directory= self.temp_val_dir,studyId= patIds
