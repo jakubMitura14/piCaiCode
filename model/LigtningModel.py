@@ -232,7 +232,7 @@ def getArrayFromPath(path):
 
 def save_heatmap(arr,dir,name,numLesions,cmapp='gray'):
     path = join(dir,name+'.png')
-    arr = np.flip(np.transpose(arr),(1,0))
+    arr = np.flip(np.transpose(arr),0)
     plt.imshow(arr , interpolation = 'nearest' , cmap= cmapp)
     plt.title( name+'__'+str(numLesions))
     plt.savefig(path)
