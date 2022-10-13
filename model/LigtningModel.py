@@ -617,7 +617,7 @@ class Model(pl.LightningModule):
             # y_true= list(map(lambda el: el.numpy()  ,y_true))                                              
 
             valid_metrics = evaluate(y_det=extracteds,
-                                    y_true=list(map(lambda el: el.numpy()  ,y_true)),
+                                    y_true=list(map(lambda el: el.numpy()[1,:,:,:]  ,y_true)),
                                     num_parallel_calls= os.cpu_count()
                                     ,verbose=1)
             
