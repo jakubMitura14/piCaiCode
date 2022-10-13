@@ -628,7 +628,7 @@ class Model(pl.LightningModule):
             extracteds= list(map(lambda numpyEntry : torch.from_numpy((numpyEntry>0).astype('int8')) ,extracteds  ))
             extracteds= list(map(lambda entry : EnsureChannelFirst()(entry) ,extracteds  ))
             extracteds= torch.stack(extracteds).to(self.device)
-            extracteds= AsDiscrete( to_onehot=2)(extracteds)#argmax=True,
+            extracteds= self.postProcess(extracteds)#argmax=True,
 
             golds=torch.stack(y_true).to(self.device)
             diceLoc=monai.metrics.compute_generalized_dice( extracteds ,golds)[1].item()
