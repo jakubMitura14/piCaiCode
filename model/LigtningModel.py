@@ -445,7 +445,7 @@ class Model(pl.LightningModule):
         # seg_hat, reg_hat = self.modelRegression(x)        
         seg_hat = self.net(x)
         seg_hat=torch.sigmoid(seg_hat)
-        diceLoc=monai.metrics.compute_generalized_dice( self.postProcess(seg_hat) ,y_true_prim)[1].item()
+        diceLoc=monai.metrics.compute_generalized_dice( AsDiscrete(argmax=True, to_onehot=2)(seg_hat) ,y_true_prim)[1].item()
         seg_hat=seg_hat.cpu().detach()
 
         t2wb=decollate_batch(batch['t2wb'])
