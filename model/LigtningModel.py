@@ -379,16 +379,16 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, postProc
     # extractedBinary= torch.from_numpy((extracted>0).astype('int8')) #binarized version
     # diceLoc=monai.metrics.compute_generalized_dice( postProcess(extractedBinary) ,gold_arr_loc)[1].item()
     # print(f"diceee loc {diceLoc} {curr_studyId}")
-    goldChannel=1
-    # from_case=evaluate_case(y_det=extracted,y_true=gold_arr_loc[goldChannel,:,:,:].numpy())
-    maxSlice = max(list(range(0,gold_arr_loc.size(dim=3))),key=lambda ind : torch.sum(gold_arr_loc[goldChannel,:,:,ind]).item() )
+    # goldChannel=1
+    # # from_case=evaluate_case(y_det=extracted,y_true=gold_arr_loc[goldChannel,:,:,:].numpy())
+    # maxSlice = max(list(range(0,gold_arr_loc.size(dim=3))),key=lambda ind : torch.sum(gold_arr_loc[goldChannel,:,:,ind]).item() )
     
-    gold_arr_loc=gold_arr_loc.cpu().detach().numpy()
-    # print(f"gold arr shape { gold_arr_loc.shape}")
+    # gold_arr_loc=gold_arr_loc.cpu().detach().numpy()
+    # # print(f"gold arr shape { gold_arr_loc.shape}")
 
-    ### visualizations
-    t2w = imageArr[i][0,:,:,maxSlice].cpu().detach().numpy()
-    t2wMax= np.max(t2w.flatten())
+    # ### visualizations
+    # t2w = imageArr[i][0,:,:,maxSlice].cpu().detach().numpy()
+    # t2wMax= np.max(t2w.flatten())
     # gold = gold_arr_loc[goldChannel,:,:,maxSlice]
     # print(f"fiin proc decol {curr_studyId} gold shape {gold.shape}")
     # print(f"maxSlice {maxSlice} gold shape {gold_arr_loc.shape}  extracted shape {extracted[:,:,maxSlice].shape} t2w {t2w.shape}  goldd {np.max(gold_arr_loc.flatten())}")
@@ -407,7 +407,7 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, postProc
     # experiment.log_image( save_heatmap(np.add(gold,extracted[:,:,maxSlice]),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}"),'plasma' )
     # experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}"))
     # return (diceLoc,from_case,gold,extracted,t2w, t2wMax,maxSlice)#extracted,gold_arr_loc[goldChannel,:,:,:])
-    return extracted#extracted,gold_arr_loc[goldChannel,:,:,:])
+    return (extracted,) #extracted,gold_arr_loc[goldChannel,:,:,:])
 
 def iterOverAndCheckType(itemm):
     if(type(itemm) is tuple):
@@ -600,6 +600,7 @@ class Model(pl.LightningModule):
             processedCases=list(map(lambda ind :getNext(ind,results,200) ,list(range(lenn)) ))
 
         extracteds=list(filter(lambda it:it!=None,processedCases))
+        extracteds=list(filter(lambda it:it[0],extracteds))
 
 
         # processedCases=list(map(partial(processDecolated,gold_arr=y_true,y_hat_arr=y_det,directory= self.temp_val_dir,studyId= patIds
