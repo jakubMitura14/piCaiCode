@@ -178,6 +178,7 @@ monai.utils.set_determinism()
 from functools import partial
 from pytorch_lightning.loggers import CometLogger
 from optuna.integration import PyTorchLightningPruningCallback
+from pytorch_lightning.callbacks import ModelCheckpoint
 
 # import preprocessing.transformsForMain
 # import preprocessing.ManageMetadata
@@ -197,12 +198,21 @@ def getParam(trial,options,key):
 
     return options[key][integerr]
 
+def addDummyLabelPath(row, labelName, dummyLabelPath):
+    """
+    adds dummy label to the given column in every spot it is empty
+    """
+    row = row[1]
+    if(row[labelName]==' '):
+        return dummyLabelPath
+    else:
+        return row[labelName]    
 
 
 
 
 def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_channels
-    ,out_channels):        
+    ,out_channels,expId):        
 
     spacing_keyword=getParam(trial,options,"spacing_keyword")
     label_name=f"label_{spacing_keyword}" 
@@ -213,10 +223,14 @@ def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_chan
     hbvColName="hbv"+spacing_keyword+"cropped"
     dummyLabelPath,img_size=dummyDict[spacing_keyword]
     chan3_col_name="joined"+spacing_keyword+"cropped"
-    
+    df[label_name]=list(map(partial(addDummyLabelPath,labelName=label_name ,dummyLabelPath= dummyLabelPath ) ,list(df.iterrows())) )  
     label_name_val=label_name
     chan3_col_name_val=chan3_col_name
 
+    picaiLossArr_auroc_final=[]
+    picaiLossArr_AP_final=[]
+    picaiLossArr_score_final=[]
+    dice_final=[]
 
 
 
@@ -260,124 +274,75 @@ def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_chan
         ,RandomBiasField_prob=trial.suggest_float("RandomBiasField_prob", 0.0, 0.6)
     )
 
-
+    dropout= trial.suggest_float("dropout", 0.0,0.6)
     data.prepare_data()
     data.setup()
+    net= getParam(trial,options,"models") #options["models"][0]#   
+    net=net(dropout,img_size,in_channels,out_channels)
 
-
+    optimizer_class= torch.optim.NAdam
+    regression_channels=getParam(trial,options,"regression_channels")
+    to_onehot_y_loss= False
+    
     model = LigtningModel.Model(
         net=net,
-        criterion=  criterion,# Our seg labels are single channel images indicating class index, rather than one-hot
-        learning_rate=1e-2,
+        criterion=  monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss),# Our seg labels are single channel images indicating class index, rather than one-hot
+        learning_rate=trial.suggest_float("learning_rate", 1e-5, 1e-3),
         optimizer_class= optimizer_class,
         picaiLossArr_auroc_final=picaiLossArr_auroc_final,
         picaiLossArr_AP_final=picaiLossArr_AP_final,
         picaiLossArr_score_final=picaiLossArr_score_final,
         regression_channels=regression_channels,
-        lr=lr,
         trial=trial
     )
-    early_stopping = pl.callbacks.early_stopping.EarlyStopping(
-        monitor='mean_val_acc',
-        patience=7,
-        mode="max",
-        #divergence_threshold=(-0.1)
+
+
+    model = LigtningModel.Model(
+         net=net,
+        criterion=  monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss),# Our seg labels are single channel images indicating class index, rather than one-hot
+        learning_rate=trial.suggest_float("learning_rate", 1e-5, 1e-3),
+        optimizer_class= optimizer_class,
+        picaiLossArr_auroc_final=picaiLossArr_auroc_final,
+        picaiLossArr_AP_final=picaiLossArr_AP_final,
+        picaiLossArr_score_final=picaiLossArr_score_final,
+        regression_channels=regression_channels,
+        trial=trial
+        ,dice_final=dice_final
+    )
+
+    checkpoint_callback = ModelCheckpoint(dirpath=f"/home/sliceruser/checkPoints/{expId}",mode='max', save_top_k=1, monitor="dice")
+    stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging(swa_lrs=1e-2)
+    optuna_prune=PyTorchLightningPruningCallback(trial, monitor="dice")     
+
+
+    trainer = pl.Trainer(
+        #accelerator="cpu", #TODO(remove)
+        max_epochs=600,#experiment.get_parameter("max_epochs"),
+        #gpus=1,
+        #precision=experiment.get_parameter("precision"), 
+        callbacks=[ checkpoint_callback,stochasticAveraging,optuna_prune ],
+        logger=comet_logger,
+        accelerator='auto',
+        devices='auto',       
+        default_root_dir= "/home/sliceruser/lightning_logs",
+        # auto_scale_batch_size="binsearch",
+        auto_lr_find=True,
+        check_val_every_n_epoch=30,
+        accumulate_grad_batches= 2,# experiment.get_parameter("accumulate_grad_batches"),
+        gradient_clip_val=  0.9 ,#experiment.get_parameter("gradient_clip_val"),# 0.5,2.0
+        log_every_n_steps=10,
+        # strategy='dp'
     )
 
 
-    # tuneCallBack=TuneReportCheckpointCallback(
-    #     metrics={
-    #         "mean_val_loss": "mean_val_loss",
-    #         "mean_val_acc": "mean_val_acc"
-    #     },
-    #     filename="checkpointtt.ckpt",
-    #     on="validation_end")
-    # tuneCallBack=TuneReportCallback(
-    #     {
-    #         "mean_val_loss": "mean_val_loss",
-    #         "mean_val_acc": "mean_val_acc"
-    #     },
-    #     on="validation_end")
 
-    #strategy = RayStrategy(num_workers=num_workers,num_cpus_per_worker=num_cpus_per_worker,  use_gpu=True)#num_cpus_per_worker=1, num_workers
-    #strategy = RayShardedStrategy(num_workers=1, num_cpus_per_worker=num_cpus_per_worker, use_gpu=True)
-
-
-    # trainer = pl.Trainer(
-    #     #accelerator="cpu", #TODO(remove)
-    #     #max_epochs=max_epochs,
-    #     #gpus=1,
-    #     #precision=experiment.get_parameter("precision"), 
-    #     callbacks=[ checkPointCallback ],# TODO unhash,#early_stopping
-    #     logger=comet_logger,
-    #     # accelerator='auto',
-    #     # devices='auto',       
-    #     default_root_dir= default_root_dir,
-    #     #auto_scale_batch_size="binsearch",
-    #     auto_lr_find=True,
-    #     check_val_every_n_epoch=10,
-    #     accumulate_grad_batches=accumulate_grad_batches,
-    #     gradient_clip_val=gradient_clip_val,# 0.5,2.0
-    #     log_every_n_steps=2,
-    #     strategy=strategy#'ddp'#'ddp' # for multi gpu training
-    # )
-    #callbacks=[PyTorchLightningPruningCallback(trial, monitor="val_acc") ]#checkPointCallback
-    # callbacks=[early_stopping ]#checkPointCallback
-    callbacks=[]#checkPointCallback
-    #cuda_now = int(os.environ['cuda_now'])
-    
-    kwargs = {
-        "accelerator":'auto',
-         "devices": 'auto',#[cuda_now],
-        "max_epochs": max_epochs,
-        "callbacks" :callbacks,
-        "logger" : comet_logger,
-        "default_root_dir" : default_root_dir,
-        "auto_lr_find" : False,
-        "check_val_every_n_epoch" : 10,
-        "accumulate_grad_batches" : accumulate_grad_batches,
-        "gradient_clip_val" :gradient_clip_val,
-        "log_every_n_steps" :2,
-        #"strategy" :'dp',# "ddp_sharded"
-        #"profiler":'simple'
-        }
-
-    # if os.path.exists(os.path.join(checkpoint_dir, "checkpointtt")):
-    #     kwargs["resume_from_checkpoint"] = os.path.join(
-    #         checkpoint_dir, "checkpointtt")
-
-    trainer = pl.Trainer(**kwargs)
-
-
-    #stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging()
-    # trainer = pl.Trainer(
-    #     #accelerator="cpu", #TODO(remove)
-    #     #max_epochs=max_epochs,
-    #     #gpus=1,
-    #     #precision=experiment.get_parameter("precision"), 
-    #     callbacks=[ checkPointCallback ],# TODO unhash,#early_stopping
-    #     logger=comet_logger,
-    #     # accelerator='auto',
-    #     # devices='auto',       
-    #     default_root_dir= "/home/sliceruser/data/lightning_logs",
-    #     #auto_scale_batch_size="binsearch",
-    #     auto_lr_find=True,
-    #     check_val_every_n_epoch=10,
-    #     accumulate_grad_batches=accumulate_grad_batches,
-    #     gradient_clip_val=gradient_clip_val,# 0.5,2.0
-    #     log_every_n_steps=2,
-    #     strategy=strategy#'ddp'#'ddp' # for multi gpu training
-    # )
-    #setting batch size automatically
-    #TODO(unhash)
-    #trainer.tune(model, datamodule=data)
 
     trainer.logger._default_hp_metric = False
     start = datetime.now()
     print('Training started at', start)
     trainer.fit(model=model, datamodule=data)
     print('Training duration:', datetime.now() - start)
-
+    return np.min(dice_final)
 
 
  

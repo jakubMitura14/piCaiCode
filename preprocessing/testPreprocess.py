@@ -249,11 +249,11 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
             if os.path.exists(row[colNameT2w]):
                 os.remove(row[colNameT2w])
             if os.path.exists(row[colNameAdc]):
-                os.remove(row[colNameT2w])
+                os.remove(row[colNameAdc])
             if os.path.exists(row[colNameHbv]):
-                os.remove(row[colNameT2w])
+                os.remove(row[colNameHbv])
             if os.path.exists(row[labelColName]):
-                os.remove(row[colNameT2w])
+                os.remove(row[labelColName])
 
             # print(f"pre patient id  {patId} ")
             # print(f"pre t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    

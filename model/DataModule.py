@@ -79,7 +79,10 @@ from model import transformsForMain as transformsForMain
 # import preprocessing.ManageMetadata as manageMetaData
 # import dataManag.utils.dataUtils as dataUtils
 # import multiprocessing
-
+from monai.config import KeysCollection
+from monai.data import MetaTensor
+import torchio
+import numpy as np
 
 
 def getMonaiSubjectDataFromDataFrame(row,label_name,label_name_val,t2wColName
@@ -155,13 +158,11 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.t2wColName=t2wColName
         self.adcColName=adcColName
         self.hbvColName=hbvColName
-        self.RandGaussianNoised_prob=RandGaussianNoised_prob
         self.RandAdjustContrastd_prob=RandAdjustContrastd_prob
         self.RandGaussianSmoothd_prob=RandGaussianSmoothd_prob
         self.RandRicianNoised_prob=RandRicianNoised_prob
         self.RandFlipd_prob=RandFlipd_prob
         self.RandAffined_prob=RandAffined_prob
-        self.RandCoarseDropoutd_prob=RandCoarseDropoutd_prob
         self.RandomElasticDeformation_prob=RandomElasticDeformation_prob
         self.RandomAnisotropy_prob=RandomAnisotropy_prob
         self.RandomMotion_prob=RandomMotion_prob
@@ -237,16 +238,19 @@ class PiCaiDataModule(pl.LightningDataModule):
         print(f" onlyPositiveSubjects {len(onlyPositiveSubjects)} onlyNegative {len(onlyNegative)} noLabels but positive {len(noLabels)}  ")
 
         train_transforms=transformsForMain.get_train_transforms(
-            self.RandGaussianNoised_prob
-            ,self.RandAdjustContrastd_prob
+            self.RandAdjustContrastd_prob
             ,self.RandGaussianSmoothd_prob
             ,self.RandRicianNoised_prob
             ,self.RandFlipd_prob
             ,self.RandAffined_prob
-            ,self.RandCoarseDropoutd_prob
-            ,self.is_whole_to_train,self.spatial_size )
-        val_transforms= transformsForMain.get_val_transforms(self.is_whole_to_train,self.spatial_size )
-
+            ,self.RandomElasticDeformation_prob
+            ,self.RandomAnisotropy_prob
+            ,self.RandomMotion_prob
+            ,self.RandomGhosting_prob
+            ,self.RandomSpike_prob
+            ,self.RandomBiasField_prob          
+             )
+        val_transforms= transformsForMain.get_val_transforms()
 
         self.val_ds=     SmartCacheDataset(data=onlyPositiveSubjects[0:25]+onlyNegative[0:10], transform=val_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
         self.train_ds_labels = SmartCacheDataset(data=onlyPositiveSubjects[25:]+onlyNegative[10:], transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())

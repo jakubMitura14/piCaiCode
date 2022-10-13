@@ -17,7 +17,7 @@ from monai.transforms import (
     Resize,
     Resized,
     RandSpatialCropd,
-    AsDiscrete,
+        AsDiscrete,
     AsDiscreted,
     CropForegroundd,
     LoadImaged,
@@ -40,14 +40,13 @@ from monai.transforms import (
     AsDiscreted,
     MapTransform,
     ResizeWithPadOrCropd,
-    EnsureChannelFirstd
+    RepeatChanneld
     
 )
+
 from monai.config import KeysCollection
-import torch
-
-
-
+from monai.data import MetaTensor
+import torchio
 import torchio
 import numpy as np
 
@@ -95,6 +94,25 @@ class standardizeLabels(MapTransform):
 #             d[key] = (d[key] > 0.5).astype('int8')
 #         return d
 
+class wrapTorchio(MapTransform):
+    def __init__(
+        self,
+        torchioObj,
+        keys: KeysCollection = "chan3_col_name",
+        # p: float=0.2,
+        allow_missing_keys: bool = False,
+        
+    ):
+        super().__init__(keys, allow_missing_keys)
+        self.keys=keys
+        self.torchioObj=torchioObj
+
+    def __call__(self, data):
+        return self.torchioObj(data)
+        # d = dict(data)
+        # for key in self.keys:
+        #     d[key] = torchioObj()   (d[key] > 0.5).astype('int8')
+        # return d
 
 
 
@@ -123,15 +141,18 @@ def decide_if_whole_image_train(is_whole_to_train, chan3Name,labelName):
 #https://github.com/DIAGNijmegen/picai_prep/blob/19a0ef2d095471648a60e45e30b218b7a81b2641/src/picai_prep/preprocessing.py
 
 
-def get_train_transforms(RandGaussianNoised_prob
-    ,RandAdjustContrastd_prob
-    ,RandGaussianSmoothd_prob
-    ,RandRicianNoised_prob
-    ,RandFlipd_prob
-    ,RandAffined_prob
-    ,RandCoarseDropoutd_prob
-    ,is_whole_to_train
-    ,spatial_size
+def get_train_transforms(
+            RandAdjustContrastd_prob
+            ,RandGaussianSmoothd_prob
+            ,RandRicianNoised_prob
+            ,RandFlipd_prob
+            ,RandAffined_prob
+            ,RandomElasticDeformation_prob
+            ,RandomAnisotropy_prob
+            ,RandomMotion_prob
+            ,RandomGhosting_prob
+            ,RandomSpike_prob
+            ,RandomBiasField_prob  
      ):
 
 
@@ -162,19 +183,23 @@ def get_train_transforms(RandGaussianNoised_prob
             #*decide_if_whole_image_train(False,"chan3_col_name","label"),
             #SpatialPadd(keys=["chan3_col_name","label"]],spatial_size=maxSize) , 
             SelectItemsd(keys=["chan3_col_name","label","study_id","num_lesions_to_retain","isAnythingInAnnotated"]),           
-            RandGaussianNoised(keys=["chan3_col_name"], prob=RandGaussianNoised_prob),
             RandAdjustContrastd(keys=["chan3_col_name"], prob=RandAdjustContrastd_prob),
             RandGaussianSmoothd(keys=["chan3_col_name"], prob=RandGaussianSmoothd_prob),
             RandRicianNoised(keys=["chan3_col_name",], prob=RandRicianNoised_prob),
             RandFlipd(keys=["chan3_col_name","label"], prob=RandFlipd_prob),
             RandAffined(keys=["chan3_col_name","label"], prob=RandAffined_prob),
-            RandCoarseDropoutd(keys=["chan3_col_name"], prob=RandCoarseDropoutd_prob,holes=6, spatial_size=5),
+            wrapTorchio(torchio.transforms.RandomElasticDeformation(include=["chan3_col_name","label"],p=RandomElasticDeformation_prob)),
+            wrapTorchio(torchio.transforms.RandomAnisotropy(include=["chan3_col_name","label"],p=RandomAnisotropy_prob)),
+            wrapTorchio(torchio.transforms.RandomMotion(include=["chan3_col_name"],p=RandomMotion_prob)),
+            wrapTorchio(torchio.transforms.RandomGhosting(include=["chan3_col_name"],p=RandomGhosting_prob)),
+            wrapTorchio(torchio.transforms.RandomSpike(include=["chan3_col_name"],p=RandomSpike_prob)),
+            wrapTorchio(torchio.transforms.RandomBiasField(include=["chan3_col_name"],p=RandomBiasField_prob)),
             
+
         ]
     )
     return train_transforms
-def get_val_transforms(is_whole_to_train,spatial_size):
-    print(f"spatial_sizeeee {spatial_size}"  )
+def get_val_transforms():
 
     val_transforms = Compose(
         [

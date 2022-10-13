@@ -239,44 +239,17 @@ def save_heatmap(arr,dir,name,numLesions,cmapp='gray'):
     return path
 
 
-def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, postProcess,epoch):
-    curr_studyId=studyId[i]
+def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, postProcess,epoch,regr):
+    regr_now = regr[i]
     gold_arr_loc=gold_arr[i]
+
+    if(regr_now==0):
+        return np.zeros_like(gold_arr_loc)        
+    curr_studyId=studyId[i]
     print(f"extracting {curr_studyId}")
     extracted=np.array(extract_lesion_candidates(y_hat_arr[i][1,:,:,:].cpu().detach().numpy())[0]) #, threshold='dynamic'
     print(f"extracted {curr_studyId}")
-    # extractedBinary= torch.from_numpy((extracted>0).astype('int8')) #binarized version
-    # diceLoc=monai.metrics.compute_generalized_dice( postProcess(extractedBinary) ,gold_arr_loc)[1].item()
-    # print(f"diceee loc {diceLoc} {curr_studyId}")
-    # goldChannel=1
-    # # from_case=evaluate_case(y_det=extracted,y_true=gold_arr_loc[goldChannel,:,:,:].numpy())
-    # maxSlice = max(list(range(0,gold_arr_loc.size(dim=3))),key=lambda ind : torch.sum(gold_arr_loc[goldChannel,:,:,ind]).item() )
-    
-    # gold_arr_loc=gold_arr_loc.cpu().detach().numpy()
-    # # print(f"gold arr shape { gold_arr_loc.shape}")
-
-    # ### visualizations
-    # t2w = imageArr[i][0,:,:,maxSlice].cpu().detach().numpy()
-    # t2wMax= np.max(t2w.flatten())
-    # gold = gold_arr_loc[goldChannel,:,:,maxSlice]
-    # print(f"fiin proc decol {curr_studyId} gold shape {gold.shape}")
-    # print(f"maxSlice {maxSlice} gold shape {gold_arr_loc.shape}  extracted shape {extracted[:,:,maxSlice].shape} t2w {t2w.shape}  goldd {np.max(gold_arr_loc.flatten())}")
-    
-
-    # # experiment.log_image( save_heatmap(extracted[:,:,maxSlice],directory,f"extracted_{curr_studyId}_{epoch}"))
-    # # experiment.log_image( save_heatmap(t2w,directory,f"t2w_{curr_studyId}_{epoch}"))
-    # # experiment.log_image( save_heatmap(imageArr[i].cpu().detach().numpy()[1,:,:,maxSlice],directory,f"adc_{curr_studyId}_{epoch}"))
-
-    # experiment.log_image(extracted[:,:,maxSlice], name=f"extracted_{curr_studyId}_{epoch}",image_colormap='Greys')
-    # experiment.log_image(t2w, name=f"t2w_{curr_studyId}_{epoch}",image_colormap='Greys')
-    # experiment.log_image(imageArr[i].numpy()[1,:,:,maxSlice], name=f"adc_{curr_studyId}_{epoch}",image_colormap='Greys')
-
-
-    # experiment.log_image( save_heatmap(np.add(t2w.astype('float'),(gold*(t2wMax)).astype('float')),directory,f"gold_plus_t2w_{curr_studyId}_{epoch}"))
-    # experiment.log_image( save_heatmap(np.add(gold,extracted[:,:,maxSlice]),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}"),'plasma' )
-    # experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}"))
-    # return (diceLoc,from_case,gold,extracted,t2w, t2wMax,maxSlice)#extracted,gold_arr_loc[goldChannel,:,:,:])
-    return extracted #extracted,gold_arr_loc[goldChannel,:,:,:])
+    return extracted
 
 def iterOverAndCheckType(itemm):
     if(type(itemm) is tuple):
@@ -311,14 +284,12 @@ class Model(pl.LightningModule):
     ,picaiLossArr_auroc_final
     ,picaiLossArr_AP_final
     ,picaiLossArr_score_final
-    ,lrMod
     ,regression_channels
     ,trial
     ,dice_final
     ):
         super().__init__()
         self.learning_rate = learning_rate
-        self.lrMod=lrMod
         self.net=net
         self.modelRegression = UNetToRegresion(2,regression_channels,net)
         self.criterion = criterion
@@ -326,7 +297,6 @@ class Model(pl.LightningModule):
         self.best_val_dice = 0
         self.best_val_epoch = 0
         self.dice_metric = monai.metrics.GeneralizedDiceScore()
-        #self.rocAuc=monai.metrics.ROCAUCMetric()
         self.picaiLossArr=[]
         self.post_pred = Compose([ AsDiscrete( to_onehot=2)])
         self.picaiLossArr_auroc=[]
@@ -338,8 +308,7 @@ class Model(pl.LightningModule):
         self.picaiLossArr_auroc_final=picaiLossArr_auroc_final
         self.picaiLossArr_AP_final=picaiLossArr_AP_final
         self.picaiLossArr_score_final=picaiLossArr_score_final
-        #temporary directory for validation images and their labels
-        self.temp_val_dir= '/home/sliceruser/data/tempH' #tempfile.mkdtemp()
+        self.temp_val_dir= '/home/sliceruser/tempH' #tempfile.mkdtemp()
         self.list_gold_val=[]
         self.list_yHat_val=[]
         self.ldiceLocst_back_yHat_val=[]
@@ -357,88 +326,33 @@ class Model(pl.LightningModule):
         os.makedirs(self.temp_val_dir,  exist_ok = True)             
 
     def configure_optimizers(self):
-        optimizer = self.optimizer_class(self.parameters(), lr=self.learning_rate*self.lrMod)
+        optimizer = self.optimizer_class(self.parameters(), lr=self.learning_rate)
         # hyperparameters from https://www.kaggle.com/code/isbhargav/guide-to-pytorch-learning-rate-scheduling/notebook
         lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer,T_0=10, T_mult=1, eta_min=0.001, last_epoch=-1 )
         return [optimizer], [lr_scheduler]
 
-    # def infer_batch_pos(self, batch):
-    #     x, y, numLesions = batch["pos"]['chan3_col_name'], batch["pos"]['label'], batch["pos"]['num_lesions_to_retain']
-    #     y_hat = self.net(x)
-    #     return y_hat, y, numLesions
+    def infer_train_ds_labels(self, batch):
+        x, y, numLesions = batch["train_ds_labels"]['chan3_col_name'] , batch["train_ds_labels"]['label'], batch["train_ds_labels"]['num_lesions_to_retain']
+        segmMap,regr = self.modelRegression(x)
+        return segmMap,regr, y, numLesions
 
 
-
-    # def infer_batch_all(self, batch):
-    #     x, numLesions =batch["all"]['chan3_col_name'], batch["all"]['num_lesions_to_retain']
-    #     y_hat = self.net(x)
-    #     return y_hat, numLesions
-
-    def calcLossHelp(self,isAnythingInAnnotated_list,seg_hat_list, y_true_list,i):
-        if(isAnythingInAnnotated_list[i]>0):
-            return self.criterion(seg_hat_list[i], y_true_list[i])
-        return ' '    
-        #     lossReg=F.smooth_l1_loss(torch.Tensor(reg_hat_list[i]).int().to(self.device) , torch.Tensor(int(numLesions_list[i])).int().to(self.device) ) 
-        #     return torch.add(lossSeg,lossReg)
-        # return  F.smooth_l1_loss(torch.Tensor(reg_hat_list[i]).int().to(self.device) , torch.Tensor(int(numLesions_list[i])).int().to(self.device) ) 
-
-
-
-    def calculateLoss(self,isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions):
-        return self.criterion(seg_hat,y_true)+ self.regLoss(reg_hat.flatten(),torch.Tensor(numLesions).to(self.device).flatten() )  #F.smooth_l1_loss(reg_hat.flatten(),torch.Tensor(numLesions).to(self.device).flatten() )
-
-        # seg_hat_list = decollate_batch(seg_hat)
-        # isAnythingInAnnotated_list = decollate_batch(isAnythingInAnnotated)
-        # y_true_list = decollate_batch(y_true)
-        # toSum= list(map(lambda i:  self.calcLossHelp(isAnythingInAnnotated_list,seg_hat_list, y_true_list ,i) , list( range(0,len( seg_hat_list)) )))
-        # toSum= list(filter(lambda it: it!=' '  ,toSum))
-        # if(len(toSum)>0):
-        #     segLoss= torch.sum(torch.stack(toSum))
-        #     lossReg=F.smooth_l1_loss(reg_hat.flatten(),torch.Tensor(numLesions).to(self.device).flatten())*2
-        #     return torch.add(segLoss,lossReg)
-
-        # #print(f"reg_hat {reg_hat} numLesions{numLesions}  "  )        
-        # return F.smooth_l1_loss(reg_hat.flatten(),torch.Tensor(numLesions).to(self.device).flatten() )*2
+    def infer_train_ds_no_labels(self, batch):
+        x, numLesions =batch["train_ds_no_labels"]['chan3_col_name'],batch["train_ds_no_labels"]['num_lesions_to_retain']
+        segmMap,regr = self.modelRegression(x)
+        return regr, numLesions
 
 
     def training_step(self, batch, batch_idx):
         # every second iteration we will do the training for segmentation
-        x, y_true, numLesions,isAnythingInAnnotated = batch['chan3_col_name'], batch['label'], batch['num_lesions_to_retain'], batch['isAnythingInAnnotated']
-        # seg_hat, reg_hat = self.modelRegression(x)
-        seg_hat = self.net(x)
-        return self.criterion(seg_hat,y_true)
-        #return self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)
 
-        # if(isAnythingInAnnotated>0):
-        #     lossSeg=self.criterion(seg_hat, y_true)
-        #     lossReg=F.smooth_l1_loss(reg_hat,numLesions)
-        #     return torch.add(lossSeg,lossReg)
-        # return  F.smooth_l1_loss(reg_hat,numLesions)   
-        
-        # # y_hat, y , numLesions_ab= self.infer_batch_pos(batch)
-        # lossa = self.criterion(y_hat, y)
-        # # regressab=  self.modelRegression(y_hat)
-        # # numLesions_ab2=list(map(lambda entry : int(entry), numLesions_ab ))
-        # # numLesions_ab3=torch.Tensor(numLesions_ab2).to(self.device)  
-        # # lossab=F.smooth_l1_loss(torch.flatten(regressab), torch.flatten(numLesions_ab3) )
-      
-        # # # in case we have odd iteration we get access only to number of lesions present in the image not where they are (if they are present at all)    
-        # # y_hat_all, numLesions= self.infer_batch_all(batch)
-        # # regress_res=self.modelRegression(y_hat_all)
-        # # numLesions1=list(map(lambda entry : int(entry), numLesions ))
-        # # numLesions2=torch.Tensor(numLesions1).to(self.device)
-        # # # print(f" regress res {torch.flatten(regress_res).size()}  orig {torch.flatten(numLesions).size() } ")
-        # # lossb=F.smooth_l1_loss(torch.flatten(regress_res), torch.flatten(numLesions2) )
+        seg_hat,reg_hat, y_true, numLesions=self.infer_train_ds_labels( batch)
+        regr_no_lab, numLesions_no_lab= self.infer_train_ds_no_labels( batch) 
 
-        # # self.log('train_loss', torch.add(lossa,lossb), prog_bar=True)
-        # # self.log('train_image_loss', lossa, prog_bar=True)
-        # # self.log('train_reg_loss', lossb, prog_bar=True)
-        # # return torch.add(torch.add(lossa,lossb),lossab)
-        # return lossa
-    # def validation_step(self, batch, batch_idx):
-        # self.list_gold_val.append(tupl[0])
-        # self.list_yHat_val.append(tupl[1])
-
+        return torch.sum(torch.stack([self.criterion(seg_hat,y_true)
+                                    ,self.regLoss(reg_hat.flatten(),torch.Tensor(numLesions).to(self.device).flatten() ) 
+                                    ,self.regLoss(regr_no_lab.flatten(),torch.Tensor(numLesions_no_lab).to(self.device).flatten() ) 
+                                        ]))
 
 
     def validation_step(self, batch, batch_idx):
@@ -446,7 +360,10 @@ class Model(pl.LightningModule):
         numBatches = y_true_prim.size(dim=0)
         #seg_hat, reg_hat = self.modelRegression(x)        
         # seg_hat, reg_hat = self.modelRegression(x)        
-        seg_hat = self.net(x).cpu().detach()
+        seg_hat,regr = self.modelRegression(x)
+        seg_hat = seg_hat.cpu().detach()
+        regr=regr.cpu().detach().numpy
+        regr= list(map(lambda el : int(el>0.5) ,regr ))
         seg_hat=torch.sigmoid(seg_hat).cpu().detach()
         t2wb=decollate_batch(batch['t2wb'])
         labelB=decollate_batch(batch['labelB'])
@@ -462,7 +379,7 @@ class Model(pl.LightningModule):
         lenn=numBatches
         processedCases=[]
         my_task=partial(processDecolated,gold_arr=y_true,y_hat_arr=y_det,directory= self.temp_val_dir,studyId= patIds
-                    ,imageArr=images, postProcess=self.postProcess,epoch=self.current_epoch)
+                    ,imageArr=images, postProcess=self.postProcess,epoch=self.current_epoch,regr=regr)
         with mp.Pool(processes = mp.cpu_count()) as pool:
             #it = pool.imap(my_task, range(lenn))
             results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
