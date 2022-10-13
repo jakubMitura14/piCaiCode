@@ -415,7 +415,7 @@ def iterOverAndCheckType(itemm):
     if(torch.is_tensor(itemm)):
         return itemm.cpu().detach().numpy()
     return itemm    
-def log_images(i,experiment,golds,extracteds ,t2ws, directory,patIds,epoch):
+def log_images(i,experiment,golds,extracteds ,t2ws, directory,patIds,epoch,numLesions):
     goldChannel=1
     gold_arr_loc=golds[i]
     maxSlice = max(list(range(0,gold_arr_loc.size(dim=3))),key=lambda ind : torch.sum(gold_arr_loc[goldChannel,:,:,ind]).item() )
@@ -585,6 +585,7 @@ class Model(pl.LightningModule):
         # y_background = decollate_batch(seg_hat[:,0,:,:,:].cpu().detach())
         y_true = decollate_batch(y_true_prim.cpu().detach())
         patIds = decollate_batch(batch['study_id'])
+        numLesions = decollate_batch(batch['numLesions'])
         images = decollate_batch(x.cpu().detach()) 
 
         print(f"val num batches {numBatches} t2wb {t2wb} patIds {patIds} labelB {labelB}")
@@ -613,7 +614,7 @@ class Model(pl.LightningModule):
             epoch=self.current_epoch
             list(map(partial(log_images
                 ,experiment=experiment,golds=y_true,extracteds=extracteds 
-                ,t2ws=images,directory=directory ,patIds=patIds,epoch=epoch),range(lenn)))
+                ,t2ws=images,directory=directory ,patIds=patIds,epoch=epoch,numLesions=numLesions),range(lenn)))
             # y_true= list(map(lambda el: el.numpy()  ,y_true))                                              
 
             valid_metrics = evaluate(y_det=extracteds,
@@ -633,7 +634,7 @@ class Model(pl.LightningModule):
 
             #golds=torch.stack(y_true).to(self.device)
             print("get dice")
-            diceLoc=monai.metrics.compute_generalized_dice( extracteds ,y_true_prim.to(self.device))[1].item()
+            diceLoc=monai.metrics.compute_generalized_dice( extracteds.to(self.device) ,y_true_prim.to(self.device))[1].item()
             print(f"diceLoc {diceLoc}")
 
             # gold = list(map(lambda tupl: tupl[2] ,processedCases ))
