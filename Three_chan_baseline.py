@@ -216,7 +216,7 @@ def mainTrain(options,df,physical_size ):
         check_val_every_n_epoch=10,
         accumulate_grad_batches= 2,# experiment.get_parameter("accumulate_grad_batches"),
         gradient_clip_val=  0.9 ,#experiment.get_parameter("gradient_clip_val"),# 0.5,2.0
-        log_every_n_steps=10,
+        log_every_n_steps=30,
         strategy='dp'
     )
     trainer.logger._default_hp_metric = False
