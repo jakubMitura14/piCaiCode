@@ -312,12 +312,14 @@ class Model(pl.LightningModule):
     ,picaiLossArr_AP_final
     ,picaiLossArr_score_final
     ,lrMod
+    ,regression_channels
+    ,trial
     ):
         super().__init__()
         self.learning_rate = learning_rate
         self.lrMod=lrMod
         self.net=net
-        # self.modelRegression = UNetToRegresion(2,regression_channels,net)
+        self.modelRegression = UNetToRegresion(2,regression_channels,net)
         self.criterion = criterion
         self.optimizer_class = optimizer_class
         self.best_val_dice = 0
@@ -354,11 +356,10 @@ class Model(pl.LightningModule):
 
     def configure_optimizers(self):
         optimizer = self.optimizer_class(self.parameters(), lr=self.learning_rate*self.lrMod)
-        #optimizer = self.optimizer_class(self.parameters())
-        return optimizer
-    
+        # hyperparameters from https://www.kaggle.com/code/isbhargav/guide-to-pytorch-learning-rate-scheduling/notebook
+        lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer,T_0=10, T_mult=1, eta_min=0.001, last_epoch=-1 )
+        return [optimizer], [lr_scheduler]
 
-    
     # def infer_batch_pos(self, batch):
     #     x, y, numLesions = batch["pos"]['chan3_col_name'], batch["pos"]['label'], batch["pos"]['num_lesions_to_retain']
     #     y_hat = self.net(x)

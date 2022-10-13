@@ -181,6 +181,7 @@ class PiCaiDataModule(pl.LightningDataModule):
         and ecxamples without such constraint
     """
     def getSubjects(self):
+        self.df=self.df.loc[self.df['study_id'] !=1000110]# becouse there is error in this label
         onlyPositve = self.df.loc[self.df['isAnyMissing'] ==False]
         onlyPositve = onlyPositve.loc[onlyPositve['isAnythingInAnnotated']>0 ]
 
@@ -262,11 +263,12 @@ class PiCaiDataModule(pl.LightningDataModule):
     def train_dataloader(self):
         return {'train_ds_labels': DataLoader(self.train_ds_labels, batch_size=self.batch_size, drop_last=self.drop_last
                           ,num_workers=self.num_workers,collate_fn=list_data_collate, shuffle=False ),
-                'train_ds_no_labels' :           
+                'train_ds_no_labels' : DataLoader(self.train_ds_no_labels, batch_size=self.batch_size, drop_last=self.drop_last
+                          ,num_workers=self.num_workers,collate_fn=list_data_collate, shuffle=False)           
                           }# ,collate_fn=list_data_collate ,collate_fn=list_data_collate , shuffle=True ,collate_fn=list_data_collate
 
     def val_dataloader(self):
-        return DataLoader(self.val_ds, batch_size=10
+        return DataLoader(self.val_ds, batch_size=40
         , drop_last=self.drop_last,num_workers=self.num_workers,collate_fn=list_data_collate, shuffle=False)#,collate_fn=list_data_collate,collate_fn=pad_list_data_collate
 
     # def test_dataloader(self):

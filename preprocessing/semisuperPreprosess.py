@@ -69,23 +69,26 @@ in the image
 def get_numb_ofLesions_toRetain(row):
     # grab lesion Gleason scores scores
     if('+'in row['lesion_GS']):
-        gleason_scores = []
-        print(f"gggg {row['lesion_GS']}")
-        if isinstance(row['lesion_GS'], float) and np.isnan(row['lesion_GS']):
+        try:
             gleason_scores = []
-        else:
-            gleason_scores = row['lesion_GS'].split(",")
+            print(f"gggg {row['lesion_GS']}")
+            if isinstance(row['lesion_GS'], float) and np.isnan(row['lesion_GS']):
+                gleason_scores = []
+            else:
+                gleason_scores = row['lesion_GS'].split(",")
 
-        # convert Gleason scores to ISUP grades
-        isup_grades = []
-        for score in gleason_scores:
-            if score == "N/A":
-                continue
+            # convert Gleason scores to ISUP grades
+            isup_grades = []
+            for score in gleason_scores:
+                if score == "N/A":
+                    continue
 
-            pattern1, pattern2 = score.split("+")
-            GS = Gleason_score(int(pattern1), int(pattern2))
-            isup_grades.append(GS.GGG)
-        return sum([score >= 2 for score in isup_grades])
+                pattern1, pattern2 = score.split("+")
+                GS = Gleason_score(int(pattern1), int(pattern2))
+                isup_grades.append(GS.GGG)
+            return sum([score >= 2 for score in isup_grades])
+        except:
+            print("error getting gleason")    
     return -1    
 
 """
