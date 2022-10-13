@@ -98,6 +98,8 @@ def mainTrain(options,df,physical_size,expId ):
         project_name="pic1", # Optional
         #experiment_name="pic1" # Optional
     )
+    lrMod=1.0
+
     #############loading meta data 
     #maxSize=manageMetaData.getMaxSize(getParam(experiment,options,"dirs")["chan3_col_name"],df)
     # print(f"************    maxSize {maxSize}   ***************")
@@ -193,7 +195,8 @@ def mainTrain(options,df,physical_size,expId ):
         # experiment=experiment,
         picaiLossArr_auroc_final=picaiLossArr_auroc_final,
         picaiLossArr_AP_final=picaiLossArr_AP_final,
-        picaiLossArr_score_final=picaiLossArr_score_final
+        picaiLossArr_score_final=picaiLossArr_score_final,
+        lrMod=lrMod
     )
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
         monitor='val_mean_score',
@@ -204,6 +207,12 @@ def mainTrain(options,df,physical_size,expId ):
     checkpoint_callback = ModelCheckpoint(dirpath=f"/home/sliceruser/data/checkPoints/{expId}",mode='max', save_top_k=1, monitor="dice")
     stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging(swa_lrs=1e-2)
     
+
+
+    trainer.tune(model)
+
+
+
     trainer = pl.Trainer(
         #accelerator="cpu", #TODO(remove)
         max_epochs=5000,#experiment.get_parameter("max_epochs"),

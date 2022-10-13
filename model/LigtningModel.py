@@ -311,16 +311,18 @@ class Model(pl.LightningModule):
     ,picaiLossArr_auroc_final
     ,picaiLossArr_AP_final
     ,picaiLossArr_score_final
+    ,lrMod
     ):
         super().__init__()
-        self.lr = learning_rate
+        self.learning_rate = learning_rate
+        self.lrMod=lrMod
         self.net=net
         # self.modelRegression = UNetToRegresion(2,regression_channels,net)
         self.criterion = criterion
         self.optimizer_class = optimizer_class
         self.best_val_dice = 0
         self.best_val_epoch = 0
-        self.dice_metric = monai.metrics.GeneralizedDiceScore()
+        # self.dice_metric = monai.metrics.GeneralizedDiceScore()
         #self.rocAuc=monai.metrics.ROCAUCMetric()
         self.picaiLossArr=[]
         self.post_pred = Compose([ AsDiscrete( to_onehot=2)])
@@ -351,8 +353,8 @@ class Model(pl.LightningModule):
         os.makedirs(self.temp_val_dir,  exist_ok = True)             
 
     def configure_optimizers(self):
-        # optimizer = self.optimizer_class(self.parameters(), lr=self.lr)
-        optimizer = self.optimizer_class(self.parameters())
+        optimizer = self.optimizer_class(self.parameters(), lr=self.learning_rate*self.lrMod)
+        #optimizer = self.optimizer_class(self.parameters())
         return optimizer
     
 
@@ -441,8 +443,11 @@ class Model(pl.LightningModule):
         numBatches = y_true_prim.size(dim=0)
         #seg_hat, reg_hat = self.modelRegression(x)        
         # seg_hat, reg_hat = self.modelRegression(x)        
-        seg_hat = self.net(x).cpu().detach()
-        seg_hat=torch.sigmoid(seg_hat).cpu().detach()
+        seg_hat = self.net(x)
+        seg_hat=torch.sigmoid(seg_hat)
+        diceLoc=monai.metrics.compute_generalized_dice( self.postProcess(seg_hat) ,y_true_prim)[1].item()
+        seg_hat=seg_hat.cpu().detach()
+
         t2wb=decollate_batch(batch['t2wb'])
         labelB=decollate_batch(batch['labelB'])
         #loss= self.criterion(seg_hat,y_true)# self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)      
@@ -473,7 +478,7 @@ class Model(pl.LightningModule):
         # processedCases=list(map(partial(processDecolated,gold_arr=y_true,y_hat_arr=y_det,directory= self.temp_val_dir,studyId= patIds
         #             ,imageArr=images, experiment=self.logger.experiment,postProcess=self.postProcess,epoch=self.current_epoch)
         #             ,range(0,numBatches)))
-        
+            
 
         if(len(extracteds)>0):
             experiment=self.logger.experiment
@@ -494,14 +499,12 @@ class Model(pl.LightningModule):
             meanPiecaiMetr_score= 0.0 if math.isnan(valid_metrics.score) else  valid_metrics.score
 
     
-            extracteds= list(map(lambda numpyEntry : self.postProcess(torch.from_numpy((numpyEntry>0).astype('int8'))) ,extracteds  ))
-            # extracteds= list(map(lambda entry : EnsureChannelFirst()(entry) ,extracteds  ))
-            extracteds= torch.stack(extracteds)
-            # extracteds= self.postProcess(extracteds)#argmax=True,
+            # extracteds= list(map(lambda numpyEntry : self.postProcess(torch.from_numpy((numpyEntry>0).astype('int8'))) ,extracteds  ))
+            # extracteds= torch.stack(extracteds)
 
             #golds=torch.stack(y_true).to(self.device)
             # print(f"get dice  extrrr {extracteds.cpu()}  Y true  {y_true_prim.cpu()}   ")
-            diceLoc=monai.metrics.compute_generalized_dice( extracteds.cpu() ,y_true_prim.cpu())[1].item()
+            # diceLoc=monai.metrics.compute_generalized_dice( extracteds.cpu() ,y_true_prim.cpu())[1].item()
             print(f"diceLoc {diceLoc}")
 
             # gold = list(map(lambda tupl: tupl[2] ,processedCases ))
@@ -509,7 +512,7 @@ class Model(pl.LightningModule):
             return {'dices': diceLoc, 'meanPiecaiMetr_auroc':meanPiecaiMetr_auroc
                     ,'meanPiecaiMetr_AP' :meanPiecaiMetr_AP,'meanPiecaiMetr_score': meanPiecaiMetr_score}
 
-        return {'dices': 0.0, 'meanPiecaiMetr_auroc':0.0
+        return {'dices': diceLoc, 'meanPiecaiMetr_auroc':0.0
                 ,'meanPiecaiMetr_AP' :0.0,'meanPiecaiMetr_score': 0.0}
 
 
