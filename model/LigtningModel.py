@@ -219,142 +219,15 @@ def getNext(i,results,TIMEOUT):
         print(f"timed outt {e} ")
         return None    
 
-def divide_chunks(l, n):
-     
-    # looping till length l
-    for i in range(0, len(l), n):
-        yield l[i:i + n]
 
 def monaiSaveFile(directory,name,arr):
     #Compose(EnsureChannelFirst(),SaveImage(output_dir=directory,separate_folder=False,output_postfix =name) )(arr)
     SaveImage(output_dir=directory,separate_folder=False,output_postfix =name,writer="ITKWriter")(arr)
 
 
-def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
-    """
-    saves arrays in given directory and return paths to them
-    """
-    adding='_e'
-    monaiSaveFile(directory,patId+ "_gold"+adding,gold_arr)
-    monaiSaveFile(directory,patId+ "_hat"+adding,y_hat_arr)
-    monaiSaveFile(directory,patId+ "image"+adding,imageArr)
-    monaiSaveFile(directory,patId+ "imageB"+adding,imageArr)
-    monaiSaveFile(directory,patId+ "hatPostA"+adding,hatPostA)
-
-    # gold_im_path = join(directory, patId+ "_gold.npy" )
-    # yHat_im_path = join(directory, patId+ "_hat.npy" )
-    # np.save(gold_im_path, gold_arr)
-    # np.save(yHat_im_path, y_hat_arr)
-    gold_im_path = join(directory, patId+ "_gold.nii.gz" )
-    yHat_im_path =join(directory, patId+ "_hat.nii.gz" )
-    image_path =join(directory, patId+ "image.nii.gz" )
-    imageB_path =join(directory, patId+ "imageB.nii.gz" )
-    hatPostA_path =join(directory, patId+ "hatPostA.nii.gz" )
-    # print(f"suuum image {torch.sum(imageArr)}    suum hat  {np.sum( y_hat_arr.numpy())} hatPostA {np.sum(hatPostA)} hatPostA uniqq {np.unique(hatPostA) } hatpostA shape {hatPostA.shape} y_hat_arr sh {y_hat_arr.shape} gold_arr shape {gold_arr.shape} ")
-    print(f" suum hat  {np.sum( y_hat_arr.numpy())} gold_arr chan 0 sum  {np.sum(gold_arr[0,:,:,:].numpy())} chan 1 sum {np.sum(gold_arr[1,:,:,:].numpy())} hatPostA chan 0 sum  {np.sum(hatPostA[0,:,:,:])} chan 1 sum {np.sum(hatPostA[1,:,:,:])}    ")
-    # gold_arr=np.swapaxes(gold_arr,0,2)
-    # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
-    # print(f"uniq gold { gold_arr.shape  }   yhat { y_hat_arr.shape }   yhat maxes  {np.maximum(y_hat_arr)}  hyat min {np.minimum(y_hat_arr)} ")
-    gold_arr=gold_arr[1,:,:,:].numpy()
-    # gold_arr=np.flip(gold_arr,(1,0))
-    y_hat_arr=y_hat_arr[1,:,:,:].numpy()
-
-    gold_arr=np.swapaxes(gold_arr,0,2)
-    y_hat_arr=np.swapaxes(y_hat_arr,0,2)
-    
-    image = sitk.GetImageFromArray(gold_arr)
-    writer = sitk.ImageFileWriter()
-    writer.SetFileName(gold_im_path)
-    writer.Execute(image)
-
-
-    image = sitk.GetImageFromArray(y_hat_arr)
-    writer = sitk.ImageFileWriter()
-    writer.SetFileName(yHat_im_path)
-    writer.Execute(image) 
-
-    image = sitk.GetImageFromArray(  np.swapaxes(imageArr[0,:,:,:].numpy(),0,2) ) 
-    writer = sitk.ImageFileWriter()
-    writer.SetFileName(image_path)
-    writer.Execute(image)
-
-    image = sitk.GetImageFromArray(  np.swapaxes(imageArr[1,:,:,:].numpy(),0,2) )
-    writer = sitk.ImageFileWriter()
-    writer.SetFileName(imageB_path)
-    writer.Execute(image)
-
-    image = sitk.GetImageFromArray(np.swapaxes(hatPostA[1,:,:,:],0,2))
-    writer = sitk.ImageFileWriter()
-    writer.SetFileName(hatPostA_path)
-    writer.Execute(image)
-
-
-
-
-    return(gold_im_path,yHat_im_path)
-
-def evaluate_all_cases(listPerEval):
-    case_target: Dict[Hashable, int] = {}
-    case_weight: Dict[Hashable, float] = {}
-    case_pred: Dict[Hashable, float] = {}
-    lesion_results: Dict[Hashable, List[Tuple[int, float, float]]] = {}
-    lesion_weight: Dict[Hashable, List[float]] = {}
-
-    meanPiecaiMetr_auroc=0.0
-    meanPiecaiMetr_AP=0.0
-    meanPiecaiMetr_score=0.0
-
-    idx=0
-    if(len(listPerEval)>0):
-        for pairr in listPerEval:
-            idx+=1
-            lesion_results_case, case_confidence = pairr
-
-            case_weight[idx] = 1.0
-            case_pred[idx] = case_confidence
-            if len(lesion_results_case):
-                case_target[idx] = np.max([a[0] for a in lesion_results_case])
-            else:
-                case_target[idx] = 0
-
-            # accumulate outputs
-            lesion_results[idx] = lesion_results_case
-            lesion_weight[idx] = [1.0] * len(lesion_results_case)
-
-        # collect results in a Metrics object
-        valid_metrics = Metrics(
-            lesion_results=lesion_results,
-            case_target=case_target,
-            case_pred=case_pred,
-            case_weight=case_weight,
-            lesion_weight=lesion_weight
-        )
-        # for i in range(0,numIters):
-        #     valid_metrics = evaluate(y_det=self.list_yHat_val[i*numPerIter:min((i+1)*numPerIter,lenn)],
-        #                         y_true=self.list_gold_val[i*numPerIter:min((i+1)*numPerIter,lenn)],
-        #                         num_parallel_calls= min(numPerIter,os.cpu_count())
-        #                         ,verbose=1
-        #                         #,y_true_postprocess_func=lambda pred: pred[1,:,:,:]
-        #                         #y_true=iter(y_true),
-        #                         ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
-        #                         #,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
-        #                         )
-        # meanPiecaiMetr_auroc_list.append(valid_metrics.auroc)
-        # meanPiecaiMetr_AP_list.append(valid_metrics.AP)
-        # meanPiecaiMetr_score_list.append((-1)*valid_metrics.score)
-        #print("finished evaluating")
-
-        meanPiecaiMetr_auroc=valid_metrics.auroc
-        meanPiecaiMetr_AP=valid_metrics.AP
-        meanPiecaiMetr_score=(-1)*valid_metrics.score
-    return (meanPiecaiMetr_auroc,meanPiecaiMetr_AP,meanPiecaiMetr_score )    
-
 def getArrayFromPath(path):
     image1=sitk.ReadImage(path)
     return sitk.GetArrayFromImage(image1)
-
-def extractLesions_my(x):
-    return extract_lesion_candidates(x)[0]
 
 
 def save_heatmap(arr,dir,name,numLesions,cmapp='gray'):
@@ -364,10 +237,6 @@ def save_heatmap(arr,dir,name,numLesions,cmapp='gray'):
     plt.title( name+'__'+str(numLesions))
     plt.savefig(path)
     return path
-
-def myMaxSlice(arr):
-    shape = arr.shape
-    slicesNum = shape[2]
 
 
 def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, postProcess,epoch):
@@ -414,7 +283,8 @@ def iterOverAndCheckType(itemm):
         return list(map(lambda en: en.cpu().detach().numpy(),itemm )) 
     if(torch.is_tensor(itemm)):
         return itemm.cpu().detach().numpy()
-    return itemm    
+    return itemm 
+
 def log_images(i,experiment,golds,extracteds ,t2ws, directory,patIds,epoch,numLesions):
     goldChannel=1
     gold_arr_loc=golds[i]
@@ -639,8 +509,8 @@ class Model(pl.LightningModule):
 
             # gold = list(map(lambda tupl: tupl[2] ,processedCases ))
 
-            return {'dices': [diceLoc], 'meanPiecaiMetr_auroc':[meanPiecaiMetr_auroc]
-                    ,'meanPiecaiMetr_AP' :[meanPiecaiMetr_AP],[meanPiecaiMetr_score]: 'meanPiecaiMetr_score'}
+            return {'dices': torch.Tensor(diceLoc), 'meanPiecaiMetr_auroc':torch.Tensor(meanPiecaiMetr_auroc)
+                    ,'meanPiecaiMetr_AP' :torch.Tensor(meanPiecaiMetr_AP),torch.Tensor(meanPiecaiMetr_score): 'meanPiecaiMetr_score'}
 
 
 
@@ -659,16 +529,6 @@ class Model(pl.LightningModule):
 
 
 
-
-
-        # return {'dices': dices, 'extrCases0':extrCases0,'extrCases1':extrCases1, 'extrCases2':extrCases2 }
-    def processOutputs(self,outputs):
-        listt = [x['from_case'] for x in outputs] 
-        listt =[item for sublist in listt for item in sublist]
-        print(f"listt b {listt}" )
-        listt= list(map(iterOverAndCheckType, listt))
-        print(f"listt c {listt}" )
-        return listt
 
     def validation_epoch_end(self, outputs):
         print("validation_epoch_end")
@@ -732,13 +592,142 @@ class Model(pl.LightningModule):
 
 
 
+# def evaluate_all_cases(listPerEval):
+#     case_target: Dict[Hashable, int] = {}
+#     case_weight: Dict[Hashable, float] = {}
+#     case_pred: Dict[Hashable, float] = {}
+#     lesion_results: Dict[Hashable, List[Tuple[int, float, float]]] = {}
+#     lesion_weight: Dict[Hashable, List[float]] = {}
+
+#     meanPiecaiMetr_auroc=0.0
+#     meanPiecaiMetr_AP=0.0
+#     meanPiecaiMetr_score=0.0
+
+#     idx=0
+#     if(len(listPerEval)>0):
+#         for pairr in listPerEval:
+#             idx+=1
+#             lesion_results_case, case_confidence = pairr
+
+#             case_weight[idx] = 1.0
+#             case_pred[idx] = case_confidence
+#             if len(lesion_results_case):
+#                 case_target[idx] = np.max([a[0] for a in lesion_results_case])
+#             else:
+#                 case_target[idx] = 0
+
+#             # accumulate outputs
+#             lesion_results[idx] = lesion_results_case
+#             lesion_weight[idx] = [1.0] * len(lesion_results_case)
+
+#         # collect results in a Metrics object
+#         valid_metrics = Metrics(
+#             lesion_results=lesion_results,
+#             case_target=case_target,
+#             case_pred=case_pred,
+#             case_weight=case_weight,
+#             lesion_weight=lesion_weight
+#         )
+#         # for i in range(0,numIters):
+#         #     valid_metrics = evaluate(y_det=self.list_yHat_val[i*numPerIter:min((i+1)*numPerIter,lenn)],
+#         #                         y_true=self.list_gold_val[i*numPerIter:min((i+1)*numPerIter,lenn)],
+#         #                         num_parallel_calls= min(numPerIter,os.cpu_count())
+#         #                         ,verbose=1
+#         #                         #,y_true_postprocess_func=lambda pred: pred[1,:,:,:]
+#         #                         #y_true=iter(y_true),
+#         #                         ,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+#         #                         #,y_det_postprocess_func=lambda pred: extract_lesion_candidates(pred)[0]
+#         #                         )
+#         # meanPiecaiMetr_auroc_list.append(valid_metrics.auroc)
+#         # meanPiecaiMetr_AP_list.append(valid_metrics.AP)
+#         # meanPiecaiMetr_score_list.append((-1)*valid_metrics.score)
+#         #print("finished evaluating")
+
+#         meanPiecaiMetr_auroc=valid_metrics.auroc
+#         meanPiecaiMetr_AP=valid_metrics.AP
+#         meanPiecaiMetr_score=(-1)*valid_metrics.score
+#     return (meanPiecaiMetr_auroc,meanPiecaiMetr_AP,meanPiecaiMetr_score )    
+
+
+
+
+
+# def saveFilesInDir(gold_arr,y_hat_arr, directory, patId,imageArr, hatPostA):
+#     """
+#     saves arrays in given directory and return paths to them
+#     """
+#     adding='_e'
+#     monaiSaveFile(directory,patId+ "_gold"+adding,gold_arr)
+#     monaiSaveFile(directory,patId+ "_hat"+adding,y_hat_arr)
+#     monaiSaveFile(directory,patId+ "image"+adding,imageArr)
+#     monaiSaveFile(directory,patId+ "imageB"+adding,imageArr)
+#     monaiSaveFile(directory,patId+ "hatPostA"+adding,hatPostA)
+
+#     # gold_im_path = join(directory, patId+ "_gold.npy" )
+#     # yHat_im_path = join(directory, patId+ "_hat.npy" )
+#     # np.save(gold_im_path, gold_arr)
+#     # np.save(yHat_im_path, y_hat_arr)
+#     gold_im_path = join(directory, patId+ "_gold.nii.gz" )
+#     yHat_im_path =join(directory, patId+ "_hat.nii.gz" )
+#     image_path =join(directory, patId+ "image.nii.gz" )
+#     imageB_path =join(directory, patId+ "imageB.nii.gz" )
+#     hatPostA_path =join(directory, patId+ "hatPostA.nii.gz" )
+#     # print(f"suuum image {torch.sum(imageArr)}    suum hat  {np.sum( y_hat_arr.numpy())} hatPostA {np.sum(hatPostA)} hatPostA uniqq {np.unique(hatPostA) } hatpostA shape {hatPostA.shape} y_hat_arr sh {y_hat_arr.shape} gold_arr shape {gold_arr.shape} ")
+#     print(f" suum hat  {np.sum( y_hat_arr.numpy())} gold_arr chan 0 sum  {np.sum(gold_arr[0,:,:,:].numpy())} chan 1 sum {np.sum(gold_arr[1,:,:,:].numpy())} hatPostA chan 0 sum  {np.sum(hatPostA[0,:,:,:])} chan 1 sum {np.sum(hatPostA[1,:,:,:])}    ")
+#     # gold_arr=np.swapaxes(gold_arr,0,2)
+#     # y_hat_arr=np.swapaxes(y_hat_arr,0,2)
+#     # print(f"uniq gold { gold_arr.shape  }   yhat { y_hat_arr.shape }   yhat maxes  {np.maximum(y_hat_arr)}  hyat min {np.minimum(y_hat_arr)} ")
+#     gold_arr=gold_arr[1,:,:,:].numpy()
+#     # gold_arr=np.flip(gold_arr,(1,0))
+#     y_hat_arr=y_hat_arr[1,:,:,:].numpy()
+
+#     gold_arr=np.swapaxes(gold_arr,0,2)
+#     y_hat_arr=np.swapaxes(y_hat_arr,0,2)
+    
+#     image = sitk.GetImageFromArray(gold_arr)
+#     writer = sitk.ImageFileWriter()
+#     writer.SetFileName(gold_im_path)
+#     writer.Execute(image)
+
+
+#     image = sitk.GetImageFromArray(y_hat_arr)
+#     writer = sitk.ImageFileWriter()
+#     writer.SetFileName(yHat_im_path)
+#     writer.Execute(image) 
+
+#     image = sitk.GetImageFromArray(  np.swapaxes(imageArr[0,:,:,:].numpy(),0,2) ) 
+#     writer = sitk.ImageFileWriter()
+#     writer.SetFileName(image_path)
+#     writer.Execute(image)
+
+#     image = sitk.GetImageFromArray(  np.swapaxes(imageArr[1,:,:,:].numpy(),0,2) )
+#     writer = sitk.ImageFileWriter()
+#     writer.SetFileName(imageB_path)
+#     writer.Execute(image)
+
+#     image = sitk.GetImageFromArray(np.swapaxes(hatPostA[1,:,:,:],0,2))
+#     writer = sitk.ImageFileWriter()
+#     writer.SetFileName(hatPostA_path)
+#     writer.Execute(image)
+
+
+
+
+#     return(gold_im_path,yHat_im_path)
 
 
 
 
 
 
-
+    #     # return {'dices': dices, 'extrCases0':extrCases0,'extrCases1':extrCases1, 'extrCases2':extrCases2 }
+    # def processOutputs(self,outputs):
+    #     listt = [x['from_case'] for x in outputs] 
+    #     listt =[item for sublist in listt for item in sublist]
+    #     print(f"listt b {listt}" )
+    #     listt= list(map(iterOverAndCheckType, listt))
+    #     print(f"listt c {listt}" )
+    #     return listt
 
 
 
