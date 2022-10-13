@@ -129,7 +129,13 @@ class PiCaiDataModule(pl.LightningDataModule):
     ,RandAffined_prob
     ,RandCoarseDropoutd_prob
     ,is_whole_to_train
-    ,spatial_size ):
+    ,spatial_size
+    ,RandomElasticDeformation_prob
+    ,RandomAnisotropy_prob
+    ,RandomMotion_prob
+    ,RandomGhosting_prob
+    ,RandomSpike_prob
+    ,RandomBiasField_prob  ):
         super().__init__()
         self.cache_dir=cache_dir
         self.batch_size = batch_size
@@ -163,9 +169,28 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.RandAffined_prob=RandAffined_prob
         self.RandCoarseDropoutd_prob=RandCoarseDropoutd_prob
         self.is_whole_to_train=is_whole_to_train 
+        self.RandomElasticDeformation_prob=RandomElasticDeformation_prob
+        self.RandomAnisotropy_prob=RandomAnisotropy_prob
+        self.RandomMotion_prob=RandomMotion_prob
+        self.RandomGhosting_prob=RandomGhosting_prob
+        self.RandomSpike_prob=RandomSpike_prob
+        self.RandomBiasField_prob=RandomBiasField_prob
 
+    """
+    splitting for test and validation and separately in case of examples with some label inside 
+        and ecxamples without such constraint
+    """
+    def getSubjects(self):
+        onlyPositve = self.df.loc[self.df['isAnyMissing'] ==False]
+        onlyPositve = onlyPositve.loc[onlyPositve['isAnythingInAnnotated']>0 ]
 
-
+        allSubj=list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1]
+        ,self.chan3_col_name,self.label_name,self.chan3_col_name_val,self.label_name_val)   , list(self.df.iterrows())))
+        
+        onlyPositiveSubj=list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1]
+        ,self.chan3_col_name,self.label_name,self.chan3_col_name_val,self.label_name_val)   , list(onlyPositve.iterrows())))
+        
+        return allSubj,onlyPositiveSubj
 
     #TODO replace with https://docs.monai.io/en/stable/data.html
     def splitDataSet(self,patList, trainSizePercent,noTestSet):
@@ -213,15 +238,11 @@ class PiCaiDataModule(pl.LightningDataModule):
             ,self.RandCoarseDropoutd_prob
             ,self.is_whole_to_train,self.spatial_size )
         val_transforms= transformsForMain.get_val_transforms(self.is_whole_to_train,self.spatial_size )
-        #todo - unhash
-        # self.train_ds =  PersistentDataset(data=self.train_subjects, transform=train_transforms,cache_dir=self.cache_dir)
-        # self.val_ds=     PersistentDataset(data=self.val_subjects, transform=val_transforms,cache_dir=self.cache_dir)
-        # self.test_ds=    PersistentDataset(data=self.test_subjects, transform=val_transforms,cache_dir=self.cache_dir)    
+
+
         self.val_ds=     SmartCacheDataset(data=val_subjects, transform=val_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
         self.train_ds=     SmartCacheDataset(data=train_subjects, transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
-        # self.train_ds =  Dataset(data=self.train_subjects, transform=train_transforms)
-        # self.val_ds=     Dataset(data=self.val_subjects, transform=val_transforms)
-        #self.test_ds=    Dataset(data=self.test_subjects, transform=val_transforms)
+
         
     def train_dataloader(self):
         return DataLoader(self.train_ds, batch_size=self.batch_size, drop_last=self.drop_last
