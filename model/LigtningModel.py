@@ -587,17 +587,17 @@ class Model(pl.LightningModule):
         def log_images(i,experiment,golds,extracteds ,t2ws, t2wMaxs,directory,maxSlices,patIds,epoch):
             goldChannel=1
             maxSlice=maxSlices[i]
+            print(f" t2wMax {t2wMax}  ")
+            print(f" maxSlice {maxSlice}  ")
             curr_studyId=patIds[i]
             t2w=t2ws[i][0,:,:,maxSlice]
             gold=golds[i][goldChannel,:,:,maxSlice]
             extracted=extracteds[i]
             t2wMax=t2wMaxs[i]
-
             print(f" t2w {t2w.shape}  ")
             print(f" gold {gold.shape}  ")
             print(f" extracted {extracted.shape}  ")
-            print(f" t2wMax {t2wMax}  ")
-            print(f" maxSlice {maxSlice}  ")
+
             print(f" curr_studyId {curr_studyId}  ")
             experiment.log_image( save_heatmap(np.add(t2w.astype('float'),(gold*(t2wMax)).astype('float')),directory,f"gold_plus_t2w_{curr_studyId}_{epoch}"))
             experiment.log_image( save_heatmap(np.add(gold,extracted[:,:,maxSlice]),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}"),'plasma' )
@@ -630,6 +630,11 @@ class Model(pl.LightningModule):
             meanPiecaiMetr_score= valid_metrics.meanPiecaiMetr_score
 
             extracteds= list(map(lambda numpyEntry : torch.from_numpy(numpyEntry) ,extracteds  ))
+            extracteds= list(map(lambda entry : EnsureChannelFirst()(entry) ,extracteds  ))
+            extracteds= torch.stack(extracteds)
+            extracteds= AsDiscrete(argmax=True, to_onehot=2)(extracteds)
+
+
 
             # gold = list(map(lambda tupl: tupl[2] ,processedCases ))
 
