@@ -534,7 +534,7 @@ class Model(pl.LightningModule):
 
     def validation_epoch_end(self, outputs):
         print("validation_epoch_end")
-        # print(f"outputs {outputs[0]['from_case'] }")
+        print(f"outputs {outputs[0]['dices'] }")
         allDices = np.array(([torch.stack(x['dices']).cpu().detach().numpy() for x in outputs])).flatten() 
         allmeanPiecaiMetr_auroc = np.array(([torch.stack(x['meanPiecaiMetr_auroc']).cpu().detach().numpy() for x in outputs])).flatten() 
         allmeanPiecaiMetr_AP = np.array(([torch.stack(x['meanPiecaiMetr_AP']).cpu().detach().numpy() for x in outputs])).flatten() 
