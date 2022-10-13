@@ -695,9 +695,9 @@ class Model(pl.LightningModule):
 
             # print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
 
-            # self.log('val_mean_auroc', meanPiecaiMetr_auroc)
-            # self.log('val_mean_AP', meanPiecaiMetr_AP)
-            # self.log('mean_val_acc', meanPiecaiMetr_score)
+            self.log('val_mean_auroc', meanPiecaiMetr_auroc)
+            self.log('val_mean_AP', meanPiecaiMetr_AP)
+            self.log('mean_val_acc', meanPiecaiMetr_score)
             # # tensorss = [torch.as_tensor(x['loc_dice']) for x in outputs]
             # # if( len(tensorss)>0):
             #     avg_dice = torch.mean(torch.stack(tensorss))
