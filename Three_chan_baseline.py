@@ -209,7 +209,6 @@ def mainTrain(options,df,physical_size,expId ):
     
 
 
-    trainer.tune(model)
 
 
 
@@ -231,6 +230,8 @@ def mainTrain(options,df,physical_size,expId ):
         log_every_n_steps=10,
         strategy='dp'
     )
+    trainer.tune(model)
+
     trainer.logger._default_hp_metric = False
     start = datetime.now()
     print('Training started at', start)
