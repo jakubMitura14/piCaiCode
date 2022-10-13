@@ -348,6 +348,7 @@ class Model(pl.LightningModule):
         # self.postProcess=monai.transforms.Compose([EnsureType(),  monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])#, monai.transforms.KeepLargestConnectedComponent()
         self.postProcess=monai.transforms.Compose([EnsureType(),EnsureChannelFirst(), AsDiscrete(argmax=True, to_onehot=2)])#, monai.transforms.KeepLargestConnectedComponent()
         self.postTrue = Compose([EnsureType()])
+        self.regLoss = nn.BCEWithLogitsLoss()
         #self.F1Score = torchmetrics.F1Score()
 
         os.makedirs(self.temp_val_dir,  exist_ok = True)             
@@ -383,7 +384,7 @@ class Model(pl.LightningModule):
 
 
     def calculateLoss(self,isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions):
-        return self.criterion(seg_hat,y_true)+ F.smooth_l1_loss(reg_hat.flatten(),torch.Tensor(numLesions).to(self.device).flatten() )
+        return self.criterion(seg_hat,y_true)+ self.regLoss(reg_hat.flatten(),torch.Tensor(numLesions).to(self.device).flatten() )  #F.smooth_l1_loss(reg_hat.flatten(),torch.Tensor(numLesions).to(self.device).flatten() )
 
         # seg_hat_list = decollate_batch(seg_hat)
         # isAnythingInAnnotated_list = decollate_batch(isAnythingInAnnotated)
@@ -528,7 +529,7 @@ class Model(pl.LightningModule):
 
     def validation_epoch_end(self, outputs):
         print("validation_epoch_end")
-        # print(f"outputs {outputs[0]['dices'] }")
+
         allDices = np.array(([x['dices'].cpu().detach().numpy() for x in outputs])).flatten() 
         allmeanPiecaiMetr_auroc = np.array(([x['meanPiecaiMetr_auroc'].cpu().detach().numpy() for x in outputs])).flatten() 
         allmeanPiecaiMetr_AP = np.array(([x['meanPiecaiMetr_AP'].cpu().detach().numpy() for x in outputs])).flatten() 
@@ -538,32 +539,17 @@ class Model(pl.LightningModule):
         
         
         if(len(allDices)>0):            
-            # allforEval = torch.stack([item for sublist in allforEval for item in sublist]).numpy()
-            # print(f"allforEval b {allforEval}")
-            # meanPiecaiMetr_auroc,meanPiecaiMetr_AP,meanPiecaiMetr_score= evaluate_all_cases(allforEval)
-                    # for i in range(0,numIters):
-            # valid_metrics = evaluate(y_det=allextracted,
-            #                         y_true=allgold,
-            #                         num_parallel_calls= os.cpu_count()
-            #                         ,verbose=1
-            #                            )
-
             meanPiecaiMetr_auroc=np.nanmean(allmeanPiecaiMetr_auroc)
             meanPiecaiMetr_AP=np.nanmean(allmeanPiecaiMetr_AP)
             meanPiecaiMetr_score= np.nanmean(allmeanPiecaiMetr_score)
-            # print("finished evaluating")
-            
-            # if(len(allDices)>0):
+
             self.log('dice', np.nanmean(allDices))
 
-            # print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
+            print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
 
             self.log('val_mean_auroc', meanPiecaiMetr_auroc)
             self.log('val_mean_AP', meanPiecaiMetr_AP)
             self.log('mean_val_acc', meanPiecaiMetr_score)
-            # # tensorss = [torch.as_tensor(x['loc_dice']) for x in outputs]
-            # # if( len(tensorss)>0):
-            #     avg_dice = torch.mean(torch.stack(tensorss))
 
             self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
             self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)

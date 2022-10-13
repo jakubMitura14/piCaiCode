@@ -178,14 +178,7 @@ options={
 "models":[getUnetA],# getVNet,getSegResNet,getSwinUNETR
 "regression_channels":[[10,16,32]], #[1,1,1],[2,4,8],
 
-# "lossF":[monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)
-#         # ,SamplesLoss(loss="sinkhorn",p=3)
-#         # ,SamplesLoss(loss="hausdorff",p=3)
-#         # ,SamplesLoss(loss="energy",p=3)
-        
-# ],
-
-"optimizer_class": [getOptNAdam] ,#torch.optim.LBFGS ,torch.optim.LBFGS optim.AggMo,   look in https://pytorch-optimizer.readthedocs.io/en/latest/api.html
+"optimizer_class": [getOptNAdam] ,# ,torch.optim.LBFGS optim.AggMo,   look in https://pytorch-optimizer.readthedocs.io/en/latest/api.html
 "act":[(Act.PRELU, {"init": 0.2})],#,(Act.LEAKYRELU, {})                                         
 "norm":[(Norm.BATCH, {}) ],
 "centerCropSize":[(256, 256,32)],
@@ -214,6 +207,7 @@ df=df.loc[df[t2wColName] != ' ']
 df=df.loc[df[adcColName] != ' ']
 df=df.loc[df[hbvColName] != ' ']
 df=df.loc[df['num_lesions_to_retain']>-1]#correct gleason ...
+
 spacings =  ["_half_spac_c", "_one_spac_c", "_one_and_half_spac_c", "_two_spac_c" ]# ,"_med_spac_b" #config['parameters']['spacing_keyword']["values"]
 
 def getDummy(spac):

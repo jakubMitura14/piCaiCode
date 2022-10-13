@@ -86,7 +86,7 @@ def isAnnytingInAnnotatedInner(row,colName):
     return np.sum(data)
 
 
-def mainTrain(options,df,physical_size,expId ):
+def mainTrain(options,df,physical_size,expId  ,trial):
     picaiLossArr_auroc_final=[]
     picaiLossArr_AP_final=[]
     picaiLossArr_score_final=[]
@@ -99,7 +99,7 @@ def mainTrain(options,df,physical_size,expId ):
         #experiment_name="pic1" # Optional
     )
     lrMod=1.0
-
+    regression_channels= krowa
     #############loading meta data 
     #maxSize=manageMetaData.getMaxSize(getParam(experiment,options,"dirs")["chan3_col_name"],df)
     # print(f"************    maxSize {maxSize}   ***************")
@@ -197,6 +197,8 @@ def mainTrain(options,df,physical_size,expId ):
         picaiLossArr_AP_final=picaiLossArr_AP_final,
         picaiLossArr_score_final=picaiLossArr_score_final,
         lrMod=lrMod
+        ,regression_channels
+        ,trial
     )
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
         monitor='val_mean_score',
