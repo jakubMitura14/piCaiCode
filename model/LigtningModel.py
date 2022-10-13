@@ -629,11 +629,11 @@ class Model(pl.LightningModule):
     
             extracteds= list(map(lambda numpyEntry : self.postProcess(torch.from_numpy((numpyEntry>0).astype('int8'))) ,extracteds  ))
             # extracteds= list(map(lambda entry : EnsureChannelFirst()(entry) ,extracteds  ))
-            extracteds= torch.stack(extracteds).to(self.device)
+            extracteds= torch.stack(extracteds)
             # extracteds= self.postProcess(extracteds)#argmax=True,
 
             #golds=torch.stack(y_true).to(self.device)
-            print("get dice")
+            print(f"get dice  extrrr {extracteds.cpu()}  Y true  {y_true_prim.cpu()}   ")
             diceLoc=monai.metrics.compute_generalized_dice( extracteds.to(self.device) ,y_true_prim.to(self.device))[1].item()
             print(f"diceLoc {diceLoc}")
 
