@@ -462,7 +462,7 @@ class Model(pl.LightningModule):
             #it = pool.imap(my_task, range(lenn))
             results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
             # time.sleep(TIMEOUT)
-            processedCases=list(map(lambda ind :getNext(ind,results,200) ,list(range(lenn)) ))
+            processedCases=list(map(lambda ind :getNext(ind,results,60) ,list(range(lenn)) ))
 
         extracteds=list(filter(lambda it:type(it) != type(None),processedCases))
         # extracteds=list(filter(lambda it:it.numpy(),extracteds))
@@ -486,9 +486,6 @@ class Model(pl.LightningModule):
                                     y_true=list(map(lambda el: el.numpy()[1,:,:,:]  ,y_true)),
                                     num_parallel_calls= os.cpu_count()
                                     ,verbose=1)
-            
-
-
             meanPiecaiMetr_auroc=0.0 if math.isnan(valid_metrics.auroc) else valid_metrics.auroc
             meanPiecaiMetr_AP=0.0 if math.isnan(valid_metrics.AP) else valid_metrics.AP
             meanPiecaiMetr_score= 0.0 if math.isnan(valid_metrics.score) else  valid_metrics.score
@@ -508,21 +505,6 @@ class Model(pl.LightningModule):
 
             return {'dices': diceLoc, 'meanPiecaiMetr_auroc':meanPiecaiMetr_auroc
                     ,'meanPiecaiMetr_AP' :meanPiecaiMetr_AP,'meanPiecaiMetr_score': meanPiecaiMetr_score}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
