@@ -626,10 +626,10 @@ class Model(pl.LightningModule):
             meanPiecaiMetr_score= valid_metrics.score
 
     
-            extracteds= list(map(lambda numpyEntry : torch.from_numpy((numpyEntry>0).astype('int8')) ,extracteds  ))
+            extracteds= list(map(lambda numpyEntry : self.postProcess(torch.from_numpy((numpyEntry>0).astype('int8'))) ,extracteds  ))
             # extracteds= list(map(lambda entry : EnsureChannelFirst()(entry) ,extracteds  ))
             extracteds= torch.stack(extracteds).to(self.device)
-            extracteds= self.postProcess(extracteds)#argmax=True,
+            # extracteds= self.postProcess(extracteds)#argmax=True,
 
             #golds=torch.stack(y_true).to(self.device)
             print("get dice")
