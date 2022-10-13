@@ -538,7 +538,7 @@ for keyWord in ['t2w','adc', 'hbv']: #'cor',,'sag'
     # denoising
     # Standardize.iterateAndDenoise(keyWord,df)
     # standarization
-    Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,110)   
+    Standardize.iterateAndStandardize(keyWord,df,trainedModelsBasicPath,300)   
 #getting dask frame
 df = dd.from_pandas(df, npartitions=os.cpu_count())
 
