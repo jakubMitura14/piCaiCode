@@ -611,13 +611,13 @@ class Model(pl.LightningModule):
             experiment=self.logger.experiment
             directory= self.temp_val_dir
             epoch=self.current_epoch
-                                                  
             list(map(partial(log_images
                 ,experiment=experiment,golds=y_true,extracteds=extracteds 
                 ,t2ws=images,directory=directory ,patIds=patIds,epoch=epoch),range(lenn)))
+            # y_true= list(map(lambda el: el.numpy()  ,y_true))                                              
 
             valid_metrics = evaluate(y_det=extracteds,
-                                    y_true=y_true,
+                                    y_true=list(map(lambda el: el.numpy()  ,y_true)),
                                     num_parallel_calls= os.cpu_count()
                                     ,verbose=1)
             
@@ -630,7 +630,7 @@ class Model(pl.LightningModule):
             extracteds= torch.stack(extracteds).to(self.device)
             extracteds= AsDiscrete( to_onehot=2)(extracteds)#argmax=True,
 
-            golds=torch.stack(golds).to(self.device)
+            golds=torch.stack(y_true).to(self.device)
             diceLoc=monai.metrics.compute_generalized_dice( extracteds ,golds)[1].item()
 
 
