@@ -357,11 +357,11 @@ def extractLesions_my(x):
     return extract_lesion_candidates(x)[0]
 
 
-def save_heatmap(arr,dir,name,cmapp='gray'):
+def save_heatmap(arr,dir,name,numLesions,cmapp='gray'):
     path = join(dir,name+'.png')
     arr = np.flip(np.transpose(arr),(1,0))
     plt.imshow(arr , interpolation = 'nearest' , cmap= cmapp)
-    plt.title( name)
+    plt.title( name+'__'+str(numLesions))
     plt.savefig(path)
     return path
 
@@ -432,9 +432,9 @@ def log_images(i,experiment,golds,extracteds ,t2ws, directory,patIds,epoch,numLe
     print(f" extracted {extracted.shape}  ")
 
     print(f" curr_studyId {curr_studyId}  ")
-    experiment.log_image( save_heatmap(np.add(t2w.astype('float'),(gold*(t2wMax)).astype('float')),directory,f"gold_plus_t2w_{curr_studyId}_{epoch}"))
-    experiment.log_image( save_heatmap(np.add(gold,extracted[:,:,maxSlice]*2),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}",'plasma'))
-    experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}"))
+    experiment.log_image( save_heatmap(np.add(t2w.astype('float'),(gold*(t2wMax)).astype('float')),directory,f"gold_plus_t2w_{curr_studyId}_{epoch}",numLesions[i]))
+    experiment.log_image( save_heatmap(np.add(gold,extracted[:,:,maxSlice]*2),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}",numLesions[i],'plasma'))
+    experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}",numLesions[i]))
 
 
 class Model(pl.LightningModule):
@@ -585,7 +585,7 @@ class Model(pl.LightningModule):
         # y_background = decollate_batch(seg_hat[:,0,:,:,:].cpu().detach())
         y_true = decollate_batch(y_true_prim.cpu().detach())
         patIds = decollate_batch(batch['study_id'])
-        numLesions = decollate_batch(batch['numLesions'])
+        numLesions = decollate_batch(batch['num_lesions_to_retain'])
         images = decollate_batch(x.cpu().detach()) 
 
         print(f"val num batches {numBatches} t2wb {t2wb} patIds {patIds} labelB {labelB}")
