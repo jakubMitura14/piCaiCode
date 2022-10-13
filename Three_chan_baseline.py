@@ -90,6 +90,7 @@ def mainTrain(options,df,physical_size,expId  ,trial):
     picaiLossArr_auroc_final=[]
     picaiLossArr_AP_final=[]
     picaiLossArr_score_final=[]
+    dice_final=[]
     print("mmmmmmmmmmmmmmmmmm")
     #TODO(remove)
     comet_logger = CometLogger(
@@ -199,6 +200,7 @@ def mainTrain(options,df,physical_size,expId  ,trial):
         lrMod=lrMod
         ,regression_channels
         ,trial
+        ,dice_final
     )
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
         monitor='val_mean_score',
@@ -240,6 +242,7 @@ def mainTrain(options,df,physical_size,expId  ,trial):
     trainer.fit(model=model, datamodule=data)
     print('Training duration:', datetime.now() - start)
 
+    return np.max(np.array(dice_final).flatten())
 
     # experiment.log_metric("last_val_loss_auroc",np.nanmax(picaiLossArr_auroc_final))
     # experiment.log_metric("last_val_loss_Ap",np.nanmax(picaiLossArr_AP_final))

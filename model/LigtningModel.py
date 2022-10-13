@@ -314,6 +314,7 @@ class Model(pl.LightningModule):
     ,lrMod
     ,regression_channels
     ,trial
+    ,dice_final
     ):
         super().__init__()
         self.learning_rate = learning_rate
@@ -333,7 +334,7 @@ class Model(pl.LightningModule):
         self.picaiLossArr_score=[]
         self.dices=[]
         self.surfDists=[]
-        
+        self.dice_final=dice_final        
         self.picaiLossArr_auroc_final=picaiLossArr_auroc_final
         self.picaiLossArr_AP_final=picaiLossArr_AP_final
         self.picaiLossArr_score_final=picaiLossArr_score_final
@@ -543,7 +544,7 @@ class Model(pl.LightningModule):
             meanPiecaiMetr_AP=np.nanmean(allmeanPiecaiMetr_AP)
             meanPiecaiMetr_score= np.nanmean(allmeanPiecaiMetr_score)
 
-            self.log('dice', np.nanmean(allDices))
+            self.log('dice', (-1)*np.nanmean(allDices))
 
             print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
 
@@ -554,6 +555,7 @@ class Model(pl.LightningModule):
             self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
             self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
             self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
+            self.dice_final.append((-1)*np.nanmean(allDices))
 
  
 

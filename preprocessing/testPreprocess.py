@@ -212,7 +212,8 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
         #if(True):
             # print(f" pathDebugT2w {pathDebugT2w} outLabelPath {outLabelPath} ")
             patId=str(row['patient_id'])
-            # print(f" {str(row[colNameAdc])}  str(row[colNameHbv]) {str(row[colNameHbv])}"    )
+            # print(f" {str(row[colNameAdc])}  str(row[colNameHbv]) {str(row[colNameHbv])}"    )        
+            
             imgT2w=sitk.ReadImage(str(row[colNameT2w]))
             imgAdc=sitk.ReadImage(str(row[colNameAdc]))
             imgHbv=sitk.ReadImage(str(row[colNameHbv]))
@@ -245,6 +246,14 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
             writer.SetFileName(outLabelPath)
             writer.Execute(imgLabel)            
 
+            if os.path.exists(row[colNameT2w]):
+                os.remove(row[colNameT2w])
+            if os.path.exists(row[colNameAdc]):
+                os.remove(row[colNameT2w])
+            if os.path.exists(row[colNameHbv]):
+                os.remove(row[colNameT2w])
+            if os.path.exists(row[labelColName]):
+                os.remove(row[colNameT2w])
 
             # print(f"pre patient id  {patId} ")
             # print(f"pre t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
@@ -252,13 +261,13 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
             # print(f"pre hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
             # print(f"pre imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
 
-            join = sitk.JoinSeriesImageFilter()
-            joined_image = join.Execute(imgT2w, imgHbv,imgAdc,imgHbv)
+            # join = sitk.JoinSeriesImageFilter()
+            # joined_image = join.Execute(imgT2w, imgHbv,imgAdc,imgHbv)
             # joined_image=Standardize.padToSize(joined_image,targetSize,paddValue)
 
-            writer = sitk.ImageFileWriter()
-            writer.SetFileName(outPath)
-            writer.Execute(joined_image)
+            # writer = sitk.ImageFileWriter()
+            # writer.SetFileName(outPath)
+            # writer.Execute(joined_image)
 
             # select = sitk.VectorIndexSelectionCastImageFilter()
             # imgT2w = select.Execute(joined_image, 0, sitk.sitkFloat32)

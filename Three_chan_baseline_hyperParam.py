@@ -162,10 +162,7 @@ def getViTAutoEnc(dropout,input_image_size,in_channels,out_channels):
         img_size=input_image_size,
         patch_size=(16,16,16)
     )
-
-
 #batch sizes
-#unet one spac sth like 16
 
 
 def getOptNAdam(lr):
@@ -176,13 +173,10 @@ options={
 
 # "models":[getUnetA,getUnetB,getVNet,getSegResNet],
 "models":[getUnetA],# getVNet,getSegResNet,getSwinUNETR
-"regression_channels":[[10,16,32]], #[1,1,1],[2,4,8],
-
+"regression_channels":[[2,4,8],[10,16,32],[32,64,128]], #,
 "optimizer_class": [getOptNAdam] ,# ,torch.optim.LBFGS optim.AggMo,   look in https://pytorch-optimizer.readthedocs.io/en/latest/api.html
-"act":[(Act.PRELU, {"init": 0.2})],#,(Act.LEAKYRELU, {})                                         
-"norm":[(Norm.BATCH, {}) ],
-"centerCropSize":[(256, 256,32)],
-#TODO() learning rate schedulers https://medium.com/mlearning-ai/make-powerful-deep-learning-models-quickly-using-pytorch-lightning-29f040158ef3
+# "centerCropSize":[(256, 256,32)],
+
 }
 
 
@@ -207,7 +201,7 @@ df=df.loc[df[t2wColName] != ' ']
 df=df.loc[df[adcColName] != ' ']
 df=df.loc[df[hbvColName] != ' ']
 df=df.loc[df['num_lesions_to_retain']>-1]#correct gleason ...
-
+df['num_lesions_to_retain']=df.apply(lambda el: int(el['num_lesions_to_retain']>0))#binarizing the output
 spacings =  ["_half_spac_c", "_one_spac_c", "_one_and_half_spac_c", "_two_spac_c" ]# ,"_med_spac_b" #config['parameters']['spacing_keyword']["values"]
 
 def getDummy(spac):
@@ -243,7 +237,7 @@ study = optuna.create_study(
         #,storage="mysql://root@127.0.0.1:3306/picai_hp_35"
         )
         #mysql://root@localhost/example
-study.optimize(objective, n_trials=40)
+study.optimize(objective, n_trials=120)
 
 # for experiment in opt.get_experiments(
 #         project_name="picai-hyperparam-search-43"):
