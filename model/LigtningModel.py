@@ -426,7 +426,7 @@ def log_images(i,experiment,golds,extracteds ,t2ws, directory,patIds,epoch):
     print(f" maxSlice {maxSlice}  ")
     curr_studyId=patIds[i]
     t2w=t2ws[i][0,:,:,maxSlice]
-    gold=golds[i][goldChannel,:,:,maxSlice]
+    gold=golds[i][goldChannel,:,:,maxSlice].cpu().detach().numpy()
     extracted=extracteds[i]
     print(f" t2w {t2w.shape}  ")
     print(f" gold {gold.shape}  ")
