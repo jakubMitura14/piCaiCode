@@ -218,16 +218,30 @@ class PiCaiDataModule(pl.LightningDataModule):
 
     def setup(self, stage=None):
         set_determinism(seed=0)
-        self.subjects = list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1]
-        ,self.label_name,self.label_name_val
-            ,self.t2wColName, self.adcColName,self.hbvColName )   , list(self.df.iterrows())))
-        train_set, valid_set,test_set = self.splitDataSet(self.subjects , self.trainSizePercent,True)
+        # self.subjects = list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1]
+        # ,self.label_name,self.label_name_val
+        #     ,self.t2wColName, self.adcColName,self.hbvColName )   , list(self.df.iterrows())))
+        # train_set, valid_set,test_set = self.splitDataSet(self.subjects , self.trainSizePercent,True)
         
         #train_subjects=self.subjects[0:179]
         #val_subjects=self.subjects[180:200]
-        train_subjects = train_set
-        val_subjects = valid_set+test_set
+        # train_subjects = train_set
+        # val_subjects = valid_set+test_set
         # self.test_subjects = test_set
+
+        allSubj,onlyPositve=  self.getSubjects()
+        allSubjects= allSubj
+        onlyPositiveSubjects= onlyPositve        
+        random.shuffle(allSubjects)
+        random.shuffle(onlyPositiveSubjects)
+
+
+        self.allSubjects= allSubjects
+        self.onlyPositiveSubjects=onlyPositiveSubjects
+        onlyNegative=list(filter(lambda subj :  subj['num_lesions_to_retain']==0  ,allSubjects))        
+        noLabels=list(filter(lambda subj :  subj['isAnythingInAnnotated']==0 and subj['num_lesions_to_retain']>0 ,allSubjects))        
+        print(f" onlyPositiveSubjects {len(onlyPositiveSubjects)} onlyNegative {len(onlyNegative)} noLabels but positive {len(noLabels)}  ")
+
         train_transforms=transformsForMain.get_train_transforms(
             self.RandGaussianNoised_prob
             ,self.RandAdjustContrastd_prob
@@ -240,13 +254,16 @@ class PiCaiDataModule(pl.LightningDataModule):
         val_transforms= transformsForMain.get_val_transforms(self.is_whole_to_train,self.spatial_size )
 
 
-        self.val_ds=     SmartCacheDataset(data=val_subjects, transform=val_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
-        self.train_ds=     SmartCacheDataset(data=train_subjects, transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+        self.val_ds=     SmartCacheDataset(data=onlyPositiveSubjects[0:25]+onlyNegative[0:10], transform=val_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+        self.train_ds_labels = SmartCacheDataset(data=onlyPositiveSubjects[25:]+onlyNegative[10:], transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+        self.train_ds_no_labels = SmartCacheDataset(data=noLabels, transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
 
         
     def train_dataloader(self):
-        return DataLoader(self.train_ds, batch_size=self.batch_size, drop_last=self.drop_last
-                          ,num_workers=self.num_workers,collate_fn=list_data_collate, shuffle=False )# ,collate_fn=list_data_collate ,collate_fn=list_data_collate , shuffle=True ,collate_fn=list_data_collate
+        return {'train_ds_labels': DataLoader(self.train_ds_labels, batch_size=self.batch_size, drop_last=self.drop_last
+                          ,num_workers=self.num_workers,collate_fn=list_data_collate, shuffle=False ),
+                'train_ds_no_labels' :           
+                          }# ,collate_fn=list_data_collate ,collate_fn=list_data_collate , shuffle=True ,collate_fn=list_data_collate
 
     def val_dataloader(self):
         return DataLoader(self.val_ds, batch_size=10

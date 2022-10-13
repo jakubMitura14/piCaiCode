@@ -19,7 +19,6 @@ from registration.elastixRegister import (reg_adc_hbv_to_t2w,
                                           reg_adc_hbv_to_t2w_sitk)
 from utilsPreProcessing import write_to_modif_path
 import math
-import swifter
 import dask
 import dask.dataframe as dd
 
@@ -317,7 +316,6 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     #needs to be on single thread as resampling GAN is acting on GPU
     # we save the metadata to main pandas data frame 
 
-# data['out'] = data['in'].swifter.apply(some_function)
     labelColName="label"+spacing_keyword
 
 
@@ -326,13 +324,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     df["t2w"+spacing_keyword]=   df.apply(partial(resample_ToMedianSpac,colName='t2w',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ), axis=1).compute()
     df[labelColName]=   df.apply(partial(resample_labels,targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ), axis=1).compute()
     
-    
-    # df["adc"+spacing_keyword]=   df.swifter.apply(partial(resample_ToMedianSpac,colName='registered_'+'adc',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ))
-    # df["hbv"+spacing_keyword]=   df.swifter.apply(partial(resample_ToMedianSpac,colName='registered_'+'hbv',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ))
-    # df["t2w"+spacing_keyword]=   df.swifter.apply(partial(resample_ToMedianSpac,colName='t2w',targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ))
-    # df[labelColName]=   df.swifter.apply(partial(resample_labels,targetSpacing=targetSpacingg, spacing_keyword=spacing_keyword  ))
-    
-    
+
     
     # resList=[]
     # with mp.Pool(processes = mp.cpu_count()) as pool:
@@ -548,7 +540,6 @@ Standardize.iterateAndchangeLabelToOnes(df)
 #### 
 #now registration of adc and hbv to t2w
 for keyWord in ['adc','hbv']:
-    # df['registered_'+keyWord] = df.swifter.apply(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'))
     df['registered_'+keyWord] = df.apply(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'), axis=1).compute()
 
 
