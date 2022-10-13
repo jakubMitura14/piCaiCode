@@ -202,7 +202,7 @@ def mainTrain(options,df,physical_size,expId ):
         divergence_threshold=(-0.1)
     )
     checkpoint_callback = ModelCheckpoint(dirpath=f"/home/sliceruser/data/checkPoints/{expId}",mode='max', save_top_k=1, monitor="dice")
-    stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging()
+    stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging(swa_lrs=1e-2)
     
     trainer = pl.Trainer(
         #accelerator="cpu", #TODO(remove)
