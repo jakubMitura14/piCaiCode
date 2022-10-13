@@ -507,7 +507,7 @@ class Model(pl.LightningModule):
             # gold = list(map(lambda tupl: tupl[2] ,processedCases ))
 
             return {'dices': diceLoc, 'meanPiecaiMetr_auroc':meanPiecaiMetr_auroc
-                    ,'meanPiecaiMetr_AP' :meanPiecaiMetr_AP,meanPiecaiMetr_score: 'meanPiecaiMetr_score'}
+                    ,'meanPiecaiMetr_AP' :meanPiecaiMetr_AP,'meanPiecaiMetr_score': meanPiecaiMetr_score}
 
 
 
