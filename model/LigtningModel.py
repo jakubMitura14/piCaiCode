@@ -298,8 +298,8 @@ def log_images(i,experiment,golds,extracteds ,t2ws, directory,patIds,epoch,numLe
     extracted=extracteds[i]
 
     experiment.log_image( save_heatmap(np.add(t2w.astype('float'),(gold*(t2wMax)).astype('float')),directory,f"gold_plus_t2w_{curr_studyId}_{epoch}",numLesions[i]))
-    experiment.log_image( save_heatmap(np.add(gold,extracted[:,:,maxSlice]*2),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}",numLesions[i],'plasma'))
-    experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}",numLesions[i]))
+    experiment.log_image( save_heatmap(np.add(gold,(extracted[:,:,maxSlice]>0).astype('int8'))*2),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}",numLesions[i],'plasma'))
+    # experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}",numLesions[i]))
 
 
 class Model(pl.LightningModule):
@@ -507,7 +507,11 @@ class Model(pl.LightningModule):
 
             golds=torch.stack(y_true).cpu()
             # print(f"get dice  extrrr {extracteds.cpu()}  Y true  {y_true_prim.cpu()}   ")
-            diceLoc=monai.metrics.compute_generalized_dice( extracteds.cpu() ,golds)[1].item()
+            diceLoc=0.0
+            try:
+                diceLoc=monai.metrics.compute_generalized_dice( extracteds.cpu() ,golds)[1].item()
+            except:
+                pass    
             print(f"diceLoc {diceLoc}")
 
             # gold = list(map(lambda tupl: tupl[2] ,processedCases ))
