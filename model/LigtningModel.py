@@ -539,9 +539,6 @@ class Model(pl.LightningModule):
         
         
         if(len(allDices)>0):            
-            allforEval=self.processOutputs(outputs)
-            self.log('dice', np.mean(allDices))
-            print(f"allgold a {allforEval}")
             # allforEval = torch.stack([item for sublist in allforEval for item in sublist]).numpy()
             # print(f"allforEval b {allforEval}")
             # meanPiecaiMetr_auroc,meanPiecaiMetr_AP,meanPiecaiMetr_score= evaluate_all_cases(allforEval)
