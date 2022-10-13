@@ -617,7 +617,7 @@ class Model(pl.LightningModule):
                 ,t2ws=images,directory=directory ,patIds=patIds,epoch=epoch),range(lenn)))
 
             valid_metrics = evaluate(y_det=extracteds,
-                                    y_true=golds,
+                                    y_true=y_true,
                                     num_parallel_calls= os.cpu_count()
                                     ,verbose=1)
             
