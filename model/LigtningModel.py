@@ -492,9 +492,11 @@ class Model(pl.LightningModule):
                                     num_parallel_calls= os.cpu_count()
                                     ,verbose=1)
             
-            meanPiecaiMetr_auroc=valid_metrics.auroc
-            meanPiecaiMetr_AP=valid_metrics.AP
-            meanPiecaiMetr_score= valid_metrics.score
+
+
+            meanPiecaiMetr_auroc=0.0 if math.isnan(valid_metrics.auroc) else valid_metrics.auroc
+            meanPiecaiMetr_AP=0.0 if math.isnan(valid_metrics.AP) else valid_metrics.AP
+            meanPiecaiMetr_score= 0.0 if math.isnan(valid_metrics.score) else  valid_metrics.score
 
     
             extracteds= list(map(lambda numpyEntry : self.postProcess(torch.from_numpy((numpyEntry>0).astype('int8'))) ,extracteds  ))
@@ -509,8 +511,8 @@ class Model(pl.LightningModule):
 
             # gold = list(map(lambda tupl: tupl[2] ,processedCases ))
 
-            return {'dices': torch.Tensor(diceLoc), 'meanPiecaiMetr_auroc':torch.Tensor(meanPiecaiMetr_auroc)
-                    ,'meanPiecaiMetr_AP' :torch.Tensor(meanPiecaiMetr_AP),torch.Tensor(meanPiecaiMetr_score): 'meanPiecaiMetr_score'}
+            return {'dices': diceLoc, 'meanPiecaiMetr_auroc':meanPiecaiMetr_auroc
+                    ,'meanPiecaiMetr_AP' :meanPiecaiMetr_AP,meanPiecaiMetr_score: 'meanPiecaiMetr_score'}
 
 
 
