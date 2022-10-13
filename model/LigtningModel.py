@@ -322,7 +322,7 @@ class Model(pl.LightningModule):
         self.optimizer_class = optimizer_class
         self.best_val_dice = 0
         self.best_val_epoch = 0
-        # self.dice_metric = monai.metrics.GeneralizedDiceScore()
+        self.dice_metric = monai.metrics.GeneralizedDiceScore()
         #self.rocAuc=monai.metrics.ROCAUCMetric()
         self.picaiLossArr=[]
         self.post_pred = Compose([ AsDiscrete( to_onehot=2)])
@@ -443,11 +443,8 @@ class Model(pl.LightningModule):
         numBatches = y_true_prim.size(dim=0)
         #seg_hat, reg_hat = self.modelRegression(x)        
         # seg_hat, reg_hat = self.modelRegression(x)        
-        seg_hat = self.net(x)
-        seg_hat=torch.sigmoid(seg_hat)
-        diceLoc=monai.metrics.compute_generalized_dice( AsDiscrete(argmax=True, to_onehot=2)(seg_hat) ,y_true_prim)[1].item()
-        seg_hat=seg_hat.cpu().detach()
-
+        seg_hat = self.net(x).cpu().detach()
+        seg_hat=torch.sigmoid(seg_hat).cpu().detach()
         t2wb=decollate_batch(batch['t2wb'])
         labelB=decollate_batch(batch['labelB'])
         #loss= self.criterion(seg_hat,y_true)# self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)      
@@ -469,7 +466,9 @@ class Model(pl.LightningModule):
             time.sleep(70)
             processedCases=list(map(lambda ind :getNext(ind,results,10) ,list(range(lenn)) ))
 
+        isTaken= list(map(lambda it:type(it) != type(None),processedCases))
         extracteds=list(filter(lambda it:type(it) != type(None),processedCases))
+
         lenn=len(extracteds)
 
         # extracteds=list(filter(lambda it:it.numpy(),extracteds))
@@ -478,7 +477,7 @@ class Model(pl.LightningModule):
         # processedCases=list(map(partial(processDecolated,gold_arr=y_true,y_hat_arr=y_det,directory= self.temp_val_dir,studyId= patIds
         #             ,imageArr=images, experiment=self.logger.experiment,postProcess=self.postProcess,epoch=self.current_epoch)
         #             ,range(0,numBatches)))
-            
+        
 
         if(len(extracteds)>0):
             experiment=self.logger.experiment
@@ -499,12 +498,14 @@ class Model(pl.LightningModule):
             meanPiecaiMetr_score= 0.0 if math.isnan(valid_metrics.score) else  valid_metrics.score
 
     
-            # extracteds= list(map(lambda numpyEntry : self.postProcess(torch.from_numpy((numpyEntry>0).astype('int8'))) ,extracteds  ))
-            # extracteds= torch.stack(extracteds)
+            extracteds= list(map(lambda numpyEntry : self.postProcess(torch.from_numpy((numpyEntry>0).astype('int8'))) ,extracteds  ))
+            extracteds= torch.stack(extracteds)
 
-            #golds=torch.stack(y_true).to(self.device)
+            # extracteds= self.postProcess(extracteds)#argmax=True,
+
+            golds=torch.stack(y_true[isTaken]).cpu()
             # print(f"get dice  extrrr {extracteds.cpu()}  Y true  {y_true_prim.cpu()}   ")
-            # diceLoc=monai.metrics.compute_generalized_dice( extracteds.cpu() ,y_true_prim.cpu())[1].item()
+            diceLoc=monai.metrics.compute_generalized_dice( extracteds.cpu() ,golds)[1].item()
             print(f"diceLoc {diceLoc}")
 
             # gold = list(map(lambda tupl: tupl[2] ,processedCases ))
@@ -512,7 +513,7 @@ class Model(pl.LightningModule):
             return {'dices': diceLoc, 'meanPiecaiMetr_auroc':meanPiecaiMetr_auroc
                     ,'meanPiecaiMetr_AP' :meanPiecaiMetr_AP,'meanPiecaiMetr_score': meanPiecaiMetr_score}
 
-        return {'dices': diceLoc, 'meanPiecaiMetr_auroc':0.0
+        return {'dices': 0.0, 'meanPiecaiMetr_auroc':0.0
                 ,'meanPiecaiMetr_AP' :0.0,'meanPiecaiMetr_score': 0.0}
 
 
