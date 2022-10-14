@@ -173,12 +173,12 @@ def getOptions():
     return {
 
     # "models":[getUnetA,getUnetB,getVNet,getSegResNet],
-    "models":[getVNet],# getVNet,getSegResNet,getSwinUNETR
-    #getUnetA
+    "models":[getSegResNet],# ,getSegResNet,getSwinUNETR
+    #getUnetA,getVNet
     "regression_channels":[[2,4,8],[10,16,32],[32,64,128]], #,
     "optimizer_class": [getOptNAdam] ,# ,torch.optim.LBFGS optim.AggMo,   look in https://pytorch-optimizer.readthedocs.io/en/latest/api.html
     # "centerCropSize":[(256, 256,32)],
-    "spacing_keyword" : ["_half_spac_c", "_one_spac_c", "_one_and_half_spac_c", "_two_spac_c" ]# ,"_med_spac_b" #config['parameters']['spacing_keyword']["values"]
+    "spacing_keyword" : ["_half_spac_c" ]# , "_one_spac_c", "_one_and_half_spac_c", "_two_spac_c"
 
     }
 
