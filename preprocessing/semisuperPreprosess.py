@@ -126,6 +126,3 @@ def writeDummyLabels(outPath,imageRef_path):
     writer.SetFileName(outPath)
     writer.Execute(image)  
     return sizz  
-
-df = pd.read_csv("/home/sliceruser/data/metadata/processedMetaData_current_b.csv")
-df["num_lesions_to_retain"] = df.apply(get_numb_ofLesions_toRetain, axis=1)

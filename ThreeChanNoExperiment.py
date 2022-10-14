@@ -312,13 +312,13 @@ def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_chan
         max_epochs=600,#experiment.get_parameter("max_epochs"),
         #gpus=1,
         #precision=experiment.get_parameter("precision"), 
-        callbacks=[ checkpoint_callback,stochasticAveraging,optuna_prune ],
+        callbacks=[ checkpoint_callback,stochasticAveraging ], #optuna_prune
         logger=comet_logger,
         accelerator='auto',
         devices='auto',       
         default_root_dir= "/home/sliceruser/lightning_logs",
         # auto_scale_batch_size="binsearch",
-        auto_lr_find=True,
+        # auto_lr_find=True,
         check_val_every_n_epoch=30,
         accumulate_grad_batches= 2,# experiment.get_parameter("accumulate_grad_batches"),
         gradient_clip_val=  0.9 ,#experiment.get_parameter("gradient_clip_val"),# 0.5,2.0
