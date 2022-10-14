@@ -243,8 +243,8 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, postProc
     regr_now = regr[i]
     gold_arr_loc=gold_arr[i]
 
-    if(regr_now==0):
-        return np.zeros_like(gold_arr_loc)        
+    # if(regr_now==0):
+    #     return np.zeros_like(gold_arr_loc)        
     curr_studyId=studyId[i]
     print(f"extracting {curr_studyId}")
     extracted=np.array(extract_lesion_candidates(y_hat_arr[i][1,:,:,:].cpu().detach().numpy())[0]) #, threshold='dynamic'
