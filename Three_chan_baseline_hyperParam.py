@@ -94,7 +94,21 @@ def getUnetA(dropout,input_image_size,in_channels,out_channels ):
         norm= (Norm.BATCH, {}),
         dropout= dropout
     )
-def getUnetB(dropout,input_image_size,in_channels,out_channels):
+
+def getUnetB(dropout,input_image_size,in_channels,out_channels ):
+    return unets.UNet(
+        spatial_dims=3,
+        in_channels=in_channels,
+        out_channels=out_channels,
+        strides=[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2),(1, 1, 1)],
+        channels=[32, 64, 128, 256, 512, 1024,2048],
+        num_res_units= 0,
+        act = (Act.PRELU, {"init": 0.2}),
+        norm= (Norm.BATCH, {}),
+        dropout= dropout
+    )
+
+def getUnetC(dropout,input_image_size,in_channels,out_channels):
     return unets.UNet(
         spatial_dims=3,
         in_channels=in_channels,
@@ -173,7 +187,7 @@ def getOptions():
     return {
 
     # "models":[getUnetA,getUnetB,getVNet,getSegResNet],
-    "models":[getUnetA,getUnetB,getVNet],# ,getSegResNet,getSwinUNETR
+    "models":[getUnetA,getUnetB,getVNet,getUnetC],# ,getSegResNet,getSwinUNETR
     #getUnetA,getUnetB,getVNet
     "regression_channels":[[2,4,8],[10,16,32],[32,64,128]], #,
     "optimizer_class": [getOptNAdam] ,# ,torch.optim.LBFGS optim.AggMo,   look in https://pytorch-optimizer.readthedocs.io/en/latest/api.html
