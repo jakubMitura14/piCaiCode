@@ -318,7 +318,7 @@ class Model(pl.LightningModule):
         self.postTrue = Compose([EnsureType()])
         self.regLoss = nn.BCEWithLogitsLoss()
         #self.F1Score = torchmetrics.F1Score()
-
+        self.experiment=self.logger.experiment
         os.makedirs(self.temp_val_dir,  exist_ok = True)             
         shutil.rmtree(self.temp_val_dir) 
         os.makedirs(self.temp_val_dir,  exist_ok = True)             
@@ -402,10 +402,10 @@ class Model(pl.LightningModule):
         #             ,range(0,numBatches)))
         
         if(len(extracteds)>0):
-            print("inside if   ")
+            print("inside ifff   ")
             directory= self.temp_val_dir
             print("inside if  b ")
-            experiment=self.logger.experiment
+            experiment=self.experiment
             print("inside if  c ")            
             epoch=self.current_epoch
             print("start logging")
