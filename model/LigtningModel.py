@@ -332,9 +332,13 @@ class Model(pl.LightningModule):
         return [optimizer], [lr_scheduler]
 
     def infer_train_ds_labels(self, batch):
-        x, y, numLesions = batch["train_ds_labels"]['chan3_col_name'] , batch["train_ds_labels"]['label'], batch["train_ds_labels"]['num_lesions_to_retain']
+        x, y, numLesions = batch['chan3_col_name'] , batch['label'], batch['num_lesions_to_retain']
         segmMap,regr = self.modelRegression(x)
         return segmMap,regr, y, numLesions
+    # def infer_train_ds_labels(self, batch):
+    #     x, y, numLesions = batch["train_ds_labels"]['chan3_col_name'] , batch["train_ds_labels"]['label'], batch["train_ds_labels"]['num_lesions_to_retain']
+    #     segmMap,regr = self.modelRegression(x)
+    #     return segmMap,regr, y, numLesions
 
 
     # def infer_train_ds_no_labels(self, batch):
@@ -390,7 +394,7 @@ class Model(pl.LightningModule):
         extracteds=list(filter(lambda it:type(it) != type(None),processedCases))
 
         lenn=len(extracteds)
-
+        print(f"lenn after extract {lenn}")
         # extracteds=list(filter(lambda it:it.numpy(),extracteds))
 
 
