@@ -241,8 +241,6 @@ def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_chan
     df=df.loc[df[t2wColName] != ' ']
     df=df.loc[df[adcColName] != ' ']
     df=df.loc[df[hbvColName] != ' ']
-    df=df.loc[df['num_lesions_to_retain']>-1]#correct gleason ...
-    df['num_lesions_to_retain']=df.apply(lambda el: int(el['num_lesions_to_retain']>0))#binarizing the output
 
     #TODO(remove)
     comet_logger = CometLogger(
