@@ -302,7 +302,7 @@ def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_chan
         ,dice_final=dice_final
     )
 
-    checkpoint_callback = ModelCheckpoint(dirpath=f"/home/sliceruser/checkPoints/{expId}",mode='max', save_top_k=1, monitor="dice")
+    checkpoint_callback = ModelCheckpoint(dirpath=f"/home/sliceruser/locTemp/checkPoints/{expId}",mode='max', save_top_k=1, monitor="dice")
     stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging(swa_lrs=1e-2)
     optuna_prune=PyTorchLightningPruningCallback(trial, monitor="dice")     
 
@@ -316,7 +316,7 @@ def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_chan
         logger=comet_logger,
         accelerator='auto',
         devices='auto',       
-        default_root_dir= "/home/sliceruser/lightning_logs",
+        default_root_dir= "/home/sliceruser/locTemp/lightning_logs",
         # auto_scale_batch_size="binsearch",
         # auto_lr_find=True,
         check_val_every_n_epoch=30,
