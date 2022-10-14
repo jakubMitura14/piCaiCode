@@ -176,6 +176,7 @@ class PiCaiDataModule(pl.LightningDataModule):
     """
     def getSubjects(self):
         self.df=self.df.loc[self.df['study_id'] !=1000110]# becouse there is error in this label
+        self.df=self.df.loc[self.df['study_id'] !=1001489]# becouse there is error in this label
         onlyPositve = self.df.loc[self.df['isAnyMissing'] ==False]
         onlyPositve = onlyPositve.loc[onlyPositve['isAnythingInAnnotated']>0 ]
 
@@ -256,14 +257,14 @@ class PiCaiDataModule(pl.LightningDataModule):
              )
         val_transforms= transformsForMain.get_val_transforms()
 
-        # self.val_ds=     SmartCacheDataset(data=onlyPositiveSubjects[0:25]+onlyNegative[0:10], transform=val_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
-        # self.train_ds_labels = SmartCacheDataset(data=onlyPositiveSubjects[25:]+onlyNegative[10:], transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
-        # self.train_ds_no_labels = SmartCacheDataset(data=noLabels, transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+        self.val_ds=     SmartCacheDataset(data=onlyPositiveSubjects[0:25]+onlyNegative[0:10], transform=val_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+        self.train_ds_labels = SmartCacheDataset(data=onlyPositiveSubjects[25:]+onlyNegative[10:], transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+        self.train_ds_no_labels = SmartCacheDataset(data=noLabels, transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
 
 
-        self.val_ds=  Dataset(data=onlyPositiveSubjects[0:25]+onlyNegative[0:10], transform=val_transforms )
-        self.train_ds_labels = Dataset(data=onlyPositiveSubjects[25:]+onlyNegative[10:], transform=train_transforms )
-        self.train_ds_no_labels = Dataset(data=noLabels, transform=train_transforms)
+        # self.val_ds=  Dataset(data=onlyPositiveSubjects[0:25]+onlyNegative[0:10], transform=val_transforms )
+        # self.train_ds_labels = Dataset(data=onlyPositiveSubjects[25:]+onlyNegative[10:], transform=train_transforms )
+        # self.train_ds_no_labels = Dataset(data=noLabels, transform=train_transforms)
 
 
     def train_dataloader(self):

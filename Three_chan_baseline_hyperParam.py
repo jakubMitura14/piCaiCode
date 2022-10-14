@@ -207,8 +207,7 @@ df['num_lesions_to_retain_bin']=df.apply(lambda el: int(el['num_lesions_to_retai
 
 physical_size =(81.0, 160.0, 192.0)#taken from picai used to crop image so only center will remain
 
-experiment_name="picai_hp_35"
-expId='a1'
+experiment_name="picai_hp_37"
 percentSplit=0.85
 
 in_channels=4
@@ -226,7 +225,7 @@ study = optuna.create_study(
         study_name=experiment_name
         ,sampler=optuna.samplers.NSGAIISampler()    
         ,pruner=optuna.pruners.HyperbandPruner()
-        ,storage="mysql://root:jm@34.78.131.144:3306/picai_hp_37"
+        ,storage=f"mysql://root:jm@34.78.131.144:3306/{experiment_name}"
         ,load_if_exists=True
         )
         #mysql://root@localhost/example
