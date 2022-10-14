@@ -219,7 +219,7 @@ def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_chan
 
     spacing_keyword=getParam(trial,options,"spacing_keyword")
     label_name=f"label_{spacing_keyword}" 
-
+    persistent_cache=tempfile.mkdtemp()
     
     t2wColName="t2w"+spacing_keyword+"cropped"
     adcColName="adc"+spacing_keyword+"cropped"
@@ -275,6 +275,7 @@ def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_chan
         ,RandomGhosting_prob=trial.suggest_float("RandomGhosting_prob", 0.0, 0.6)
         ,RandomSpike_prob=trial.suggest_float("RandomSpike_prob", 0.0, 0.6)
         ,RandomBiasField_prob=trial.suggest_float("RandomBiasField_prob", 0.0, 0.6)
+        ,persistent_cache=persistent_cache
     )
 
     dropout= trial.suggest_float("dropout", 0.0,0.6)
@@ -321,8 +322,8 @@ def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_chan
         check_val_every_n_epoch=30,
         accumulate_grad_batches= 2,# experiment.get_parameter("accumulate_grad_batches"),
         gradient_clip_val=  0.9 ,#experiment.get_parameter("gradient_clip_val"),# 0.5,2.0
-        log_every_n_steps=10,
-        # strategy='dp'
+        log_every_n_steps=10
+        #strategy='dp'
     )
 
 
@@ -333,6 +334,7 @@ def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_chan
     print('Training started at', start)
     trainer.fit(model=model, datamodule=data)
     print('Training duration:', datetime.now() - start)
+    shutil.rmtree(persistent_cache) 
     return np.min(dice_final)
 
 

@@ -134,7 +134,8 @@ class PiCaiDataModule(pl.LightningDataModule):
     ,RandomMotion_prob
     ,RandomGhosting_prob
     ,RandomSpike_prob
-    ,RandomBiasField_prob  ):
+    ,RandomBiasField_prob
+    ,persistent_cache  ):
         super().__init__()
         self.batch_size = batch_size
         self.df = df
@@ -169,6 +170,7 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.RandomGhosting_prob=RandomGhosting_prob
         self.RandomSpike_prob=RandomSpike_prob
         self.RandomBiasField_prob=RandomBiasField_prob
+        self.persistent_cache=persistent_cache
 
     """
     splitting for test and validation and separately in case of examples with some label inside 
@@ -257,10 +259,14 @@ class PiCaiDataModule(pl.LightningDataModule):
              )
         val_transforms= transformsForMain.get_val_transforms()
 
-        self.val_ds=     SmartCacheDataset(data=onlyPositiveSubjects[0:25]+onlyNegative[0:10], transform=val_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
-        self.train_ds_labels = SmartCacheDataset(data=onlyPositiveSubjects[25:]+onlyNegative[10:], transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
-        self.train_ds_no_labels = SmartCacheDataset(data=noLabels, transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+        self.val_ds=     LMDBDataset(data=onlyPositiveSubjects[0:25]+onlyNegative[0:10], transform=val_transforms ,cache_dir=self.persistent_cache)
+        self.train_ds_labels = LMDBDataset(data=onlyPositiveSubjects[25:]+onlyNegative[10:], transform=train_transforms  ,cache_dir=self.persistent_cache)
+                #self.train_ds_no_labels = SmartCacheDataset(data=noLabels, transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+        # self.val_ds=     SmartCacheDataset(data=onlyPositiveSubjects[0:25]+onlyNegative[0:10], transform=val_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+        # self.train_ds_labels = SmartCacheDataset(data=onlyPositiveSubjects[25:]+onlyNegative[10:], transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+        # #self.train_ds_no_labels = SmartCacheDataset(data=noLabels, transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
 
+        # self.train_ds_all =  LMDBDataset(data=train_set_all, transform=train_transforms,cache_dir=self.persistent_cache)
 
         # self.val_ds=  Dataset(data=onlyPositiveSubjects[0:25]+onlyNegative[0:10], transform=val_transforms )
         # self.train_ds_labels = Dataset(data=onlyPositiveSubjects[25:]+onlyNegative[10:], transform=train_transforms )
