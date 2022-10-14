@@ -200,9 +200,8 @@ def getDummy(spac):
 aa=list(map(getDummy  ,spacings  ))
 dummyDict={"_half_spac_c":aa[0] , "_one_spac_c":aa[1], "_one_and_half_spac_c":aa[2], "_two_spac_c":aa[3]}
 
-print(df.columns)
-print( df['num_lesions_to_retain'])
-df=df.loc[df['num_lesions_to_retain']>-1]#correct gleason ...
+
+#df=df.loc[df['num_lesions_to_retain']>-1]#correct gleason ...
 df['num_lesions_to_retain_bin']=df.apply(lambda el: int(el['num_lesions_to_retain']>0), axis=1 )#binarizing the output
 
 
