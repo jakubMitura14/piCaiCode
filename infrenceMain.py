@@ -13,18 +13,27 @@ import dask.dataframe as dd
 from evalutils import SegmentationAlgorithm
 from evalutils.validators import (UniqueImagesValidator,
                                   UniquePathIndicesValidator)
+import Three_chan_baseline_hyperParam
+from pathlib import Path    
 
 checkPointPath="/path/to/checkpoint.ckpt"
 normalizationsDir="" #path to the files with normalization data
 elacticPath='/home/sliceruser/elastixBase/elastix-5.0.1-linux/bin/elastix'
 reg_prop='/home/sliceruser/data/piCaiCode/preprocessing/registration/parameters.txt'  
 physical_size =(81.0, 160.0, 192.0)#taken from picai used to crop image so only center will remain
+options = Three_chan_baseline_hyperParam.getOptions()
+spacing_keyword=options["spacing_keyword"][0]
+model=options["models"][0]
+regression_channels=options["regression_channels"][0]
+tempPath=""
 
 """
 accepts row from dataframe where paths to the files are present 
 """
 def standardize(row):
-    for seriesString in ['t2w','adc', 'hbv']:         
+    for seriesString in ['t2w','adc', 'hbv']: 
+        newPath=join(tempPath,Path(row[seriesString]).name)
+
         pathNormalizer = join(normalizationsDir,seriesString+".npy")
         nyul_normalizer = NyulNormalize()
         nyul_normalizer.load_standard_histogram(pathNormalizer)

@@ -168,19 +168,20 @@ def getViTAutoEnc(dropout,input_image_size,in_channels,out_channels):
 
 def getOptNAdam(lr):
     return torch.optim.NAdam(lr=lr)
-
+def getOptions():
 #getViTAutoEnc,getAhnet,getSegResNetVAE,getAttentionUnet,getSwinUNETR,getSegResNet,getVNet,getUnetB
-options={
+    return {
 
-# "models":[getUnetA,getUnetB,getVNet,getSegResNet],
-"models":[getUnetA],# getVNet,getSegResNet,getSwinUNETR
-"regression_channels":[[2,4,8],[10,16,32],[32,64,128]], #,
-"optimizer_class": [getOptNAdam] ,# ,torch.optim.LBFGS optim.AggMo,   look in https://pytorch-optimizer.readthedocs.io/en/latest/api.html
-# "centerCropSize":[(256, 256,32)],
-"spacing_keyword" : ["_half_spac_c", "_one_spac_c", "_one_and_half_spac_c", "_two_spac_c" ]# ,"_med_spac_b" #config['parameters']['spacing_keyword']["values"]
+    # "models":[getUnetA,getUnetB,getVNet,getSegResNet],
+    "models":[getUnetA],# getVNet,getSegResNet,getSwinUNETR
+    "regression_channels":[[2,4,8],[10,16,32],[32,64,128]], #,
+    "optimizer_class": [getOptNAdam] ,# ,torch.optim.LBFGS optim.AggMo,   look in https://pytorch-optimizer.readthedocs.io/en/latest/api.html
+    # "centerCropSize":[(256, 256,32)],
+    "spacing_keyword" : ["_half_spac_c", "_one_spac_c", "_one_and_half_spac_c", "_two_spac_c" ]# ,"_med_spac_b" #config['parameters']['spacing_keyword']["values"]
 
-}
+    }
 
+options = getOptions()
 df = pd.read_csv("/home/sliceruser/data/metadata/processedMetaData_current_b.csv")
 
 # t2wColName="t2w"+spacing_keyword 
@@ -211,7 +212,8 @@ out_channels=2
 
 def objective(trial: optuna.trial.Trial) -> float:
 
-    return ThreeChanNoExperiment.mainTrain(trial,df,experiment_name,dummyDict,options)
+    return ThreeChanNoExperiment.train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_channels
+    ,out_channels)
 
 
 
@@ -219,7 +221,7 @@ study = optuna.create_study(
         study_name=experiment_name
         ,sampler=optuna.samplers.NSGAIISampler()    
         ,pruner=optuna.pruners.HyperbandPruner()
-        ,storage="mysql://root:jm@34.78.131.144:3306/picai_hp_35"
+        ,storage="mysql://root:jm@34.78.131.144:3306/picai_hp_37"
         ,load_if_exists=True
         )
         #mysql://root@localhost/example

@@ -212,7 +212,10 @@ def addDummyLabelPath(row, labelName, dummyLabelPath):
 
 
 def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_channels
-    ,out_channels,expId):        
+    ,out_channels):        
+
+    #basically id of trial 
+    expId=trial.number
 
     spacing_keyword=getParam(trial,options,"spacing_keyword")
     label_name=f"label_{spacing_keyword}" 
