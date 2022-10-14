@@ -180,10 +180,14 @@ class PiCaiDataModule(pl.LightningDataModule):
         onlyPositve = onlyPositve.loc[onlyPositve['isAnythingInAnnotated']>0 ]
 
         allSubj=list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1]
-        ,self.chan3_col_name,self.label_name,self.chan3_col_name_val,self.label_name_val)   , list(self.df.iterrows())))
+        ,label_name=self.label_name,label_name_val=self.label_name
+        ,t2wColName=self.t2wColName
+        ,adcColName=self.adcColName,hbvColName=self.hbvColName )   , list(self.df.iterrows())))
         
         onlyPositiveSubj=list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1]
-        ,self.chan3_col_name,self.label_name,self.chan3_col_name_val,self.label_name_val)   , list(onlyPositve.iterrows())))
+        ,label_name=self.label_name,label_name_val=self.label_name
+        ,t2wColName=self.t2wColName
+        ,adcColName=self.adcColName,hbvColName=self.hbvColName )  , list(onlyPositve.iterrows())))
         
         return allSubj,onlyPositiveSubj
 
