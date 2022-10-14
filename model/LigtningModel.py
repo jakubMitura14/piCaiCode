@@ -318,7 +318,7 @@ class Model(pl.LightningModule):
         self.postTrue = Compose([EnsureType()])
         self.regLoss = nn.BCEWithLogitsLoss()
         #self.F1Score = torchmetrics.F1Score()
-        self.experiment=self.logger.experiment
+        
         os.makedirs(self.temp_val_dir,  exist_ok = True)             
         shutil.rmtree(self.temp_val_dir) 
         os.makedirs(self.temp_val_dir,  exist_ok = True)             
@@ -358,6 +358,10 @@ class Model(pl.LightningModule):
 
 
     def validation_step(self, batch, batch_idx):
+        print("start validation")
+        experiment=self.experiment=self.logger.experiment
+        print("got experiment")
+        
         x, y_true_prim, numLesions,isAnythingInAnnotated = batch['chan3_col_name_val'], batch['label_name_val'], batch['num_lesions_to_retain'], batch['isAnythingInAnnotated']
         numBatches = y_true_prim.size(dim=0)
         #seg_hat, reg_hat = self.modelRegression(x)        
@@ -404,8 +408,7 @@ class Model(pl.LightningModule):
         if(len(extracteds)>0):
             print("inside ifff   ")
             directory= self.temp_val_dir
-            print("inside if  b ")
-            experiment=self.experiment
+
             print("inside if  c ")            
             epoch=self.current_epoch
             print("start logging")
