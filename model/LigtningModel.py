@@ -354,7 +354,7 @@ class Model(pl.LightningModule):
         # regr_no_lab, numLesions_no_lab= self.infer_train_ds_no_labels( batch) 
 
         return torch.sum(torch.stack([self.criterion(seg_hat,y_true)
-                                    ,self.regLoss(reg_hat.flatten(),torch.Tensor(numLesions).to(self.device).flatten() ) 
+                                    ,self.regLoss(reg_hat.flatten().float(),torch.Tensor(numLesions).to(self.device).flatten().float() ) 
                                     # ,self.regLoss(regr_no_lab.flatten(),torch.Tensor(numLesions_no_lab).to(self.device).flatten() ) 
                                         ]))
 
