@@ -72,7 +72,6 @@ def get_numb_ofLesions_toRetain(row):
         if('+'in row['lesion_GS']):
       
             gleason_scores = []
-            print(f"gggg {row['lesion_GS']}")
             if isinstance(row['lesion_GS'], float) and np.isnan(row['lesion_GS']):
                 gleason_scores = []
             else:
@@ -89,7 +88,7 @@ def get_numb_ofLesions_toRetain(row):
                 isup_grades.append(GS.GGG)
             return sum([score >= 2 for score in isup_grades])
     except:
-        print("error getting gleason {row['lesion_GS']}")    
+        print(f"error getting gleason {row['lesion_GS']}")    
     return -1    
 
 """
