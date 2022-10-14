@@ -62,18 +62,18 @@ import torch.nn.functional as F
 # import importlib.util
 # import sys
 
-# spec = importlib.util.spec_from_file_location("transformsForMain", "/home/sliceruser/data/piCaiCode/preprocessing/transformsForMain.py")
+# spec = importlib.util.spec_from_file_location("transformsForMain", "/home/sliceruser/locTemp/piCaiCode/preprocessing/transformsForMain.py")
 # transformsForMain = importlib.util.module_from_spec(spec)
 # sys.modules["transformsForMain"] = transformsForMain
 # spec.loader.exec_module(transformsForMain)
 
-# spec = importlib.util.spec_from_file_location("ManageMetadata", "/home/sliceruser/data/piCaiCode/preprocessing/ManageMetadata.py")
+# spec = importlib.util.spec_from_file_location("ManageMetadata", "/home/sliceruser/locTemp/piCaiCode/preprocessing/ManageMetadata.py")
 # manageMetaData = importlib.util.module_from_spec(spec)
 # sys.modules["ManageMetadata"] = manageMetaData
 # spec.loader.exec_module(manageMetaData)
 
 
-# spec = importlib.util.spec_from_file_location("dataUtils", "/home/sliceruser/data/piCaiCode/dataManag/utils/dataUtils.py")
+# spec = importlib.util.spec_from_file_location("dataUtils", "/home/sliceruser/locTemp/piCaiCode/dataManag/utils/dataUtils.py")
 # dataUtils = importlib.util.module_from_spec(spec)
 # sys.modules["dataUtils"] = dataUtils
 # spec.loader.exec_module(dataUtils)

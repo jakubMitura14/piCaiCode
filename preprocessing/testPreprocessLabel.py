@@ -40,16 +40,16 @@ def loadLib(name,path):
     spec.loader.exec_module(res)
     return res
 
-manageMetaData =loadLib("ManageMetadata", "/home/sliceruser/data/piCaiCode/preprocessing/ManageMetadata.py")
-dataUtils =loadLib("dataUtils", "/home/sliceruser/data/piCaiCode/dataManag/utils/dataUtils.py")
+manageMetaData =loadLib("ManageMetadata", "/home/sliceruser/locTemp/piCaiCode/preprocessing/ManageMetadata.py")
+dataUtils =loadLib("dataUtils", "/home/sliceruser/locTemp/piCaiCode/dataManag/utils/dataUtils.py")
 
-unets =loadLib("unets", "/home/sliceruser/data/piCaiCode/model/unets.py")
-DataModule =loadLib("DataModule", "/home/sliceruser/data/piCaiCode/model/DataModule.py")
-LigtningModel =loadLib("LigtningModel", "/home/sliceruser/data/piCaiCode/model/LigtningModel.py")
-Standardize=loadLib("Standardize", "/home/sliceruser/data/piCaiCode/preprocessing/Standardize.py")
-Resampling=loadLib("Resampling", "/home/sliceruser/data/piCaiCode/preprocessing/Resampling.py")
-utilsPreProcessing=loadLib("utilsPreProcessing", "/home/sliceruser/data/piCaiCode/preprocessing/utilsPreProcessing.py")
-ManageMetadata=loadLib("ManageMetadata", "/home/sliceruser/data/piCaiCode/preprocessing/ManageMetadata.py")
+unets =loadLib("unets", "/home/sliceruser/locTemp/piCaiCode/model/unets.py")
+DataModule =loadLib("DataModule", "/home/sliceruser/locTemp/piCaiCode/model/DataModule.py")
+LigtningModel =loadLib("LigtningModel", "/home/sliceruser/locTemp/piCaiCode/model/LigtningModel.py")
+Standardize=loadLib("Standardize", "/home/sliceruser/locTemp/piCaiCode/preprocessing/Standardize.py")
+Resampling=loadLib("Resampling", "/home/sliceruser/locTemp/piCaiCode/preprocessing/Resampling.py")
+utilsPreProcessing=loadLib("utilsPreProcessing", "/home/sliceruser/locTemp/piCaiCode/preprocessing/utilsPreProcessing.py")
+ManageMetadata=loadLib("ManageMetadata", "/home/sliceruser/locTemp/piCaiCode/preprocessing/ManageMetadata.py")
 
 
 from utilsPreProcessing import write_to_modif_path 
@@ -62,7 +62,7 @@ experiment = Experiment(
 
 ## some paths
 elacticPath='/home/sliceruser/Slicer/NA-MIC/Extensions-30822/SlicerElastix/lib/Slicer-5.0/elastix'
-reg_prop='/home/sliceruser/data/piCaiCode/preprocessing/registration/parameters.txt'  
+reg_prop='/home/sliceruser/locTemp/piCaiCode/preprocessing/registration/parameters.txt'  
 trainedModelsBasicPath='/home/sliceruser/data/preprocess/standarizationModels'
 
 

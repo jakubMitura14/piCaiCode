@@ -68,15 +68,15 @@ def loadLib(name,path):
     return res
 import model.transformsForMain as transformsForMain
 import model.DataModule as DataModule
-manageMetaData =loadLib("ManageMetadata", "/home/sliceruser/data/piCaiCode/preprocessing/ManageMetadata.py")
-dataUtils =loadLib("dataUtils", "/home/sliceruser/data/piCaiCode/dataManag/utils/dataUtils.py")
+manageMetaData =loadLib("ManageMetadata", "/home/sliceruser/locTemp/piCaiCode/preprocessing/ManageMetadata.py")
+dataUtils =loadLib("dataUtils", "/home/sliceruser/locTemp/piCaiCode/dataManag/utils/dataUtils.py")
 
-unets =loadLib("unets", "/home/sliceruser/data/piCaiCode/model/unets.py")
-DataModule =loadLib("DataModule", "/home/sliceruser/data/piCaiCode/model/DataModule.py")
-LigtningModel =loadLib("LigtningModel", "/home/sliceruser/data/piCaiCode/model/LigtningModel.py")
-Three_chan_baseline =loadLib("Three_chan_baseline", "/home/sliceruser/data/piCaiCode/Three_chan_baseline.py")
-ThreeChanNoExperiment =loadLib("ThreeChanNoExperiment", "/home/sliceruser/data/piCaiCode/ThreeChanNoExperiment.py")
-semisuperPreprosess =loadLib("semisuperPreprosess", "/home/sliceruser/data/piCaiCode/preprocessing/semisuperPreprosess.py")
+unets =loadLib("unets", "/home/sliceruser/locTemp/piCaiCode/model/unets.py")
+DataModule =loadLib("DataModule", "/home/sliceruser/locTemp/piCaiCode/model/DataModule.py")
+LigtningModel =loadLib("LigtningModel", "/home/sliceruser/locTemp/piCaiCode/model/LigtningModel.py")
+Three_chan_baseline =loadLib("Three_chan_baseline", "/home/sliceruser/locTemp/piCaiCode/Three_chan_baseline.py")
+ThreeChanNoExperiment =loadLib("ThreeChanNoExperiment", "/home/sliceruser/locTemp/piCaiCode/ThreeChanNoExperiment.py")
+semisuperPreprosess =loadLib("semisuperPreprosess", "/home/sliceruser/locTemp/piCaiCode/preprocessing/semisuperPreprosess.py")
 
 
 
@@ -207,7 +207,7 @@ df['num_lesions_to_retain_bin']=df.apply(lambda el: int(el['num_lesions_to_retai
 
 physical_size =(81.0, 160.0, 192.0)#taken from picai used to crop image so only center will remain
 
-experiment_name="picai_hp_37"
+experiment_name="pic38"
 percentSplit=0.85
 
 in_channels=4

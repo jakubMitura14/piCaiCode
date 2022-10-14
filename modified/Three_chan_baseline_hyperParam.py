@@ -69,14 +69,14 @@ def loadLib(name,path):
     spec.loader.exec_module(res)
     return res
 
-manageMetaData =loadLib("ManageMetadata", "/home/sliceruser/data/piCaiCode/preprocessing/ManageMetadata.py")
-dataUtils =loadLib("dataUtils", "/home/sliceruser/data/piCaiCode/dataManag/utils/dataUtils.py")
-unets =loadLib("unets", "/home/sliceruser/data/piCaiCode/model/unets.py")
-DataModule =loadLib("DataModule", "/home/sliceruser/data/piCaiCode/model/DataModule.py")
-LigtningModel =loadLib("LigtningModel", "/home/sliceruser/data/piCaiCode/model/LigtningModel.py")
-Three_chan_baseline =loadLib("Three_chan_baseline", "/home/sliceruser/data/piCaiCode/Three_chan_baseline.py")
-detectSemiSupervised =loadLib("detectSemiSupervised", "/home/sliceruser/data/piCaiCode/model/detectSemiSupervised.py")
-semisuperPreprosess =loadLib("semisuperPreprosess", "/home/sliceruser/data/piCaiCode/preprocessing/semisuperPreprosess.py")
+manageMetaData =loadLib("ManageMetadata", "/home/sliceruser/locTemp/piCaiCode/preprocessing/ManageMetadata.py")
+dataUtils =loadLib("dataUtils", "/home/sliceruser/locTemp/piCaiCode/dataManag/utils/dataUtils.py")
+unets =loadLib("unets", "/home/sliceruser/locTemp/piCaiCode/model/unets.py")
+DataModule =loadLib("DataModule", "/home/sliceruser/locTemp/piCaiCode/model/DataModule.py")
+LigtningModel =loadLib("LigtningModel", "/home/sliceruser/locTemp/piCaiCode/model/LigtningModel.py")
+Three_chan_baseline =loadLib("Three_chan_baseline", "/home/sliceruser/locTemp/piCaiCode/Three_chan_baseline.py")
+detectSemiSupervised =loadLib("detectSemiSupervised", "/home/sliceruser/locTemp/piCaiCode/model/detectSemiSupervised.py")
+semisuperPreprosess =loadLib("semisuperPreprosess", "/home/sliceruser/locTemp/piCaiCode/preprocessing/semisuperPreprosess.py")
 
 # ray.init(runtime_env={"env_vars": {"PL_DISABLE_FORK": "1"}})
 ##options

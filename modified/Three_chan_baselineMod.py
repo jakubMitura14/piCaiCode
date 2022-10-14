@@ -61,14 +61,14 @@ def loadLib(name,path):
     spec.loader.exec_module(res)
     return res
 
-# transformsForMain =loadLib("transformsForMain", "/home/sliceruser/data/piCaiCode/preprocessing/transformsForMain.py")
-# manageMetaData =loadLib("ManageMetadata", "/home/sliceruser/data/piCaiCode/preprocessing/ManageMetadata.py")
-# dataUtils =loadLib("dataUtils", "/home/sliceruser/data/piCaiCode/dataManag/utils/dataUtils.py")
+# transformsForMain =loadLib("transformsForMain", "/home/sliceruser/locTemp/piCaiCode/preprocessing/transformsForMain.py")
+# manageMetaData =loadLib("ManageMetadata", "/home/sliceruser/locTemp/piCaiCode/preprocessing/ManageMetadata.py")
+# dataUtils =loadLib("dataUtils", "/home/sliceruser/locTemp/piCaiCode/dataManag/utils/dataUtils.py")
 
-unets =loadLib("unets", "/home/sliceruser/data/piCaiCode/model/unets.py")
-DataModule =loadLib("DataModule", "/home/sliceruser/data/piCaiCode/model/DataModule.py")
-LigtningModel =loadLib("LigtningModel", "/home/sliceruser/data/piCaiCode/model/LigtningModel.py")
-semisuperPreprosess =loadLib("semisuperPreprosess", "/home/sliceruser/data/piCaiCode/preprocessing/semisuperPreprosess.py")
+unets =loadLib("unets", "/home/sliceruser/locTemp/piCaiCode/model/unets.py")
+DataModule =loadLib("DataModule", "/home/sliceruser/locTemp/piCaiCode/model/DataModule.py")
+LigtningModel =loadLib("LigtningModel", "/home/sliceruser/locTemp/piCaiCode/model/LigtningModel.py")
+semisuperPreprosess =loadLib("semisuperPreprosess", "/home/sliceruser/locTemp/piCaiCode/preprocessing/semisuperPreprosess.py")
 
 
 

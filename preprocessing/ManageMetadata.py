@@ -16,7 +16,7 @@ def loadLib(name,path):
     spec.loader.exec_module(res)
     return res
     
-# transformsForMain =loadLib("transformsForMain", "/home/sliceruser/data/piCaiCode/preprocessing/transformsForMain.py")
+# transformsForMain =loadLib("transformsForMain", "/home/sliceruser/locTemp/piCaiCode/preprocessing/transformsForMain.py")
 
 
 # def load_df_only_full(df,chan3_col_name,label_name,is_whole_to_train,transformsForMain,chan3_col_name_val,label_name_val):
