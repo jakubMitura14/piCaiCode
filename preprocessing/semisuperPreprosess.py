@@ -115,7 +115,7 @@ def writeDummyLabels(outPath,imageRef_path):
     data= sitk.GetArrayFromImage(origImage)
     sizz= data.shape
     print(f"sizz {sizz} ")
-    arr= np.zeros((sizz[0],sizz[1],sizz[2])).astype('int32')
+    arr= np.zeros_like(data).astype('int8') #np.zeros((sizz[0],sizz[1],sizz[2])).astype('int8')
     image = sitk.GetImageFromArray(arr)
     image.SetSpacing(origImage.GetSpacing())
     image.SetOrigin(origImage.GetOrigin())
