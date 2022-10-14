@@ -386,7 +386,7 @@ class Model(pl.LightningModule):
         with mp.Pool(processes = mp.cpu_count()) as pool:
             #it = pool.imap(my_task, range(lenn))
             results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
-            time.sleep(100)
+            time.sleep(45)
             processedCases=list(map(lambda ind :getNext(ind,results,10) ,list(range(lenn)) ))
 
         isTaken= list(map(lambda it:type(it) != type(None),processedCases))
@@ -401,8 +401,8 @@ class Model(pl.LightningModule):
         #             ,imageArr=images, experiment=self.logger.experiment,postProcess=self.postProcess,epoch=self.current_epoch)
         #             ,range(0,numBatches)))
         
-
         if(len(extracteds)>0):
+            print("inside if   ")
             experiment=self.logger.experiment
             directory= self.temp_val_dir
             epoch=self.current_epoch
