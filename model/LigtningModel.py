@@ -383,7 +383,7 @@ class Model(pl.LightningModule):
         with mp.Pool(processes = mp.cpu_count()) as pool:
             #it = pool.imap(my_task, range(lenn))
             results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
-            time.sleep(70)
+            time.sleep(100)
             processedCases=list(map(lambda ind :getNext(ind,results,10) ,list(range(lenn)) ))
 
         isTaken= list(map(lambda it:type(it) != type(None),processedCases))
