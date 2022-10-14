@@ -261,6 +261,9 @@ def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_chan
         chan3_col_name_val=chan3_col_name_val,
         label_name_val=label_name_val,
         label_name=label_name
+        ,t2wColName=t2wColName
+        ,adcColName=adcColName
+        ,hbvColName=hbvColName
         #maxSize=maxSize
         ,RandAdjustContrastd_prob=trial.suggest_float("RandAdjustContrastd_prob", 0.0, 0.6)
         ,RandGaussianSmoothd_prob=trial.suggest_float("RandGaussianSmoothd_prob", 0.0, 0.6)
