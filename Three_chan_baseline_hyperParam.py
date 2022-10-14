@@ -190,7 +190,7 @@ df = pd.read_csv("/home/sliceruser/data/metadata/processedMetaData_current_b.csv
 spacings =  options['spacing_keyword']#["_half_spac_c", "_one_spac_c", "_one_and_half_spac_c", "_two_spac_c" ]# ,"_med_spac_b" #config['parameters']['spacing_keyword']["values"]
 
 def getDummy(spac):
-    label_name=f"label{spac}_maxSize_" 
+    label_name=f"label_{spac}" 
     imageRef_path=list(filter(lambda it: it!= '', df[label_name].to_numpy()))[0]
     dummyLabelPath=f"/home/sliceruser/dummyData/zeroLabel{spac}.nii.gz"
     sizz=semisuperPreprosess.writeDummyLabels(dummyLabelPath,imageRef_path)
