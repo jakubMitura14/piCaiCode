@@ -363,7 +363,7 @@ class Model(pl.LightningModule):
         seg_hat,regr = self.modelRegression(x)
         seg_hat = seg_hat.cpu().detach()
         regr=regr.cpu().detach().numpy
-        regr= list(map(lambda el : int(el>0.5) ,regr ))
+        # regr= list(map(lambda el : int(el>0.5) ,regr ))
         seg_hat=torch.sigmoid(seg_hat).cpu().detach()
         t2wb=decollate_batch(batch['t2wb'])
         labelB=decollate_batch(batch['labelB'])
