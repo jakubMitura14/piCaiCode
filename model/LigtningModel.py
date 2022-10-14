@@ -337,21 +337,21 @@ class Model(pl.LightningModule):
         return segmMap,regr, y, numLesions
 
 
-    def infer_train_ds_no_labels(self, batch):
-        x, numLesions =batch["train_ds_no_labels"]['chan3_col_name'],batch["train_ds_no_labels"]['num_lesions_to_retain']
-        segmMap,regr = self.modelRegression(x)
-        return regr, numLesions
+    # def infer_train_ds_no_labels(self, batch):
+    #     x, numLesions =batch["train_ds_no_labels"]['chan3_col_name'],batch["train_ds_no_labels"]['num_lesions_to_retain']
+    #     segmMap,regr = self.modelRegression(x)
+    #     return regr, numLesions
 
 
     def training_step(self, batch, batch_idx):
         # every second iteration we will do the training for segmentation
 
         seg_hat,reg_hat, y_true, numLesions=self.infer_train_ds_labels( batch)
-        regr_no_lab, numLesions_no_lab= self.infer_train_ds_no_labels( batch) 
+        # regr_no_lab, numLesions_no_lab= self.infer_train_ds_no_labels( batch) 
 
         return torch.sum(torch.stack([self.criterion(seg_hat,y_true)
                                     ,self.regLoss(reg_hat.flatten(),torch.Tensor(numLesions).to(self.device).flatten() ) 
-                                    ,self.regLoss(regr_no_lab.flatten(),torch.Tensor(numLesions_no_lab).to(self.device).flatten() ) 
+                                    # ,self.regLoss(regr_no_lab.flatten(),torch.Tensor(numLesions_no_lab).to(self.device).flatten() ) 
                                         ]))
 
 
