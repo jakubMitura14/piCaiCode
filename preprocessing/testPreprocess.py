@@ -551,8 +551,6 @@ Standardize.iterateAndchangeLabelToOnes(df)
 for keyWord in ['adc','hbv']:
     df['registered_'+keyWord] = df.apply(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'), axis=1).compute()
 
-
-
     # resList=[]     
     # with mp.Pool(processes = mp.cpu_count()) as pool:
     #     resList=pool.map(partial(reg_adc_hbv_to_t2w,colName=keyWord,elacticPath=elacticPath,reg_prop=reg_prop,t2wColName='t2w'),list(df.iterrows()))    
