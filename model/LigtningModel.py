@@ -240,8 +240,8 @@ def save_heatmap(arr,dir,name,numLesions,cmapp='gray'):
 
 
 def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, postProcess,epoch,regr):
-    regr_now = regr[i]
-    gold_arr_loc=gold_arr[i]
+    # regr_now = regr[i]
+    # gold_arr_loc=gold_arr[i]
 
     # if(regr_now==0):
     #     return np.zeros_like(gold_arr_loc)        
