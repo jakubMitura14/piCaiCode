@@ -124,7 +124,7 @@ class PiCaiDataModule(pl.LightningDataModule):
     ,drop_last,df,chan3_col_name,chan3_col_name_val
     ,label_name,label_name_val,
     t2wColName,adcColName,hbvColName,
-    ,RandAdjustContrastd_prob
+    RandAdjustContrastd_prob
     ,RandGaussianSmoothd_prob
     ,RandRicianNoised_prob
     ,RandFlipd_prob
