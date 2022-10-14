@@ -253,9 +253,9 @@ def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_chan
     )
     
     data = DataModule.PiCaiDataModule(
+        trainSizePercent=percentSplit,# 
         df= df,
         batch_size=40,#
-        trainSizePercent=percentSplit,# 
         num_workers=os.cpu_count(),#os.cpu_count(),
         drop_last=False,#True,
         #we need to use diffrent cache folders depending on weather we are dividing data or not
@@ -287,18 +287,6 @@ def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_chan
     regression_channels=getParam(trial,options,"regression_channels")
     to_onehot_y_loss= False
     
-    model = LigtningModel.Model(
-        net=net,
-        criterion=  monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss),# Our seg labels are single channel images indicating class index, rather than one-hot
-        learning_rate=trial.suggest_float("learning_rate", 1e-5, 1e-3),
-        optimizer_class= optimizer_class,
-        picaiLossArr_auroc_final=picaiLossArr_auroc_final,
-        picaiLossArr_AP_final=picaiLossArr_AP_final,
-        picaiLossArr_score_final=picaiLossArr_score_final,
-        regression_channels=regression_channels,
-        trial=trial
-    )
-
 
     model = LigtningModel.Model(
          net=net,
