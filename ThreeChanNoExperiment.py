@@ -253,7 +253,7 @@ def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_chan
     data = DataModule.PiCaiDataModule(
         trainSizePercent=percentSplit,# 
         df= df,
-        batch_size=40,#
+        batch_size=80,#
         num_workers=os.cpu_count(),#os.cpu_count(),
         drop_last=False,#True,
         #we need to use diffrent cache folders depending on weather we are dividing data or not
@@ -279,8 +279,8 @@ def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_chan
     )
 
     dropout= trial.suggest_float("dropout", 0.0,0.6)
-    data.prepare_data()
-    data.setup()
+    # data.prepare_data()
+    # data.setup()
     net= getParam(trial,options,"models") #options["models"][0]#   
     net=net(dropout,img_size,in_channels,out_channels)
 

@@ -240,11 +240,9 @@ def save_heatmap(arr,dir,name,numLesions,cmapp='gray'):
 
 
 def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, postProcess,epoch,regr):
-    # regr_now = regr[i]
-    # gold_arr_loc=gold_arr[i]
-
-    # if(regr_now==0):
-    #     return np.zeros_like(gold_arr_loc)        
+    regr_now = regr[i]
+    if(regr_now==0):
+        return np.zeros_like(y_hat_arr[i][1,:,:,:])        
     curr_studyId=studyId[i]
     print(f"extracting {curr_studyId}")
     extracted=np.array(extract_lesion_candidates(y_hat_arr[i][1,:,:,:].cpu().detach().numpy())[0]) #, threshold='dynamic'
@@ -366,7 +364,7 @@ class Model(pl.LightningModule):
         # seg_hat, reg_hat = self.modelRegression(x)        
         seg_hat,regr = self.modelRegression(x)
         seg_hat = seg_hat.cpu().detach()
-        regr=regr.cpu().detach().numpy
+        regr=regr.cpu().detach().numpy()
         # regr= list(map(lambda el : int(el>0.5) ,regr ))
         seg_hat=torch.sigmoid(seg_hat).cpu().detach()
         t2wb=decollate_batch(batch['t2wb'])
@@ -379,7 +377,8 @@ class Model(pl.LightningModule):
         numLesions = decollate_batch(batch['num_lesions_to_retain'])
         images = decollate_batch(x.cpu().detach()) 
 
-        print(f"val num batches {numBatches} t2wb {t2wb} patIds {patIds} labelB {labelB}")
+        # print(f"val num batches {numBatches} t2wb {t2wb} patIds {patIds} labelB {labelB}")
+        print(f"val num batches {numBatches} ")
         lenn=numBatches
         processedCases=[]
         my_task=partial(processDecolated,gold_arr=y_true,y_hat_arr=y_det,directory= self.temp_val_dir,studyId= patIds
@@ -407,12 +406,12 @@ class Model(pl.LightningModule):
             experiment=self.logger.experiment
             directory= self.temp_val_dir
             epoch=self.current_epoch
-            
+            print("start logging")
             list(map(partial(log_images
                 ,experiment=experiment,golds=y_true,extracteds=extracteds 
                 ,t2ws=images,directory=directory ,patIds=patIds,epoch=epoch,numLesions=numLesions),range(lenn)))
             # y_true= list(map(lambda el: el.numpy()  ,y_true))                                              
-
+            print("end logging")
             valid_metrics = evaluate(y_det=extracteds,
                                     y_true=list(map(lambda el: el.numpy()[1,:,:,:]  ,y_true)),
                                     num_parallel_calls= os.cpu_count()
@@ -421,7 +420,7 @@ class Model(pl.LightningModule):
             meanPiecaiMetr_AP=0.0 if math.isnan(valid_metrics.AP) else valid_metrics.AP
             meanPiecaiMetr_score= 0.0 if math.isnan(valid_metrics.score) else  valid_metrics.score
 
-    
+            print("start dice")
             extracteds= list(map(lambda numpyEntry : self.postProcess(torch.from_numpy((numpyEntry>0).astype('int8'))) ,extracteds  ))
             extracteds= torch.stack(extracteds)
 

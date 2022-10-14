@@ -256,11 +256,16 @@ class PiCaiDataModule(pl.LightningDataModule):
              )
         val_transforms= transformsForMain.get_val_transforms()
 
-        self.val_ds=     SmartCacheDataset(data=onlyPositiveSubjects[0:25]+onlyNegative[0:10], transform=val_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
-        self.train_ds_labels = SmartCacheDataset(data=onlyPositiveSubjects[25:]+onlyNegative[10:], transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
-        self.train_ds_no_labels = SmartCacheDataset(data=noLabels, transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+        # self.val_ds=     SmartCacheDataset(data=onlyPositiveSubjects[0:25]+onlyNegative[0:10], transform=val_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+        # self.train_ds_labels = SmartCacheDataset(data=onlyPositiveSubjects[25:]+onlyNegative[10:], transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+        # self.train_ds_no_labels = SmartCacheDataset(data=noLabels, transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
 
-        
+
+        self.val_ds=  Dataset(data=onlyPositiveSubjects[0:25]+onlyNegative[0:10], transform=val_transforms )
+        self.train_ds_labels = Dataset(data=onlyPositiveSubjects[25:]+onlyNegative[10:], transform=train_transforms )
+        self.train_ds_no_labels = Dataset(data=noLabels, transform=train_transforms)
+
+
     def train_dataloader(self):
         return DataLoader(self.train_ds_labels, batch_size=self.batch_size, drop_last=self.drop_last
                           ,num_workers=self.num_workers, shuffle=False )
