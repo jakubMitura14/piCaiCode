@@ -203,7 +203,7 @@ dummyDict={"_half_spac_c":aa[0] , "_one_spac_c":aa[1], "_one_and_half_spac_c":aa
 print(df.columns)
 print( df['num_lesions_to_retain'])
 df=df.loc[df['num_lesions_to_retain']>-1]#correct gleason ...
-df['num_lesions_to_retain_bin']=df.apply(lambda el: int(el[1]['num_lesions_to_retain']>0))#binarizing the output
+df['num_lesions_to_retain_bin']=df.apply(lambda el: int(el['num_lesions_to_retain']>0), axis=1 )#binarizing the output
 
 
 physical_size =(81.0, 160.0, 192.0)#taken from picai used to crop image so only center will remain
