@@ -306,7 +306,7 @@ class Model(pl.LightningModule):
         self.picaiLossArr_auroc_final=picaiLossArr_auroc_final
         self.picaiLossArr_AP_final=picaiLossArr_AP_final
         self.picaiLossArr_score_final=picaiLossArr_score_final
-        self.temp_val_dir= '/home/sliceruser/tempH' #tempfile.mkdtemp()
+        self.temp_val_dir= '/home/sliceruser/locTemp/tempH' #tempfile.mkdtemp()
         self.list_gold_val=[]
         self.list_yHat_val=[]
         self.ldiceLocst_back_yHat_val=[]
@@ -403,8 +403,10 @@ class Model(pl.LightningModule):
         
         if(len(extracteds)>0):
             print("inside if   ")
-            experiment=self.logger.experiment
             directory= self.temp_val_dir
+            print("inside if  b ")
+            experiment=self.logger.experiment
+            print("inside if  c ")            
             epoch=self.current_epoch
             print("start logging")
             list(map(partial(log_images

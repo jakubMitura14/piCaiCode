@@ -25,7 +25,7 @@ import pandas as pd
 from functools import partial
 import dask
 import dask.dataframe as dd
-
+import os
 @dataclass
 class Gleason_score(object):
     """Gleason score with pattern1 + pattern2 = total"""
@@ -115,14 +115,15 @@ def writeDummyLabels(outPath,imageRef_path):
     data= sitk.GetArrayFromImage(origImage)
     sizz= data.shape
     print(f"sizz {sizz} ")
-    arr= np.zeros_like(data).astype('int8') #np.zeros((sizz[0],sizz[1],sizz[2])).astype('int8')
-    image = sitk.GetImageFromArray(arr)
-    image.SetSpacing(origImage.GetSpacing())
-    image.SetOrigin(origImage.GetOrigin())
-    image.SetDirection(origImage.GetDirection())
-    #saving to hard drive
-    writer = sitk.ImageFileWriter()
-    writer.KeepOriginalImageUIDOn()
-    writer.SetFileName(outPath)
-    writer.Execute(image)  
+    if(not os.path.exists(outPath)):
+        arr= np.zeros_like(data).astype('int8') #np.zeros((sizz[0],sizz[1],sizz[2])).astype('int8')
+        image = sitk.GetImageFromArray(arr)
+        image.SetSpacing(origImage.GetSpacing())
+        image.SetOrigin(origImage.GetOrigin())
+        image.SetDirection(origImage.GetDirection())
+        #saving to hard drive
+        writer = sitk.ImageFileWriter()
+        writer.KeepOriginalImageUIDOn()
+        writer.SetFileName(outPath)
+        writer.Execute(image)  
     return sizz  

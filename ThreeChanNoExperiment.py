@@ -242,7 +242,6 @@ def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_chan
     df=df.loc[df[adcColName] != ' ']
     df=df.loc[df[hbvColName] != ' ']
 
-    #TODO(remove)
     comet_logger = CometLogger(
         api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
         #workspace="OPI", # Optional
