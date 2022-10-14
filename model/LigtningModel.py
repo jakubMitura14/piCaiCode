@@ -477,8 +477,7 @@ class Model(pl.LightningModule):
 
             self.log('dice', (-1)*np.nanmean(allDices))
 
-            print(f"meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
-
+            print(f"meanDice {np.nanmean(allDices)} meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
             self.log('val_mean_auroc', meanPiecaiMetr_auroc)
             self.log('val_mean_AP', meanPiecaiMetr_AP)
             self.log('mean_val_acc', meanPiecaiMetr_score)
