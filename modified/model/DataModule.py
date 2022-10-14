@@ -118,13 +118,9 @@ def getMonaiSubjectDataFromDataFrame(row,chan3_col_name,label_name,chan3_col_nam
 class PiCaiDataModule(pl.LightningDataModule):
     def __init__(self,trainSizePercent,df,batch_size,num_workers
     ,drop_last,cache_dir,chan3_col_name,chan3_col_name_val
-    ,label_name,label_name_val, RandGaussianNoised_prob
-    ,RandAdjustContrastd_prob,RandGaussianSmoothd_prob
-    ,RandRicianNoised_prob,RandFlipd_prob
-    ,RandAffined_prob,RandCoarseDropoutd_prob
-    ,is_whole_to_train ,centerCropSize
-    ,RandomElasticDeformation_prob,RandomAnisotropy_prob
-    ,RandomMotion_prob,RandomGhosting_prob ,RandomSpike_prob
+    ,label_name,label_name_val, RandGaussianNoised_prob,RandAdjustContrastd_prob,RandGaussianSmoothd_prob
+    ,RandRicianNoised_prob,RandFlipd_prob,RandAffined_prob,RandCoarseDropoutd_prob
+    ,is_whole_to_train ,centerCropSize,RandomElasticDeformation_prob,RandomAnisotropy_prob,RandomMotion_prob,RandomGhosting_prob ,RandomSpike_prob
     ,RandomBiasField_prob ):
         super().__init__()
         self.cache_dir=cache_dir
