@@ -276,7 +276,7 @@ class PiCaiDataModule(pl.LightningDataModule):
         #                   }# ,collate_fn=list_data_collate ,collate_fn=list_data_collate , shuffle=True ,collate_fn=list_data_collate
 
     def val_dataloader(self):
-        return DataLoader(self.val_ds, batch_size=40
+        return DataLoader(self.val_ds, batch_size=self.batch_size
         , drop_last=self.drop_last,num_workers=self.num_workers, shuffle=False)#,collate_fn=list_data_collate,collate_fn=pad_list_data_collate
 
     # def test_dataloader(self):
