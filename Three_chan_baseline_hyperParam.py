@@ -178,8 +178,7 @@ def getOptions():
     "regression_channels":[[2,4,8],[10,16,32],[32,64,128]], #,
     "optimizer_class": [getOptNAdam] ,# ,torch.optim.LBFGS optim.AggMo,   look in https://pytorch-optimizer.readthedocs.io/en/latest/api.html
     # "centerCropSize":[(256, 256,32)],
-    "spacing_keyword" : ["_half_spac_c" ]# , "_one_spac_c", "_one_and_half_spac_c", "_two_spac_c"
-
+    "spacing_keyword" : ["_half_spac_c" ,"_one_spac_c", "_one_and_half_spac_c", "_two_spac_c"]# 
     }
 
 options = getOptions()
@@ -208,7 +207,7 @@ df['num_lesions_to_retain_bin']=df.apply(lambda el: int(el['num_lesions_to_retai
 
 physical_size =(81.0, 160.0, 192.0)#taken from picai used to crop image so only center will remain
 
-experiment_name="pic38"
+experiment_name="pic39"
 percentSplit=0.85
 
 in_channels=4
