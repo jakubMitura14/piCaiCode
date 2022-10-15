@@ -242,14 +242,7 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
             writer.SetFileName(outhbvPath)
             writer.Execute(imgHbv)
 
-            if os.path.exists(row[colNameT2w]):
-                os.remove(row[colNameT2w])
-            if os.path.exists(row[colNameAdc]):
-                os.remove(row[colNameAdc])
-            if os.path.exists(row[colNameHbv]):
-                os.remove(row[colNameHbv])
-
-    
+  
     if(str(row[labelColName])!= " " and str(row[labelColName])!="" and len(str(row[labelColName]))>5 ):
         outLabelPathBool=True
         imgLabel=sitk.ReadImage(str(row[labelColName]))
@@ -299,6 +292,12 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
             # print(f"post adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
             # print(f"post hbv size {imgHbv.GetSize() } spacing {imgHbv.GetSpacing()} ")    
             # print(f"post imgLabel size {imgLabel.GetSize() } spacing {imgLabel.GetSpacing()} ")    
+    if (os.path.exists(row[colNameT2w]) and outt2wPathBool):
+        os.remove(row[colNameT2w])
+    if (os.path.exists(row[colNameAdc]) and outadcPathBool ):
+        os.remove(row[colNameAdc])
+    if (os.path.exists(row[colNameHbv]) and outhbvPathBool):
+        os.remove(row[colNameHbv])
 
 
             
@@ -597,7 +596,7 @@ for keyWord in ['adc','hbv']:
     # df['registered_'+keyWord+"score"]=reg_values  
 #adding data about number of lesions that algorithm should detect
 df=semisuperPreprosess.iterate_and_addLesionNumber(df)
-df['num_lesions_to_retain_bin']=df.apply(lambda el: np.int(el['case_csPCa']=='YES'), axis=1 )#binarizing the output
+df['num_lesions_to_retain_bin']=df.apply(lambda el: np.int(el['case_csPCa']=='YES'), axis=1 ).compute()#binarizing the output
 
 #checking registration by reading from logs the metrics so we will get idea how well it went
 
