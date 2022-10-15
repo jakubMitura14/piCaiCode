@@ -201,12 +201,19 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
     outadcPath=str(row[colNameAdc]).replace('.mha',sizeWord+ 'adceee.nii.gz')
     outhbvPath=str(row[colNameHbv]).replace('.mha',sizeWord+ 'hbveee.nii.gz')
     
+    outLabelPathBool=False
+    outt2wPathBool=False
+    outadcPathBool=False
+    outhbvPathBool=False
     
 
     if(str(row[colNameT2w])!= " " and str(row[colNameT2w])!="" and len(str(row[colNameT2w]))>5 
         and str(row[colNameAdc])!= " " and str(row[colNameAdc])!=""  and len(str(row[colNameAdc]))>5 
         and str(row[colNameHbv])!= " " and str(row[colNameHbv])!="" and len(str(row[colNameHbv]))>5 
         ):
+        outt2wPathBool=True
+        outadcPathBool=True
+        outhbvPathBool=True
         if(not pathOs.exists(outt2wPath)):
         #if(True):
             # print(f" pathDebugT2w {pathDebugT2w} outLabelPath {outLabelPath} ")
@@ -239,8 +246,6 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
             writer.SetFileName(outhbvPath)
             writer.Execute(imgHbv)
 
-       
-
             if os.path.exists(row[colNameT2w]):
                 os.remove(row[colNameT2w])
             if os.path.exists(row[colNameAdc]):
@@ -249,15 +254,16 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
                 os.remove(row[colNameHbv])
 
     
-        if(str(row[labelColName])!= " " and str(row[labelColName])!="" and len(str(row[labelColName]))>5 ):
-            imgLabel=sitk.ReadImage(str(row[labelColName]))
-            imgLabel=sitk.Cast(imgLabel, sitk.sitkUInt8)
-            imgLabel=Standardize.padToSize(imgLabel,targetSize,paddValue)
-            writer = sitk.ImageFileWriter()
-            writer.SetFileName(outLabelPath)
-            writer.Execute(imgLabel)     
-            if os.path.exists(row[labelColName]):
-                os.remove(row[labelColName])            
+    if(str(row[labelColName])!= " " and str(row[labelColName])!="" and len(str(row[labelColName]))>5 ):
+        outLabelPathBool=True
+        imgLabel=sitk.ReadImage(str(row[labelColName]))
+        imgLabel=sitk.Cast(imgLabel, sitk.sitkUInt8)
+        imgLabel=Standardize.padToSize(imgLabel,targetSize,paddValue)
+        writer = sitk.ImageFileWriter()
+        writer.SetFileName(outLabelPath)
+        writer.Execute(imgLabel)     
+        if os.path.exists(row[labelColName]):
+            os.remove(row[labelColName])            
             # print(f"pre patient id  {patId} ")
             # print(f"pre t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
             # print(f"pre adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
@@ -300,14 +306,20 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
 
 
             
+    if(not outLabelPathBool):
+        outLabelPath=" "
+    if(not outt2wPathBool):
+        outt2wPath=" "
+    if(not outadcPathBool):
+        outadcPath=" "
+    if(not outhbvPathBool):
+        outhbvPath=" "
 
 
 
 
-
-        return (outLabelPath,outt2wPath,outadcPath,outhbvPath)[tuplNum]
+    return (outLabelPath,outt2wPath,outadcPath,outhbvPath)[tuplNum]
                    
-    return (" "," "," "," ")[tuplNum]
 
 
 
