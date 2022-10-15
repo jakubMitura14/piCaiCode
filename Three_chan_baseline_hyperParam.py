@@ -221,7 +221,7 @@ df['num_lesions_to_retain_bin']=df.apply(lambda el: int(el['num_lesions_to_retai
 
 physical_size =(81.0, 160.0, 192.0)#taken from picai used to crop image so only center will remain
 
-experiment_name="pic39"
+experiment_name="pic40"
 percentSplit=0.85
 
 in_channels=4

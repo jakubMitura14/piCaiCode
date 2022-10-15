@@ -292,7 +292,7 @@ def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_chan
     model = LigtningModel.Model(
          net=net,
         criterion=  monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss),# Our seg labels are single channel images indicating class index, rather than one-hot
-        learning_rate=trial.suggest_float("learning_rate", 1e-5, 1e-3),
+        learning_rate=trial.suggest_float("learning_rate", 1e-6, 1e-4),
         optimizer_class= optimizer_class,
         picaiLossArr_auroc_final=picaiLossArr_auroc_final,
         picaiLossArr_AP_final=picaiLossArr_AP_final,
@@ -309,7 +309,7 @@ def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_chan
 
     trainer = pl.Trainer(
         #accelerator="cpu", #TODO(remove)
-        max_epochs=600,#experiment.get_parameter("max_epochs"),
+        max_epochs=900,#experiment.get_parameter("max_epochs"),
         #gpus=1,
         #precision=experiment.get_parameter("precision"), 
         callbacks=[ checkpoint_callback,stochasticAveraging ], #optuna_prune
