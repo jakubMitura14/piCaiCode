@@ -206,7 +206,6 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
     if(str(row[colNameT2w])!= " " and str(row[colNameT2w])!="" and len(str(row[colNameT2w]))>5 
         and str(row[colNameAdc])!= " " and str(row[colNameAdc])!=""  and len(str(row[colNameAdc]))>5 
         and str(row[colNameHbv])!= " " and str(row[colNameHbv])!="" and len(str(row[colNameHbv]))>5 
-        and str(row[labelColName])!= " " and str(row[labelColName])!="" and len(str(row[labelColName]))>5 
         ):
         if(not pathOs.exists(outt2wPath)):
         #if(True):
@@ -217,17 +216,15 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
             imgT2w=sitk.ReadImage(str(row[colNameT2w]))
             imgAdc=sitk.ReadImage(str(row[colNameAdc]))
             imgHbv=sitk.ReadImage(str(row[colNameHbv]))
-            imgLabel=sitk.ReadImage(str(row[labelColName]))
+            
 
             imgT2w=sitk.Cast(imgT2w, sitk.sitkFloat32)
             imgAdc=sitk.Cast(imgAdc, sitk.sitkFloat32)
             imgHbv=sitk.Cast(imgHbv, sitk.sitkFloat32)
-            imgLabel=sitk.Cast(imgLabel, sitk.sitkUInt8)
 
             imgT2w=Standardize.padToSize(imgT2w,targetSize,paddValue)
             imgAdc=Standardize.padToSize(imgAdc,targetSize,paddValue)
             imgHbv=Standardize.padToSize(imgHbv,targetSize,paddValue)
-            imgLabel=Standardize.padToSize(imgLabel,targetSize,paddValue)
 
 
             writer = sitk.ImageFileWriter()
@@ -242,9 +239,7 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
             writer.SetFileName(outhbvPath)
             writer.Execute(imgHbv)
 
-            writer = sitk.ImageFileWriter()
-            writer.SetFileName(outLabelPath)
-            writer.Execute(imgLabel)            
+       
 
             if os.path.exists(row[colNameT2w]):
                 os.remove(row[colNameT2w])
@@ -252,9 +247,17 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
                 os.remove(row[colNameAdc])
             if os.path.exists(row[colNameHbv]):
                 os.remove(row[colNameHbv])
-            if os.path.exists(row[labelColName]):
-                os.remove(row[labelColName])
 
+    
+        if(str(row[labelColName])!= " " and str(row[labelColName])!="" and len(str(row[labelColName]))>5 ):
+            imgLabel=sitk.ReadImage(str(row[labelColName]))
+            imgLabel=sitk.Cast(imgLabel, sitk.sitkUInt8)
+            imgLabel=Standardize.padToSize(imgLabel,targetSize,paddValue)
+            writer = sitk.ImageFileWriter()
+            writer.SetFileName(outLabelPath)
+            writer.Execute(imgLabel)     
+            if os.path.exists(row[labelColName]):
+                os.remove(row[labelColName])            
             # print(f"pre patient id  {patId} ")
             # print(f"pre t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
             # print(f"pre adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
