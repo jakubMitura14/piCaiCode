@@ -217,7 +217,7 @@ spacings =  options['spacing_keyword']#["_half_spac_c", "_one_spac_c", "_one_and
 def getDummy(spac):
     label_name=f"label_{spac}" 
     imageRef_path=list(filter(lambda it: it!= '', df[label_name].to_numpy()))[0]
-    dummyLabelPath=f"/home/sliceruser/data/dummyData/zeroLabel{spac}.nii.gz"
+    dummyLabelPath=f"/home/sliceruser/locTemp/dummyData/zeroLabel{spac}.nii.gz"
     sizz=semisuperPreprosess.writeDummyLabels(dummyLabelPath,imageRef_path)
     img_size = (sizz[2],sizz[1],sizz[0])
     return(dummyLabelPath,img_size)
@@ -250,9 +250,11 @@ study = optuna.create_study(
         study_name=experiment_name
         ,sampler=optuna.samplers.NSGAIISampler()    
         ,pruner=optuna.pruners.HyperbandPruner()
-        ,storage=f"mysql://root:jm@34.78.131.144:3306/{experiment_name}"
+        ,storage=f"mysql://root:jm@34.91.215.109:3306/{experiment_name}"
         ,load_if_exists=True
         )
+
+  
         #mysql://root@localhost/example
 study.optimize(objective, n_trials=120)
 
