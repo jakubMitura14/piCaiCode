@@ -216,6 +216,7 @@ spacings =  options['spacing_keyword']#["_half_spac_c", "_one_spac_c", "_one_and
 
 def getDummy(spac):
     label_name=f"label_{spac}" 
+    print(df[label_name])
     imageRef_path=list(filter(lambda it: it!= " ", df[label_name].to_numpy()))[0]
     dummyLabelPath=f"/home/sliceruser/locTemp/dummyData/zeroLabel{spac}.nii.gz"
     sizz=semisuperPreprosess.writeDummyLabels(dummyLabelPath,imageRef_path)
