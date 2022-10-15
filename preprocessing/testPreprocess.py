@@ -49,7 +49,7 @@ df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData.csv')
 # df = df.loc[df['isAnyMissing'] ==False]
 # df = df.loc[df['isAnythingInAnnotated']>0 ]    
 #just for testing    
-# df= df.head(25)
+df= df.head(60)
 ##df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
 print(df)    
 
@@ -237,10 +237,6 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
             writer = sitk.ImageFileWriter()
             writer.SetFileName(outt2wPath)
             writer.Execute(imgT2w)
-
-            writer = sitk.ImageFileWriter()
-            writer.SetFileName(outadcPath)
-            writer.Execute(imgLabel)
 
             writer = sitk.ImageFileWriter()
             writer.SetFileName(outhbvPath)
@@ -601,6 +597,7 @@ for keyWord in ['adc','hbv']:
     # df['registered_'+keyWord+"score"]=reg_values  
 #adding data about number of lesions that algorithm should detect
 df=semisuperPreprosess.iterate_and_addLesionNumber(df)
+df['num_lesions_to_retain_bin']=df.apply(lambda el: np.int(el['case_csPCa']=='YES'), axis=1 )#binarizing the output
 
 #checking registration by reading from logs the metrics so we will get idea how well it went
 
