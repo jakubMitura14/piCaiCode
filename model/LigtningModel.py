@@ -241,8 +241,8 @@ def save_heatmap(arr,dir,name,numLesions,cmapp='gray'):
 
 def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, postProcess,epoch,regr):
     regr_now = regr[i]
-    if(regr_now==0):
-        return np.zeros_like(y_hat_arr[i][1,:,:,:])        
+    # if(regr_now==0):
+    #     return np.zeros_like(y_hat_arr[i][1,:,:,:])        
     curr_studyId=studyId[i]
     print(f"extracting {curr_studyId}")
     extracted=np.array(extract_lesion_candidates(y_hat_arr[i][1,:,:,:].cpu().detach().numpy())[0]) #, threshold='dynamic'
