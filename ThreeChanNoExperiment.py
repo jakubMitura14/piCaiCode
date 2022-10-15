@@ -210,7 +210,7 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
     #basically id of trial 
     
     spacing_keyword=getParam(trial,options,"spacing_keyword")
-    label_name=f"label_{spacing_keyword}" 
+    label_name=f"label_{spacing_keyword}fi"
     
     
     t2wColName="t2w"+spacing_keyword+"cropped"

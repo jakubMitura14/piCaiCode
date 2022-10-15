@@ -521,7 +521,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     #adding dummy labels                            
     dummyLabelPath,img_size=getDummy(df,spacing_keyword)
   
-    df[label_name]=df.apply(partial(addDummyLabelPath,labelName=label_name ,dummyLabelPath= dummyLabelPath ), axis=1).compute()
+    df[label_name+'fi']=df.apply(partial(addDummyLabelPath,labelName=label_name ,dummyLabelPath= dummyLabelPath ), axis=1).compute()
 
     # df[joinedColName]=   df.apply(partial(resize_and_join
     #                             ,colNameT2w=t2wKeyWord
