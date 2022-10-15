@@ -305,21 +305,26 @@ def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_chan
     checkpoint_callback = ModelCheckpoint(dirpath=f"/home/sliceruser/locTemp/checkPoints/{expId}",mode='max', save_top_k=1, monitor="dice")
     stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging(swa_lrs=1e-2)
     optuna_prune=PyTorchLightningPruningCallback(trial, monitor="dice")     
-
+    early_stopping = pl.callbacks.early_stopping.EarlyStopping(
+        monitor='dice',
+        patience=15,
+        mode="min",
+        #divergence_threshold=(-0.1)
+    )
 
     trainer = pl.Trainer(
         #accelerator="cpu", #TODO(remove)
-        max_epochs=900,#experiment.get_parameter("max_epochs"),
+        max_epochs=1600,#experiment.get_parameter("max_epochs"),
         #gpus=1,
         #precision=experiment.get_parameter("precision"), 
-        callbacks=[ checkpoint_callback,stochasticAveraging ], #optuna_prune
+        callbacks=[ checkpoint_callback,stochasticAveraging,early_stopping ], #optuna_prune
         logger=comet_logger,
         accelerator='auto',
         devices='auto',       
         default_root_dir= "/home/sliceruser/locTemp/lightning_logs",
         # auto_scale_batch_size="binsearch",
         # auto_lr_find=True,
-        check_val_every_n_epoch=30,
+        check_val_every_n_epoch=50,
         accumulate_grad_batches= 2,# experiment.get_parameter("accumulate_grad_batches"),
         gradient_clip_val=  0.9 ,#experiment.get_parameter("gradient_clip_val"),# 0.5,2.0
         log_every_n_steps=10

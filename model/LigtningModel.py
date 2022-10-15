@@ -329,31 +329,31 @@ class Model(pl.LightningModule):
         lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer,T_0=10, T_mult=1, eta_min=0.001, last_epoch=-1 )
         return [optimizer], [lr_scheduler]
 
-    def infer_train_ds_labels(self, batch):
-        x, y, numLesions = batch['chan3_col_name'] , batch['label'], batch['num_lesions_to_retain']
-        segmMap,regr = self.modelRegression(x)
-        return segmMap,regr, y, numLesions
     # def infer_train_ds_labels(self, batch):
-    #     x, y, numLesions = batch["train_ds_labels"]['chan3_col_name'] , batch["train_ds_labels"]['label'], batch["train_ds_labels"]['num_lesions_to_retain']
+    #     x, y, numLesions = batch['chan3_col_name'] , batch['label'], batch['num_lesions_to_retain']
     #     segmMap,regr = self.modelRegression(x)
     #     return segmMap,regr, y, numLesions
+    def infer_train_ds_labels(self, batch):
+        x, y, numLesions = batch["train_ds_labels"]['chan3_col_name'] , batch["train_ds_labels"]['label'], batch["train_ds_labels"]['num_lesions_to_retain']
+        segmMap,regr = self.modelRegression(x)
+        return segmMap,regr, y, numLesions
 
 
-    # def infer_train_ds_no_labels(self, batch):
-    #     x, numLesions =batch["train_ds_no_labels"]['chan3_col_name'],batch["train_ds_no_labels"]['num_lesions_to_retain']
-    #     segmMap,regr = self.modelRegression(x)
-    #     return regr, numLesions
+    def infer_train_ds_no_labels(self, batch):
+        x, numLesions =batch["train_ds_no_labels"]['chan3_col_name'],batch["train_ds_no_labels"]['num_lesions_to_retain']
+        segmMap,regr = self.modelRegression(x)
+        return regr, numLesions
 
 
     def training_step(self, batch, batch_idx):
         # every second iteration we will do the training for segmentation
 
         seg_hat,reg_hat, y_true, numLesions=self.infer_train_ds_labels( batch)
-        # regr_no_lab, numLesions_no_lab= self.infer_train_ds_no_labels( batch) 
+        regr_no_lab, numLesions_no_lab= self.infer_train_ds_no_labels( batch) 
 
         return torch.sum(torch.stack([self.criterion(seg_hat,y_true)
                                     ,self.regLoss(reg_hat.flatten().float(),torch.Tensor(numLesions).to(self.device).flatten().float() ) 
-                                    # ,self.regLoss(regr_no_lab.flatten(),torch.Tensor(numLesions_no_lab).to(self.device).flatten() ) 
+                                    ,self.regLoss(regr_no_lab.flatten(),torch.Tensor(numLesions_no_lab).to(self.device).flatten() ) 
                                         ]))
 
 

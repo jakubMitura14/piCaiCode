@@ -179,7 +179,7 @@ class PiCaiDataModule(pl.LightningDataModule):
     def getSubjects(self):
         self.df=self.df.loc[self.df['study_id'] !=1000110]# becouse there is error in this label
         self.df=self.df.loc[self.df['study_id'] !=1001489]# becouse there is error in this label
-        onlyPositve = self.df.loc[self.df['isAnyMissing'] ==False]
+        #onlyPositve = self.df.loc[self.df['isAnyMissing'] ==False]
         onlyPositve = onlyPositve.loc[onlyPositve['isAnythingInAnnotated']>0 ]
 
         allSubj=list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1]
@@ -241,7 +241,7 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.allSubjects= allSubjects
         self.onlyPositiveSubjects=onlyPositiveSubjects
         onlyNegative=list(filter(lambda subj :  subj['num_lesions_to_retain']==0  ,allSubjects))        
-        noLabels=list(filter(lambda subj :  subj['isAnythingInAnnotated']==0 and subj['num_lesions_to_retain']>0 ,allSubjects))        
+        noLabels=list(filter(lambda subj :  subj['isAnythingInAnnotated']==0 and subj['num_lesions_to_retain']==1 ,allSubjects))        
         print(f" onlyPositiveSubjects {len(onlyPositiveSubjects)} onlyNegative {len(onlyNegative)} noLabels but positive {len(noLabels)}  ")
 
         train_transforms=transformsForMain.get_train_transforms(
@@ -277,13 +277,13 @@ class PiCaiDataModule(pl.LightningDataModule):
 
 
     def train_dataloader(self):
-        return DataLoader(self.train_ds_labels, batch_size=self.batch_size, drop_last=self.drop_last
-                          ,num_workers=self.num_workers, shuffle=False )
-        # return {'train_ds_labels': DataLoader(self.train_ds_labels, batch_size=self.batch_size, drop_last=self.drop_last
-        #                   ,num_workers=self.num_workers,collate_fn=list_data_collate, shuffle=False ),
-        #         'train_ds_no_labels' : DataLoader(self.train_ds_no_labels, batch_size=self.batch_size, drop_last=self.drop_last
-        #                   ,num_workers=self.num_workers,collate_fn=list_data_collate, shuffle=False)           
-        #                   }# ,collate_fn=list_data_collate ,collate_fn=list_data_collate , shuffle=True ,collate_fn=list_data_collate
+        # return DataLoader(self.train_ds_labels, batch_size=self.batch_size, drop_last=self.drop_last
+        #                   ,num_workers=self.num_workers, shuffle=False )
+        return {'train_ds_labels': DataLoader(self.train_ds_labels, batch_size=self.batch_size, drop_last=self.drop_last
+                          ,num_workers=self.num_workers,collate_fn=list_data_collate, shuffle=False ),
+                'train_ds_no_labels' : DataLoader(self.train_ds_no_labels, batch_size=self.batch_size, drop_last=self.drop_last
+                          ,num_workers=self.num_workers,collate_fn=list_data_collate, shuffle=False)           
+                          }# ,collate_fn=list_data_collate ,collate_fn=list_data_collate , shuffle=True ,collate_fn=list_data_collate
 
     def val_dataloader(self):
         return DataLoader(self.val_ds, batch_size=self.batch_size
