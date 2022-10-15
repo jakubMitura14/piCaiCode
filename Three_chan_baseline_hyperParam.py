@@ -123,7 +123,7 @@ def getUnetD(dropout,input_image_size,in_channels,out_channels ):
         spatial_dims=3,
         in_channels=in_channels,
         out_channels=out_channels,
-        strides=[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2),(1, 1, 1),(1, 1, 1)],
+        strides=[(1, 1, 1),(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2),(1, 1, 1)],
         channels=[32, 64, 128, 256, 512, 1024,2048,4096],
         num_res_units= 0,
         act = (Act.PRELU, {"init": 0.2}),
