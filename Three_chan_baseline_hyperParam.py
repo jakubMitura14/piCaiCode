@@ -254,8 +254,9 @@ def objective(trial: optuna.trial.Trial) -> float:
     checkPointPath=f"/home/sliceruser/locTemp/checkPoints/{experiment_name}/{expId}"
     #get the objects needed for run
     trainer, model, data=ThreeChanNoExperiment.getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channels
-    ,out_channels,picaiLossArr_auroc_final,picaiLossArr_AP_final,picaiLossArr_score_final, dice_final,persistent_cache,checkPointPath)
-    #check weather we already have some checkpoint to use
+    ,out_channels,picaiLossArr_auroc_final,picaiLossArr_AP_final,picaiLossArr_score_final, dice_final
+    ,persistent_cache,expId,checkPointPath )
+     #check weather we already have some checkpoint to use
     dir = os.listdir(checkPointPath)
     if len(dir) > 0:
         model = model.LigtningModel.Model.load_from_checkpoint(dir[0])

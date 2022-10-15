@@ -288,7 +288,7 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
     )
 
     checkpoint_callback = ModelCheckpoint(dirpath= checkPointPath,mode='max', save_top_k=1, monitor="dice")
-    stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging(swa_lrs=1e-4)
+    stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging(swa_lrs=trial.suggest_float("swa_lrs", 1e-6, 1e-4))
     optuna_prune=PyTorchLightningPruningCallback(trial, monitor="dice")     
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
         monitor='dice',
