@@ -328,7 +328,7 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
     #                             )  ,list(df.iterrows())) 
     # df[t2wKeyWord+"_3Chan"+sizeWord]=resList
 
-def getDummy(spac):
+def getDummy(df,spac):
     df= df.compute()
     label_name=f"label_{spac}" 
     print(df[label_name])
@@ -519,7 +519,7 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
                                 ,tuplNum=3
                                 ), axis=1).compute()
     #adding dummy labels                            
-    dummyLabelPath,img_size=getDummy(spacing_keyword)
+    dummyLabelPath,img_size=getDummy(df,spacing_keyword)
   
     df[label_name]=df.apply(partial(addDummyLabelPath,labelName=label_name ,dummyLabelPath= dummyLabelPath ), axis=1).compute()
 
