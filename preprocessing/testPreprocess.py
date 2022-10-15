@@ -49,7 +49,7 @@ df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData.csv')
 # df = df.loc[df['isAnyMissing'] ==False]
 # df = df.loc[df['isAnythingInAnnotated']>0 ]    
 #just for testing    
-df= df.head(60)
+# df= df.head(60)
 ##df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
 print(df)    
 
