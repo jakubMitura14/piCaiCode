@@ -49,7 +49,7 @@ df = pd.read_csv('/home/sliceruser/data/metadata/processedMetaData.csv')
 # df = df.loc[df['isAnyMissing'] ==False]
 # df = df.loc[df['isAnythingInAnnotated']>0 ]    
 #just for testing    
-# df= df.head(60)
+df= df.head(60)
 ##df.to_csv('/home/sliceruser/data/metadata/processedMetaData_current.csv') 
 print(df)    
 
@@ -241,6 +241,10 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
             writer = sitk.ImageFileWriter()
             writer.SetFileName(outhbvPath)
             writer.Execute(imgHbv)
+
+            writer = sitk.ImageFileWriter()
+            writer.SetFileName(outadcPath)
+            writer.Execute(imgAdc)
 
   
     if(str(row[labelColName])!= " " and str(row[labelColName])!="" and len(str(row[labelColName]))>5 ):
