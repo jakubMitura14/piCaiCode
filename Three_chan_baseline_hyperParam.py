@@ -257,9 +257,10 @@ def objective(trial: optuna.trial.Trial) -> float:
     ,out_channels,picaiLossArr_auroc_final,picaiLossArr_AP_final,picaiLossArr_score_final, dice_final
     ,persistent_cache,expId,checkPointPath )
      #check weather we already have some checkpoint to use
-    dir = os.listdir(checkPointPath)
-    if len(dir) > 0:
-        model = model.LigtningModel.Model.load_from_checkpoint(dir[0])
+    if os.path.exists(checkPointPath):
+        dir = os.listdir(checkPointPath)
+        if len(dir) > 0:
+            model = model.LigtningModel.Model.load_from_checkpoint(dir[0])
 
     #getting training
     start = datetime.now()
