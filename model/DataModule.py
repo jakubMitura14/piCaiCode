@@ -257,6 +257,21 @@ class PiCaiDataModule(pl.LightningDataModule):
             ,self.RandomSpike_prob
             ,self.RandomBiasField_prob          
              )
+        train_transforms_noLabel=transformsForMain.get_train_transforms_noLabel(
+            self.RandAdjustContrastd_prob
+            ,self.RandGaussianSmoothd_prob
+            ,self.RandRicianNoised_prob
+            ,self.RandFlipd_prob
+            ,self.RandAffined_prob
+            ,self.RandomElasticDeformation_prob
+            ,self.RandomAnisotropy_prob
+            ,self.RandomMotion_prob
+            ,self.RandomGhosting_prob
+            ,self.RandomSpike_prob
+            ,self.RandomBiasField_prob          
+             )
+
+
         val_transforms= transformsForMain.get_val_transforms()
 
         # self.val_ds=     Dataset(data=onlyPositiveSubjects[0:25]+onlyNegative[0:10], transform=val_transforms)
@@ -265,15 +280,15 @@ class PiCaiDataModule(pl.LightningDataModule):
         # self.val_ds=     LMDBDataset(data=onlyPositiveSubjects[0:25]+onlyNegative[0:10], transform=val_transforms ,cache_dir=self.persistent_cache)
         # self.train_ds_labels = LMDBDataset(data=onlyPositiveSubjects[25:]+onlyNegative[10:], transform=train_transforms  ,cache_dir=self.persistent_cache)
                 #self.train_ds_no_labels = SmartCacheDataset(data=noLabels, transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
-        self.val_ds=     SmartCacheDataset(data=onlyPositiveSubjects[0:25]+onlyNegative[0:10], transform=val_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
-        self.train_ds_labels = SmartCacheDataset(data=onlyPositiveSubjects[25:]+onlyNegative[10:], transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
-        self.train_ds_no_labels = SmartCacheDataset(data=noLabels, transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+        # self.val_ds=     SmartCacheDataset(data=onlyPositiveSubjects[0:25]+onlyNegative[0:10], transform=val_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+        # self.train_ds_labels = SmartCacheDataset(data=onlyPositiveSubjects[25:]+onlyNegative[10:], transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+        # self.train_ds_no_labels = SmartCacheDataset(data=noLabels, transform=train_transforms_noLabel  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
 
         # self.train_ds_all =  LMDBDataset(data=train_set_all, transform=train_transforms,cache_dir=self.persistent_cache)
 
-        # self.val_ds=  Dataset(data=onlyPositiveSubjects[0:25]+onlyNegative[0:10], transform=val_transforms )
-        # self.train_ds_labels = Dataset(data=onlyPositiveSubjects[25:]+onlyNegative[10:], transform=train_transforms )
-        # self.train_ds_no_labels = Dataset(data=noLabels, transform=train_transforms)
+        self.val_ds=  Dataset(data=onlyPositiveSubjects[0:25]+onlyNegative[0:10], transform=val_transforms )
+        self.train_ds_labels = Dataset(data=onlyPositiveSubjects[25:]+onlyNegative[10:], transform=train_transforms )
+        self.train_ds_no_labels = Dataset(data=noLabels, transform=train_transforms_noLabel)
 
 
     def train_dataloader(self):

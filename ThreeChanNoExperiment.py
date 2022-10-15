@@ -222,7 +222,7 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
     chan3_col_name_val=chan3_col_name
 
  
-    df=df.loc[df[label_name_val] != ' ']
+    # df=df.loc[df[label_name_val] != ' ']
     df=df.loc[df[t2wColName] != ' ']
     df=df.loc[df[adcColName] != ' ']
     df=df.loc[df[hbvColName] != ' ']
