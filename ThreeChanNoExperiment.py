@@ -212,7 +212,8 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
     spacing_keyword=getParam(trial,options,"spacing_keyword")
     label_name=f"label_{spacing_keyword}" 
     
-        t2wColName="t2w"+spacing_keyword+"cropped"
+    
+    t2wColName="t2w"+spacing_keyword+"cropped"
     adcColName="adc"+spacing_keyword+"cropped"
     hbvColName="hbv"+spacing_keyword+"cropped"
     dummyLabelPath,img_size=dummyDict[spacing_keyword]
