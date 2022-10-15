@@ -180,7 +180,7 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.df=self.df.loc[self.df['study_id'] !=1000110]# becouse there is error in this label
         self.df=self.df.loc[self.df['study_id'] !=1001489]# becouse there is error in this label
         #onlyPositve = self.df.loc[self.df['isAnyMissing'] ==False]
-        onlyPositve = onlyPositve.loc[onlyPositve['isAnythingInAnnotated']>0 ]
+        onlyPositve = self.df.loc[self.df['isAnythingInAnnotated']>0 ]
 
         allSubj=list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1]
         ,label_name=self.label_name,label_name_val=self.label_name
