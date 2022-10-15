@@ -475,7 +475,7 @@ class Model(pl.LightningModule):
             meanPiecaiMetr_AP=np.nanmean(allmeanPiecaiMetr_AP)
             meanPiecaiMetr_score= np.nanmean(allmeanPiecaiMetr_score)
 
-            self.log('dice', (-1)*np.nanmean(allDices))
+            self.log('dice', np.nanmean(allDices))
 
             print(f"meanDice {np.nanmean(allDices)} meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
             self.log('val_mean_auroc', meanPiecaiMetr_auroc)
@@ -485,7 +485,7 @@ class Model(pl.LightningModule):
             self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
             self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
             self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
-            self.dice_final.append((-1)*np.nanmean(allDices))
+            self.dice_final.append(np.nanmean(allDices))
 
  
 

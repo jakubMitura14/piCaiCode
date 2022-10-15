@@ -211,15 +211,16 @@ def addDummyLabelPath(row, labelName, dummyLabelPath):
 
 
 
-def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_channels
-    ,out_channels):        
+def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channels
+    ,out_channels,picaiLossArr_auroc_final,picaiLossArr_AP_final,picaiLossArr_score_final, dice_final
+    ,persistent_cache,expId,checkPointPath ):        
 
     #basically id of trial 
-    expId=trial.number
+    
 
     spacing_keyword=getParam(trial,options,"spacing_keyword")
     label_name=f"label_{spacing_keyword}" 
-    persistent_cache=tempfile.mkdtemp()
+    
     
     t2wColName="t2w"+spacing_keyword+"cropped"
     adcColName="adc"+spacing_keyword+"cropped"
@@ -230,11 +231,7 @@ def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_chan
     label_name_val=label_name
     chan3_col_name_val=chan3_col_name
 
-    picaiLossArr_auroc_final=[]
-    picaiLossArr_AP_final=[]
-    picaiLossArr_score_final=[]
-    dice_final=[]
-
+ 
 
 
     df=df.loc[df[label_name_val] != ' ']
@@ -302,7 +299,7 @@ def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_chan
         ,dice_final=dice_final
     )
 
-    checkpoint_callback = ModelCheckpoint(dirpath=f"/home/sliceruser/locTemp/checkPoints/{expId}",mode='max', save_top_k=1, monitor="dice")
+    checkpoint_callback = ModelCheckpoint(dirpath= checkPointPath,mode='max', save_top_k=1, monitor="dice")
     stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging(swa_lrs=1e-2)
     optuna_prune=PyTorchLightningPruningCallback(trial, monitor="dice")     
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
@@ -314,7 +311,7 @@ def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_chan
 
     trainer = pl.Trainer(
         #accelerator="cpu", #TODO(remove)
-        max_epochs=1600,#experiment.get_parameter("max_epochs"),
+        max_epochs=1600,
         #gpus=1,
         #precision=experiment.get_parameter("precision"), 
         callbacks=[ checkpoint_callback,stochasticAveraging,early_stopping ], #optuna_prune
@@ -325,22 +322,14 @@ def train_model(trial,df,experiment_name,dummyDict,options,percentSplit, in_chan
         # auto_scale_batch_size="binsearch",
         # auto_lr_find=True,
         check_val_every_n_epoch=50,
-        accumulate_grad_batches= 2,# experiment.get_parameter("accumulate_grad_batches"),
+        accumulate_grad_batches= 2,
         gradient_clip_val=  0.9 ,#experiment.get_parameter("gradient_clip_val"),# 0.5,2.0
-        log_every_n_steps=10
+        log_every_n_steps=3
         #strategy='dp'
     )
+    #trainer.logger._default_hp_metric = False
 
-
-
-
-    trainer.logger._default_hp_metric = False
-    start = datetime.now()
-    print('Training started at', start)
-    trainer.fit(model=model, datamodule=data)
-    print('Training duration:', datetime.now() - start)
-    shutil.rmtree(persistent_cache) 
-    return np.min(dice_final)
+    return (trainer, model, data)
 
 
  
