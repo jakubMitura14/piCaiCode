@@ -164,6 +164,7 @@ def padToAndSaveLabel(row,colname,targetSize, paddValue,keyword,isTobeDiv):
     writer = sitk.ImageFileWriter()
     path = str(row[colname])
     if(path!=" "):
+        print("padding labels")
         outPath = path.replace('.nii.gz',keyword+ 'padded'+'.nii.gz')
         image=sitk.ReadImage(str(path))
         # print(f"resize label too {targetSize}")
