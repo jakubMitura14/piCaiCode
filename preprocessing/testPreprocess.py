@@ -617,7 +617,6 @@ filePath='/home/sliceruser/data/metadata/processedMetaData_current_b.csv'
 if os.path.exists(filePath):
     os.remove(filePath) 
 df.compute().to_csv(filePath)#.compute()
-print(df['"label__half_spac_c'])
 
 
 
