@@ -329,6 +329,7 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
     # df[t2wKeyWord+"_3Chan"+sizeWord]=resList
 
 def getDummy(spac):
+    df= df.compute()
     label_name=f"label_{spac}" 
     print(df[label_name])
     imageRef_path=list(filter(lambda it: it!= " ", df[label_name].to_numpy()))[0]

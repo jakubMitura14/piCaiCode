@@ -54,6 +54,20 @@ def standardize(row):
         writer.Execute(image)    
         return newPath        
 
+def register(row, keyword):
+    pass
+
+def resample(row,keyword,targetSpacing):
+    pass
+
+def resize(row,keyword,targetSpacing, physical_size):
+    pass
+
+def applyModel(row):
+    pass
+
+
+
 
 
 
