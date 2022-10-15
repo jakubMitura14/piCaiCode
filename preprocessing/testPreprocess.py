@@ -251,8 +251,8 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
         writer = sitk.ImageFileWriter()
         writer.SetFileName(outLabelPath)
         writer.Execute(imgLabel)     
-        if os.path.exists(row[labelColName]):
-            os.remove(row[labelColName])            
+        # if os.path.exists(row[labelColName]):
+        #     os.remove(row[labelColName])            
             # print(f"pre patient id  {patId} ")
             # print(f"pre t2w size {imgT2w.GetSize() } spacing {imgT2w.GetSpacing()} ")    
             # print(f"pre adc size {imgAdc.GetSize() } spacing {imgAdc.GetSpacing()} ")    
