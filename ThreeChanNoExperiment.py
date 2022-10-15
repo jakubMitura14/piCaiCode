@@ -198,15 +198,7 @@ def getParam(trial,options,key):
 
     return options[key][integerr]
 
-def addDummyLabelPath(row, labelName, dummyLabelPath):
-    """
-    adds dummy label to the given column in every spot it is empty
-    """
-    row = row[1]
-    if(row[labelName]==' '):
-        return dummyLabelPath
-    else:
-        return row[labelName]    
+
 
 
 
@@ -217,23 +209,18 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
 
     #basically id of trial 
     
-
     spacing_keyword=getParam(trial,options,"spacing_keyword")
     label_name=f"label_{spacing_keyword}" 
     
-    
-    t2wColName="t2w"+spacing_keyword+"cropped"
+        t2wColName="t2w"+spacing_keyword+"cropped"
     adcColName="adc"+spacing_keyword+"cropped"
     hbvColName="hbv"+spacing_keyword+"cropped"
     dummyLabelPath,img_size=dummyDict[spacing_keyword]
     chan3_col_name="joined"+spacing_keyword+"cropped"
-    df[label_name]=list(map(partial(addDummyLabelPath,labelName=label_name ,dummyLabelPath= dummyLabelPath ) ,list(df.iterrows())) )  
     label_name_val=label_name
     chan3_col_name_val=chan3_col_name
 
  
-
-
     df=df.loc[df[label_name_val] != ' ']
     df=df.loc[df[t2wColName] != ' ']
     df=df.loc[df[adcColName] != ' ']

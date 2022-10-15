@@ -219,7 +219,7 @@ def getDummy(spac):
     label_name=f"label_{spac}" 
     print(df[label_name])
     imageRef_path=list(filter(lambda it: it!= " ", df[label_name].to_numpy()))[0]
-    dummyLabelPath=f"/home/sliceruser/locTemp/dummyData/zeroLabel{spac}.nii.gz"
+    dummyLabelPath=f"/home/sliceruser/data/dummyData/zeroLabel{spac}.nii.gz"
     sizz=semisuperPreprosess.writeDummyLabels(dummyLabelPath,imageRef_path)
     img_size = (sizz[2],sizz[1],sizz[0])
     return(dummyLabelPath,img_size)

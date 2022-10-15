@@ -333,6 +333,24 @@ def resize_and_join(row,colNameT2w,colNameAdc,colNameHbv
     #                             )  ,list(df.iterrows())) 
     # df[t2wKeyWord+"_3Chan"+sizeWord]=resList
 
+def getDummy(spac):
+    label_name=f"label_{spac}" 
+    print(df[label_name])
+    imageRef_path=list(filter(lambda it: it!= " ", df[label_name].to_numpy()))[0]
+    dummyLabelPath=f"/home/sliceruser/data/dummyData/zeroLabel{spac}.nii.gz"
+    sizz=semisuperPreprosess.writeDummyLabels(dummyLabelPath,imageRef_path)
+    img_size = (sizz[2],sizz[1],sizz[0])
+    return(dummyLabelPath,img_size)
+
+def addDummyLabelPath(row, labelName, dummyLabelPath):
+    """
+    adds dummy label to the given column in every spot it is empty
+    """
+    # row = row[1]
+    if(row[labelName]==' '):
+        return dummyLabelPath
+    else:
+        return row[labelName]    
 
 def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
     print(f"**************    target spacing    ***************  {targetSpacingg}   {spacing_keyword}")  
@@ -504,6 +522,11 @@ def preprocess_diffrent_spacings(df,targetSpacingg,spacing_keyword):
                                 ,labelColName=labelColName
                                 ,tuplNum=3
                                 ), axis=1).compute()
+    #adding dummy labels                            
+    dummyLabelPath,img_size=getDummy(spacing_keyword)
+  
+    df[label_name]=df.apply(partial(addDummyLabelPath,labelName=label_name ,dummyLabelPath= dummyLabelPath ), axis=1).compute()
+
     # df[joinedColName]=   df.apply(partial(resize_and_join
     #                             ,colNameT2w=t2wKeyWord
     #                             ,colNameAdc="adc"+spacing_keyword
