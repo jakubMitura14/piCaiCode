@@ -187,7 +187,7 @@ def get_train_transforms(
             #RandGaussianSmoothd(keys=["chan3_col_name"], prob=RandGaussianSmoothd_prob),
             RandRicianNoised(keys=["chan3_col_name",], prob=RandRicianNoised_prob),
             RandFlipd(keys=["chan3_col_name","label"], prob=RandFlipd_prob),
-            #RandAffined(keys=["chan3_col_name","label"], prob=RandAffined_prob),
+            RandAffined(keys=["chan3_col_name","label"], prob=RandAffined_prob),
             #wrapTorchio(torchio.transforms.RandomElasticDeformation(include=["chan3_col_name","label"],p=RandomElasticDeformation_prob)),
             #wrapTorchio(torchio.transforms.RandomAnisotropy(include=["chan3_col_name","label"],p=RandomAnisotropy_prob)),
             #wrapTorchio(torchio.transforms.RandomMotion(include=["chan3_col_name"],p=RandomMotion_prob)),

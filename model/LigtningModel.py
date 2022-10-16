@@ -637,7 +637,15 @@ class Model(pl.LightningModule):
         # processedCases=list(map(partial(processDecolated,gold_arr=y_true,y_hat_arr=y_det,directory= self.temp_val_dir,studyId= patIds
         #             ,imageArr=images, experiment=self.logger.experiment,postProcess=self.postProcess,epoch=self.current_epoch)
         #             ,range(0,numBatches)))
-        
+        y_detD=list(map(lambda entry : self.postProcess(entry) ,y_det  ))
+        y_detD= torch.stack(y_detD).cpu()
+        goldsFull = torch.stack(y_true).cpu()
+        diceLocRaw=0.0
+        try:
+            diceLocRaw=monai.metrics.compute_generalized_dice( y_detD.cpu() ,goldsFull)[1].item()
+        except:
+            pass  
+
         if(len(extracteds)>0):
             directory= self.temp_val_dir
             epoch=self.current_epoch
@@ -656,26 +664,32 @@ class Model(pl.LightningModule):
             print("start dice")
             extracteds= list(map(lambda numpyEntry : self.postProcess(torch.from_numpy((numpyEntry>0).astype('int8'))) ,extracteds  ))
             extracteds= torch.stack(extracteds)
+            
+
+
 
             # extracteds= self.postProcess(extracteds)#argmax=True,
-            y_true=list(filter(lambda tupl:  isTaken[tupl[0]] , enumerate(y_true)))
-            y_true=list(map(lambda tupl:  tupl[1] ,y_true))
+            y_truefil=list(filter(lambda tupl:  isTaken[tupl[0]] , enumerate(y_true)))
+            y_truefil=list(map(lambda tupl:  tupl[1] ,y_truefil))
+            golds=torch.stack(y_truefil).cpu()
 
-            golds=torch.stack(y_true).cpu()
             # print(f"get dice  extrrr {extracteds.cpu()}  Y true  {y_true_prim.cpu()}   ")
             diceLoc=0.0
             try:
                 diceLoc=monai.metrics.compute_generalized_dice( extracteds.cpu() ,golds)[1].item()
             except:
                 pass    
-            print(f"diceLoc {diceLoc}")
+  
+
+
+            print(f"diceLoc {diceLoc} diceLocRaw {diceLocRaw}")
 
             # gold = list(map(lambda tupl: tupl[2] ,processedCases ))
 
-            return {'dices': diceLoc, 'meanPiecaiMetr_auroc':meanPiecaiMetr_auroc
+            return {'dices': diceLoc, 'diceLocRaw':diceLocRaw ,'meanPiecaiMetr_auroc':meanPiecaiMetr_auroc
                     ,'meanPiecaiMetr_AP' :meanPiecaiMetr_AP,'meanPiecaiMetr_score': meanPiecaiMetr_score}
 
-        return {'dices': 0.0, 'meanPiecaiMetr_auroc':0.0
+        return {'dices': 0.0,'diceLocRaw':diceLocRaw, 'meanPiecaiMetr_auroc':0.0
                 ,'meanPiecaiMetr_AP' :0.0,'meanPiecaiMetr_score': 0.0}
 
 
