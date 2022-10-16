@@ -290,6 +290,9 @@ class PiCaiDataModule(pl.LightningDataModule):
         self.val_ds=  Dataset(data=onlyPositiveSubjects[0:onlyPosTreshold]+onlyNegative[0:onlyNegativeThreshold], transform=val_transforms )
         self.train_ds_labels = Dataset(data=onlyPositiveSubjects[onlyPosTreshold:]+onlyNegative[onlyNegativeThreshold:], transform=train_transforms )
         self.train_ds_no_labels = Dataset(data=noLabels, transform=train_transforms_noLabel)
+        # self.val_ds=  Dataset(data=onlyPositiveSubjects[0:onlyPosTreshold]+onlyNegative[0:onlyNegativeThreshold], transform=val_transforms )
+        # self.train_ds_labels = Dataset(data=onlyPositiveSubjects[onlyPosTreshold:]+onlyNegative[onlyNegativeThreshold:], transform=train_transforms )
+        # self.train_ds_no_labels = Dataset(data=noLabels, transform=train_transforms_noLabel)
 
 
     def train_dataloader(self):
