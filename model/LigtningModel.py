@@ -532,7 +532,7 @@ class Model(pl.LightningModule):
     def train_dataloader(self):
         if(self.current_epoch%2):
             return {'train_ds_labels': DataLoader(self.train_ds_labels, batch_size=self.batch_size, drop_last=self.drop_last
-                          ,num_workers=self.num_workers,collate_fn=list_data_collate, shuffle=False )}
+                          ,num_workers=self.num_workers,collate_fn=list_data_collate, shuffle=True )}
         else:
             return {'train_ds_no_labels' : DataLoader(self.train_ds_no_labels, batch_size=self.batch_size, drop_last=self.drop_last
                           ,num_workers=self.num_workers,collate_fn=list_data_collate, shuffle=False)           
@@ -546,7 +546,7 @@ class Model(pl.LightningModule):
         #                   }# ,collate_fn=list_data_collate ,collate_fn=list_data_collate , shuffle=True ,collate_fn=list_data_collate
 
     def val_dataloader(self):
-        return DataLoader(self.val_ds, batch_size=8#self.batch_size
+        return DataLoader(self.val_ds, batch_size=12#self.batch_size
         , drop_last=self.drop_last,num_workers=self.num_workers, shuffle=False)#,collate_fn=list_data_collate,collate_fn=pad_list_data_collate
 
 
@@ -699,6 +699,7 @@ class Model(pl.LightningModule):
         print("validation_epoch_end")
 
         allDices = np.array(([x['dices'] for x in outputs])).flatten() 
+        alldiceLocRaw = np.array(([x['diceLocRaw'] for x in outputs])).flatten() 
         allmeanPiecaiMetr_auroc = np.array(([x['meanPiecaiMetr_auroc'] for x in outputs])).flatten() 
         allmeanPiecaiMetr_AP = np.array(([x['meanPiecaiMetr_AP'] for x in outputs])).flatten() 
         allmeanPiecaiMetr_score = np.array(([x['meanPiecaiMetr_score'] for x in outputs])).flatten() 
@@ -718,8 +719,9 @@ class Model(pl.LightningModule):
             meanPiecaiMetr_score= np.nanmean(allmeanPiecaiMetr_score)
 
             self.log('dice', np.nanmean(allDices))
+            self.log('diceLocRaw', np.nanmean(alldiceLocRaw))
 
-            print(f"meanDice {np.nanmean(allDices)} meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
+            print(f"meanDice {np.nanmean(allDices)} diceLocRaw { np.nanmean(alldiceLocRaw)} meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
             self.log('val_mean_auroc', meanPiecaiMetr_auroc)
             self.log('val_mean_AP', meanPiecaiMetr_AP)
             self.log('mean_val_acc', meanPiecaiMetr_score)
