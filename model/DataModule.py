@@ -299,13 +299,13 @@ class PiCaiDataModule(pl.LightningDataModule):
 
 
     def train_dataloader(self):
-        # return DataLoader(self.train_ds_labels, batch_size=self.batch_size, drop_last=self.drop_last
-        #                   ,num_workers=self.num_workers, shuffle=False )
-        return {'train_ds_labels': DataLoader(self.train_ds_labels, batch_size=self.batch_size, drop_last=self.drop_last
-                          ,num_workers=self.num_workers,collate_fn=list_data_collate, shuffle=False ),
-                'train_ds_no_labels' : DataLoader(self.train_ds_no_labels, batch_size=self.batch_size, drop_last=self.drop_last
-                          ,num_workers=self.num_workers,collate_fn=list_data_collate, shuffle=False)           
-                          }# ,collate_fn=list_data_collate ,collate_fn=list_data_collate , shuffle=True ,collate_fn=list_data_collate
+        return DataLoader(self.train_ds_labels, batch_size=self.batch_size, drop_last=self.drop_last
+                          ,num_workers=self.num_workers, shuffle=False )
+        # return {'train_ds_labels': DataLoader(self.train_ds_labels, batch_size=self.batch_size, drop_last=self.drop_last
+        #                   ,num_workers=self.num_workers,collate_fn=list_data_collate, shuffle=False ),
+        #         'train_ds_no_labels' : DataLoader(self.train_ds_no_labels, batch_size=self.batch_size, drop_last=self.drop_last
+        #                   ,num_workers=self.num_workers,collate_fn=list_data_collate, shuffle=False)           
+        #                   }# ,collate_fn=list_data_collate ,collate_fn=list_data_collate , shuffle=True ,collate_fn=list_data_collate
 
     def val_dataloader(self):
         return DataLoader(self.val_ds, batch_size=self.batch_size
