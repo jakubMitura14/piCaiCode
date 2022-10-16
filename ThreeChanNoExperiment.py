@@ -339,7 +339,7 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
         accumulate_grad_batches= 2,
         gradient_clip_val=  0.9 ,#experiment.get_parameter("gradient_clip_val"),# 0.5,2.0
         log_every_n_steps=3
-        ,reload_dataloaders_every_epoch=True
+        ,reload_dataloaders_every_n_epochs=1
         #strategy='dp'
     )
     #trainer.logger._default_hp_metric = False
