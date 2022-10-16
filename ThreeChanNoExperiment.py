@@ -335,7 +335,7 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
         default_root_dir= "/home/sliceruser/locTemp/lightning_logs",
         # auto_scale_batch_size="binsearch",
         auto_lr_find=True,
-        check_val_every_n_epoch=50,
+        check_val_every_n_epoch=2,
         accumulate_grad_batches= 2,
         gradient_clip_val=  0.9 ,#experiment.get_parameter("gradient_clip_val"),# 0.5,2.0
         log_every_n_steps=3
