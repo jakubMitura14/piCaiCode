@@ -682,23 +682,23 @@ class Model(pl.LightningModule):
 
             # print(f"get dice  extrrr {extracteds.cpu()}  Y true  {y_true_prim.cpu()}   ")
             diceLoc=0.0
-            diceLoc=monai.metrics.compute_generalized_dice( extracteds.cpu() ,golds)[1].item()
+            # diceLoc=monai.metrics.compute_generalized_dice( extracteds.cpu() ,golds)[1].item()
 
-            # try:
-            #     diceLoc=monai.metrics.compute_generalized_dice( extracteds.cpu() ,golds)[1].item()
-            # except:
-            #     pass    
+            try:
+                diceLoc=monai.metrics.compute_generalized_dice( extracteds.cpu() ,golds)[1].item()
+            except:
+                pass    
   
 
 
-            print(f"diceLoc {diceLoc} diceLocRaw {diceLocRaw}")
+            # print(f"diceLoc {diceLoc} diceLocRaw {diceLocRaw}")
 
             # gold = list(map(lambda tupl: tupl[2] ,processedCases ))
 
-            return {'dices': diceLoc, 'diceLocRaw':diceLocRaw ,'meanPiecaiMetr_auroc':meanPiecaiMetr_auroc
+            return {'dices': diceLoc, 'meanPiecaiMetr_auroc':meanPiecaiMetr_auroc
                     ,'meanPiecaiMetr_AP' :meanPiecaiMetr_AP,'meanPiecaiMetr_score': meanPiecaiMetr_score}
 
-        return {'dices': 0.0,'diceLocRaw':diceLocRaw, 'meanPiecaiMetr_auroc':0.0
+        return {'dices': 0.0, 'meanPiecaiMetr_auroc':0.0
                 ,'meanPiecaiMetr_AP' :0.0,'meanPiecaiMetr_score': 0.0}
 
 
@@ -708,7 +708,6 @@ class Model(pl.LightningModule):
         print("validation_epoch_end")
 
         allDices = np.array(([x['dices'] for x in outputs])).flatten() 
-        alldiceLocRaw = np.array(([x['diceLocRaw'] for x in outputs])).flatten() 
         allmeanPiecaiMetr_auroc = np.array(([x['meanPiecaiMetr_auroc'] for x in outputs])).flatten() 
         allmeanPiecaiMetr_AP = np.array(([x['meanPiecaiMetr_AP'] for x in outputs])).flatten() 
         allmeanPiecaiMetr_score = np.array(([x['meanPiecaiMetr_score'] for x in outputs])).flatten() 
@@ -728,9 +727,8 @@ class Model(pl.LightningModule):
             meanPiecaiMetr_score= np.nanmean(allmeanPiecaiMetr_score)
 
             self.log('dice', np.nanmean(allDices))
-            self.log('diceLocRaw', np.nanmean(alldiceLocRaw))
 
-            print(f"meanDice {np.nanmean(allDices)} diceLocRaw { np.nanmean(alldiceLocRaw)} meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
+            print(f"meanDice {np.nanmean(allDices)} meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
             self.log('val_mean_auroc', meanPiecaiMetr_auroc)
             self.log('val_mean_AP', meanPiecaiMetr_AP)
             self.log('mean_val_acc', meanPiecaiMetr_score)
