@@ -346,14 +346,12 @@ class Model(pl.LightningModule):
 
 
     def training_step(self, batch, batch_idx):
-        # every second iteration we will do the training for segmentation
-
         seg_hat,reg_hat, y_true, numLesions=self.infer_train_ds_labels( batch)
-        #regr_no_lab, numLesions_no_lab= self.infer_train_ds_no_labels( batch) 
+        regr_no_lab, numLesions_no_lab= self.infer_train_ds_no_labels( batch) 
 
         return torch.sum(torch.stack([self.criterion(seg_hat,y_true)
                                     ,self.regLoss(reg_hat.flatten().float(),torch.Tensor(numLesions).to(self.device).flatten().float() ) 
-                                   # ,self.regLoss(regr_no_lab.flatten(),torch.Tensor(numLesions_no_lab).to(self.device).flatten() ) 
+                                    ,self.regLoss(regr_no_lab.flatten(),torch.Tensor(numLesions_no_lab).to(self.device).flatten() ) 
                                         ]))
 
 
@@ -389,7 +387,7 @@ class Model(pl.LightningModule):
         with mp.Pool(processes = mp.cpu_count()) as pool:
             #it = pool.imap(my_task, range(lenn))
             results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
-            time.sleep(60)
+            time.sleep(5)
             processedCases=list(map(lambda ind :getNext(ind,results,15) ,list(range(lenn)) ))
 
         isTaken= list(map(lambda it:type(it) != type(None),processedCases))
