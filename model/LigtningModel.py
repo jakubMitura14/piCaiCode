@@ -247,7 +247,7 @@ def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, postProc
     #     return np.zeros_like(y_hat_arr[i][1,:,:,:])        
     curr_studyId=studyId[i]
     print(f"extracting {curr_studyId}")
-    extracted=np.array(extract_lesion_candidates(y_hat_arr[i][1,:,:,:].cpu().detach().numpy(),threshold='dynamic')[0]) #
+    extracted=np.array(extract_lesion_candidates(y_hat_arr[i][1,:,:,:].cpu().detach().numpy(),threshold='dynamic-fast')[0]) # dynamic-fast  dynamic
     print(f"extracted {curr_studyId}")
     return extracted
 
@@ -595,11 +595,16 @@ class Model(pl.LightningModule):
         print("start validation")
         experiment=self.experiment=self.logger.experiment
         
-        x, y_true_prim, numLesions,isAnythingInAnnotated = batch['chan3_col_name_val'], batch['label_name_val'], batch['num_lesions_to_retain'], batch['isAnythingInAnnotated']
-        numBatches = y_true_prim.size(dim=0)
+        x, y_true, numLesions,isAnythingInAnnotated = batch['chan3_col_name_val'], batch['label_name_val'], batch['num_lesions_to_retain'], batch['isAnythingInAnnotated']
+
+
+        numBatches = y_true.size(dim=0)
         #seg_hat, reg_hat = self.modelRegression(x)        
         # seg_hat, reg_hat = self.modelRegression(x)        
         seg_hat,regr = self.modelRegression(x)
+        diceLocRaw=monai.metrics.compute_generalized_dice( self.postProcess(seg_hat) ,y_true)[1].cpu().detach().item()
+
+
         seg_hat = seg_hat.cpu().detach()
         regr=regr.cpu().detach().numpy()
         # regr= list(map(lambda el : int(el>0.5) ,regr ))
@@ -609,7 +614,7 @@ class Model(pl.LightningModule):
         #loss= self.criterion(seg_hat,y_true)# self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)      
         y_det = decollate_batch(seg_hat.cpu().detach())
         # y_background = decollate_batch(seg_hat[:,0,:,:,:].cpu().detach())
-        y_true = decollate_batch(y_true_prim.cpu().detach())
+        y_true = decollate_batch(y_true.cpu().detach())
         patIds = decollate_batch(batch['study_id'])
         numLesions = decollate_batch(batch['num_lesions_to_retain'])
         images = decollate_batch(x.cpu().detach()) 
@@ -623,7 +628,7 @@ class Model(pl.LightningModule):
         with mp.Pool(processes = mp.cpu_count()) as pool:
             #it = pool.imap(my_task, range(lenn))
             results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
-            time.sleep(300)
+            time.sleep(60)
             processedCases=list(map(lambda ind :getNext(ind,results,15) ,list(range(lenn)) ))
 
         isTaken= list(map(lambda it:type(it) != type(None),processedCases))
@@ -637,12 +642,13 @@ class Model(pl.LightningModule):
         # processedCases=list(map(partial(processDecolated,gold_arr=y_true,y_hat_arr=y_det,directory= self.temp_val_dir,studyId= patIds
         #             ,imageArr=images, experiment=self.logger.experiment,postProcess=self.postProcess,epoch=self.current_epoch)
         #             ,range(0,numBatches)))
-        y_detD=list(map(lambda entry : self.postProcess(entry) ,y_det  ))
-        y_detD= torch.stack(y_detD).cpu()
-        goldsFull = torch.stack(y_true).cpu()
-        diceLocRaw=0.0
-        diceLocRaw=monai.metrics.compute_generalized_dice( y_detD.cpu() ,goldsFull)[1].item()
-        
+        # y_detD=list(map(lambda entry : self.postProcess(entry) ,y_det  ))
+        # y_detD= torch.stack(y_detD).cpu()
+        # goldsFull = torch.stack(y_true).cpu()
+        # diceLocRaw=0.0
+        # diceLocRaw=monai.metrics.compute_generalized_dice( y_detD.cpu() ,goldsFull)[1].item()
+                
+
         # try:
         #     diceLocRaw=monai.metrics.compute_generalized_dice( y_detD.cpu() ,goldsFull)[1].item()
         # except:
