@@ -234,8 +234,58 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
         #experiment_name="baseline" # Optional
     )
     
-    data = DataModule.PiCaiDataModule(
-        trainSizePercent=percentSplit,# 
+    # data = DataModule.PiCaiDataModule(
+    #     trainSizePercent=percentSplit,# 
+    #     df= df,
+    #     batch_size=2,#
+    #     num_workers=os.cpu_count(),#os.cpu_count(),
+    #     drop_last=False,#True,
+    #     #we need to use diffrent cache folders depending on weather we are dividing data or not
+    #     chan3_col_name =chan3_col_name,
+    #     chan3_col_name_val=chan3_col_name_val,
+    #     label_name_val=label_name_val,
+    #     label_name=label_name
+    #     ,t2wColName=t2wColName
+    #     ,adcColName=adcColName
+    #     ,hbvColName=hbvColName
+    #     #maxSize=maxSize
+    #     ,RandAdjustContrastd_prob=trial.suggest_float("RandAdjustContrastd_prob", 0.0, 0.6)
+    #     ,RandGaussianSmoothd_prob=0.0 #trial.suggest_float("RandGaussianSmoothd_prob", 0.0, 0.6)
+    #     ,RandRicianNoised_prob=trial.suggest_float("RandRicianNoised_prob", 0.0, 0.6)
+    #     ,RandFlipd_prob=trial.suggest_float("RandFlipd_prob", 0.0, 0.6)
+    #     ,RandAffined_prob=0.0#trial.suggest_float("RandAffined_prob", 0.0, 0.6)
+    #     ,RandomElasticDeformation_prob=0.0#trial.suggest_float("RandomElasticDeformation_prob", 0.0, 0.6)
+    #     ,RandomAnisotropy_prob=0.0#trial.suggest_float("RandomAnisotropy_prob", 0.0, 0.6)
+    #     ,RandomMotion_prob=0.0#trial.suggest_float("RandomMotion_prob", 0.0, 0.6)
+    #     ,RandomGhosting_prob=0.0#trial.suggest_float("RandomGhosting_prob", 0.0, 0.6)
+    #     ,RandomSpike_prob=0.0#trial.suggest_float("RandomSpike_prob", 0.0, 0.6)
+    #     ,RandomBiasField_prob=0.0#trial.suggest_float("RandomBiasField_prob", 0.0, 0.6)
+    #     ,persistent_cache=persistent_cache
+    # )
+
+    dropout= trial.suggest_float("dropout", 0.0,0.6)
+    # data.prepare_data()
+    # data.setup()
+    net= getParam(trial,options,"models") #options["models"][0]#   
+    net=net(dropout,img_size,in_channels,out_channels)
+
+    optimizer_class= torch.optim.NAdam
+    regression_channels=getParam(trial,options,"regression_channels")
+    to_onehot_y_loss= False
+    
+
+    model = LigtningModel.Model(
+         net=net,
+        criterion=  monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss),# Our seg labels are single channel images indicating class index, rather than one-hot
+        learning_rate=trial.suggest_float("learning_rate", 1e-6, 1e-4),
+        optimizer_class= optimizer_class,
+        picaiLossArr_auroc_final=picaiLossArr_auroc_final,
+        picaiLossArr_AP_final=picaiLossArr_AP_final,
+        picaiLossArr_score_final=picaiLossArr_score_final,
+        regression_channels=regression_channels,
+        trial=trial
+        ,dice_final=dice_final
+        ,trainSizePercent=percentSplit,# 
         df= df,
         batch_size=2,#
         num_workers=os.cpu_count(),#os.cpu_count(),
@@ -261,30 +311,6 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
         ,RandomSpike_prob=0.0#trial.suggest_float("RandomSpike_prob", 0.0, 0.6)
         ,RandomBiasField_prob=0.0#trial.suggest_float("RandomBiasField_prob", 0.0, 0.6)
         ,persistent_cache=persistent_cache
-    )
-
-    dropout= trial.suggest_float("dropout", 0.0,0.6)
-    # data.prepare_data()
-    # data.setup()
-    net= getParam(trial,options,"models") #options["models"][0]#   
-    net=net(dropout,img_size,in_channels,out_channels)
-
-    optimizer_class= torch.optim.NAdam
-    regression_channels=getParam(trial,options,"regression_channels")
-    to_onehot_y_loss= False
-    
-
-    model = LigtningModel.Model(
-         net=net,
-        criterion=  monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss),# Our seg labels are single channel images indicating class index, rather than one-hot
-        learning_rate=trial.suggest_float("learning_rate", 1e-6, 1e-4),
-        optimizer_class= optimizer_class,
-        picaiLossArr_auroc_final=picaiLossArr_auroc_final,
-        picaiLossArr_AP_final=picaiLossArr_AP_final,
-        picaiLossArr_score_final=picaiLossArr_score_final,
-        regression_channels=regression_channels,
-        trial=trial
-        ,dice_final=dice_final
     )
 
     checkpoint_callback = ModelCheckpoint(dirpath= checkPointPath,mode='max', save_top_k=1, monitor="dice")
@@ -313,11 +339,12 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
         accumulate_grad_batches= 2,
         gradient_clip_val=  0.9 ,#experiment.get_parameter("gradient_clip_val"),# 0.5,2.0
         log_every_n_steps=3
+        ,reload_dataloaders_every_epoch=True
         #strategy='dp'
     )
     #trainer.logger._default_hp_metric = False
 
-    return (trainer, model, data)
+    return (trainer, model)
 
 
  

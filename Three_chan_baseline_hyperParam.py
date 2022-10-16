@@ -242,7 +242,7 @@ def objective(trial: optuna.trial.Trial) -> float:
     
     checkPointPath=f"/home/sliceruser/locTemp/checkPoints/{experiment_name}/{expId}"
     #get the objects needed for run
-    trainer, model, data=ThreeChanNoExperiment.getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channels
+    trainer, model=ThreeChanNoExperiment.getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channels
     ,out_channels,picaiLossArr_auroc_final,picaiLossArr_AP_final,picaiLossArr_score_final, dice_final
     ,persistent_cache,expId,checkPointPath )
      #check weather we already have some checkpoint to use
@@ -254,7 +254,7 @@ def objective(trial: optuna.trial.Trial) -> float:
     #getting training
     start = datetime.now()
     print('Training started at', start)
-    trainer.fit(model=model, datamodule=data)
+    trainer.fit(model)
     print('Training duration:', datetime.now() - start)
     shutil.rmtree(persistent_cache) 
     return np.max(dice_final)

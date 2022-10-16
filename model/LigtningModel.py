@@ -177,6 +177,8 @@ from picai_eval.image_utils import (read_label, read_prediction,
 from picai_eval.metrics import Metrics
 
 from picai_eval.eval import evaluate_case
+from model import transformsForMain as transformsForMain 
+import random
 
 # import modelUtlils
 import matplotlib.pyplot as plt
@@ -272,7 +274,36 @@ def log_images(i,experiment,golds,extracteds ,t2ws, directory,patIds,epoch,numLe
     experiment.log_image( save_heatmap(np.add(gold,((extracted[:,:,maxSlice]>0).astype('int8'))*2),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}",numLesions[i],'plasma'))
     # experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}",numLesions[i]))
 
+def getMonaiSubjectDataFromDataFrame(row,label_name,label_name_val,t2wColName
+,adcColName,hbvColName ):
+        """
+        given row from data frame prepares Subject object from it
+        """
+        subject= {#"chan3_col_name": str(row[chan3_col_name])
+        "t2w": str(row[t2wColName]),        
+        "t2wb": str(row[t2wColName])        
+        ,"hbv": str(row[adcColName])        
+        ,"adc": str(row[hbvColName]) 
+        ,"labelB"    :str(row[label_name])    
+        
+       , "isAnythingInAnnotated":int(row['isAnythingInAnnotated'])
+        , "study_id":str(row['study_id'])
+        , "patient_id":str(row['patient_id'])
+        , "num_lesions_to_retain":int(row['num_lesions_to_retain_bin'])
+        # , "study_id":row['study_id']
+        # , "patient_age":row['patient_age']
+        # , "psa":row['psa']
+        # , "psad":row['psad']
+        # , "prostate_volume":row['prostate_volume']
+        # , "histopath_type":row['histopath_type']
+        # , "lesion_GS":row['lesion_GS']
+        , "label":str(row[label_name])
+        , "label_name_val":str(row[label_name_val])
+        
+        
+        }
 
+        return subject
 class Model(pl.LightningModule):
     def __init__(self
     , net
@@ -285,6 +316,22 @@ class Model(pl.LightningModule):
     ,regression_channels
     ,trial
     ,dice_final
+    ,trainSizePercent,batch_size,num_workers
+    ,drop_last,df,chan3_col_name,chan3_col_name_val
+    ,label_name,label_name_val,
+    t2wColName,adcColName,hbvColName,
+    RandAdjustContrastd_prob
+    ,RandGaussianSmoothd_prob
+    ,RandRicianNoised_prob
+    ,RandFlipd_prob
+    ,RandAffined_prob
+    ,RandomElasticDeformation_prob
+    ,RandomAnisotropy_prob
+    ,RandomMotion_prob
+    ,RandomGhosting_prob
+    ,RandomSpike_prob
+    ,RandomBiasField_prob
+    ,persistent_cache
     ):
         super().__init__()
         self.learning_rate = learning_rate
@@ -318,10 +365,194 @@ class Model(pl.LightningModule):
         self.postTrue = Compose([EnsureType()])
         self.regLoss = nn.BCEWithLogitsLoss()
         #self.F1Score = torchmetrics.F1Score()
-        
+        self.batch_size = batch_size
+        self.df = df
+        self.num_workers = num_workers
+        self.drop_last = drop_last
+        self.train_set = None
+        self.val_set = None
+        self.test_set = None  
+        self.trainSizePercent =trainSizePercent
+        self.train_files = None
+        self.val_files= None
+        self.test_files= None
+        self.train_ds = None
+        self.val_ds= None
+        self.test_ds= None        
+        self.subjects= None
+        self.chan3_col_name=chan3_col_name
+        self.chan3_col_name_val=chan3_col_name_val
+        self.label_name=label_name
+        self.label_name_val=label_name_val
+        self.t2wColName=t2wColName
+        self.adcColName=adcColName
+        self.hbvColName=hbvColName
+        self.RandAdjustContrastd_prob=RandAdjustContrastd_prob
+        self.RandGaussianSmoothd_prob=RandGaussianSmoothd_prob
+        self.RandRicianNoised_prob=RandRicianNoised_prob
+        self.RandFlipd_prob=RandFlipd_prob
+        self.RandAffined_prob=RandAffined_prob
+        self.RandomElasticDeformation_prob=RandomElasticDeformation_prob
+        self.RandomAnisotropy_prob=RandomAnisotropy_prob
+        self.RandomMotion_prob=RandomMotion_prob
+        self.RandomGhosting_prob=RandomGhosting_prob
+        self.RandomSpike_prob=RandomSpike_prob
+        self.RandomBiasField_prob=RandomBiasField_prob
+        self.persistent_cache=persistent_cache
+
+
         os.makedirs(self.temp_val_dir,  exist_ok = True)             
         shutil.rmtree(self.temp_val_dir) 
         os.makedirs(self.temp_val_dir,  exist_ok = True)             
+
+    """
+    splitting for test and validation and separately in case of examples with some label inside 
+        and ecxamples without such constraint
+    """
+    def getSubjects(self):
+        self.df=self.df.loc[self.df['study_id'] !=1000110]# becouse there is error in this label
+        self.df=self.df.loc[self.df['study_id'] !=1001489]# becouse there is error in this label
+        #onlyPositve = self.df.loc[self.df['isAnyMissing'] ==False]
+        onlyPositve = self.df.loc[self.df['isAnythingInAnnotated']>0 ]
+
+        allSubj=list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1]
+        ,label_name=self.label_name,label_name_val=self.label_name
+        ,t2wColName=self.t2wColName
+        ,adcColName=self.adcColName,hbvColName=self.hbvColName )   , list(self.df.iterrows())))
+        
+        onlyPositiveSubj=list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1]
+        ,label_name=self.label_name,label_name_val=self.label_name
+        ,t2wColName=self.t2wColName
+        ,adcColName=self.adcColName,hbvColName=self.hbvColName )  , list(onlyPositve.iterrows())))
+        
+        return allSubj,onlyPositiveSubj
+
+    #TODO replace with https://docs.monai.io/en/stable/data.html
+    def splitDataSet(self,patList, trainSizePercent,noTestSet):
+        """
+        test train validation split
+        TODO(balance sets)
+        """
+        totalLen=len(patList)
+        train_test_split( patList  )
+        numTrain= math.ceil(trainSizePercent*totalLen)
+        numTestAndVal=totalLen-numTrain
+        numTest=math.ceil(numTestAndVal*0.5)
+        numVal= numTestAndVal-numTest
+
+        # valid_set,test_set = torch.utils.data.random_split(test_and_val_set, [math. ceil(0.5), 0.5])
+        print('Train data set:', numTrain)
+        print('Test data set:',numTest)
+        print('Valid data set:', numVal)
+        if(noTestSet):
+            return torch.utils.data.random_split(patList, [numTrain,numTestAndVal,0])
+        else:    
+            return torch.utils.data.random_split(patList, [numTrain,numVal,numTest])
+
+
+
+    def setup(self, stage=None):
+        set_determinism(seed=0)
+        # self.subjects = list(map(lambda row: getMonaiSubjectDataFromDataFrame(row[1]
+        # ,self.label_name,self.label_name_val
+        #     ,self.t2wColName, self.adcColName,self.hbvColName )   , list(self.df.iterrows())))
+        # train_set, valid_set,test_set = self.splitDataSet(self.subjects , self.trainSizePercent,True)
+        
+        #train_subjects=self.subjects[0:179]
+        #val_subjects=self.subjects[180:200]
+        # train_subjects = train_set
+        # val_subjects = valid_set+test_set
+        # self.test_subjects = test_set
+
+        allSubj,onlyPositve=  self.getSubjects()
+        allSubjects= allSubj
+        onlyPositiveSubjects= onlyPositve        
+        random.shuffle(allSubjects)
+        random.shuffle(onlyPositiveSubjects)
+
+
+        self.allSubjects= allSubjects
+        self.onlyPositiveSubjects=onlyPositiveSubjects
+        onlyNegative=list(filter(lambda subj :  subj['num_lesions_to_retain']==0  ,allSubjects))        
+        noLabels=list(filter(lambda subj :  subj['isAnythingInAnnotated']==0 and subj['num_lesions_to_retain']==1 ,allSubjects))        
+        print(f" onlyPositiveSubjects {len(onlyPositiveSubjects)} onlyNegative {len(onlyNegative)} noLabels but positive {len(noLabels)}  ")
+
+        train_transforms=transformsForMain.get_train_transforms(
+            self.RandAdjustContrastd_prob
+            ,self.RandGaussianSmoothd_prob
+            ,self.RandRicianNoised_prob
+            ,self.RandFlipd_prob
+            ,self.RandAffined_prob
+            ,self.RandomElasticDeformation_prob
+            ,self.RandomAnisotropy_prob
+            ,self.RandomMotion_prob
+            ,self.RandomGhosting_prob
+            ,self.RandomSpike_prob
+            ,self.RandomBiasField_prob          
+             )
+        train_transforms_noLabel=transformsForMain.get_train_transforms_noLabel(
+            self.RandAdjustContrastd_prob
+            ,self.RandGaussianSmoothd_prob
+            ,self.RandRicianNoised_prob
+            ,self.RandFlipd_prob
+            ,self.RandAffined_prob
+            ,self.RandomElasticDeformation_prob
+            ,self.RandomAnisotropy_prob
+            ,self.RandomMotion_prob
+            ,self.RandomGhosting_prob
+            ,self.RandomSpike_prob
+            ,self.RandomBiasField_prob          
+             )
+
+
+        val_transforms= transformsForMain.get_val_transforms()
+
+        # self.val_ds=     Dataset(data=onlyPositiveSubjects[0:25]+onlyNegative[0:10], transform=val_transforms)
+        # self.train_ds_labels = Dataset(data=onlyPositiveSubjects[25:]+onlyNegative[10:], transform=train_transforms)
+
+        # self.val_ds=     LMDBDataset(data=onlyPositiveSubjects[0:25]+onlyNegative[0:10], transform=val_transforms ,cache_dir=self.persistent_cache)
+        # self.train_ds_labels = LMDBDataset(data=onlyPositiveSubjects[25:]+onlyNegative[10:], transform=train_transforms  ,cache_dir=self.persistent_cache)
+                #self.train_ds_no_labels = SmartCacheDataset(data=noLabels, transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+        # self.val_ds=     SmartCacheDataset(data=onlyPositiveSubjects[0:25]+onlyNegative[0:10], transform=val_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+        # self.train_ds_labels = SmartCacheDataset(data=onlyPositiveSubjects[25:]+onlyNegative[10:], transform=train_transforms  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+        # self.train_ds_no_labels = SmartCacheDataset(data=noLabels, transform=train_transforms_noLabel  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
+
+        # self.train_ds_all =  LMDBDataset(data=train_set_all, transform=train_transforms,cache_dir=self.persistent_cache)
+        onlyPosTreshold=4
+        onlyNegativeThreshold=3
+        # self.val_ds=  LMDBDataset(data=onlyPositiveSubjects[0:onlyPosTreshold]+onlyNegative[0:onlyNegativeThreshold], transform=val_transforms ,cache_dir=self.persistent_cache)
+        # self.train_ds_labels = LMDBDataset(data=onlyPositiveSubjects[onlyPosTreshold:]+onlyNegative[onlyNegativeThreshold:], transform=train_transforms,cache_dir=self.persistent_cache )
+        # self.train_ds_no_labels = LMDBDataset(data=noLabels, transform=train_transforms_noLabel,cache_dir=self.persistent_cache)
+        # self.val_ds=  Dataset(data=onlyPositiveSubjects[0:onlyPosTreshold]+onlyNegative[0:onlyNegativeThreshold], transform=val_transforms )
+        # self.train_ds_labels = Dataset(data=onlyPositiveSubjects[onlyPosTreshold:]+onlyNegative[onlyNegativeThreshold:], transform=train_transforms )
+        # self.train_ds_no_labels = Dataset(data=noLabels, transform=train_transforms_noLabel)
+        self.val_ds=  Dataset(data=onlyPositiveSubjects[0:onlyPosTreshold], transform=val_transforms )
+        self.train_ds_labels = Dataset(data=onlyPositiveSubjects[onlyPosTreshold:60], transform=train_transforms )
+        self.train_ds_no_labels = Dataset(data=noLabels, transform=train_transforms_noLabel)
+
+
+    def train_dataloader(self):
+        if(self.current_epoch%2):
+            return {'train_ds_labels': DataLoader(self.train_ds_labels, batch_size=self.batch_size, drop_last=self.drop_last
+                          ,num_workers=self.num_workers,collate_fn=list_data_collate, shuffle=False )}
+        else:
+            return {'train_ds_no_labels' : DataLoader(self.train_ds_no_labels, batch_size=self.batch_size, drop_last=self.drop_last
+                          ,num_workers=self.num_workers,collate_fn=list_data_collate, shuffle=False)           
+                          }                              
+        # return {'train_ds_labels': DataLoader(self.train_ds_labels, batch_size=self.batch_size, drop_last=self.drop_last
+        #                   ,num_workers=self.num_workers, shuffle=False ) }
+        # return {'train_ds_labels': DataLoader(self.train_ds_labels, batch_size=self.batch_size, drop_last=self.drop_last
+        #                   ,num_workers=self.num_workers,collate_fn=list_data_collate, shuffle=False ),
+        #         'train_ds_no_labels' : DataLoader(self.train_ds_no_labels, batch_size=self.batch_size, drop_last=self.drop_last
+        #                   ,num_workers=self.num_workers,collate_fn=list_data_collate, shuffle=False)           
+        #                   }# ,collate_fn=list_data_collate ,collate_fn=list_data_collate , shuffle=True ,collate_fn=list_data_collate
+
+    def val_dataloader(self):
+        return DataLoader(self.val_ds, batch_size=self.batch_size
+        , drop_last=self.drop_last,num_workers=self.num_workers, shuffle=False)#,collate_fn=list_data_collate,collate_fn=pad_list_data_collate
+
+
+
 
     def configure_optimizers(self):
         optimizer = self.optimizer_class(self.parameters(), lr=self.learning_rate)
