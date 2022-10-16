@@ -546,7 +546,7 @@ class Model(pl.LightningModule):
         #                   }# ,collate_fn=list_data_collate ,collate_fn=list_data_collate , shuffle=True ,collate_fn=list_data_collate
 
     def val_dataloader(self):
-        return DataLoader(self.val_ds, batch_size=12#self.batch_size
+        return DataLoader(self.val_ds, batch_size=6#self.batch_size
         , drop_last=self.drop_last,num_workers=self.num_workers, shuffle=False)#,collate_fn=list_data_collate,collate_fn=pad_list_data_collate
 
 
@@ -623,7 +623,7 @@ class Model(pl.LightningModule):
         with mp.Pool(processes = mp.cpu_count()) as pool:
             #it = pool.imap(my_task, range(lenn))
             results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
-            time.sleep(210)
+            time.sleep(300)
             processedCases=list(map(lambda ind :getNext(ind,results,15) ,list(range(lenn)) ))
 
         isTaken= list(map(lambda it:type(it) != type(None),processedCases))
@@ -641,10 +641,12 @@ class Model(pl.LightningModule):
         y_detD= torch.stack(y_detD).cpu()
         goldsFull = torch.stack(y_true).cpu()
         diceLocRaw=0.0
-        try:
-            diceLocRaw=monai.metrics.compute_generalized_dice( y_detD.cpu() ,goldsFull)[1].item()
-        except:
-            pass  
+        diceLocRaw=monai.metrics.compute_generalized_dice( y_detD.cpu() ,goldsFull)[1].item()
+        
+        # try:
+        #     diceLocRaw=monai.metrics.compute_generalized_dice( y_detD.cpu() ,goldsFull)[1].item()
+        # except:
+        #     pass  
 
         if(len(extracteds)>0):
             directory= self.temp_val_dir
@@ -675,10 +677,12 @@ class Model(pl.LightningModule):
 
             # print(f"get dice  extrrr {extracteds.cpu()}  Y true  {y_true_prim.cpu()}   ")
             diceLoc=0.0
-            try:
-                diceLoc=monai.metrics.compute_generalized_dice( extracteds.cpu() ,golds)[1].item()
-            except:
-                pass    
+            diceLoc=monai.metrics.compute_generalized_dice( extracteds.cpu() ,golds)[1].item()
+
+            # try:
+            #     diceLoc=monai.metrics.compute_generalized_dice( extracteds.cpu() ,golds)[1].item()
+            # except:
+            #     pass    
   
 
 

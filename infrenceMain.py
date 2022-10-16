@@ -60,29 +60,28 @@ def copyDirAndOrigin(imageOrig,spacing,data):
 accepts row from dataframe where paths to the files are present 
 and standardize t2w adc an hbv using saved histograms
 """
-def standardize(row):
-    for seriesString in ['t2w','adc', 'hbv']: 
-        newPath=join(tempPath,Path(row[seriesString]).name)
+def standardize(row,seriesString,tempPath):
+    newPath=join(tempPath,Path(row[seriesString]).name)
 
-        pathNormalizer = join(normalizationsDir,seriesString+".npy")
-        nyul_normalizer = NyulNormalize()
-        nyul_normalizer.load_standard_histogram(pathNormalizer)
+    pathNormalizer = join(normalizationsDir,seriesString+".npy")
+    nyul_normalizer = NyulNormalize()
+    nyul_normalizer.load_standard_histogram(pathNormalizer)
 
-        image1=sitk.ReadImage(row[seriesString])
-        image1 = sitk.DICOMOrient(image1, 'RAS')
-        image1 = sitk.Cast(image1, sitk.sitkFloat32)
-        data=nyul_normalizer(sitk.GetArrayFromImage(image1))
-        #recreating image keeping relevant metadata
-        image = sitk.GetImageFromArray(data)  
-        image.SetSpacing(image1.GetSpacing())
-        image.SetOrigin(image1.GetOrigin())
-        image.SetDirection(image1.GetDirection())
+    image1=sitk.ReadImage(row[seriesString])
+    image1 = sitk.DICOMOrient(image1, 'RAS')
+    image1 = sitk.Cast(image1, sitk.sitkFloat32)
+    data=nyul_normalizer(sitk.GetArrayFromImage(image1))
+    #recreating image keeping relevant metadata
+    image = sitk.GetImageFromArray(data)  
+    image.SetSpacing(image1.GetSpacing())
+    image.SetOrigin(image1.GetOrigin())
+    image.SetDirection(image1.GetDirection())
 
-        writer = sitk.ImageFileWriter()
-        writer.KeepOriginalImageUIDOn()
-        writer.SetFileName(newPath)
-        writer.Execute(image)    
-        return newPath        
+    writer = sitk.ImageFileWriter()
+    writer.KeepOriginalImageUIDOn()
+    writer.SetFileName(newPath)
+    writer.Execute(image)    
+    return newPath        
 """
 register adc and hbv to t2w
 keyword is either adc or hbv column names
@@ -122,15 +121,9 @@ def register(row, keyword,t2wkeyword,elacticPath,reg_prop,reIndex=0):
         return result #
     #return " " in case of incorrect path input            
     return " "
-"""
-resamples to the given spacing
-keyword - column name with file to be resampled
-targetSpacing - target spacing
-"""
-def resample(row,keyword,targetSpacing):
-    
-    path=row[keyword]
-    spacing_keyword="spac"
+
+def resamplBase(path,targetSpacing,interpolator):
+
     imageOrig = sitk.ReadImage(path)
     origSize= imageOrig.GetSize()
     orig_spacing=imageOrig.GetSpacing()
@@ -151,35 +144,45 @@ def resample(row,keyword,targetSpacing):
     resample.SetOutputOrigin(image.GetOrigin())
     resample.SetTransform(sitk.Transform())
     resample.SetDefaultPixelValue(image.GetPixelIDValue())
-    resample.SetInterpolator(sitk.sitkBSpline)
+    resample.SetInterpolator(interpolator)
     resample.SetSize(new_size)
-    res= resample.Execute(image)
+    return resample.Execute(image)
 
+"""
+resamples to the given spacing
+keyword - column name with file to be resampled
+targetSpacing - target spacing
+"""
+def resample(row,keyword,targetSpacing):
+    path=row[keyword]
+    spacing_keyword="spac"
+    res=resamplBase(path,targetSpacing,sitk.sitkBSpline)
     newPath = path.replace(".mha",spacing_keyword+".mha" )
     writer = sitk.ImageFileWriter()
     writer.KeepOriginalImageUIDOn()
     writer.SetFileName(newPath)
-    writer.Execute(image)    
-
+    writer.Execute(res)
+    return newPath    
 
 """
-resize to given physical size taking spacing into account
-additionally enable saving the metadata used in this resizing so the process can be reversed in the end
-keyword - colname with path of the file to modify
-targetSpacing - target spacing
-physical_size - physical size irrespective of spacing that the image should have
+resample back to original spacing
 """
-def resize(row,keyword,targetSpacing, physical_size):
-    
-    paddValue=0
-    sizzX= physical_size[0]/targetSpacing[0]
-    sizzY= physical_size[1]/targetSpacing[1]
-    sizzZ= physical_size[2]/targetSpacing[2]
-    sizz=(sizzX,sizzY,sizzZ)
+def resampleBack(row,keyword,t2wOrig):
     path=row[keyword]
+    pathT2w=row[t2wOrig]
+    imageT2w= sitk.ReadImage(pathT2w)
+    res=resamplBase(path,imageT2w.GetSpacing(),sitk.sitkNearestNeighbor )
+    newPath = path.replace(".mha",spacing_keyword+"back.mha" )
+    writer = sitk.ImageFileWriter()
+    writer.KeepOriginalImageUIDOn()
+    writer.SetFileName(newPath)
+    writer.Execute(res)
+    return newPath    
 
-    multNum=32#32
-    targetSize=(math.ceil(sizz[0]/multNum)*multNum, math.ceil(sizz[1]/multNum)*multNum,math.ceil(sizz[2]/multNum)*multNum  )
+
+
+def resizeBase(path,targetSize ):
+    paddValue=0
     image1 = sitk.ReadImage(path)              
     currentSize=image1.GetSize()
     sizediffs=(targetSize[0]-currentSize[1]  , targetSize[1]-currentSize[1]  ,targetSize[2]-currentSize[2])
@@ -195,7 +198,20 @@ def resize(row,keyword,targetSpacing, physical_size):
     rest_to_crop= list(map(lambda dim : (-1)*min(dim,0) ,rest ))
 
     padded= sitk.ConstantPad(image1, halfDiffSize_to_pad, rest_to_pad, paddValue)
-    res= sitk.Crop(padded, halfDiffSize_to_crop,rest_to_crop )
+    return  sitk.Crop(padded, halfDiffSize_to_crop,rest_to_crop )
+"""
+resize to given physical size taking spacing into account
+additionally enable saving the metadata used in this resizing so the process can be reversed in the end
+keyword - colname with path of the file to modify
+targetSpacing - target spacing
+physical_size - physical size irrespective of spacing that the image should have
+"""
+def resize(row,keyword,targetSize):
+    
+    
+    path=row[keyword]
+    res=resizeBase(path,targetSize )
+
 
     newPath = path.replace(".mha","cropped.mha" )
     writer = sitk.ImageFileWriter()
@@ -205,11 +221,28 @@ def resize(row,keyword,targetSpacing, physical_size):
 
     return newPath        
 
+def resizeBack(row,keyword,t2wOrig,resultsDir):
+    path=row[keyword]
+    pathT2w=row[t2wOrig]
+    imageT2w= sitk.ReadImage(pathT2w)
+    res=resizeBase(path,imageT2w.GetSize())
+
+    newPath=join(resultsDir,Path(row[t2wOrig]).name)
+
+    newPath = path.replace(".mha","cropped_back.mha" )
+    writer = sitk.ImageFileWriter()
+    writer.KeepOriginalImageUIDOn()
+    writer.SetFileName(newPath)
+    writer.Execute(res)
+
+    return newPath            
+
+
 """
 applying pytorch lightning model using checkpoint from path
 t2wKey,adcKey,hbvKey - column names with paths to respective modalities
 """
-def applyModel(row, t2wKey,adcKey,hbvKey,resultsDir):
+def applyModel(row, t2wKey,adcKey,hbvKey):
     
     path=row[t2wKey]
     image1 = sitk.ReadImage(path)   
@@ -232,18 +265,32 @@ def applyModel(row, t2wKey,adcKey,hbvKey,resultsDir):
     # # predict with the model
     # y_hat = model(x)
 
-"""
-resize the output of the model to original spacing and size of the image
 
 """
-def getBackOriginalDims(row,resultKey,resultsDir,originalt2w):
-    origPath = row[originalt2w]
-    newPath=join(resultsDir,Path(row[resultKey]).name)
+combines peprocessing infrence and postprocessing
+"""
+def process(targetSpacing,df,physical_size ,elacticPath,reg_prop,resultsDir):
+    sizzX= physical_size[0]/targetSpacing[0]
+    sizzY= physical_size[1]/targetSpacing[1]
+    sizzZ= physical_size[2]/targetSpacing[2]
+    sizz=(sizzX,sizzY,sizzZ) 
 
-    pass
+    multNum=32#32
+    targetSize=(math.ceil(sizz[0]/multNum)*multNum, math.ceil(sizz[1]/multNum)*multNum,math.ceil(sizz[2]/multNum)*multNum  )
+    for seriesString in ['t2w','adc', 'hbv']: 
+        df[seriesString+"_Stand"]=df.apply(partial(standardize, seriesString= seriesString,tempPath=tempPath )  ,axis=1)
+    for keyword in ['adc_Stand', 'hbv_Stand']: 
+        df[keyword+"_reg"]=df.apply(partial(register, keyword=keyword,t2wkeyword='t2w_Stand',elacticPath=elacticPath,reg_prop=reg_prop)  ,axis=1)
+    for keyword in ['t2w_Stand','adc_Stand_reg', 'hbv_Stand_reg']: 
+        df[keyword+"_resampl"]=df.apply(partial(resample, keyword=keyword,targetSpacing=targetSpacing)  ,axis=1)
+    for keyword in ['t2w_Stand_resampl','adc_Stand_reg_resampl', 'hbv_Stand_reg_resampl']: 
+        df[keyword+"_resiz"]=df.apply(partial(resize, keyword=keyword,targetSize=targetSize)  ,axis=1)
+    df['res']=df.apply(partial(applyModel, t2wKey='t2w_Stand_resampl_resiz',adcKey='adc_Stand_reg_resampl_resiz',hbvKey='hbv_Stand_reg_resampl_resiz')  ,axis=1)
+    df['res_resampl']=df.apply(partial(resampleBack, keyword='res', t2wOrig='t2w')  ,axis=1)
+    df['res_resampl_resize']=df.apply(partial(resizeBack, keyword='res_resampl', t2wOrig='t2w',resultsDir=resultsDir)  ,axis=1)
 
 
-
+        
 
 class csPCaAlgorithm(SegmentationAlgorithm):
     """
