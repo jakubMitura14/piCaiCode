@@ -113,7 +113,7 @@ def getUnetC(dropout,input_image_size,in_channels,out_channels ):
         in_channels=in_channels,
         out_channels=out_channels,
         strides=[(2, 2, 2), (1, 2, 2), (1, 2, 2), (1, 2, 2), (2, 2, 2),(1, 1, 1)],
-        channels=[32, 64, 128, 256, 512, 1024,2048],
+        channels=[32, 64, 128, 256, 512, 1024,1024],
         num_res_units= 0,
         act = (Act.PRELU, {"init": 0.2}),
         norm= (Norm.BATCH, {}),
