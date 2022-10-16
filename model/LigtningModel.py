@@ -348,10 +348,10 @@ class Model(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         if(self.current_epoch%2):
             seg_hat,reg_hat, y_true, numLesions=self.infer_train_ds_labels( batch)
-            return torch.sum(torch.stack([self.criterion(seg_hat,y_true)
+            return torch.add(self.criterion(seg_hat,y_true)
                             ,self.regLoss(reg_hat.flatten().float(),torch.Tensor(numLesions).to(self.device).flatten().float() ) 
                             # ,self.regLoss(regr_no_lab.flatten(),torch.Tensor(numLesions_no_lab).to(self.device).flatten() ) 
-                                ]))
+                                )
         else:
             regr_no_lab, numLesions_no_lab= self.infer_train_ds_no_labels( batch) 
             return self.regLoss(regr_no_lab.flatten(),torch.Tensor(numLesions_no_lab).to(self.device).flatten() ) 
