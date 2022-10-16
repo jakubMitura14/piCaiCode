@@ -299,7 +299,7 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
 
     trainer = pl.Trainer(
         #accelerator="cpu", #TODO(remove)
-        max_epochs=1600,
+        max_epochs=4000,
         #gpus=1,
         #precision=experiment.get_parameter("precision"), 
         callbacks=[ checkpoint_callback,stochasticAveraging,early_stopping ], #optuna_prune
