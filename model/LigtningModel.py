@@ -606,7 +606,7 @@ class Model(pl.LightningModule):
         regr=regr.cpu().detach().numpy()
         # regr= list(map(lambda el : int(el>0.5) ,regr ))
         seg_hat=torch.sigmoid(seg_hat).cpu().detach()
-        diceLocRaw=monai.metrics.compute_generalized_dice( self.postProcessA(seg_hat) ,y_true.cpu())[1].cpu().detach().item()
+        # diceLocRaw=monai.metrics.compute_generalized_dice( self.postProcessA(seg_hat) ,y_true.cpu())[1].cpu().detach().item()
 
         t2wb=decollate_batch(batch['t2wb'])
         labelB=decollate_batch(batch['labelB'])
@@ -627,7 +627,7 @@ class Model(pl.LightningModule):
         with mp.Pool(processes = mp.cpu_count()) as pool:
             #it = pool.imap(my_task, range(lenn))
             results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
-            time.sleep(60)
+            time.sleep(90)
             processedCases=list(map(lambda ind :getNext(ind,results,15) ,list(range(lenn)) ))
 
         isTaken= list(map(lambda it:type(it) != type(None),processedCases))
