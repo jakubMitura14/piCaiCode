@@ -319,7 +319,7 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
         monitor='dice',
         patience=15,
-        mode="min",
+        mode="max",
         #divergence_threshold=(-0.1)
     )
 
