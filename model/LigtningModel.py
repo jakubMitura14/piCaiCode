@@ -523,12 +523,10 @@ class Model(pl.LightningModule):
         # self.val_ds=  LMDBDataset(data=onlyPositiveSubjects[0:onlyPosTreshold]+onlyNegative[0:onlyNegativeThreshold], transform=val_transforms ,cache_dir=self.persistent_cache)
         # self.train_ds_labels = LMDBDataset(data=onlyPositiveSubjects[onlyPosTreshold:]+onlyNegative[onlyNegativeThreshold:], transform=train_transforms,cache_dir=self.persistent_cache )
         # self.train_ds_no_labels = LMDBDataset(data=noLabels, transform=train_transforms_noLabel,cache_dir=self.persistent_cache)
-        # self.val_ds=  Dataset(data=onlyPositiveSubjects[0:onlyPosTreshold]+onlyNegative[0:onlyNegativeThreshold], transform=val_transforms )
-        # self.train_ds_labels = Dataset(data=onlyPositiveSubjects[onlyPosTreshold:]+onlyNegative[onlyNegativeThreshold:], transform=train_transforms )
-        # self.train_ds_no_labels = Dataset(data=noLabels, transform=train_transforms_noLabel)
         self.val_ds=  Dataset(data=onlyPositiveSubjects[0:onlyPosTreshold]+onlyNegative[0:onlyNegativeThreshold], transform=val_transforms )
-        self.train_ds_labels = Dataset(data=onlyPositiveSubjects[onlyPosTreshold:,+onlyNegative[onlyNegativeThreshold:] ], transform=train_transforms )
+        self.train_ds_labels = Dataset(data=onlyPositiveSubjects[onlyPosTreshold:]+onlyNegative[onlyNegativeThreshold:], transform=train_transforms )
         self.train_ds_no_labels = Dataset(data=noLabels, transform=train_transforms_noLabel)
+
 
 
     def train_dataloader(self):
@@ -548,7 +546,7 @@ class Model(pl.LightningModule):
         #                   }# ,collate_fn=list_data_collate ,collate_fn=list_data_collate , shuffle=True ,collate_fn=list_data_collate
 
     def val_dataloader(self):
-        return DataLoader(self.val_ds, batch_size=7#self.batch_size
+        return DataLoader(self.val_ds, batch_size=8#self.batch_size
         , drop_last=self.drop_last,num_workers=self.num_workers, shuffle=False)#,collate_fn=list_data_collate,collate_fn=pad_list_data_collate
 
 
