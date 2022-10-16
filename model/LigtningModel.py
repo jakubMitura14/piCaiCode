@@ -547,7 +547,7 @@ class Model(pl.LightningModule):
         #                   }# ,collate_fn=list_data_collate ,collate_fn=list_data_collate , shuffle=True ,collate_fn=list_data_collate
 
     def val_dataloader(self):
-        return DataLoader(self.val_ds, batch_size=6#self.batch_size
+        return DataLoader(self.val_ds, batch_size=self.batch_size
         , drop_last=self.drop_last,num_workers=self.num_workers, shuffle=False)#,collate_fn=list_data_collate,collate_fn=pad_list_data_collate
 
 
@@ -627,7 +627,7 @@ class Model(pl.LightningModule):
         with mp.Pool(processes = mp.cpu_count()) as pool:
             #it = pool.imap(my_task, range(lenn))
             results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
-            time.sleep(90)
+            time.sleep(60)
             processedCases=list(map(lambda ind :getNext(ind,results,15) ,list(range(lenn)) ))
 
         isTaken= list(map(lambda it:type(it) != type(None),processedCases))

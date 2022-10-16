@@ -188,15 +188,15 @@ def getOptions():
     return {
 
     # "models":[getUnetA,getUnetB,getVNet,getSegResNet],
-    # "models":[getUnetA,getUnetB,getUnetC],# ,getSegResNet,getSwinUNETR,getUnetA,getUnetB,getVNet,getUnetC
-    "models":[getUnetC],# ,getSegResNet,getSwinUNETR,getUnetA,getUnetB,getVNet,getUnetC
+    "models":[getUnetA,getUnetB,getUnetC],# ,getSegResNet,getSwinUNETR,getUnetA,getUnetB,getVNet,getUnetC
+    #"models":[getUnetC],# ,getSegResNet,getSwinUNETR,getUnetA,getUnetB,getVNet,getUnetC
     #getUnetA,getUnetB,getVNet
-    # "regression_channels":[[2,4,8],[10,16,32],[32,64,128]], #,
-    "regression_channels":[[32,64,128]], #,
+    "regression_channels":[[10,16,32],[32,64,128]], #,
+    #"regression_channels":[[32,64,128]], #,
     "optimizer_class": [getOptNAdam] ,# ,torch.optim.LBFGS optim.AggMo,   look in https://pytorch-optimizer.readthedocs.io/en/latest/api.html
     # "centerCropSize":[(256, 256,32)],
-    # "spacing_keyword" : ["_half_spac_c" ,"_one_spac_c", "_one_and_half_spac_c", "_two_spac_c"]
-    "spacing_keyword" : ["_half_spac_c"]
+    "spacing_keyword" : ["_half_spac_c" ,"_one_spac_c", "_one_and_half_spac_c", "_two_spac_c"]
+    #"spacing_keyword" : ["_half_spac_c"]
     }
 
 options = getOptions()
@@ -217,8 +217,8 @@ def getDummy(spac):
     return(dummyLabelPath,img_size)
 
 aa=list(map(getDummy  ,spacings  ))
-# dummyDict={"_half_spac_c":aa[0], "_one_spac_c":aa[1], "_one_and_half_spac_c":aa[2], "_two_spac_c":aa[3]}
-dummyDict={"_half_spac_c":aa[0]}
+dummyDict={"_half_spac_c":aa[0], "_one_spac_c":aa[1], "_one_and_half_spac_c":aa[2], "_two_spac_c":aa[3]}
+#dummyDict={"_half_spac_c":aa[0]}
 
 
 #df=df.loc[df['num_lesions_to_retain']>-1]#correct gleason ...
@@ -226,7 +226,7 @@ dummyDict={"_half_spac_c":aa[0]}
 
 physical_size =(81.0, 160.0, 192.0)#taken from picai used to crop image so only center will remain
 
-experiment_name="pic42"
+experiment_name="pic43"
 percentSplit=0.85
 
 in_channels=3
