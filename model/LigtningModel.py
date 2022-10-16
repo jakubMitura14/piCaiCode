@@ -361,6 +361,7 @@ class Model(pl.LightningModule):
         #os.makedirs('/home/sliceruser/data/temp')
         # self.postProcess=monai.transforms.Compose([EnsureType(), monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])#, monai.transforms.KeepLargestConnectedComponent()
         # self.postProcess=monai.transforms.Compose([EnsureType(),  monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])#, monai.transforms.KeepLargestConnectedComponent()
+        self.postProcessA=monai.transforms.Compose([EnsureType(), AsDiscrete(argmax=True, to_onehot=2)])#, monai.transforms.KeepLargestConnectedComponent()
         self.postProcess=monai.transforms.Compose([EnsureType(),EnsureChannelFirst(), AsDiscrete(argmax=True, to_onehot=2)])#, monai.transforms.KeepLargestConnectedComponent()
         self.postTrue = Compose([EnsureType()])
         self.regLoss = nn.BCEWithLogitsLoss()
@@ -602,7 +603,7 @@ class Model(pl.LightningModule):
         #seg_hat, reg_hat = self.modelRegression(x)        
         # seg_hat, reg_hat = self.modelRegression(x)        
         seg_hat,regr = self.modelRegression(x)
-        diceLocRaw=monai.metrics.compute_generalized_dice( self.postProcess(seg_hat) ,y_true)[1].cpu().detach().item()
+        diceLocRaw=monai.metrics.compute_generalized_dice( self.postProcessA(seg_hat) ,y_true)[1].cpu().detach().item()
 
 
         seg_hat = seg_hat.cpu().detach()
