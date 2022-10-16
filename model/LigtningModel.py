@@ -597,19 +597,17 @@ class Model(pl.LightningModule):
         experiment=self.experiment=self.logger.experiment
         
         x, y_true, numLesions,isAnythingInAnnotated = batch['chan3_col_name_val'], batch['label_name_val'], batch['num_lesions_to_retain'], batch['isAnythingInAnnotated']
-
-
         numBatches = y_true.size(dim=0)
         #seg_hat, reg_hat = self.modelRegression(x)        
         # seg_hat, reg_hat = self.modelRegression(x)        
         seg_hat,regr = self.modelRegression(x)
-        diceLocRaw=monai.metrics.compute_generalized_dice( self.postProcessA(seg_hat) ,y_true)[1].cpu().detach().item()
-
-
         seg_hat = seg_hat.cpu().detach()
+
         regr=regr.cpu().detach().numpy()
         # regr= list(map(lambda el : int(el>0.5) ,regr ))
         seg_hat=torch.sigmoid(seg_hat).cpu().detach()
+        diceLocRaw=monai.metrics.compute_generalized_dice( self.postProcessA(seg_hat) ,y_true.cpu())[1].cpu().detach().item()
+
         t2wb=decollate_batch(batch['t2wb'])
         labelB=decollate_batch(batch['labelB'])
         #loss= self.criterion(seg_hat,y_true)# self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)      
