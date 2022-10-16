@@ -285,8 +285,8 @@ class PiCaiDataModule(pl.LightningDataModule):
         # self.train_ds_no_labels = SmartCacheDataset(data=noLabels, transform=train_transforms_noLabel  ,num_init_workers=os.cpu_count(),num_replace_workers=os.cpu_count())
 
         # self.train_ds_all =  LMDBDataset(data=train_set_all, transform=train_transforms,cache_dir=self.persistent_cache)
-        onlyPosTreshold=18
-        onlyNegativeThreshold=6
+        onlyPosTreshold=4
+        onlyNegativeThreshold=3
         # self.val_ds=  LMDBDataset(data=onlyPositiveSubjects[0:onlyPosTreshold]+onlyNegative[0:onlyNegativeThreshold], transform=val_transforms ,cache_dir=self.persistent_cache)
         # self.train_ds_labels = LMDBDataset(data=onlyPositiveSubjects[onlyPosTreshold:]+onlyNegative[onlyNegativeThreshold:], transform=train_transforms,cache_dir=self.persistent_cache )
         # self.train_ds_no_labels = LMDBDataset(data=noLabels, transform=train_transforms_noLabel,cache_dir=self.persistent_cache)
@@ -299,8 +299,8 @@ class PiCaiDataModule(pl.LightningDataModule):
 
 
     def train_dataloader(self):
-        return DataLoader(self.train_ds_labels, batch_size=self.batch_size, drop_last=self.drop_last
-                          ,num_workers=self.num_workers, shuffle=False )
+        return {'train_ds_labels': DataLoader(self.train_ds_labels, batch_size=self.batch_size, drop_last=self.drop_last
+                          ,num_workers=self.num_workers, shuffle=False ) }
         # return {'train_ds_labels': DataLoader(self.train_ds_labels, batch_size=self.batch_size, drop_last=self.drop_last
         #                   ,num_workers=self.num_workers,collate_fn=list_data_collate, shuffle=False ),
         #         'train_ds_no_labels' : DataLoader(self.train_ds_no_labels, batch_size=self.batch_size, drop_last=self.drop_last
