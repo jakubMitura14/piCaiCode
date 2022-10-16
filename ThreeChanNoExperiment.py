@@ -237,7 +237,7 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
     data = DataModule.PiCaiDataModule(
         trainSizePercent=percentSplit,# 
         df= df,
-        batch_size=7,#
+        batch_size=2,#
         num_workers=os.cpu_count(),#os.cpu_count(),
         drop_last=False,#True,
         #we need to use diffrent cache folders depending on weather we are dividing data or not
