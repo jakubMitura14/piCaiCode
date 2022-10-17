@@ -272,7 +272,7 @@ def log_images(i,experiment,golds,extracteds ,t2ws, directory,patIds,epoch,numLe
     #logging only if it is non zero case
     if np.sum(gold)>0:
         experiment.log_image( save_heatmap(np.add(t2w.astype('float'),(gold*(t2wMax)).astype('float')),directory,f"gold_plus_t2w_{curr_studyId}_{epoch}",numLesions[i]))
-        experiment.log_image( save_heatmap(np.add(gold,((extracted[:,:,maxSlice]>0).astype('int8'))*2),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}",numLesions[i],'plasma'))
+        experiment.log_image( save_heatmap(np.add(gold*3,((extracted[:,:,maxSlice]>0).astype('int8'))),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}",numLesions[i],'plasma'))
         # experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}",numLesions[i]))
 
 def getMonaiSubjectDataFromDataFrame(row,label_name,label_name_val,t2wColName
@@ -639,8 +639,8 @@ class Model(pl.LightningModule):
         seg_hat=torch.sigmoid(seg_hat).cpu().detach()
         # diceLocRaw=monai.metrics.compute_generalized_dice( self.postProcessA(seg_hat) ,y_true.cpu())[1].cpu().detach().item()
 
-        t2wb=decollate_batch(batch['t2wb'])
-        labelB=decollate_batch(batch['labelB'])
+        # t2wb=decollate_batch(batch['t2wb'])
+        # labelB=decollate_batch(batch['labelB'])
         #loss= self.criterion(seg_hat,y_true)# self.calculateLoss(isAnythingInAnnotated,seg_hat,y_true,reg_hat,numLesions)      
         y_det = decollate_batch(seg_hat.cpu().detach())
         # y_background = decollate_batch(seg_hat[:,0,:,:,:].cpu().detach())
