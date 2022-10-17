@@ -305,7 +305,7 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
         ,RandRicianNoised_prob=trial.suggest_float("RandRicianNoised_prob", 0.0, 0.9)
         ,RandFlipd_prob=trial.suggest_float("RandFlipd_prob", 0.0, 0.9)
         ,RandAffined_prob=trial.suggest_float("RandAffined_prob", 0.0, 0.9)
-        ,RandomElasticDeformation_prob=0.0#trial.suggest_float("RandomElasticDeformation_prob", 0.0, 0.9)
+        ,RandomElasticDeformation_prob=trial.suggest_float("RandomElasticDeformation_prob", 0.0, 0.9)
         ,RandomAnisotropy_prob=0.0#trial.suggest_float("RandomAnisotropy_prob", 0.0, 0.9)
         ,RandomMotion_prob=0.0#trial.suggest_float("RandomMotion_prob", 0.0, 0.6)
         ,RandomGhosting_prob=0.0#trial.suggest_float("RandomGhosting_prob", 0.0, 0.6)

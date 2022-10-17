@@ -40,7 +40,8 @@ from monai.transforms import (
     AsDiscreted,
     MapTransform,
     ResizeWithPadOrCropd,
-    RepeatChanneld
+    RepeatChanneld,
+    Rand3DElasticd
     
 )
 
@@ -188,6 +189,7 @@ def get_train_transforms(
             RandRicianNoised(keys=["chan3_col_name",], prob=RandRicianNoised_prob),
             RandFlipd(keys=["chan3_col_name","label"], prob=RandFlipd_prob),
             RandAffined(keys=["chan3_col_name","label"], prob=RandAffined_prob),
+            Rand3DElasticd(keys=["chan3_col_name","label"],sigma_range= (1, 2), magnitude_range=(0.5, 0.5) ,prob=RandomElasticDeformation_prob),
             #wrapTorchio(torchio.transforms.RandomElasticDeformation(include=["chan3_col_name","label"],p=RandomElasticDeformation_prob)),
             #wrapTorchio(torchio.transforms.RandomAnisotropy(include=["chan3_col_name","label"],p=RandomAnisotropy_prob)),
             #wrapTorchio(torchio.transforms.RandomMotion(include=["chan3_col_name"],p=RandomMotion_prob)),
@@ -233,6 +235,8 @@ def get_train_transforms_noLabel(
             # RandRicianNoised(keys=["chan3_col_name",], prob=RandRicianNoised_prob),
             # RandFlipd(keys=["chan3_col_name"], prob=RandFlipd_prob),
             RandAffined(keys=["chan3_col_name"], prob=RandAffined_prob),
+            Rand3DElasticd(keys=["chan3_col_name"],sigma_range= (1, 2), magnitude_range=(0.5, 0.5) ,prob=RandomElasticDeformation_prob),
+
             #wrapTorchio(torchio.transforms.RandomElasticDeformation(include=["chan3_col_name"],p=RandomElasticDeformation_prob)),
             #wrapTorchio(torchio.transforms.RandomAnisotropy(include=["chan3_col_name"],p=RandomAnisotropy_prob)),
             # wrapTorchio(torchio.transforms.RandomMotion(include=["chan3_col_name"],p=RandomMotion_prob)),
