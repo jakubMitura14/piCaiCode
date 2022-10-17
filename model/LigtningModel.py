@@ -243,8 +243,8 @@ def save_heatmap(arr,dir,name,numLesions,cmapp='gray'):
 
 def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, postProcess,epoch,regr):
     regr_now = regr[i]
-    # if(regr_now==0):
-    #     return np.zeros_like(y_hat_arr[i][1,:,:,:])        
+    if(regr_now==0):
+        return np.zeros_like(y_hat_arr[i][1,:,:,:])        
     curr_studyId=studyId[i]
     print(f"extracting {curr_studyId}")
     extracted=np.array(extract_lesion_candidates(y_hat_arr[i][1,:,:,:].cpu().detach().numpy(),threshold='dynamic-fast')[0]) # dynamic-fast  dynamic
@@ -262,17 +262,18 @@ def log_images(i,experiment,golds,extracteds ,t2ws, directory,patIds,epoch,numLe
     goldChannel=1
     gold_arr_loc=golds[i]
     maxSlice = max(list(range(0,gold_arr_loc.size(dim=3))),key=lambda ind : torch.sum(gold_arr_loc[goldChannel,:,:,ind]).item() )
+    
     t2w = t2ws[i][0,:,:,maxSlice].cpu().detach().numpy()
     t2wMax= np.max(t2w.flatten())
-
 
     curr_studyId=patIds[i]
     gold=golds[i][goldChannel,:,:,maxSlice].cpu().detach().numpy()
     extracted=extracteds[i]
-
-    experiment.log_image( save_heatmap(np.add(t2w.astype('float'),(gold*(t2wMax)).astype('float')),directory,f"gold_plus_t2w_{curr_studyId}_{epoch}",numLesions[i]))
-    experiment.log_image( save_heatmap(np.add(gold,((extracted[:,:,maxSlice]>0).astype('int8'))*2),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}",numLesions[i],'plasma'))
-    # experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}",numLesions[i]))
+    #logging only if it is non zero case
+    if np.sum(gold)>0:
+        experiment.log_image( save_heatmap(np.add(t2w.astype('float'),(gold*(t2wMax)).astype('float')),directory,f"gold_plus_t2w_{curr_studyId}_{epoch}",numLesions[i]))
+        experiment.log_image( save_heatmap(np.add(gold,((extracted[:,:,maxSlice]>0).astype('int8'))*2),directory,f"gold_plus_extracted_{curr_studyId}_{epoch}",numLesions[i],'plasma'))
+        # experiment.log_image( save_heatmap(gold,directory,f"gold_{curr_studyId}_{epoch}",numLesions[i]))
 
 def getMonaiSubjectDataFromDataFrame(row,label_name,label_name_val,t2wColName
 ,adcColName,hbvColName ):
@@ -332,7 +333,11 @@ class Model(pl.LightningModule):
     ,RandomSpike_prob
     ,RandomBiasField_prob
     ,persistent_cache
+    ,spacing_keyword,netIndex, regr_chan_index
     ):
+
+
+
         super().__init__()
         self.learning_rate = learning_rate
         self.net=net
@@ -400,8 +405,10 @@ class Model(pl.LightningModule):
         self.RandomSpike_prob=RandomSpike_prob
         self.RandomBiasField_prob=RandomBiasField_prob
         self.persistent_cache=persistent_cache
-
-
+        self.spacing_keyword=spacing_keyword
+        self.netIndex=netIndex
+        self.regr_chan_index=regr_chan_index
+        self.trial=trial
         os.makedirs(self.temp_val_dir,  exist_ok = True)             
         shutil.rmtree(self.temp_val_dir) 
         os.makedirs(self.temp_val_dir,  exist_ok = True)             
@@ -589,11 +596,36 @@ class Model(pl.LightningModule):
         #                             ,self.regLoss(regr_no_lab.flatten(),torch.Tensor(numLesions_no_lab).to(self.device).flatten() ) 
         #                                 ]))
 
+    def logHyperparameters(self,experiment):
+        if(self.current_epoch==0):
+
+
+            experiment.log_parameter('machine', os.environ['machine'])
+            experiment.log_parameter('trial_number', self.trial.number)
+            
+            experiment.log_parameter('spacing_keyword', self.spacing_keyword)
+            experiment.log_parameter('netIndex', self.netIndex)
+            experiment.log_parameter('regr_chan_index', self.regr_chan_index)
+
+            experiment.log_parameter('RandAdjustContrastd_prob', self.RandAdjustContrastd_prob)
+            experiment.log_parameter('RandGaussianSmoothd_prob', self.RandGaussianSmoothd_prob)
+            experiment.log_parameter('RandRicianNoised_prob', self.RandRicianNoised_prob)
+            experiment.log_parameter('RandFlipd_prob', self.RandFlipd_prob)
+            experiment.log_parameter('RandAffined_prob', self.RandAffined_prob)
+            experiment.log_parameter('RandomElasticDeformation_prob', self.RandomElasticDeformation_prob)
+            experiment.log_parameter('RandomMotion_prob', self.RandomMotion_prob)
+            experiment.log_parameter('RandomGhosting_prob', self.RandomGhosting_prob)
+            experiment.log_parameter('RandomSpike_prob', self.RandomSpike_prob)
+            experiment.log_parameter('RandomBiasField_prob', self.RandomBiasField_prob)
+
+
 
     def validation_step(self, batch, batch_idx):
         print("start validation")
         experiment=self.experiment=self.logger.experiment
-        
+        #log hyperparameters if it is epoch 1
+        self.logHyperparameters(experiment)
+
         x, y_true, numLesions,isAnythingInAnnotated = batch['chan3_col_name_val'], batch['label_name_val'], batch['num_lesions_to_retain'], batch['isAnythingInAnnotated']
         numBatches = y_true.size(dim=0)
         #seg_hat, reg_hat = self.modelRegression(x)        

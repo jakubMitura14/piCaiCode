@@ -196,7 +196,7 @@ def getParam(trial,options,key):
     #print(f"  ")
     integerr=trial.suggest_int(key, 0, lenn-1)
 
-    return options[key][integerr]
+    return integerr,options[key][integerr]
 
 
 
@@ -209,7 +209,7 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
 
     #basically id of trial 
     
-    spacing_keyword=getParam(trial,options,"spacing_keyword")
+    spacIndex,spacing_keyword=getParam(trial,options,"spacing_keyword")
     label_name=f"label_{spacing_keyword}fi"
     
     
@@ -266,13 +266,14 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
     dropout= trial.suggest_float("dropout", 0.0,0.6)
     # data.prepare_data()
     # data.setup()
-    net= getParam(trial,options,"models") #options["models"][0]#   
+    netIndex,net= getParam(trial,options,"models") #options["models"][0]#   
     net=net(dropout,img_size,in_channels,out_channels)
 
     optimizer_class= torch.optim.NAdam
-    regression_channels=getParam(trial,options,"regression_channels")
+    regr_chan_index,regression_channels=getParam(trial,options,"regression_channels")
     to_onehot_y_loss= False
     
+
 
     model = LigtningModel.Model(
          net=net,
@@ -311,11 +312,14 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
         ,RandomSpike_prob=0.0#trial.suggest_float("RandomSpike_prob", 0.0, 0.6)
         ,RandomBiasField_prob=0.0#trial.suggest_float("RandomBiasField_prob", 0.0, 0.6)
         ,persistent_cache=persistent_cache
+        ,spacing_keyword=spacing_keyword
+        ,netIndex=netIndex
+        ,regr_chan_index=regr_chan_index
     )
 
-    checkpoint_callback = ModelCheckpoint(dirpath= checkPointPath,mode='max', save_top_k=1, monitor="dice")
+    checkpoint_callback = ModelCheckpoint(dirpath= checkPointPath,mode='max', save_top_k=1, monitor="meanPiecaiMetr_score")
     stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging(swa_lrs=trial.suggest_float("swa_lrs", 1e-6, 1e-4))
-    optuna_prune=PyTorchLightningPruningCallback(trial, monitor="dice")     
+    optuna_prune=PyTorchLightningPruningCallback(trial, monitor="meanPiecaiMetr_score")     
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
         monitor='meanPiecaiMetr_score',
         patience=20,
