@@ -317,11 +317,12 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
         ,regr_chan_index=regr_chan_index
     )
 
-    checkpoint_callback = ModelCheckpoint(dirpath= checkPointPath,mode='max', save_top_k=1, monitor="meanPiecaiMetr_score")
+    toMonitor="score_my"
+    checkpoint_callback = ModelCheckpoint(dirpath= checkPointPath,mode='max', save_top_k=1, monitor=toMonitor)
     stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging(swa_lrs=trial.suggest_float("swa_lrs", 1e-6, 1e-4))
-    optuna_prune=PyTorchLightningPruningCallback(trial, monitor="meanPiecaiMetr_score")     
+    optuna_prune=PyTorchLightningPruningCallback(trial, monitor=toMonitor)     
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
-        monitor='meanPiecaiMetr_score',
+        monitor=toMonitor,
         patience=30,
         mode="max",
         #divergence_threshold=(-0.1)

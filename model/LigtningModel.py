@@ -750,7 +750,7 @@ class Model(pl.LightningModule):
         # allmeanPiecaiMetr_score = np.array(([x['meanPiecaiMetr_score'].cpu().detach().numpy() for x in outputs])).flatten() 
         regressionMetric=self.regressionMetric.compute()
         self.regressionMetric.reset()
-    
+        self.log('regr_F1', regressionMetric)
         
         
         if(len(allDices)>0):            
@@ -765,7 +765,7 @@ class Model(pl.LightningModule):
             self.log('val_mean_auroc', meanPiecaiMetr_auroc)
             self.log('val_mean_AP', meanPiecaiMetr_AP)
             self.log('meanPiecaiMetr_score', meanPiecaiMetr_score)
-            self.log('regr_F1', regressionMetric)
+            
             self.log('score_my', meanPiecaiMetr_score_my)
 
             self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
