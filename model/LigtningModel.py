@@ -27,7 +27,7 @@ from monai.data import CacheDataset,Dataset,PersistentDataset, list_data_collate
 from monai.config import print_config
 from monai.apps import download_and_extract
 import time
-from torchmetrics import BinaryF1Score
+from torchmetrics.classification import BinaryF1Score
 from datetime import datetime
 import os
 import tempfile
