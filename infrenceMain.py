@@ -46,6 +46,23 @@ regression_channels=options["regression_channels"][0]
 tempPath=""
 
 
+class MissingSequenceError(Exception):
+    """Exception raised when a sequence is missing."""
+
+    def __init__(self, name, folder):
+        message = f"Could not find scan for {name} in {folder} (files: {os.listdir(folder)})"
+        super.__init__(message)
+
+
+class MultipleScansSameSequencesError(Exception):
+    """Exception raised when multiple scans of the same sequences are provided."""
+
+    def __init__(self, name, folder):
+        message = f"Found multiple scans for {name} in {folder} (files: {os.listdir(folder)})"
+        super.__init__(message)
+
+
+
 def copyDirAndOrigin(imageOrig,spacing,data):
     image1 = sitk.GetImageFromArray(data)
     image1.SetSpacing(spacing) #updating spacing
@@ -340,130 +357,115 @@ class csPCaAlgorithm(SegmentationAlgorithm):
             else:
                 # append scan path to algorithm input paths
                 self.scan_paths += [file_paths[0]]
+        print(self.scan_paths)
 
-    def preprocess_input(self):
-        """Preprocess input images to nnUNet Raw Data Archive format"""
-        # set up Sample
-        sample = Sample(
-            scans=[
-                sitk.ReadImage(str(path))
-                for path in self.scan_paths
-            ],
-        )
-
-        # perform preprocessing
-        sample.preprocess()
-
-        # write preprocessed scans to nnUNet input directory
-        for i, scan in enumerate(sample.scans):
-            path = self.nnunet_inp_dir / f"scan_{i:04d}.nii.gz"
-            atomic_image_write(scan, path)
 
     # Note: need to overwrite process because of flexible inputs, which requires custom data loading
     def process(self):
         """
         Load bpMRI scans and generate detection map for clinically significant prostate cancer
         """
-        # perform preprocessing
-        self.preprocess_input()
+        print("processss")
+        # # perform preprocessing
+        # self.preprocess_input()
 
-        # perform inference using nnUNet
-        pred_ensemble = None
-        ensemble_count = 0
-        for trainer in [
-            "nnUNetTrainerV2_Loss_FL_and_CE_checkpoints",
-        ]:
-            # predict sample
-            self.predict(
-                task="Task2203_picai_baseline",
-                trainer=trainer,
-                checkpoint="model_best",
-            )
+        # # perform inference using nnUNet
+        # pred_ensemble = None
+        # ensemble_count = 0
+        # for trainer in [
+        #     "nnUNetTrainerV2_Loss_FL_and_CE_checkpoints",
+        # ]:
+        #     # predict sample
+        #     self.predict(
+        #         task="Task2203_picai_baseline",
+        #         trainer=trainer,
+        #         checkpoint="model_best",
+        #     )
 
-            # read softmax prediction
-            pred_path = str(self.nnunet_out_dir / "scan.npz")
-            pred = np.array(np.load(pred_path)['softmax'][1]).astype('float32')
-            os.remove(pred_path)
-            if pred_ensemble is None:
-                pred_ensemble = pred
-            else:
-                pred_ensemble += pred
-            ensemble_count += 1
+        #     # read softmax prediction
+        #     pred_path = str(self.nnunet_out_dir / "scan.npz")
+        #     pred = np.array(np.load(pred_path)['softmax'][1]).astype('float32')
+        #     os.remove(pred_path)
+        #     if pred_ensemble is None:
+        #         pred_ensemble = pred
+        #     else:
+        #         pred_ensemble += pred
+        #     ensemble_count += 1
 
-        # average the accumulated confidence scores
-        pred_ensemble /= ensemble_count
+        # # average the accumulated confidence scores
+        # pred_ensemble /= ensemble_count
 
-        # the prediction is currently at the size and location of the nnU-Net preprocessed
-        # scan, so we need to convert it to the original extent before we continue
-        convert_to_original_extent(
-            pred=pred_ensemble,
-            pkl_path=self.nnunet_out_dir / "scan.pkl",
-            dst_path=self.nnunet_out_dir / "softmax.nii.gz",
-        )
+        # # the prediction is currently at the size and location of the nnU-Net preprocessed
+        # # scan, so we need to convert it to the original extent before we continue
+        # convert_to_original_extent(
+        #     pred=pred_ensemble,
+        #     pkl_path=self.nnunet_out_dir / "scan.pkl",
+        #     dst_path=self.nnunet_out_dir / "softmax.nii.gz",
+        # )
 
-        # now each voxel in softmax.nii.gz corresponds to the same voxel in the original (T2-weighted) scan
-        pred_ensemble = sitk.ReadImage(str(self.nnunet_out_dir / "softmax.nii.gz"))
+        # # now each voxel in softmax.nii.gz corresponds to the same voxel in the original (T2-weighted) scan
+        # pred_ensemble = sitk.ReadImage(str(self.nnunet_out_dir / "softmax.nii.gz"))
 
-        # extract lesion candidates from softmax prediction
-        # note: we set predictions outside the central 81 x 192 x 192 mm to zero, as this is far outside the prostate
-        detection_map = extract_lesion_candidates_cropped(
-            pred=sitk.GetArrayFromImage(pred_ensemble),
-            threshold="dynamic"
-        )
+        # # extract lesion candidates from softmax prediction
+        # # note: we set predictions outside the central 81 x 192 x 192 mm to zero, as this is far outside the prostate
+        # detection_map = extract_lesion_candidates_cropped(
+        #     pred=sitk.GetArrayFromImage(pred_ensemble),
+        #     threshold="dynamic"
+        # )
 
-        # convert detection map to a SimpleITK image and infuse the physical metadata of original T2-weighted scan
-        reference_scan_original_path = str(self.scan_paths[0])
-        reference_scan_original = sitk.ReadImage(reference_scan_original_path)
-        detection_map: sitk.Image = sitk.GetImageFromArray(detection_map)
-        detection_map.CopyInformation(reference_scan_original)
+        # # convert detection map to a SimpleITK image and infuse the physical metadata of original T2-weighted scan
+        # reference_scan_original_path = str(self.scan_paths[0])
+        # reference_scan_original = sitk.ReadImage(reference_scan_original_path)
+        # detection_map: sitk.Image = sitk.GetImageFromArray(detection_map)
+        # detection_map.CopyInformation(reference_scan_original)
 
-        # save prediction to output folder
-        atomic_image_write(detection_map, str(self.cspca_detection_map_path))
+        # # save prediction to output folder
+        # atomic_image_write(detection_map, str(self.cspca_detection_map_path))
 
-        # save case-level likelihood
-        with open(self.case_confidence_path, 'w') as fp:
-            json.dump(float(np.max(sitk.GetArrayFromImage(detection_map))), fp)
+        # # save case-level likelihood
+        # with open(self.case_confidence_path, 'w') as fp:
+        #     json.dump(float(np.max(sitk.GetArrayFromImage(detection_map))), fp)
 
-    def predict(self, task, trainer="nnUNetTrainerV2", network="3d_fullres",
-                checkpoint="model_final_checkpoint", folds="0,1,2,3,4", store_probability_maps=True,
-                disable_augmentation=False, disable_patch_overlap=False):
-        """
-        Use trained nnUNet network to generate segmentation masks
-        """
+    # def predict(self, task, trainer="nnUNetTrainerV2", network="3d_fullres",
+    #             checkpoint="model_final_checkpoint", folds="0,1,2,3,4", store_probability_maps=True,
+    #             disable_augmentation=False, disable_patch_overlap=False):
+    #     """
+    #     Use trained nnUNet network to generate segmentation masks
+    #     """
 
-        # Set environment variables
-        os.environ['RESULTS_FOLDER'] = str(self.nnunet_results)
+    #     # Set environment variables
+    #     os.environ['RESULTS_FOLDER'] = str(self.nnunet_results)
 
-        # Run prediction script
-        cmd = [
-            'nnUNet_predict',
-            '-t', task,
-            '-i', str(self.nnunet_inp_dir),
-            '-o', str(self.nnunet_out_dir),
-            '-m', network,
-            '-tr', trainer,
-            '--num_threads_preprocessing', '2',
-            '--num_threads_nifti_save', '1'
-        ]
+    #     # Run prediction script
+    #     cmd = [
+    #         'nnUNet_predict',
+    #         '-t', task,
+    #         '-i', str(self.nnunet_inp_dir),
+    #         '-o', str(self.nnunet_out_dir),
+    #         '-m', network,
+    #         '-tr', trainer,
+    #         '--num_threads_preprocessing', '2',
+    #         '--num_threads_nifti_save', '1'
+    #     ]
 
-        if folds:
-            cmd.append('-f')
-            cmd.extend(folds.split(','))
+    #     if folds:
+    #         cmd.append('-f')
+    #         cmd.extend(folds.split(','))
 
-        if checkpoint:
-            cmd.append('-chk')
-            cmd.append(checkpoint)
+    #     if checkpoint:
+    #         cmd.append('-chk')
+    #         cmd.append(checkpoint)
 
-        if store_probability_maps:
-            cmd.append('--save_npz')
+    #     if store_probability_maps:
+    #         cmd.append('--save_npz')
 
-        if disable_augmentation:
-            cmd.append('--disable_tta')
+    #     if disable_augmentation:
+    #         cmd.append('--disable_tta')
 
-        if disable_patch_overlap:
-            cmd.extend(['--step_size', '1'])
+    #     if disable_patch_overlap:
+    #         cmd.extend(['--step_size', '1'])
 
-        subprocess.check_call(cmd)
+    #     subprocess.check_call(cmd)
 
 
 if __name__ == "__main__":
