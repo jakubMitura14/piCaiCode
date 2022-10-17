@@ -210,9 +210,6 @@ class UNetToRegresion(nn.Module):
         #print(f"segmMap  {segmMap}")
         return (segmMap,self.model(segmMap))
 
-
-# torch.autograd.set_detect_anomaly(True)
-
 def getNext(i,results,TIMEOUT):
     try:
         # return it.next(timeout=TIMEOUT)
