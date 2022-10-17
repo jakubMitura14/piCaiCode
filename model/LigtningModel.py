@@ -521,12 +521,13 @@ class Model(pl.LightningModule):
         # self.train_ds_all =  LMDBDataset(data=train_set_all, transform=train_transforms,cache_dir=self.persistent_cache)
         onlyPosTreshold=18
         onlyNegativeThreshold=6
+        onlyNegativeThresholdB=400
         # self.val_ds=  LMDBDataset(data=onlyPositiveSubjects[0:onlyPosTreshold]+onlyNegative[0:onlyNegativeThreshold], transform=val_transforms ,cache_dir=self.persistent_cache)
         # self.train_ds_labels = LMDBDataset(data=onlyPositiveSubjects[onlyPosTreshold:]+onlyNegative[onlyNegativeThreshold:], transform=train_transforms,cache_dir=self.persistent_cache )
         # self.train_ds_no_labels = LMDBDataset(data=noLabels, transform=train_transforms_noLabel,cache_dir=self.persistent_cache)
         self.val_ds=  Dataset(data=onlyPositiveSubjects[0:onlyPosTreshold]+onlyNegative[0:onlyNegativeThreshold], transform=val_transforms )
-        self.train_ds_labels = Dataset(data=onlyPositiveSubjects[onlyPosTreshold:]+onlyNegative[onlyNegativeThreshold:], transform=train_transforms )
-        self.train_ds_no_labels = Dataset(data=noLabels, transform=train_transforms_noLabel)
+        self.train_ds_labels = Dataset(data=onlyPositiveSubjects[onlyPosTreshold:]+onlyNegative[onlyNegativeThreshold:onlyNegativeThresholdB], transform=train_transforms )
+        self.train_ds_no_labels = Dataset(data=noLabels+onlyNegative[onlyNegativeThresholdB:], transform=train_transforms_noLabel)
 
 
 
@@ -559,10 +560,7 @@ class Model(pl.LightningModule):
         lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer,T_0=10, T_mult=1, eta_min=0.001, last_epoch=-1 )
         return [optimizer], [lr_scheduler]
 
-    # def infer_train_ds_labels(self, batch):
-    #     x, y, numLesions = batch['chan3_col_name'] , batch['label'], batch['num_lesions_to_retain']
-    #     segmMap,regr = self.modelRegression(x)
-    #     return segmMap,regr, y, numLesions
+
     def infer_train_ds_labels(self, batch):
         x, y, numLesions = batch["train_ds_labels"]['chan3_col_name'] , batch["train_ds_labels"]['label'], batch["train_ds_labels"]['num_lesions_to_retain']
         segmMap,regr = self.modelRegression(x)

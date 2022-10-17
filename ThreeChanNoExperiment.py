@@ -304,8 +304,8 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
         ,RandRicianNoised_prob=trial.suggest_float("RandRicianNoised_prob", 0.0, 0.6)
         ,RandFlipd_prob=trial.suggest_float("RandFlipd_prob", 0.0, 0.6)
         ,RandAffined_prob=trial.suggest_float("RandAffined_prob", 0.0, 0.6)
-        ,RandomElasticDeformation_prob=0.0#trial.suggest_float("RandomElasticDeformation_prob", 0.0, 0.6)
-        ,RandomAnisotropy_prob=0.0#trial.suggest_float("RandomAnisotropy_prob", 0.0, 0.6)
+        ,RandomElasticDeformation_prob=trial.suggest_float("RandomElasticDeformation_prob", 0.0, 0.6)
+        ,RandomAnisotropy_prob=trial.suggest_float("RandomAnisotropy_prob", 0.0, 0.6)
         ,RandomMotion_prob=0.0#trial.suggest_float("RandomMotion_prob", 0.0, 0.6)
         ,RandomGhosting_prob=0.0#trial.suggest_float("RandomGhosting_prob", 0.0, 0.6)
         ,RandomSpike_prob=0.0#trial.suggest_float("RandomSpike_prob", 0.0, 0.6)
@@ -325,7 +325,7 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
 
     trainer = pl.Trainer(
         #accelerator="cpu", #TODO(remove)
-        max_epochs=4000,
+        max_epochs=8000,
         #gpus=1,
         #precision=experiment.get_parameter("precision"), 
         callbacks=[ checkpoint_callback,stochasticAveraging,early_stopping ], #optuna_prune
