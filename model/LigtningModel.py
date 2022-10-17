@@ -203,7 +203,7 @@ class UNetToRegresion(nn.Module):
             #nn.BatchNorm3d(100),
             nn.ReLU(inplace=True),
             nn.Linear(in_features=100, out_features=1)
-            ,torch.nn.Sigmoid()
+            # ,torch.nn.Sigmoid()
         )
     def forward(self, x):
         segmMap=self.segmModel(x)
@@ -631,9 +631,10 @@ class Model(pl.LightningModule):
         # seg_hat, reg_hat = self.modelRegression(x)        
         seg_hat,regr = self.modelRegression(x)
         seg_hat = seg_hat.cpu().detach()
+        regr=torch.sigmoid(regr)
+
         # self.regressionMetric(regr.flatten().float(),torch.Tensor(numLesions).to(self.device).flatten().float())
         print(f"regr{regr} numLesions {numLesions} ")
-        # regr=torch.sigmoid(regr)
         self.regressionMetric(torch.round(regr.flatten().float()),torch.Tensor(numLesions).to(self.device).float())
         regr=regr.cpu().detach().numpy()
         # regr= list(map(lambda el : int(el>0.5) ,regr ))
