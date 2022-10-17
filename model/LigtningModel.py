@@ -633,7 +633,7 @@ class Model(pl.LightningModule):
         # seg_hat, reg_hat = self.modelRegression(x)        
         seg_hat,regr = self.modelRegression(x)
         seg_hat = seg_hat.cpu().detach()
-        self.regressionMetric(regr,numLesions)
+        self.regressionMetric(regr.flatten().float(),torch.Tensor(numLesions).to(self.device).flatten().float())
         regr=regr.cpu().detach().numpy()
         # regr= list(map(lambda el : int(el>0.5) ,regr ))
         seg_hat=torch.sigmoid(seg_hat).cpu().detach()
