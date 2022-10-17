@@ -636,7 +636,7 @@ class Model(pl.LightningModule):
         # self.regressionMetric(regr.flatten().float(),torch.Tensor(numLesions).to(self.device).flatten().float())
         print(f"regr{regr} numLesions {numLesions} ")
         regr=torch.sigmoid(regr)
-        self.regressionMetric(regr.float(),torch.Tensor(numLesions).to(self.device).float())
+        self.regressionMetric(torch.round(regr.flatten().float()),torch.Tensor(numLesions).to(self.device).float())
         regr=regr.cpu().detach().numpy()
         # regr= list(map(lambda el : int(el>0.5) ,regr ))
         seg_hat=torch.sigmoid(seg_hat).cpu().detach()
