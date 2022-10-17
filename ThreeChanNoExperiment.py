@@ -322,7 +322,7 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
     optuna_prune=PyTorchLightningPruningCallback(trial, monitor="meanPiecaiMetr_score")     
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
         monitor='meanPiecaiMetr_score',
-        patience=20,
+        patience=30,
         mode="max",
         #divergence_threshold=(-0.1)
     )

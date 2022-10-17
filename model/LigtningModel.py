@@ -27,7 +27,7 @@ from monai.data import CacheDataset,Dataset,PersistentDataset, list_data_collate
 from monai.config import print_config
 from monai.apps import download_and_extract
 import time
-
+from torchmetrics import BinaryF1Score
 from datetime import datetime
 import os
 import tempfile
@@ -243,8 +243,8 @@ def save_heatmap(arr,dir,name,numLesions,cmapp='gray'):
 
 def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, postProcess,epoch,regr):
     regr_now = regr[i]
-    if(regr_now==0):
-        return np.zeros_like(y_hat_arr[i][1,:,:,:])        
+    # if(regr_now==0):
+    #     return np.zeros_like(y_hat_arr[i][1,:,:,:])        
     curr_studyId=studyId[i]
     print(f"extracting {curr_studyId}")
     extracted=np.array(extract_lesion_candidates(y_hat_arr[i][1,:,:,:].cpu().detach().numpy(),threshold='dynamic-fast')[0]) # dynamic-fast  dynamic
@@ -409,6 +409,7 @@ class Model(pl.LightningModule):
         self.netIndex=netIndex
         self.regr_chan_index=regr_chan_index
         self.trial=trial
+        self.regressionMetric=BinaryF1Score()
         os.makedirs(self.temp_val_dir,  exist_ok = True)             
         shutil.rmtree(self.temp_val_dir) 
         os.makedirs(self.temp_val_dir,  exist_ok = True)             
@@ -632,7 +633,7 @@ class Model(pl.LightningModule):
         # seg_hat, reg_hat = self.modelRegression(x)        
         seg_hat,regr = self.modelRegression(x)
         seg_hat = seg_hat.cpu().detach()
-
+        self.regressionMetric(regr,numLesions)
         regr=regr.cpu().detach().numpy()
         # regr= list(map(lambda el : int(el>0.5) ,regr ))
         seg_hat=torch.sigmoid(seg_hat).cpu().detach()
@@ -747,7 +748,8 @@ class Model(pl.LightningModule):
         # allmeanPiecaiMetr_auroc = np.array(([x['meanPiecaiMetr_auroc'].cpu().detach().numpy() for x in outputs])).flatten() 
         # allmeanPiecaiMetr_AP = np.array(([x['meanPiecaiMetr_AP'].cpu().detach().numpy() for x in outputs])).flatten() 
         # allmeanPiecaiMetr_score = np.array(([x['meanPiecaiMetr_score'].cpu().detach().numpy() for x in outputs])).flatten() 
-        
+        regressionMetric=self.regressionMetric.compute()
+        self.regressionMetric.reset()
     
         
         
@@ -755,17 +757,20 @@ class Model(pl.LightningModule):
             meanPiecaiMetr_auroc=np.nanmean(allmeanPiecaiMetr_auroc)
             meanPiecaiMetr_AP=np.nanmean(allmeanPiecaiMetr_AP)
             meanPiecaiMetr_score= np.nanmean(allmeanPiecaiMetr_score)
+            meanPiecaiMetr_score_my= (meanPiecaiMetr_auroc+meanPiecaiMetr_AP+regressionMetric)/3 #np.nanmean(allmeanPiecaiMetr_score)
 
             self.log('dice', np.nanmean(allDices))
 
-            print(f"meanDice {np.nanmean(allDices)} meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
+            print(f"meanPiecaiMetr_score_my {meanPiecaiMetr_score_my} meanDice {np.nanmean(allDices)} regr_F1 {regressionMetric}  meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
             self.log('val_mean_auroc', meanPiecaiMetr_auroc)
             self.log('val_mean_AP', meanPiecaiMetr_AP)
             self.log('meanPiecaiMetr_score', meanPiecaiMetr_score)
+            self.log('regr_F1', regressionMetric)
+            self.log('score_my', meanPiecaiMetr_score_my)
 
             self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
             self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
-            self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
+            self.picaiLossArr_score_final.append(meanPiecaiMetr_score_my)
             self.dice_final.append(np.nanmean(allDices))
 
  
