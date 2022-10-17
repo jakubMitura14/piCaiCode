@@ -318,14 +318,14 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
     optuna_prune=PyTorchLightningPruningCallback(trial, monitor="dice")     
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
         monitor='meanPiecaiMetr_score',
-        patience=15,
+        patience=20,
         mode="max",
         #divergence_threshold=(-0.1)
     )
 
     trainer = pl.Trainer(
         #accelerator="cpu", #TODO(remove)
-        max_epochs=8000,
+        max_epochs=12000,
         #gpus=1,
         #precision=experiment.get_parameter("precision"), 
         callbacks=[ checkpoint_callback,stochasticAveraging,early_stopping ], #optuna_prune
