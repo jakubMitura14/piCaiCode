@@ -203,7 +203,7 @@ class UNetToRegresion(nn.Module):
             #nn.BatchNorm3d(100),
             nn.ReLU(inplace=True),
             nn.Linear(in_features=100, out_features=1)
-            ,torch.nn.Sigmoid
+            ,torch.nn.Sigmoid()
         )
     def forward(self, x):
         segmMap=self.segmModel(x)
