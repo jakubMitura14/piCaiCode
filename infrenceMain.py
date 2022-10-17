@@ -316,18 +316,18 @@ class csPCaAlgorithm(SegmentationAlgorithm):
             "/input/images/transverse-hbv-prostate-mri",
         ]
         self.scan_paths = []
-        self.cspca_detection_map_path = Path("/output/images/cspca-detection-map/cspca_detection_map.mha")
-        self.case_confidence_path = Path("/output/cspca-case-level-likelihood.json")
+        # self.cspca_detection_map_path = Path("/output/images/cspca-detection-map/cspca_detection_map.mha")
+        # self.case_confidence_path = Path("/output/cspca-case-level-likelihood.json")
 
-        # input / output paths for nnUNet
-        self.nnunet_inp_dir = Path("/opt/algorithm/nnunet/input")
-        self.nnunet_out_dir = Path("/opt/algorithm/nnunet/output")
-        self.nnunet_results = Path("/opt/algorithm/results")
+        # # input / output paths for nnUNet
+        # self.nnunet_inp_dir = Path("/opt/algorithm/nnunet/input")
+        # self.nnunet_out_dir = Path("/opt/algorithm/nnunet/output")
+        # self.nnunet_results = Path("/opt/algorithm/results")
 
-        # ensure required folders exist
-        self.nnunet_inp_dir.mkdir(exist_ok=True, parents=True)
-        self.nnunet_out_dir.mkdir(exist_ok=True, parents=True)
-        self.cspca_detection_map_path.parent.mkdir(exist_ok=True, parents=True)
+        # # ensure required folders exist
+        # self.nnunet_inp_dir.mkdir(exist_ok=True, parents=True)
+        # self.nnunet_out_dir.mkdir(exist_ok=True, parents=True)
+        # self.cspca_detection_map_path.parent.mkdir(exist_ok=True, parents=True)
 
         # input validation for multiple inputs
         scan_glob_format = "*.mha"

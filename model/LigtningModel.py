@@ -683,7 +683,7 @@ class Model(pl.LightningModule):
         # except:
         #     pass  
 
-        if(len(extracteds)>0):
+        if(len(extracteds)>1):
             directory= self.temp_val_dir
             epoch=self.current_epoch
             list(map(partial(log_images
