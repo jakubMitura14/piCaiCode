@@ -289,7 +289,7 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
         ,trainSizePercent=percentSplit,# 
         df= df,
         batch_size=4,#
-        num_workers=os.cpu_count(),#os.cpu_count(),
+        num_workers=(os.cpu_count()-1),#os.cpu_count(),
         drop_last=False,#True,
         #we need to use diffrent cache folders depending on weather we are dividing data or not
         chan3_col_name =chan3_col_name,
