@@ -261,7 +261,7 @@ def objective(trial: optuna.trial.Trial) -> float:
     trainer.fit(model)
     print('Training duration:', datetime.now() - start)
     shutil.rmtree(persistent_cache) 
-    return np.max(dice_final)
+    return np.max(picaiLossArr_score_final)
 
 
 study = optuna.create_study(
