@@ -210,6 +210,8 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit
     dropout= trial.suggest_float("dropout", 0.0,0.6)
     # data.prepare_data()
     # data.setup()
+    dummyLabelPath,img_size=dummyDict[spacing_keyword]
+
     netIndex,net= getParam(trial,options,"models") #options["models"][0]#   
     net=net(dropout,img_size,in_channels,out_channels)
 
@@ -232,7 +234,6 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit
     t2wColName="t2w"+spacing_keyword+"cropped"
     adcColName="adc"+spacing_keyword+"cropped"
     hbvColName="hbv"+spacing_keyword+"cropped"
-    dummyLabelPath,img_size=dummyDict[spacing_keyword]
     chan3_col_name="joined"+spacing_keyword+"cropped"
     label_name_val=label_name
     chan3_col_name_val=chan3_col_name
