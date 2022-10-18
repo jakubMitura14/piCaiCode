@@ -644,10 +644,11 @@ class Model(pl.LightningModule):
         print(f"kkkkkk {sklearn.metrics.confusion_matrix(numL,regrr).ravel()}")
         conff=sklearn.metrics.confusion_matrix(numL,regrr).ravel()
         
-        f1_scoree=int(np.array_equal( numL,regrr )  )
-        if(len(conff)>0):
+        f1_scoree=float(numL[1])
+        if(not np.array_equal( numL,regrr )):
             tn, fp, fn, tp = conff 
             f1_scoree=(tp+tn)/(tp+fp+fn+tn)
+
 
         
         #f1_scoree = sklearn.metrics.balanced_accuracy_score(numL,regrr)
