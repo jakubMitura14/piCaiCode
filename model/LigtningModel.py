@@ -645,9 +645,8 @@ class Model(pl.LightningModule):
         print(f"regr{regrr} numL {numL} ")
 
         # f1_scoree = sklearn.metrics.accuracy_score(numL,regrr)
-        print(f"kkkkkk {sklearn.metrics.confusion_matrix(numL,regrr).ravel()}")
         conff=sklearn.metrics.confusion_matrix(numL,regrr).ravel()
-        
+       
         f1_scoree=0.0
         # f1_scoree=float(np.array_equal( numL,regrr )) #exactly the same
         # alt= (1-float(np.array_equal( numL,np.logical_not(numL))))
