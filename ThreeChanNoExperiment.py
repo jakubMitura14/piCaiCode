@@ -215,13 +215,13 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit
     dummyLabelPath,img_size=dummyDict[spacing_keyword]
 
     netIndex,net= getParam(trial,options,"models") #options["models"][0]#   
-    net=net(dropout,img_size,in_channels,out_channels)
 
     isVnet=(netIndex==0)
     in_channels=3
     out_channels=2
     if(isVnet):
         in_channels=4
+    net=net(dropout,img_size,in_channels,out_channels)
 
     #basically id of trial 
     
