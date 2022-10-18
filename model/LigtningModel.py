@@ -530,8 +530,8 @@ class Model(pl.LightningModule):
 
         # self.train_ds_all =  LMDBDataset(data=train_set_all, transform=train_transforms,cache_dir=self.persistent_cache)
         onlyPosTreshold=24
-        onlyNegativeThreshold=10
-        onlyNegativeThresholdB=400
+        onlyNegativeThreshold=12
+        onlyNegativeThresholdB=800
         # self.val_ds=  LMDBDataset(data=onlyPositiveSubjects[0:onlyPosTreshold]+onlyNegative[0:onlyNegativeThreshold], transform=val_transforms ,cache_dir=self.persistent_cache)
         # self.train_ds_labels = LMDBDataset(data=onlyPositiveSubjects[onlyPosTreshold:]+onlyNegative[onlyNegativeThreshold:], transform=train_transforms,cache_dir=self.persistent_cache )
         # self.train_ds_no_labels = LMDBDataset(data=noLabels, transform=train_transforms_noLabel,cache_dir=self.persistent_cache)

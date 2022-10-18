@@ -210,6 +210,8 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit
     dropout= trial.suggest_float("dropout", 0.0,0.6)
     # data.prepare_data()
     # data.setup()
+    spacing_keyword=options["spacing_keyword"][0]
+    spacIndex=0
     dummyLabelPath,img_size=dummyDict[spacing_keyword]
 
     netIndex,net= getParam(trial,options,"models") #options["models"][0]#   
@@ -224,8 +226,7 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit
     #basically id of trial 
     
     # spacIndex,spacing_keyword=getParam(trial,options,"spacing_keyword")
-    spacing_keyword=options["spacing_keyword"][0]
-    spacIndex=0
+
     # spacIndex,spacing_keyword=getParam(trial,options,"spacing_keyword")
 
     label_name=f"label_{spacing_keyword}fi"
