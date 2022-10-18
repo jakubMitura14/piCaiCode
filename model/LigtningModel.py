@@ -644,8 +644,14 @@ class Model(pl.LightningModule):
         print(f"kkkkkk {sklearn.metrics.confusion_matrix(numL,regrr).ravel()}")
         conff=sklearn.metrics.confusion_matrix(numL,regrr).ravel()
         
-        f1_scoree=float(numL[1])
-        if(not np.array_equal( numL,regrr )):
+        f1_scoree=0.0
+        # f1_scoree=float(np.array_equal( numL,regrr )) #exactly the same
+        # alt= (1-float(np.array_equal( numL,np.logical_not(numL))))
+        if(np.array_equal( numL,regrr )):
+            f1_scoree=1.0
+        elif(np.array_equal( numL,np.logical_not(numL))):
+            f1_scoree=0.0
+        else:
             tn, fp, fn, tp = conff 
             f1_scoree=(tp+tn)/(tp+fp+fn+tn)
 
