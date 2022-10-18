@@ -191,6 +191,7 @@ class UNetToRegresion(nn.Module):
         ,segmModel
     ) -> None:
         super().__init__()
+        print(" in UNetToRegresion {in_channels}")
         self.segmModel=segmModel
         self.model = nn.Sequential(
             ConvBnReLU3d(in_channels=in_channels, out_channels=regression_channels[0], kernel_size=3, stride=2,qconfig = torch.quantization.get_default_qconfig('fbgemm')),

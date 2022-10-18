@@ -140,8 +140,9 @@ def decide_if_whole_image_train(is_whole_to_train, chan3Name,labelName):
 
 def concatInOne(isVnet):
     if(isVnet):
-        return ["t2w","adc","hbv" ]
-    return ["t2w","adc","hbv" ,"adc"]    
+        return ["t2w","adc","hbv" ,"adc"]  
+    return ["t2w","adc","hbv" ]
+      
 
 
 #https://github.com/DIAGNijmegen/picai_prep/blob/19a0ef2d095471648a60e45e30b218b7a81b2641/src/picai_prep/preprocessing.py
