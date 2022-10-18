@@ -223,7 +223,7 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit
     batch_size=16
     if(isVnet):
         in_channels=4
-        batch_size=6
+        batch_size=4
     net=net(dropout,img_size,in_channels,out_channels)
 
     #basically id of trial 
