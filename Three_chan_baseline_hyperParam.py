@@ -191,7 +191,7 @@ def getOptions():
     #"models":[getUnetA,getUnetB,getUnetC],# ,getSegResNet,getSwinUNETR,getUnetA,getUnetB,getVNet,getUnetC
     "models":[getUnetC],# ,getSegResNet,getSwinUNETR,getUnetA,getUnetB,getVNet,getUnetC
     #getUnetA,getUnetB,getVNet
-    "regression_channels":[[10,16,32],[32,64,128]], #,
+    "regression_channels":[[32,64,128]], #,[10,16,32],
     #"regression_channels":[[32,64,128]], #,
     "optimizer_class": [getOptNAdam] ,# ,torch.optim.LBFGS optim.AggMo,   look in https://pytorch-optimizer.readthedocs.io/en/latest/api.html
     # "centerCropSize":[(256, 256,32)],

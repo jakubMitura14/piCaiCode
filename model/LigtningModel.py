@@ -642,7 +642,7 @@ class Model(pl.LightningModule):
 
         # f1_scoree = sklearn.metrics.accuracy_score(numL,regrr)
         tn, fp, fn, tp =  sklearn.metrics.confusion_matrix(numL,regrr).ravel()
-        f1_scoree=(tp+fp)/(tp+fp+fn+tn)
+        f1_scoree=(tp+tn)/(tp+fp+fn+tn)
         #f1_scoree = sklearn.metrics.balanced_accuracy_score(numL,regrr)
         print(f"loc f1_score {f1_scoree} tn {tn}  fp {fp} fn {fn} tp {tp}")
         self.regressionMetric(torch.round(regr.flatten().float()),torch.Tensor(numLesions).to(self.device).float())
@@ -754,7 +754,7 @@ class Model(pl.LightningModule):
         allmeanPiecaiMetr_auroc = np.array(([x['meanPiecaiMetr_auroc'] for x in outputs])).flatten() 
         allmeanPiecaiMetr_AP = np.array(([x['meanPiecaiMetr_AP'] for x in outputs])).flatten() 
         allmeanPiecaiMetr_score = np.array(([x['meanPiecaiMetr_score'] for x in outputs])).flatten() 
-        allf1_scoree = np.array(([x['f1_scoree'] for x in outputs])).flatten() 
+        allaccuracy = np.array(([x['f1_scoree'] for x in outputs])).flatten() 
         
     
         # allDices = np.array(([x['dices'].cpu().detach().numpy() for x in outputs])).flatten() 
@@ -770,16 +770,16 @@ class Model(pl.LightningModule):
             meanPiecaiMetr_auroc=np.nanmean(allmeanPiecaiMetr_auroc)
             meanPiecaiMetr_AP=np.nanmean(allmeanPiecaiMetr_AP)
             meanPiecaiMetr_score= np.nanmean(allmeanPiecaiMetr_score)
-            f1_scoree= np.nanmean(allf1_scoree)
+            accuracy= np.nanmean(allaccuracy)
             meanPiecaiMetr_score_my= (meanPiecaiMetr_auroc+meanPiecaiMetr_AP+regressionMetric)/3 #np.nanmean(allmeanPiecaiMetr_score)
 
             self.log('dice', np.nanmean(allDices))
 
-            print(f"f1_scoree_scikit {f1_scoree} meanPiecaiMetr_score_my {meanPiecaiMetr_score_my} meanDice {np.nanmean(allDices)} regr_F1 {regressionMetric}  meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
+            print(f"accuracy {accuracy} meanPiecaiMetr_score_my {meanPiecaiMetr_score_my} meanDice {np.nanmean(allDices)} regr_F1 {regressionMetric}  meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
             self.log('val_mean_auroc', meanPiecaiMetr_auroc)
             self.log('val_mean_AP', meanPiecaiMetr_AP)
             self.log('meanPiecaiMetr_score', meanPiecaiMetr_score)
-            self.log('f1_scoree_scikit', f1_scoree)
+            self.log('accuracy', accuracy)
             
             self.log('score_my', meanPiecaiMetr_score_my)
 
