@@ -220,7 +220,7 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit
 
     in_channels=3
     out_channels=2
-    batch_size=16
+    batch_size=12
     if(isVnet):
         in_channels=4
         batch_size=4
