@@ -189,7 +189,7 @@ def getOptions():
 
     # "models":[getUnetA,getUnetB,getVNet,getSegResNet],
     #"models":[getUnetA,getUnetB,getUnetC],# ,getSegResNet,getSwinUNETR,getUnetA,getUnetB,getVNet,getUnetC
-    "models":[getUnetC],# ,getSegResNet,getSwinUNETR,getUnetA,getUnetB,getVNet,getUnetC
+    "models":[getSegResNet],# ,getSegResNet,getSwinUNETR,getUnetA,getUnetB,getVNet,getUnetC
     #getUnetA,getUnetB,getVNet
     "regression_channels":[[32,64,128]], #,[10,16,32],
     #"regression_channels":[[32,64,128]], #,
