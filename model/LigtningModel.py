@@ -183,7 +183,7 @@ import random
 # import modelUtlils
 import matplotlib.pyplot as plt
 from sklearn.metrics import f1_score  
-
+import sklearn
 class UNetToRegresion(nn.Module):
     def __init__(self,
         in_channels,
@@ -636,8 +636,11 @@ class Model(pl.LightningModule):
         regr=torch.sigmoid(regr)
         print(f"regr sigm  {regr}")
         # self.regressionMetric(regr.flatten().float(),torch.Tensor(numLesions).to(self.device).flatten().float())
-        print(f"regr{torch.round(regr.flatten().float())} numLesions {numLesions} ")
-        f1_scoree = f1_score(torch.round(regr.flatten()).bool().cpu().detach().numpy(),torch.Tensor(numLesions).cpu().bool().detach().numpy())
+        regrr=torch.round(regr.flatten()).bool().cpu().detach().numpy()
+        numL=torch.Tensor(numLesions).cpu().bool().detach().numpy()
+        print(f"regr{regrr} numL {numL} ")
+
+        f1_scoree = sklearn.metrics.roc_auc_score(regrr,numL)
         print(f"loc f1_score {f1_scoree}")
         self.regressionMetric(torch.round(regr.flatten().float()),torch.Tensor(numLesions).to(self.device).float())
         regr=regr.cpu().detach().numpy()
