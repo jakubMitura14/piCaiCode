@@ -788,7 +788,7 @@ class Model(pl.LightningModule):
             meanPiecaiMetr_AP=np.nanmean(allmeanPiecaiMetr_AP)
             meanPiecaiMetr_score= np.nanmean(allmeanPiecaiMetr_score)
             accuracy= np.nanmean(allaccuracy)
-            meanPiecaiMetr_score_my= (meanPiecaiMetr_auroc+meanPiecaiMetr_AP+regressionMetric)/3 #np.nanmean(allmeanPiecaiMetr_score)
+            meanPiecaiMetr_score_my= (meanPiecaiMetr_auroc+meanPiecaiMetr_AP+accuracy)/3 #np.nanmean(allmeanPiecaiMetr_score)
 
             self.log('dice', np.nanmean(allDices))
 
