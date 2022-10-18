@@ -637,7 +637,7 @@ class Model(pl.LightningModule):
         print(f"regr sigm  {regr}")
         # self.regressionMetric(regr.flatten().float(),torch.Tensor(numLesions).to(self.device).flatten().float())
         print(f"regr{torch.round(regr.flatten().float())} numLesions {numLesions} ")
-        f1_score = f1_score(regr.flatten().float()).cpu(),torch.Tensor(numLesions).cpu().float())
+        f1_score = f1_score(regr.flatten().float().cpu(),torch.Tensor(numLesions).cpu().float())
         print(f"loc f1_score {f1_score}")
         self.regressionMetric(torch.round(regr.flatten().float()),torch.Tensor(numLesions).to(self.device).float())
         regr=regr.cpu().detach().numpy()
