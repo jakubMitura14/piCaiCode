@@ -221,7 +221,11 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit
 
     #basically id of trial 
     
-    spacIndex,spacing_keyword=getParam(trial,options,"spacing_keyword")
+    # spacIndex,spacing_keyword=getParam(trial,options,"spacing_keyword")
+    spacing_keyword=options["spacing_keyword"][0]
+    spacIndex=0
+    # spacIndex,spacing_keyword=getParam(trial,options,"spacing_keyword")
+
     label_name=f"label_{spacing_keyword}fi"
     
     
