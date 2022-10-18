@@ -215,8 +215,9 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit
     dummyLabelPath,img_size=dummyDict[spacing_keyword]
 
     netIndex,net= getParam(trial,options,"models") #options["models"][0]#   
-
     isVnet=(netIndex==0)
+    print(f"aaaaa {netIndex} {isVnet}")
+
     in_channels=3
     out_channels=2
     if(isVnet):
