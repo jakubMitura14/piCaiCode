@@ -217,8 +217,8 @@ def getDummy(spac):
     return(dummyLabelPath,img_size)
 
 aa=list(map(getDummy  ,spacings  ))
-dummyDict={"_half_spac_c":aa[0], "_one_spac_c":aa[1], "_one_and_half_spac_c":aa[2], "_two_spac_c":aa[3]}
-#dummyDict={"_half_spac_c":aa[0]}
+# dummyDict={"_half_spac_c":aa[0], "_one_spac_c":aa[1], "_one_and_half_spac_c":aa[2], "_two_spac_c":aa[3]}
+dummyDict={"_one_spac_c":aa[0]}
 
 
 #df=df.loc[df['num_lesions_to_retain']>-1]#correct gleason ...
