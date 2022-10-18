@@ -189,7 +189,7 @@ def getOptions():
 
     # "models":[getUnetA,getUnetB,getVNet,getSegResNet],
     #"models":[getUnetA,getUnetB,getUnetC],# ,getSegResNet,getSwinUNETR,getUnetA,getUnetB,getVNet,getUnetC
-    "models":[getSegResNetVAE],# ,getSegResNet,getSwinUNETR,getUnetA,getUnetB,getVNet,getUnetC
+    "models":[getVNet],# ,getSegResNet,getSwinUNETR,getUnetA,getUnetB,getUnetC
     #getUnetA,getUnetB,getSegResNet,   getVNet
     "regression_channels":[[32,64,128]], #,[10,16,32],
     #"regression_channels":[[32,64,128]], #,
@@ -229,8 +229,7 @@ physical_size =(81.0, 160.0, 192.0)#taken from picai used to crop image so only 
 experiment_name="pic52"
 percentSplit=0.85
 
-in_channels=3
-out_channels=2
+
 
 
 def objective(trial: optuna.trial.Trial) -> float:
@@ -246,8 +245,8 @@ def objective(trial: optuna.trial.Trial) -> float:
     
     checkPointPath=f"/home/sliceruser/locTemp/checkPoints/{experiment_name}/{expId}"
     #get the objects needed for run
-    trainer, model=ThreeChanNoExperiment.getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channels
-    ,out_channels,picaiLossArr_auroc_final,picaiLossArr_AP_final,picaiLossArr_score_final, dice_final
+    trainer, model=ThreeChanNoExperiment.getModel(trial,df,experiment_name,dummyDict,options,percentSplit,
+    picaiLossArr_auroc_final,picaiLossArr_AP_final,picaiLossArr_score_final, dice_final
     ,persistent_cache,expId,checkPointPath )
      #check weather we already have some checkpoint to use
     if os.path.exists(checkPointPath):

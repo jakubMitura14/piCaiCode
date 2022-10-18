@@ -332,7 +332,7 @@ class Model(pl.LightningModule):
     ,RandomSpike_prob
     ,RandomBiasField_prob
     ,persistent_cache
-    ,spacing_keyword,netIndex, regr_chan_index
+    ,spacing_keyword,netIndex, regr_chan_index,isVnet
     ):
 
 
@@ -409,6 +409,7 @@ class Model(pl.LightningModule):
         self.regr_chan_index=regr_chan_index
         self.trial=trial
         self.regressionMetric=BinaryF1Score()
+        self.isVnet=isVnet
         os.makedirs(self.temp_val_dir,  exist_ok = True)             
         shutil.rmtree(self.temp_val_dir) 
         os.makedirs(self.temp_val_dir,  exist_ok = True)             
@@ -496,7 +497,8 @@ class Model(pl.LightningModule):
             ,self.RandomMotion_prob
             ,self.RandomGhosting_prob
             ,self.RandomSpike_prob
-            ,self.RandomBiasField_prob          
+            ,self.RandomBiasField_prob
+            ,self.isVnet           
              )
         train_transforms_noLabel=transformsForMain.get_train_transforms_noLabel(
             self.RandAdjustContrastd_prob
@@ -509,11 +511,12 @@ class Model(pl.LightningModule):
             ,self.RandomMotion_prob
             ,self.RandomGhosting_prob
             ,self.RandomSpike_prob
-            ,self.RandomBiasField_prob          
+            ,self.RandomBiasField_prob
+            ,self.isVnet          
              )
 
 
-        val_transforms= transformsForMain.get_val_transforms()
+        val_transforms= transformsForMain.get_val_transforms(self.isVnet )
 
         # self.val_ds=     Dataset(data=onlyPositiveSubjects[0:25]+onlyNegative[0:10], transform=val_transforms)
         # self.train_ds_labels = Dataset(data=onlyPositiveSubjects[25:]+onlyNegative[10:], transform=train_transforms)

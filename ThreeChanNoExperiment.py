@@ -203,9 +203,21 @@ def getParam(trial,options,key):
 
 
 
-def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channels
-    ,out_channels,picaiLossArr_auroc_final,picaiLossArr_AP_final,picaiLossArr_score_final, dice_final
+def getModel(trial,df,experiment_name,dummyDict,options,percentSplit
+,picaiLossArr_auroc_final,picaiLossArr_AP_final,picaiLossArr_score_final, dice_final
     ,persistent_cache,expId,checkPointPath ):        
+
+    dropout= trial.suggest_float("dropout", 0.0,0.6)
+    # data.prepare_data()
+    # data.setup()
+    netIndex,net= getParam(trial,options,"models") #options["models"][0]#   
+    net=net(dropout,img_size,in_channels,out_channels)
+
+    isVnet=(netIndex==0)
+    in_channels=3
+    out_channels=2
+    if(isVnet):
+        in_channels=4
 
     #basically id of trial 
     
@@ -263,11 +275,6 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
     #     ,persistent_cache=persistent_cache
     # )
 
-    dropout= trial.suggest_float("dropout", 0.0,0.6)
-    # data.prepare_data()
-    # data.setup()
-    netIndex,net= getParam(trial,options,"models") #options["models"][0]#   
-    net=net(dropout,img_size,in_channels,out_channels)
 
     optimizer_class= torch.optim.NAdam
     regr_chan_index,regression_channels=getParam(trial,options,"regression_channels")
@@ -315,6 +322,7 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
         ,spacing_keyword=spacing_keyword
         ,netIndex=netIndex
         ,regr_chan_index=regr_chan_index
+        ,isVnet=isVnet
     )
 
     toMonitor="score_my"

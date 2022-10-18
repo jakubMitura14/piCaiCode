@@ -138,6 +138,11 @@ def decide_if_whole_image_train(is_whole_to_train, chan3Name,labelName):
              ]
     return []         
 
+def concatInOne(isVnet):
+    if(isVnet):
+        return ["t2w","adc","hbv" ]
+    return ["t2w","adc","hbv" ,"adc"]    
+
 
 #https://github.com/DIAGNijmegen/picai_prep/blob/19a0ef2d095471648a60e45e30b218b7a81b2641/src/picai_prep/preprocessing.py
 
@@ -154,6 +159,7 @@ def get_train_transforms(
             ,RandomGhosting_prob
             ,RandomSpike_prob
             ,RandomBiasField_prob  
+            ,isVnet
      ):
 
 
@@ -168,7 +174,7 @@ def get_train_transforms(
 
             AsDiscreted(keys=["label"],to_onehot=2),
             #ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label"], spatial_size=spatial_size,),
-            ConcatItemsd(keys=["t2w","adc","hbv" ],name="chan3_col_name"),
+            ConcatItemsd(keys=concatInOne(isVnet),name="chan3_col_name"),
 
             #torchio.transforms.OneHot(include=["label"] ), #num_classes=3,
             #AsDiscreted(keys=["label"],to_onehot=2,threshold=0.5),
@@ -215,6 +221,7 @@ def get_train_transforms_noLabel(
             ,RandomGhosting_prob
             ,RandomSpike_prob
             ,RandomBiasField_prob  
+            ,isVnet
      ):
 
 
@@ -224,7 +231,8 @@ def get_train_transforms_noLabel(
             LoadImaged(keys=["t2w","hbv","adc" ],reader="ITKReader"),
             EnsureTyped(keys=["t2w","hbv","adc" ]),
             EnsureChannelFirstd(keys=["t2w","hbv","adc" ]),
-            ConcatItemsd(keys=["t2w","adc","hbv" ],name="chan3_col_name"),
+            # ConcatItemsd(keys=["t2w","adc","hbv" ],name="chan3_col_name"),
+            ConcatItemsd(keys=concatInOne(isVnet),name="chan3_col_name"),
             SelectItemsd(keys=["chan3_col_name","study_id","num_lesions_to_retain","isAnythingInAnnotated"]),           
             RandAdjustContrastd(keys=["chan3_col_name"], prob=RandAdjustContrastd_prob),
             #RandGaussianSmoothd(keys=["chan3_col_name"], prob=RandGaussianSmoothd_prob),
@@ -250,7 +258,7 @@ def get_train_transforms_noLabel(
     return train_transforms
 
 
-def get_val_transforms():
+def get_val_transforms(isVnet):
 
     val_transforms = Compose(
         [
@@ -261,7 +269,8 @@ def get_val_transforms():
             standardizeLabels(keys=["label_name_val"]),
             AsDiscreted(keys=["label_name_val"], to_onehot=2),
             #ResizeWithPadOrCropd(keys=["t2w","hbv","adc" ,"label_name_val"], spatial_size=spatial_size,),
-            ConcatItemsd(["t2w","adc","hbv"], "chan3_col_name_val"),
+            ConcatItemsd(concatInOne(isVnet), "chan3_col_name_val"),
+            # ConcatItemsd(["t2w","adc","hbv"], "chan3_col_name_val"),
 
             #torchio.transforms.OneHot(include=["label"] ),#num_classes=3
             #AsDiscreted(keys=["label"],to_onehot=2,threshold=0.5),
