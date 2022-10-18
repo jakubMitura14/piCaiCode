@@ -640,7 +640,8 @@ class Model(pl.LightningModule):
         numL=torch.Tensor(numLesions).cpu().bool().detach().numpy()
         print(f"regr{regrr} numL {numL} ")
 
-        f1_scoree = sklearn.metrics.fbeta_score(regrr,numL,beta=0.5)
+        # f1_scoree = sklearn.metrics.cohen_kappa_score(numL,regrr)
+        f1_scoree = sklearn.metrics.balanced_accuracy_score(numL,regrr)
         print(f"loc f1_score {f1_scoree}")
         self.regressionMetric(torch.round(regr.flatten().float()),torch.Tensor(numLesions).to(self.device).float())
         regr=regr.cpu().detach().numpy()
