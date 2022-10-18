@@ -652,7 +652,7 @@ class Model(pl.LightningModule):
 
         
         #f1_scoree = sklearn.metrics.balanced_accuracy_score(numL,regrr)
-        print(f"loc f1_score {f1_scoree} tn {tn}  fp {fp} fn {fn} tp {tp}")
+        print(f"loc f1_score {f1_scoree}")
         self.regressionMetric(torch.round(regr.flatten().float()),torch.Tensor(numLesions).to(self.device).float())
         regr=regr.cpu().detach().numpy()
         # regr= list(map(lambda el : int(el>0.5) ,regr ))
