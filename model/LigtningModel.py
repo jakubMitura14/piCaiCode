@@ -182,6 +182,7 @@ import random
 
 # import modelUtlils
 import matplotlib.pyplot as plt
+from sklearn.metrics import f1_score  
 
 class UNetToRegresion(nn.Module):
     def __init__(self,
@@ -633,9 +634,11 @@ class Model(pl.LightningModule):
         print(f"regr raw {regr}")
         seg_hat = seg_hat.cpu().detach()
         regr=torch.sigmoid(regr)
-
+        print(f"regr sigm  {regr}")
         # self.regressionMetric(regr.flatten().float(),torch.Tensor(numLesions).to(self.device).flatten().float())
         print(f"regr{torch.round(regr.flatten().float())} numLesions {numLesions} ")
+        f1_score = f1_score(regr.flatten().float()).cpu(),torch.Tensor(numLesions).cpu().float())
+        print(f"loc f1_score {f1_score}")
         self.regressionMetric(torch.round(regr.flatten().float()),torch.Tensor(numLesions).to(self.device).float())
         regr=regr.cpu().detach().numpy()
         # regr= list(map(lambda el : int(el>0.5) ,regr ))
@@ -730,10 +733,10 @@ class Model(pl.LightningModule):
             # gold = list(map(lambda tupl: tupl[2] ,processedCases ))
 
             return {'dices': diceLoc, 'meanPiecaiMetr_auroc':meanPiecaiMetr_auroc
-                    ,'meanPiecaiMetr_AP' :meanPiecaiMetr_AP,'meanPiecaiMetr_score': meanPiecaiMetr_score}
+                    ,'meanPiecaiMetr_AP' :meanPiecaiMetr_AP,'meanPiecaiMetr_score': meanPiecaiMetr_score, 'f1_score':f1_score}
 
         return {'dices': 0.0, 'meanPiecaiMetr_auroc':0.0
-                ,'meanPiecaiMetr_AP' :0.0,'meanPiecaiMetr_score': 0.0}
+                ,'meanPiecaiMetr_AP' :0.0,'meanPiecaiMetr_score': 0.0, 'f1_score':f1_score}
 
 
 
@@ -745,6 +748,7 @@ class Model(pl.LightningModule):
         allmeanPiecaiMetr_auroc = np.array(([x['meanPiecaiMetr_auroc'] for x in outputs])).flatten() 
         allmeanPiecaiMetr_AP = np.array(([x['meanPiecaiMetr_AP'] for x in outputs])).flatten() 
         allmeanPiecaiMetr_score = np.array(([x['meanPiecaiMetr_score'] for x in outputs])).flatten() 
+        allf1_score = np.array(([x['f1_score'] for x in outputs])).flatten() 
         
     
         # allDices = np.array(([x['dices'].cpu().detach().numpy() for x in outputs])).flatten() 
@@ -760,14 +764,16 @@ class Model(pl.LightningModule):
             meanPiecaiMetr_auroc=np.nanmean(allmeanPiecaiMetr_auroc)
             meanPiecaiMetr_AP=np.nanmean(allmeanPiecaiMetr_AP)
             meanPiecaiMetr_score= np.nanmean(allmeanPiecaiMetr_score)
+            f1_score= np.nanmean(allf1_score)
             meanPiecaiMetr_score_my= (meanPiecaiMetr_auroc+meanPiecaiMetr_AP+regressionMetric)/3 #np.nanmean(allmeanPiecaiMetr_score)
 
             self.log('dice', np.nanmean(allDices))
 
-            print(f"meanPiecaiMetr_score_my {meanPiecaiMetr_score_my} meanDice {np.nanmean(allDices)} regr_F1 {regressionMetric}  meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
+            print(f"f1_score_scikit {f1_score} meanPiecaiMetr_score_my {meanPiecaiMetr_score_my} meanDice {np.nanmean(allDices)} regr_F1 {regressionMetric}  meanPiecaiMetr_auroc {meanPiecaiMetr_auroc} meanPiecaiMetr_AP {meanPiecaiMetr_AP}  meanPiecaiMetr_score {meanPiecaiMetr_score} "  )
             self.log('val_mean_auroc', meanPiecaiMetr_auroc)
             self.log('val_mean_AP', meanPiecaiMetr_AP)
             self.log('meanPiecaiMetr_score', meanPiecaiMetr_score)
+            self.log('f1_score_scikit', f1_score)
             
             self.log('score_my', meanPiecaiMetr_score_my)
 
