@@ -641,8 +641,9 @@ class Model(pl.LightningModule):
         print(f"regr{regrr} numL {numL} ")
 
         f1_scoree = sklearn.metrics.cohen_kappa_score(numL,regrr)
+        tn, fp, fn, tp =  sklearn.metrics.confusion_matrix(numL,regrr)
         #f1_scoree = sklearn.metrics.balanced_accuracy_score(numL,regrr)
-        print(f"loc f1_score {f1_scoree}")
+        print(f"loc f1_score {f1_scoree} tn {tn}  fp {fp} fn {fn} tp {tp}")
         self.regressionMetric(torch.round(regr.flatten().float()),torch.Tensor(numLesions).to(self.device).float())
         regr=regr.cpu().detach().numpy()
         # regr= list(map(lambda el : int(el>0.5) ,regr ))
