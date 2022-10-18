@@ -288,8 +288,8 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
         ,dice_final=dice_final
         ,trainSizePercent=percentSplit,# 
         df= df,
-        batch_size=4,#
-        num_workers=(os.cpu_count()-2),#os.cpu_count(),
+        batch_size=12,#
+        num_workers=(os.cpu_count()),#os.cpu_count(),
         drop_last=False,#True,
         #we need to use diffrent cache folders depending on weather we are dividing data or not
         chan3_col_name =chan3_col_name,
@@ -340,7 +340,7 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit, in_channel
         default_root_dir= "/home/sliceruser/locTemp/lightning_logs",
         # auto_scale_batch_size="binsearch",
         auto_lr_find=True,
-        check_val_every_n_epoch=40,
+        check_val_every_n_epoch=4,
         accumulate_grad_batches= 1,
         gradient_clip_val=  0.9 ,#experiment.get_parameter("gradient_clip_val"),# 0.5,2.0
         log_every_n_steps=5
