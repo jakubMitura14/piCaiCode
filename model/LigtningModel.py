@@ -630,6 +630,7 @@ class Model(pl.LightningModule):
         #seg_hat, reg_hat = self.modelRegression(x)        
         # seg_hat, reg_hat = self.modelRegression(x)        
         seg_hat,regr = self.modelRegression(x)
+        print(f"regr raw {regr}")
         seg_hat = seg_hat.cpu().detach()
         regr=torch.sigmoid(regr)
 
