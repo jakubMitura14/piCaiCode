@@ -226,7 +226,7 @@ dummyDict={"_one_spac_c":aa[0]}
 
 physical_size =(81.0, 160.0, 192.0)#taken from picai used to crop image so only center will remain
 
-experiment_name="pic52"
+experiment_name="pic53"
 percentSplit=0.85
 
 
