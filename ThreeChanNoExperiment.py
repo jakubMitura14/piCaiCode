@@ -340,7 +340,7 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit
     optuna_prune=PyTorchLightningPruningCallback(trial, monitor=toMonitor)     
     early_stopping = pl.callbacks.early_stopping.EarlyStopping(
         monitor=toMonitor,
-        patience=30,
+        patience=10,
         mode="max",
         #divergence_threshold=(-0.1)
     )
@@ -357,7 +357,7 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit
         default_root_dir= "/home/sliceruser/locTemp/lightning_logs",
         # auto_scale_batch_size="binsearch",
         auto_lr_find=True,
-        check_val_every_n_epoch=4,
+        check_val_every_n_epoch=40,
         accumulate_grad_batches= 1,
         gradient_clip_val=  0.9 ,#experiment.get_parameter("gradient_clip_val"),# 0.5,2.0
         log_every_n_steps=5
