@@ -639,7 +639,7 @@ class Model(pl.LightningModule):
         print(f"regr{torch.round(regr.flatten().float())} numLesions {numLesions} ")
         f1_scoree = f1_score(regr.flatten().float().cpu(),torch.Tensor(numLesions).cpu().float())
         print(f"loc f1_score {f1_scoree}")
-        self.regressionMetric(torch.round(regr.flatten().float()),torch.Tensor(numLesions).to(self.device).float())
+        self.regressionMetric(torch.round(regr.flatten().bool()),torch.Tensor(numLesions).to(self.device).bool())
         regr=regr.cpu().detach().numpy()
         # regr= list(map(lambda el : int(el>0.5) ,regr ))
         seg_hat=torch.sigmoid(seg_hat).cpu().detach()
