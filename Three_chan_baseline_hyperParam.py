@@ -252,7 +252,8 @@ def objective(trial: optuna.trial.Trial) -> float:
     if os.path.exists(checkPointPath):
         dir = os.listdir(checkPointPath)
         if len(dir) > 0:
-            model = model.LigtningModel.Model.load_from_checkpoint(dir[0])
+            if('ckpt' in dir[0]):
+                model = model.LigtningModel.Model.load_from_checkpoint(dir[0])
 
     #getting training
     start = datetime.now()
