@@ -233,12 +233,12 @@ class UNetToEnsemble(nn.Module):
         ,train_transforms=train_transforms
             ,train_transforms_noLabel=train_transforms_noLabel,val_transforms=val_transforms), modelPaths))
         
-        
+    
+
     def forward(self, x):
-        stackedInput=torch.cat((x,
-            torch.cat(
-                list(map(lambda model: forwardLoadedModel(model,x),self.loadedModels)),0
-                )),0)
+        from_models =torch.cat( list(map(lambda model: forwardLoadedModel(model,x),self.loadedModels)),0)
+        print(f"from_models {from_models.size()}  x {x.size} ")
+        stackedInput=torch.cat((x,from_models),0)
 
         #print(f"segmMap  {segmMap}")
         return self.baseUnet(stackedInput)
