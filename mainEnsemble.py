@@ -166,9 +166,9 @@ def loadModel(checkPointPath,trials,options):
     regr_chan_index=trialProp["regression_channels"]
 
     LigtningModel.Model.load_from_checkpoint(checkPointPath
-        , net
+        , net=net
         , criterion=monai.losses.FocalLoss(include_background=False, to_onehot_y=False)
-        , learning_rate=1e-4
+        , learning_rate=1e-5
         , optimizer_class=torch.optim.NAdam
         ,picaiLossArr_auroc_final=picaiLossArr_auroc_final
         ,picaiLossArr_AP_final=picaiLossArr_AP_final
