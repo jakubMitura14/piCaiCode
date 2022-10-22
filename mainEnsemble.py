@@ -321,7 +321,14 @@ def getEnsemble(df,experiment_name,dummyDict,options,percentSplit
 
 
 
-
+def getDummy(spac):
+    label_name=f"label_{spac}" 
+    print(df[label_name])
+    imageRef_path=list(filter(lambda it: it!= " ", df[label_name].to_numpy()))[0]
+    dummyLabelPath=f"/home/sliceruser/data/dummyData/zeroLabel{spac}.nii.gz"
+    sizz=semisuperPreprosess.writeDummyLabels(dummyLabelPath,imageRef_path)
+    img_size = (sizz[2],sizz[1],sizz[0])
+    return(dummyLabelPath,img_size)
 
 options = hyperParamHelper.getOptions()
 spacings =  options['spacing_keyword']#["_half_spac_c", "_one_spac_c", "_one_and_half_spac_c", "_two_spac_c" ]# ,"_med_spac_b" #config['parameters']['spacing_keyword']["values"]
