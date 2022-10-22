@@ -341,7 +341,7 @@ def getEnsemble(df,experiment_name,dummyDict,options,percentSplit
     model = LigtningModel.Model(
         net=net
         ,criterion=  monai.losses.FocalLoss(include_background=False, to_onehot_y=to_onehot_y_loss)# Our seg labels are single channel images indicating class index, rather than one-hot
-        ,learning_rate=1e-4#trial.suggest_float("learning_rate", 1e-6, 1e-4),
+        ,learning_rate=1e-5#trial.suggest_float("learning_rate", 1e-6, 1e-4),
         ,optimizer_class= optimizer_class
         ,picaiLossArr_auroc_final=picaiLossArr_auroc_final
         ,picaiLossArr_AP_final=picaiLossArr_AP_final
@@ -406,9 +406,9 @@ def getEnsemble(df,experiment_name,dummyDict,options,percentSplit
         default_root_dir= "/home/sliceruser/locTemp/lightning_logs",
         # auto_scale_batch_size="binsearch",
         auto_lr_find=True,
-        check_val_every_n_epoch=40,
+        check_val_every_n_epoch=20,
         accumulate_grad_batches= 1,
-        #gradient_clip_val=  0.9 ,#experiment.get_parameter("gradient_clip_val"),# 0.5,2.0
+        gradient_clip_val=  0.9 ,#experiment.get_parameter("gradient_clip_val"),# 0.5,2.0
         log_every_n_steps=5
         ,reload_dataloaders_every_n_epochs=1
         #strategy='dp'
