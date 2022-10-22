@@ -398,7 +398,7 @@ def getEnsemble(df,experiment_name,dummyDict,options,percentSplit
         #accelerator="cpu", #TODO(remove)
         max_epochs=1000,
         #gpus=1,
-        #precision=experiment.get_parameter("precision"), 
+        precision=16#experiment.get_parameter("precision"), 
         callbacks=[ checkpoint_callback,stochasticAveraging ], #optuna_prune,early_stopping
         logger=comet_logger,
         accelerator='auto',
