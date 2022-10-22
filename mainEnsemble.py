@@ -290,7 +290,10 @@ def getEnsemble(df,experiment_name,dummyDict,options,percentSplit
 
     in_channels=3+len(checkpointPaths_to_load)
     out_channels=2
-    batch_size=8
+    batch_size=2
+    train_transforms_noLabel=get_transforms_no_label_ensembl()
+    train_transforms=get_transforms_label_ensembl()
+    val_transforms=train_transforms    
 
     net=getUnetEnsemble(checkpointPaths_to_load,study,options,train_transforms,train_transforms_noLabel,val_transforms)
 
@@ -333,9 +336,7 @@ def getEnsemble(df,experiment_name,dummyDict,options,percentSplit
     isVnet=False
 
 
-    train_transforms_noLabel=get_transforms_no_label_ensembl()
-    train_transforms=get_transforms_label_ensembl()
-    val_transforms=train_transforms
+
 
     model = LigtningModel.Model(
         net=net
