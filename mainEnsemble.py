@@ -130,9 +130,9 @@ monai.utils.set_determinism()
 import model.LigtningModel as LigtningModel
 
 def getTrialNumberFromPath(checkpointPath):
-    fullDir=os.path.dirname(checkpointPath)
+    # fullDir=os.path.dirname(checkpointPath)
     
-    res= int(Path(fullDir).name)
+    res= int(Path(checkpointPath).stem)
     print(f" getTrialNumberFromPath {res} {checkpointPath} ")
     return res
 
@@ -453,7 +453,7 @@ checkpointPaths_to_load= list_full_paths('/home/sliceruser/locTemp/checkPointsIn
 print(f"checkpointPaths_to_load {checkpointPaths_to_load}")
 studyNameToLoad="pic53"
 study = optuna.create_study(
-        study_name=experiment_name
+        study_name=studyNameToLoad
         ,sampler=optuna.samplers.NSGAIISampler()    
         ,pruner=optuna.pruners.HyperbandPruner()
         ,storage=f"mysql://root:jm@34.91.215.109:3306/{studyNameToLoad}"
