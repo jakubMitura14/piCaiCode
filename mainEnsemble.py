@@ -382,6 +382,8 @@ def getEnsemble(df,experiment_name,dummyDict,options,percentSplit
         ,train_transforms=train_transforms
         ,train_transforms_noLabel=train_transforms_noLabel
         ,val_transforms=val_transforms
+        ,threshold='dynamic'
+        ,toWaitForPostProcess=5
         ,toLogHyperParam=False
     )
 
