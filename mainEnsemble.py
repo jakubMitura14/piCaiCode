@@ -235,10 +235,10 @@ class UNetToEnsemble(nn.Module):
         
         
     def forward(self, x):
-        stackedInput=torch.cat(x,
+        stackedInput=torch.cat((x,
             torch.stack(
                 list(map(lambda model: forwardLoadedModel(model,x),self.loadedModels))
-                ),0)
+                )),0)
 
         #print(f"segmMap  {segmMap}")
         return self.baseUnet(stackedInput)
