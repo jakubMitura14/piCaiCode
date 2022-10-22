@@ -295,7 +295,7 @@ def getEnsemble(df,experiment_name,dummyDict,options,percentSplit
     batch_size=3
     train_transforms_noLabel=get_transforms_no_label_ensembl()
     train_transforms=get_transforms_label_ensembl()
-    val_transforms=train_transforms    
+    val_transforms=transformsForMain.get_val_transforms(isVnet)    
 
     net=getUnetEnsemble(checkpointPaths_to_load,study,options,train_transforms,train_transforms_noLabel,val_transforms)
 
