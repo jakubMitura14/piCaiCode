@@ -309,14 +309,12 @@ def getEnsemble(df,experiment_name,dummyDict,options,percentSplit
         api_key="yB0irIjdk9t7gbpTlSUPnXBd4",
         #workspace="OPI", # Optional
         project_name=experiment_name, # Optional
-        #experiment_name="baseline" # Optional
     )
     
     optimizer_class= torch.optim.NAdam
-    regr_chan_index,regression_channels=options["regression_channels"][regression_channelsNum]
-    to_onehot_y_loss= False
-    
-    RandAdjustContrastd_prob=0.0#trial.suggest_float("RandAdjustContrastd_prob", 0.0, 0.9)
+    regression_channels=options["regression_channels"][regression_channelsNum]
+    to_onehot_y_loss= False    
+    RandAdjustContrastd_prob=0.0
     RandGaussianSmoothd_prob=0.0 #trial.suggest_float("RandGaussianSmoothd_prob", 0.0, 0.6)
     RandRicianNoised_prob=0.0#trial.suggest_float("RandRicianNoised_prob", 0.0, 0.9)
     RandFlipd_prob=0.0#trial.suggest_float("RandFlipd_prob", 0.0, 0.9)
