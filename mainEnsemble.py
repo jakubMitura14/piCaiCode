@@ -414,7 +414,7 @@ def getEnsemble(df,experiment_name,dummyDict,options,percentSplit
         #strategy='dp'
     )
     #trainer.logger._default_hp_metric = False
-
+    trainer.fit(model)
     return (trainer, model)
 
 # git lfs push --all origin main:main https://github.com/jakubMitura14/piCaiCode.git
