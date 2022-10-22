@@ -258,8 +258,8 @@ def get_transforms_no_label_ensembl():
             LoadImaged(keys=["t2w","hbv","adc" ],reader="ITKReader"),
             EnsureChannelFirstd(keys=["t2w","hbv","adc" ]),
             EnsureTyped(keys=["t2w","hbv","adc" ]),
-            ConcatItemsd(["t2w","hbv","adc" ], "chan3_col_name_val"),
-            SelectItemsd(keys=["labelB","t2wb","chan3_col_name_val","study_id","num_lesions_to_retain","isAnythingInAnnotated"]),
+            ConcatItemsd(["t2w","hbv","adc" ], "chan3_col_name"),
+            SelectItemsd(keys=["labelB","t2wb","chan3_col_name","study_id","num_lesions_to_retain","isAnythingInAnnotated"]),
         ]
     )
     return val_transforms
