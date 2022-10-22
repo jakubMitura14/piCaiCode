@@ -259,7 +259,7 @@ class Model(pl.LightningModule):
     ,spacing_keyword,netIndex, regr_chan_index,isVnet
     ,train_transforms,train_transforms_noLabel,val_transforms
     ,threshold='dynamic-fast'
-    ,toWaitForPostProcess=60
+    ,toWaitForPostProcess=15
     ,toLogHyperParam=True
     ):
         super().__init__()
@@ -582,8 +582,8 @@ class Model(pl.LightningModule):
         with mp.Pool(processes = mp.cpu_count()) as pool:
             #it = pool.imap(my_task, range(lenn))
             results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
-            time.sleep(self.toWaitForPostProcess)
-            processedCases=list(map(lambda ind :getNext(ind,results,15) ,list(range(lenn)) ))
+            time.sleep(60)
+            processedCases=list(map(lambda ind :getNext(ind,results,self.toWaitForPostProcess) ,list(range(lenn)) ))
 
         isTaken= list(map(lambda it:type(it) != type(None),processedCases))
         extracteds=list(filter(lambda it:type(it) != type(None),processedCases))
@@ -697,7 +697,7 @@ class Model(pl.LightningModule):
 
             self.picaiLossArr_auroc_final.append(meanPiecaiMetr_auroc)
             self.picaiLossArr_AP_final.append(meanPiecaiMetr_AP)
-            self.picaiLossArr_score_final.append(meanPiecaiMetr_score_my)
+            self.picaiLossArr_score_final.append(meanPiecaiMetr_score)
             self.dice_final.append(np.nanmean(allDices))
 
  
