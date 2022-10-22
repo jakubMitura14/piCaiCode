@@ -206,10 +206,10 @@ def loadModel(checkPointPath,trials,options,train_transforms,train_transforms_no
         ,train_transforms=train_transforms
         ,train_transforms_noLabel=train_transforms_noLabel
         ,val_transforms=val_transforms
-        )
+        ).modelRegression.cuda()
 
 def forwardLoadedModel(model,x):
-    segmMap,regr = model.modelRegression(x)
+    segmMap,regr = model(x)
     return segmMap
 
 class UNetToEnsemble(nn.Module):
