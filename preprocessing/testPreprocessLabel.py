@@ -41,7 +41,6 @@ def loadLib(name,path):
     return res
 
 manageMetaData =loadLib("ManageMetadata", "/home/sliceruser/locTemp/piCaiCode/preprocessing/ManageMetadata.py")
-dataUtils =loadLib("dataUtils", "/home/sliceruser/locTemp/piCaiCode/dataManag/utils/dataUtils.py")
 
 unets =loadLib("unets", "/home/sliceruser/locTemp/piCaiCode/model/unets.py")
 DataModule =loadLib("DataModule", "/home/sliceruser/locTemp/piCaiCode/model/DataModule.py")

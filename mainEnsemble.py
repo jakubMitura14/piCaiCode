@@ -324,7 +324,7 @@ percentSplit=0.85
 checkPointPath_to_save=f"/home/sliceruser/locTemp/checkPoints/{experiment_name}"
 regression_channelsNum=1
 checkpointPaths_to_load= os.listdir('/home/jakubmituraaa/locTemp/checkPointsIn')
-
+print(f"checkpointPaths_to_load {checkpointPaths_to_load}")
 getEnsemble(df,experiment_name,dummyDict,options,percentSplit
 ,picaiLossArr_auroc_final,picaiLossArr_AP_final,picaiLossArr_score_final, dice_final
     ,persistent_cache,checkPointPath_to_save, checkpointPaths_to_load
