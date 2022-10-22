@@ -295,6 +295,8 @@ def getEnsemble(df,experiment_name,dummyDict,options,percentSplit
     batch_size=3
     train_transforms_noLabel=get_transforms_no_label_ensembl()
     train_transforms=get_transforms_label_ensembl()
+    isVnet=False
+
     val_transforms=transformsForMain.get_val_transforms(isVnet)    
 
     net=getUnetEnsemble(checkpointPaths_to_load,study,options,train_transforms,train_transforms_noLabel,val_transforms)
@@ -335,7 +337,6 @@ def getEnsemble(df,experiment_name,dummyDict,options,percentSplit
     RandomGhosting_prob=0.0#trial.suggest_float("RandomGhosting_prob", 0.0, 0.6)
     RandomSpike_prob=0.0#trial.suggest_float("RandomSpike_prob", 0.0, 0.6)
     RandomBiasField_prob=0.0#trial.suggest_float("RandomBiasField_prob", 0.0, 0.6)
-    isVnet=False
 
 
 
