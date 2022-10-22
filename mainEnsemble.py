@@ -222,7 +222,7 @@ class UNetToEnsemble(nn.Module):
         self.baseUnet= unets.UNet(
             spatial_dims=3,
             in_channels=3+len(modelPaths),
-            out_channels=1,
+            out_channels=2,
             strides=[(2, 2, 2), (1, 2, 2)],
             channels=[32, 64, 128],
             num_res_units= 0,
