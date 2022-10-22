@@ -1,168 +1,89 @@
 ### Define Data Handling
 
-from distutils.log import error
-import time
-from pathlib import Path
-from datetime import datetime
-import SimpleITK as sitk
-from monai.utils import set_determinism
-import math
-import torch
-from torch.utils.data import random_split, DataLoader
-import monai
-import gdown
-import pandas as pd
-import torchio as tio
-import pytorch_lightning as pl
-import matplotlib.pyplot as plt
-import seaborn as sns
-import numpy as np
-from sklearn.model_selection import train_test_split
-from monai.networks.nets import UNet
-from monai.networks.layers import Norm
-from monai.metrics import DiceMetric
-from monai.losses import DiceLoss
-from monai.inferers import sliding_window_inference
-from monai.data import CacheDataset,Dataset,PersistentDataset, list_data_collate, decollate_batch
-from monai.config import print_config
-from monai.apps import download_and_extract
-import time
-from torchmetrics.classification import BinaryF1Score
-from datetime import datetime
-import os
-import tempfile
-from glob import glob
-from monai.handlers.utils import from_engine
-from monai.networks.nets import UNet
-from monai.networks.layers import Norm
-from monai.metrics import DiceMetric
-from monai.losses import DiceLoss
-from monai.inferers import sliding_window_inference
-from monai.config import print_config
-from monai.apps import download_and_extract
-import torch
-import matplotlib.pyplot as plt
-import tempfile
-import shutil
-import os
-import glob
-from picai_eval import evaluate
-#from picai_eval.picai_eval import evaluate_case
-from statistics import mean
-from report_guided_annotation import extract_lesion_candidates
-from scipy.ndimage import gaussian_filter
-import tempfile
-import shutil
-from os import path as pathOs
-from os.path import basename, dirname, exists, isdir, join, split
-import torch.nn as nn
-import torch.nn.functional as F
-
-from monai.metrics import (DiceMetric, HausdorffDistanceMetric,
-                           SurfaceDistanceMetric)
-from torchmetrics import Precision
-from monai.transforms import (
-    AsDiscrete,
-    AddChanneld,
-    Compose,
-    CropForegroundd,
-    LoadImaged,
-    Orientationd,
-    RandCropByPosNegLabeld,
-    ScaleIntensityRanged,
-    Spacingd,
-    EnsureTyped,
-    EnsureType,
-)
-import torchio
-import importlib.util
-import sys
-import warnings
-from typing import Optional, Sequence, Tuple, Union
-import torch
-import torch.nn as nn
-from monai.networks.blocks.convolutions import Convolution, ResidualUnit
-from monai.networks.layers.factories import Act, Norm
-from monai.networks.layers.simplelayers import SkipConnection
-from monai.utils import alias, deprecated_arg, export
-import functools
-import operator
-from torch.nn.intrinsic.qat import ConvBnReLU3d
-
-import multiprocessing as mp
-import time
-from monai.transforms import (
-    EnsureChannelFirstd,
-    Orientationd,
-    AsDiscrete,
-    AddChanneld,
-    Spacingd,
-    Compose,
-    CropForegroundd,
-    LoadImaged,
-    Orientationd,
-    RandCropByPosNegLabeld,
-    ScaleIntensityRanged,
-    Spacingd,
-    EnsureTyped,
-    EnsureType,
-    Resize,
-    Resized,
-    RandSpatialCropd,
-        AsDiscrete,
-    AsDiscreted,
-    CropForegroundd,
-    LoadImaged,
-    Orientationd,
-    RandCropByPosNegLabeld,
-    SaveImaged,
-    ScaleIntensityRanged,
-    SelectItemsd,
-    Invertd,
-    DivisiblePadd,
-    SpatialPadd,
-    RandGaussianNoised,
-    RandAdjustContrastd,
-    RandGaussianSmoothd,
-    RandRicianNoised,
-    RandFlipd,
-    RandAffined,
-    ConcatItemsd,
-    RandCoarseDropoutd,
-    AsDiscreted,
-    MapTransform,
-    ResizeWithPadOrCropd,
-    EnsureChannelFirstd,
-    SaveImage,
-    EnsureChannelFirst
-    
-)
-
-import time
-from functools import partial
-from torchmetrics.functional import precision_recall
-from torch.utils.cpp_extension import load
-import torchmetrics
-# lltm_cuda = load('lltm_cuda', ['lltm_cuda.cpp', 'lltm_cuda_kernel.cu'], verbose=True)
-from monai.metrics import (
-    ConfusionMatrixMetric,
-    compute_confusion_matrix_metric,
-    do_metric_reduction,
-    get_confusion_matrix,
-)
-
 import concurrent.futures
+import functools
+import glob
+import importlib.util
 import itertools
 import json
+import math
+import multiprocessing as mp
+import operator
 import os
+import shutil
+import sys
+import tempfile
+import time
+import warnings
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
+from distutils.log import error
+from functools import partial
+from glob import glob
+from os import path as pathOs
+from os.path import basename, dirname, exists, isdir, join, split
 from pathlib import Path
-from typing import (Callable, Dict, Hashable, Iterable, List, Optional, Sized,
-                    Tuple, Union)
+#from picai_eval.picai_eval import evaluate_case
+from statistics import mean
+from typing import (Callable, Dict, Hashable, Iterable, List, Optional,
+                    Sequence, Sized, Tuple, Union)
 
+import gdown
+import matplotlib.pyplot as plt
+import monai
 import numpy as np
+import pandas as pd
+import pytorch_lightning as pl
+import seaborn as sns
+import SimpleITK as sitk
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torchio
+import torchio as tio
+import torchmetrics
+from monai.apps import download_and_extract
+from monai.config import print_config
+from monai.data import (CacheDataset, Dataset, PersistentDataset,
+                        decollate_batch, list_data_collate)
+from monai.handlers.utils import from_engine
+from monai.inferers import sliding_window_inference
+from monai.losses import DiceLoss
+# lltm_cuda = load('lltm_cuda', ['lltm_cuda.cpp', 'lltm_cuda_kernel.cu'], verbose=True)
+from monai.metrics import (ConfusionMatrixMetric, DiceMetric,
+                           HausdorffDistanceMetric, SurfaceDistanceMetric,
+                           compute_confusion_matrix_metric,
+                           do_metric_reduction, get_confusion_matrix)
+from monai.networks.blocks.convolutions import Convolution, ResidualUnit
+from monai.networks.layers import Norm
+from monai.networks.layers.factories import Act, Norm
+from monai.networks.layers.simplelayers import SkipConnection
+from monai.networks.nets import UNet
+from monai.transforms import (AddChanneld, AsDiscrete, AsDiscreted, Compose,
+                              ConcatItemsd, CropForegroundd, DivisiblePadd,
+                              EnsureChannelFirst, EnsureChannelFirstd,
+                              EnsureType, EnsureTyped, Invertd, LoadImaged,
+                              MapTransform, Orientationd, RandAdjustContrastd,
+                              RandAffined, RandCoarseDropoutd,
+                              RandCropByPosNegLabeld, RandFlipd,
+                              RandGaussianNoised, RandGaussianSmoothd,
+                              RandRicianNoised, RandSpatialCropd, Resize,
+                              Resized, ResizeWithPadOrCropd, SaveImage,
+                              SaveImaged, ScaleIntensityRanged, SelectItemsd,
+                              Spacingd, SpatialPadd)
+from monai.utils import alias, deprecated_arg, export, set_determinism
+from picai_eval import evaluate
+from report_guided_annotation import extract_lesion_candidates
 from scipy import ndimage
+from scipy.ndimage import gaussian_filter
 from scipy.optimize import linear_sum_assignment
+from sklearn.model_selection import train_test_split
+from torch.nn.intrinsic.qat import ConvBnReLU3d
+from torch.utils.cpp_extension import load
+from torch.utils.data import DataLoader, random_split
+from torchmetrics import Precision
+from torchmetrics.classification import BinaryF1Score
+from torchmetrics.functional import precision_recall
 from tqdm import tqdm
 
 try:
@@ -170,20 +91,22 @@ try:
 except ImportError:  # pragma: no cover
     pass
 
-from picai_eval.analysis_utils import (calculate_dsc, calculate_iou,
-                                       label_structure, parse_detection_map)
-from picai_eval.image_utils import (read_label, read_prediction,
-                                    resize_image_with_crop_or_pad)
-from picai_eval.metrics import Metrics
-
-from picai_eval.eval import evaluate_case
-from model import transformsForMain as transformsForMain 
 import random
 
 # import modelUtlils
 import matplotlib.pyplot as plt
-from sklearn.metrics import f1_score  
 import sklearn
+from picai_eval.analysis_utils import (calculate_dsc, calculate_iou,
+                                       label_structure, parse_detection_map)
+from picai_eval.eval import evaluate_case
+from picai_eval.image_utils import (read_label, read_prediction,
+                                    resize_image_with_crop_or_pad)
+from picai_eval.metrics import Metrics
+from sklearn.metrics import f1_score
+
+from model import transformsForMain as transformsForMain
+
+
 class UNetToRegresion(nn.Module):
     def __init__(self,
         in_channels,
@@ -241,13 +164,13 @@ def save_heatmap(arr,dir,name,numLesions,cmapp='gray'):
     return path
 
 
-def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, postProcess,epoch,regr):
+def processDecolated(i,gold_arr,y_hat_arr, directory, studyId,imageArr, postProcess,epoch,regr,threshold):
     regr_now = regr[i]
     # if(regr_now==0):
     #     return np.zeros_like(y_hat_arr[i][1,:,:,:])        
     curr_studyId=studyId[i]
     print(f"extracting {curr_studyId}")
-    extracted=np.array(extract_lesion_candidates(y_hat_arr[i][1,:,:,:].cpu().detach().numpy(),threshold='dynamic-fast')[0]) # dynamic-fast  dynamic
+    extracted=np.array(extract_lesion_candidates(y_hat_arr[i][1,:,:,:].cpu().detach().numpy(),threshold=threshold)[0]) # dynamic-fast  dynamic
     print(f"extracted {curr_studyId}")
     return extracted
 
@@ -334,6 +257,10 @@ class Model(pl.LightningModule):
     ,RandomBiasField_prob
     ,persistent_cache
     ,spacing_keyword,netIndex, regr_chan_index,isVnet
+    ,train_transforms,train_transforms_noLabel,val_transforms
+    ,threshold='dynamic-fast'
+    ,toWaitForPostProcess=60
+    ,toLogHyperParam=True
     ):
         super().__init__()
         self.learning_rate = learning_rate
@@ -360,14 +287,10 @@ class Model(pl.LightningModule):
         self.list_yHat_val=[]
         self.ldiceLocst_back_yHat_val=[]
         self.isAnyNan=False
-        #os.makedirs('/home/sliceruser/data/temp')
-        # self.postProcess=monai.transforms.Compose([EnsureType(), monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])#, monai.transforms.KeepLargestConnectedComponent()
-        # self.postProcess=monai.transforms.Compose([EnsureType(),  monai.transforms.ForegroundMask(), AsDiscrete( to_onehot=2)])#, monai.transforms.KeepLargestConnectedComponent()
         self.postProcessA=monai.transforms.Compose([EnsureType(), AsDiscrete(argmax=True, to_onehot=2)])#, monai.transforms.KeepLargestConnectedComponent()
         self.postProcess=monai.transforms.Compose([EnsureType(),EnsureChannelFirst(), AsDiscrete(argmax=True, to_onehot=2)])#, monai.transforms.KeepLargestConnectedComponent()
         self.postTrue = Compose([EnsureType()])
         self.regLoss = nn.BCEWithLogitsLoss()
-        #self.F1Score = torchmetrics.F1Score()
         self.batch_size = batch_size
         self.df = df
         self.num_workers = num_workers
@@ -410,7 +333,16 @@ class Model(pl.LightningModule):
         self.isVnet=isVnet
         os.makedirs(self.temp_val_dir,  exist_ok = True)             
         shutil.rmtree(self.temp_val_dir) 
-        os.makedirs(self.temp_val_dir,  exist_ok = True)             
+        os.makedirs(self.temp_val_dir,  exist_ok = True)  
+        self.threshold=threshold
+        self.toWaitForPostProcess=toWaitForPostProcess
+        self.train_transforms =train_transforms
+        self.train_transforms_noLabel= train_transforms_noLabel
+        self.val_transforms=val_transforms 
+        self.toLogHyperParam=toLogHyperParam
+
+
+
 
     """
     splitting for test and validation and separately in case of examples with some label inside 
@@ -484,37 +416,7 @@ class Model(pl.LightningModule):
         noLabels=list(filter(lambda subj :  subj['isAnythingInAnnotated']==0 and subj['num_lesions_to_retain']==1 ,allSubjects))        
         print(f" onlyPositiveSubjects {len(onlyPositiveSubjects)} onlyNegative {len(onlyNegative)} noLabels but positive {len(noLabels)}  ")
 
-        train_transforms=transformsForMain.get_train_transforms(
-            self.RandAdjustContrastd_prob
-            ,self.RandGaussianSmoothd_prob
-            ,self.RandRicianNoised_prob
-            ,self.RandFlipd_prob
-            ,self.RandAffined_prob
-            ,self.RandomElasticDeformation_prob
-            ,self.RandomAnisotropy_prob
-            ,self.RandomMotion_prob
-            ,self.RandomGhosting_prob
-            ,self.RandomSpike_prob
-            ,self.RandomBiasField_prob
-            ,self.isVnet           
-             )
-        train_transforms_noLabel=transformsForMain.get_train_transforms_noLabel(
-            self.RandAdjustContrastd_prob
-            ,self.RandGaussianSmoothd_prob
-            ,self.RandRicianNoised_prob
-            ,self.RandFlipd_prob
-            ,self.RandAffined_prob
-            ,self.RandomElasticDeformation_prob
-            ,self.RandomAnisotropy_prob
-            ,self.RandomMotion_prob
-            ,self.RandomGhosting_prob
-            ,self.RandomSpike_prob
-            ,self.RandomBiasField_prob
-            ,self.isVnet          
-             )
 
-
-        val_transforms= transformsForMain.get_val_transforms(self.isVnet )
 
         # self.val_ds=     Dataset(data=onlyPositiveSubjects[0:25]+onlyNegative[0:10], transform=val_transforms)
         # self.train_ds_labels = Dataset(data=onlyPositiveSubjects[25:]+onlyNegative[10:], transform=train_transforms)
@@ -533,9 +435,9 @@ class Model(pl.LightningModule):
         # self.val_ds=  LMDBDataset(data=onlyPositiveSubjects[0:onlyPosTreshold]+onlyNegative[0:onlyNegativeThreshold], transform=val_transforms ,cache_dir=self.persistent_cache)
         # self.train_ds_labels = LMDBDataset(data=onlyPositiveSubjects[onlyPosTreshold:]+onlyNegative[onlyNegativeThreshold:], transform=train_transforms,cache_dir=self.persistent_cache )
         # self.train_ds_no_labels = LMDBDataset(data=noLabels, transform=train_transforms_noLabel,cache_dir=self.persistent_cache)
-        self.val_ds=  Dataset(data=onlyPositiveSubjects[0:onlyPosTreshold]+onlyNegative[0:onlyNegativeThreshold], transform=val_transforms )
-        self.train_ds_labels = Dataset(data=onlyPositiveSubjects[onlyPosTreshold:]+onlyNegative[onlyNegativeThreshold:onlyNegativeThresholdB], transform=train_transforms )
-        self.train_ds_no_labels = Dataset(data=noLabels+onlyNegative[onlyNegativeThresholdB:], transform=train_transforms_noLabel)
+        self.val_ds=  Dataset(data=onlyPositiveSubjects[0:onlyPosTreshold]+onlyNegative[0:onlyNegativeThreshold], transform=self.val_transforms )
+        self.train_ds_labels = Dataset(data=onlyPositiveSubjects[onlyPosTreshold:]+onlyNegative[onlyNegativeThreshold:onlyNegativeThresholdB], transform=self.train_transforms )
+        self.train_ds_no_labels = Dataset(data=noLabels+onlyNegative[onlyNegativeThresholdB:], transform=self.train_transforms_noLabel)
 
 
 
@@ -598,11 +500,6 @@ class Model(pl.LightningModule):
         #                                 ]))
 
     def logHyperparameters(self,experiment):
-        if(self.current_epoch==0):
-
-
-            experiment.log_parameter('machine', os.environ['machine'])
-            experiment.log_parameter('trial_number', self.trial.number)
             
             experiment.log_parameter('spacing_keyword', self.spacing_keyword)
             experiment.log_parameter('netIndex', self.netIndex)
@@ -625,7 +522,8 @@ class Model(pl.LightningModule):
         print("start validation")
         experiment=self.experiment=self.logger.experiment
         #log hyperparameters if it is epoch 1
-        self.logHyperparameters(experiment)
+        if(self.toLogHyperParam):
+            self.logHyperparameters(experiment)
 
         x, y_true, numLesions,isAnythingInAnnotated = batch['chan3_col_name_val'], batch['label_name_val'], batch['num_lesions_to_retain'], batch['isAnythingInAnnotated']
         numBatches = y_true.size(dim=0)
@@ -680,11 +578,11 @@ class Model(pl.LightningModule):
         lenn=numBatches
         processedCases=[]
         my_task=partial(processDecolated,gold_arr=y_true,y_hat_arr=y_det,directory= self.temp_val_dir,studyId= patIds
-                    ,imageArr=images, postProcess=self.postProcess,epoch=self.current_epoch,regr=regr)
+                    ,imageArr=images, postProcess=self.postProcess,epoch=self.current_epoch,regr=regr,threshold=self.threshold)
         with mp.Pool(processes = mp.cpu_count()) as pool:
             #it = pool.imap(my_task, range(lenn))
             results = list(map(lambda i: pool.apply_async(my_task, (i,)) ,list(range(lenn))  ))
-            time.sleep(60)
+            time.sleep(self.toWaitForPostProcess)
             processedCases=list(map(lambda ind :getNext(ind,results,15) ,list(range(lenn)) ))
 
         isTaken= list(map(lambda it:type(it) != type(None),processedCases))
