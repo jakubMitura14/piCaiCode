@@ -210,7 +210,7 @@ def loadModel(checkPointPath,trials,options,train_transforms,train_transforms_no
 
 def forwardLoadedModel(model,x):
     segmMap,regr = model(x)
-    return segmMap
+    return segmMap[1,:,:,:]
 
 class UNetToEnsemble(nn.Module):
     def __init__(self,
@@ -236,8 +236,8 @@ class UNetToEnsemble(nn.Module):
     
 
     def forward(self, x):
-        from_models =torch.cat( list(map(lambda model: forwardLoadedModel(model,x),self.loadedModels)),0)
-        print(f"from_models {from_models.size()}  x {x.size} ")
+        from_models =torch.stack( list(map(lambda model: forwardLoadedModel(model,x),self.loadedModels)))
+        print(f"from_models {from_models.size()}  x {x.size()} ")
         stackedInput=torch.cat((x,from_models),0)
 
         #print(f"segmMap  {segmMap}")
