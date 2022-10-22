@@ -135,8 +135,7 @@ def getTrialNumberFromPath(checkpointPath):
     res= int(Path(checkpointPath).stem)
     print(f" getTrialNumberFromPath {res} {checkpointPath} ")
     return res
-
-def loadModel(checkPointPath,trials,options):
+def loadModel(checkPointPath,trials,options,train_transforms,train_transforms_noLabel,val_transforms):
     trialNum=getTrialNumberFromPath(checkPointPath)
     trial=trials[trialNum]
     trialProp=trial.params    
@@ -204,6 +203,9 @@ def loadModel(checkPointPath,trials,options):
         ,netIndex=netIndex
         ,regr_chan_index=regr_chan_index
         ,isVnet=isVnet
+        ,train_transforms=train_transforms
+        ,train_transforms_noLabel=train_transforms_noLabel
+        ,val_transforms=val_transforms
         )
 
 
@@ -212,7 +214,7 @@ class UNetToEnsemble(nn.Module):
     def __init__(self,
         modelPaths,
         study,
-        options
+        options,train_transforms,train_transforms_noLabel,val_transforms
     ) -> None:
         super().__init__()
         self.baseUnet= unets.UNet(
@@ -225,7 +227,9 @@ class UNetToEnsemble(nn.Module):
             act = (Act.PRELU, {"init": 0.2}),
             norm= (Norm.BATCH, {}))
         study.trials
-        self.loadedModels= list(map(partial(loadModel,trials=study.trials,options=options), modelPaths))
+        self.loadedModels= list(map(partial(loadModel,trials=study.trials,options=options
+        ,train_transforms=train_transforms
+            ,train_transforms_noLabel=train_transforms_noLabel,val_transforms=val_transforms), modelPaths))
         
         
     def forward(self, x):
@@ -240,8 +244,8 @@ class UNetToEnsemble(nn.Module):
 # model = LigtningModel.Model.load_from_checkpoint("/path/to/checkpoint.ckpt")
 
 
-def getUnetEnsemble(modelPaths,study,options):
-    return UNetToEnsemble(modelPaths,study,options)
+def getUnetEnsemble(modelPaths,study,options,train_transforms,train_transforms_noLabel,val_transforms):
+    return UNetToEnsemble(modelPaths,study,options,train_transforms,train_transforms_noLabel,val_transforms)
 
 
 
@@ -288,7 +292,7 @@ def getEnsemble(df,experiment_name,dummyDict,options,percentSplit
     out_channels=2
     batch_size=8
 
-    net=getUnetEnsemble(checkpointPaths_to_load,study,options)
+    net=getUnetEnsemble(checkpointPaths_to_load,study,options,train_transforms,train_transforms_noLabel,val_transforms)
 
     label_name=f"label_{spacing_keyword}fi"
    
