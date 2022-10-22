@@ -137,6 +137,9 @@ def getTrialNumberFromPath(checkpointPath):
     return res
 
 def loadModel(checkPointPath,trials,options):
+    trialNum=getTrialNumberFromPath(checkPointPath)
+    trial=trials[trialNum]
+    trialProp=trial.params    
     picaiLossArr_auroc_final=[]
     picaiLossArr_AP_final=[]
     picaiLossArr_score_final=[]
@@ -161,9 +164,7 @@ def loadModel(checkPointPath,trials,options):
     net = options["models"][netIndex]
     net=net(0.0,img_size,in_channels,out_channels)
     regr_chan_index=trialProp["regression_channels"]
-    trialNum=getTrialNumberFromPath(checkPointPath)
-    trial=trials[trialNum]
-    trialProp=trial.params
+
     LigtningModel.Model.load_from_checkpoint(checkPointPath
         , net
         , criterion=monai.losses.FocalLoss(include_background=False, to_onehot_y=False)
