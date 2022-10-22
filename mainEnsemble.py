@@ -312,6 +312,7 @@ def getEnsemble(df,experiment_name,dummyDict,options,percentSplit
     )
     
     optimizer_class= torch.optim.NAdam
+    regr_chan_index=regression_channelsNum
     regression_channels=options["regression_channels"][regression_channelsNum]
     to_onehot_y_loss= False    
     RandAdjustContrastd_prob=0.0
