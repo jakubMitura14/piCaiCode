@@ -210,7 +210,7 @@ def loadModel(checkPointPath,trials,options,train_transforms,train_transforms_no
 
 def forwardLoadedModel(model,x):
     segmMap,regr = model(x)
-    return segmMap[1,:,:,:]
+    return segmMap[:,1,:,:,:]
 
 class UNetToEnsemble(nn.Module):
     def __init__(self,
