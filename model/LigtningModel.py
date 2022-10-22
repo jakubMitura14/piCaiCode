@@ -335,9 +335,6 @@ class Model(pl.LightningModule):
     ,persistent_cache
     ,spacing_keyword,netIndex, regr_chan_index,isVnet
     ):
-
-
-
         super().__init__()
         self.learning_rate = learning_rate
         self.net=net

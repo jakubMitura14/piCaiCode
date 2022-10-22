@@ -105,6 +105,17 @@ from torch.utils.data import DataLoader, random_split
 from torchmetrics import Precision
 from torchmetrics.functional import precision_recall
 from tqdm import tqdm
+from optuna.visualization import plot_contour
+from optuna.visualization import plot_edf
+from optuna.visualization import plot_intermediate_values
+from optuna.visualization import plot_optimization_history
+from optuna.visualization import plot_parallel_coordinate
+from optuna.visualization import plot_param_importances
+from optuna.visualization import plot_slice
+import importlib.util
+import optuna
+from optuna.integration import PyTorchLightningPruningCallback
+import sys
 def loadLib(name,path):
     spec = importlib.util.spec_from_file_location(name, path)
     res = importlib.util.module_from_spec(spec)
@@ -117,9 +128,89 @@ import hyperParamHelper
 
 monai.utils.set_determinism()
 import model.LigtningModel as LigtningModel
+
+def getTrialNumberFromPath(checkpointPath):
+    fullDir=os.path.dirname(checkpointPath)
+    
+    res= int(Path(fullDir).name)
+    print(f" getTrialNumberFromPath {res} {checkpointPath} ")
+    return res
+
+def loadModel(checkPointPath,trials,options):
+    picaiLossArr_auroc_final=[]
+    picaiLossArr_AP_final=[]
+    picaiLossArr_score_final=[]
+    dice_final=[]
+    netIndex=trialProp["models"]
+    isVnet=(netIndex==0)
+    in_channels=3
+    out_channels=2
+    if(isVnet):
+        in_channels=4
+    spacing_keyword=options["spacing_keyword"][0]
+    dummyLabelPath,img_size=dummyDict[spacing_keyword]
+    label_name=f"label_{spacing_keyword}fi"
+    
+    t2wColName="t2w"+spacing_keyword+"cropped"
+    adcColName="adc"+spacing_keyword+"cropped"
+    hbvColName="hbv"+spacing_keyword+"cropped"
+    chan3_col_name="joined"+spacing_keyword+"cropped"
+    label_name_val=label_name
+    chan3_col_name_val=chan3_col_name
+
+    net = options["models"][netIndex]
+    net=net(0.0,img_size,in_channels,out_channels)
+    regr_chan_index=trialProp["regression_channels"]
+    trialNum=getTrialNumberFromPath(checkPointPath)
+    trial=trials[trialNum]
+    trialProp=trial.params
+    LigtningModel.Model.load_from_checkpoint(checkPointPath
+        , net
+        , criterion=monai.losses.FocalLoss(include_background=False, to_onehot_y=False)
+        , learning_rate=1e-4
+        , optimizer_class=torch.optim.NAdam
+        ,picaiLossArr_auroc_final=picaiLossArr_auroc_final
+        ,picaiLossArr_AP_final=picaiLossArr_AP_final
+        ,picaiLossArr_score_final=picaiLossArr_score_final
+        ,regression_channels= options["regression_channels"][regr_chan_index]
+        ,trial=trial
+        ,dice_final=dice_final
+        ,trainSizePercent=0.85
+        ,batch_size=2
+        ,num_workers=os.cpu_count()
+        ,drop_last=False
+        ,df=df
+        ,chan3_col_name=chan3_col_name
+        ,chan3_col_name_val=chan3_col_name_val
+        ,label_name=label_name
+        ,label_name_val=label_name_val
+        ,t2wColName=t2wColName
+        ,adcColName=adcColName
+        ,hbvColName=hbvColName
+        ,RandAdjustContrastd_prob=0.0
+        ,RandGaussianSmoothd_prob=0.0
+        ,RandRicianNoised_prob=0.0
+        ,RandFlipd_prob=0.0
+        ,RandAffined_prob=0.0
+        ,RandomElasticDeformation_prob=0.0
+        ,RandomAnisotropy_prob=0.0
+        ,RandomMotion_prob=0.0
+        ,RandomGhosting_prob=0.0
+        ,RandomSpike_prob=0.0
+        ,RandomBiasField_prob=0.0
+        ,persistent_cache=persistent_cache
+        ,spacing_keyword=spacing_keyword
+        ,netIndex=netIndex
+        ,regr_chan_index=regr_chan_index
+        ,isVnet=isVnet
+        )
+
+
+
 class UNetToEnsemble(nn.Module):
     def __init__(self,
-        modelPaths
+        modelPaths,
+        study
     ) -> None:
         super().__init__()
         self.baseUnet= unets.UNet(
@@ -131,6 +222,7 @@ class UNetToEnsemble(nn.Module):
             num_res_units= 0,
             act = (Act.PRELU, {"init": 0.2}),
             norm= (Norm.BATCH, {}))
+        study.trials
         self.loadedModels= list(map(LigtningModel.Model.load_from_checkpoint , modelPaths))
         
     def forward(self, x):
@@ -145,7 +237,7 @@ class UNetToEnsemble(nn.Module):
 # model = LigtningModel.Model.load_from_checkpoint("/path/to/checkpoint.ckpt")
 
 
-def getUnetEnsemble(modelPaths):
+def getUnetEnsemble(modelPaths,study):
     return UNetToEnsemble(modelPaths)
 
 
@@ -182,7 +274,8 @@ def get_transforms_label_ensembl():
 
 def getEnsemble(df,experiment_name,dummyDict,options,percentSplit
 ,picaiLossArr_auroc_final,picaiLossArr_AP_final,picaiLossArr_score_final, dice_final
-    ,persistent_cache,checkPointPath_to_save, checkpointPaths_to_load,regression_channelsNum):        
+    ,persistent_cache,checkPointPath_to_save
+    ,checkpointPaths_to_load,regression_channelsNum,study):        
 
     spacing_keyword=options["spacing_keyword"][0]
     dummyLabelPath,img_size=dummyDict[spacing_keyword]
@@ -192,7 +285,7 @@ def getEnsemble(df,experiment_name,dummyDict,options,percentSplit
     out_channels=2
     batch_size=8
 
-    net=getUnetEnsemble(checkpointPaths_to_load)
+    net=getUnetEnsemble(checkpointPaths_to_load,study)
 
     label_name=f"label_{spacing_keyword}fi"
    
@@ -219,7 +312,7 @@ def getEnsemble(df,experiment_name,dummyDict,options,percentSplit
     optimizer_class= torch.optim.NAdam
     regr_chan_index,regression_channels=options["regression_channels"][regression_channelsNum]
     to_onehot_y_loss= False
-
+    
     RandAdjustContrastd_prob=0.0#trial.suggest_float("RandAdjustContrastd_prob", 0.0, 0.9)
     RandGaussianSmoothd_prob=0.0 #trial.suggest_float("RandGaussianSmoothd_prob", 0.0, 0.6)
     RandRicianNoised_prob=0.0#trial.suggest_float("RandRicianNoised_prob", 0.0, 0.9)
@@ -356,7 +449,16 @@ checkPointPath_to_save=f"/home/sliceruser/locTemp/checkPoints/{experiment_name}"
 regression_channelsNum=1
 checkpointPaths_to_load= list_full_paths('/home/sliceruser/locTemp/checkPointsIn/checkpoints')
 print(f"checkpointPaths_to_load {checkpointPaths_to_load}")
+study = optuna.create_study(
+        study_name=experiment_name
+        ,sampler=optuna.samplers.NSGAIISampler()    
+        ,pruner=optuna.pruners.HyperbandPruner()
+        ,storage=f"mysql://root:jm@34.91.215.109:3306/{experiment_name}"
+        ,load_if_exists=True
+        ,direction="maximize"
+        )
+
 getEnsemble(df,experiment_name,dummyDict,options,percentSplit
 ,picaiLossArr_auroc_final,picaiLossArr_AP_final,picaiLossArr_score_final, dice_final
     ,persistent_cache,checkPointPath_to_save, checkpointPaths_to_load
-    ,regression_channelsNum)
+    ,regression_channelsNum,study)
