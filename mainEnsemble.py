@@ -292,7 +292,7 @@ def getEnsemble(df,experiment_name,dummyDict,options,percentSplit
 
     in_channels=3+len(checkpointPaths_to_load)
     out_channels=2
-    batch_size=2
+    batch_size=3
     train_transforms_noLabel=get_transforms_no_label_ensembl()
     train_transforms=get_transforms_label_ensembl()
     val_transforms=train_transforms    
@@ -400,7 +400,7 @@ def getEnsemble(df,experiment_name,dummyDict,options,percentSplit
 
     trainer = pl.Trainer(
         #accelerator="cpu", #TODO(remove)
-        max_epochs=1000,
+        max_epochs=5000,
         #gpus=1,
         #precision=16,#experiment.get_parameter("precision"), 
         callbacks=[ checkpoint_callback,stochasticAveraging ], #optuna_prune,early_stopping
@@ -410,12 +410,12 @@ def getEnsemble(df,experiment_name,dummyDict,options,percentSplit
         default_root_dir= "/home/sliceruser/locTemp/lightning_logs",
         # auto_scale_batch_size="binsearch",
         auto_lr_find=True,
-        check_val_every_n_epoch=20,
+        check_val_every_n_epoch=40,
         accumulate_grad_batches= 1,
         gradient_clip_val=  0.9 ,#experiment.get_parameter("gradient_clip_val"),# 0.5,2.0
         log_every_n_steps=5
         ,reload_dataloaders_every_n_epochs=1
-        #strategy='dp'
+        strategy='dp'
     )
     #trainer.logger._default_hp_metric = False
     trainer.fit(model)
