@@ -208,7 +208,9 @@ def loadModel(checkPointPath,trials,options,train_transforms,train_transforms_no
         ,val_transforms=val_transforms
         )
 
-
+def forwardLoadedModel(model,x):
+    segmMap,regr = model.modelRegression(x)
+    return segmMap
 
 class UNetToEnsemble(nn.Module):
     def __init__(self,
@@ -235,7 +237,7 @@ class UNetToEnsemble(nn.Module):
     def forward(self, x):
         stackedInput=torch.cat(x,
             torch.stack(
-                list(map(lambda modell:modell.forward(x),self.loadedModels))
+                list(map(lambda model: forwardLoadedModel(model,x),self.loadedModels))
                 ),0)
 
         #print(f"segmMap  {segmMap}")
