@@ -320,6 +320,7 @@ def getEnsemble(df,experiment_name,dummyDict,options,percentSplit
 # git lfs push --all origin main:main https://github.com/jakubMitura14/piCaiCode.git
 
 
+df = pd.read_csv("/home/sliceruser/data/metadata/processedMetaData_current_b.csv")
 
 def getDummy(spac):
     label_name=f"label_{spac}" 
@@ -345,7 +346,6 @@ dice_final=[]
 persistent_cache=tempfile.mkdtemp()
 experiment_name="ensemble1"
 dummyDict=dummyDict
-df = pd.read_csv("/home/sliceruser/data/metadata/processedMetaData_current_b.csv")
 options=options
 percentSplit=0.85
 checkPointPath_to_save=f"/home/sliceruser/locTemp/checkPoints/{experiment_name}"
