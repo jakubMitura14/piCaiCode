@@ -449,11 +449,12 @@ checkPointPath_to_save=f"/home/sliceruser/locTemp/checkPoints/{experiment_name}"
 regression_channelsNum=1
 checkpointPaths_to_load= list_full_paths('/home/sliceruser/locTemp/checkPointsIn/checkpoints')
 print(f"checkpointPaths_to_load {checkpointPaths_to_load}")
+studyNameToLoad="pic53"
 study = optuna.create_study(
         study_name=experiment_name
         ,sampler=optuna.samplers.NSGAIISampler()    
         ,pruner=optuna.pruners.HyperbandPruner()
-        ,storage=f"mysql://root:jm@34.91.215.109:3306/{experiment_name}"
+        ,storage=f"mysql://root:jm@34.91.215.109:3306/{studyNameToLoad}"
         ,load_if_exists=True
         ,direction="maximize"
         )
