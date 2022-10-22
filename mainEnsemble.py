@@ -105,10 +105,18 @@ from torch.utils.data import DataLoader, random_split
 from torchmetrics import Precision
 from torchmetrics.functional import precision_recall
 from tqdm import tqdm
+def loadLib(name,path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    res = importlib.util.module_from_spec(spec)
+    sys.modules[name] = res
+    spec.loader.exec_module(res)
+    return res
+
+semisuperPreprosess =loadLib("semisuperPreprosess", "/home/sliceruser/locTemp/piCaiCode/preprocessing/semisuperPreprosess.py")
+import hyperParamHelper
 
 monai.utils.set_determinism()
 import model.LigtningModel as LigtningModel
-import Three_chan_baseline_hyperParam
 class UNetToEnsemble(nn.Module):
     def __init__(self,
         modelPaths
@@ -311,15 +319,27 @@ def getEnsemble(df,experiment_name,dummyDict,options,percentSplit
 
 # git lfs push --all origin main:main https://github.com/jakubMitura14/piCaiCode.git
 
+
+
+
+
+options = hyperParamHelper.getOptions()
+spacings =  options['spacing_keyword']#["_half_spac_c", "_one_spac_c", "_one_and_half_spac_c", "_two_spac_c" ]# ,"_med_spac_b" #config['parameters']['spacing_keyword']["values"]
+aa=list(map(getDummy  ,spacings  ))
+# dummyDict={"_half_spac_c":aa[0], "_one_spac_c":aa[1], "_one_and_half_spac_c":aa[2], "_two_spac_c":aa[3]}
+dummyDict={"_one_spac_c":aa[0]}
+
+
+
 picaiLossArr_auroc_final=[]
 picaiLossArr_AP_final=[]
 picaiLossArr_score_final=[]
 dice_final=[]
 persistent_cache=tempfile.mkdtemp()
 experiment_name="ensemble1"
-dummyDict=Three_chan_baseline_hyperParam.dummyDict
+dummyDict=dummyDict
 df = pd.read_csv("/home/sliceruser/data/metadata/processedMetaData_current_b.csv")
-options=Three_chan_baseline_hyperParam.options
+options=options
 percentSplit=0.85
 checkPointPath_to_save=f"/home/sliceruser/locTemp/checkPoints/{experiment_name}"
 regression_channelsNum=1
