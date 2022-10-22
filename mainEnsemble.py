@@ -267,13 +267,13 @@ def get_transforms_label_ensembl():
 
     val_transforms = Compose(
         [
-            LoadImaged(keys=["t2w","hbv","adc" ,"label_name"],reader="ITKReader"),
-            EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label_name"]),
-            EnsureTyped(keys=["t2w","hbv","adc" ,"label_name"]),
-            transformsForMain.standardizeLabels(keys=["label_name"]),
-            AsDiscreted(keys=["label_name"], to_onehot=2),
+            LoadImaged(keys=["t2w","hbv","adc" ,"label"],reader="ITKReader"),
+            EnsureChannelFirstd(keys=["t2w","hbv","adc" ,"label"]),
+            EnsureTyped(keys=["t2w","hbv","adc" ,"label"]),
+            transformsForMain.standardizeLabels(keys=["label"]),
+            AsDiscreted(keys=["label"], to_onehot=2),
             ConcatItemsd(["t2w","hbv","adc" ], "chan3_col_name"),
-            SelectItemsd(keys=["labelB","t2wb","chan3_col_name","label_name","study_id","num_lesions_to_retain","isAnythingInAnnotated"]),
+            SelectItemsd(keys=["labelB","t2wb","chan3_col_name","label","study_id","num_lesions_to_retain","isAnythingInAnnotated"]),
          ]
     )
     return val_transforms
