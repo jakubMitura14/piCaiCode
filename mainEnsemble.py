@@ -337,6 +337,10 @@ aa=list(map(getDummy  ,spacings  ))
 # dummyDict={"_half_spac_c":aa[0], "_one_spac_c":aa[1], "_one_and_half_spac_c":aa[2], "_two_spac_c":aa[3]}
 dummyDict={"_one_spac_c":aa[0]}
 
+#from https://www.askpython.com/python/examples/python-directory-listing
+def list_full_paths(directory):
+    return [os.path.join(directory, file) for file in os.listdir(directory)]
+ 
 
 
 picaiLossArr_auroc_final=[]
@@ -350,7 +354,7 @@ options=options
 percentSplit=0.85
 checkPointPath_to_save=f"/home/sliceruser/locTemp/checkPoints/{experiment_name}"
 regression_channelsNum=1
-checkpointPaths_to_load= os.listdir('/home/sliceruser/locTemp/checkPointsIn/checkpoints')
+checkpointPaths_to_load= list_full_paths('/home/sliceruser/locTemp/checkPointsIn/checkpoints')
 print(f"checkpointPaths_to_load {checkpointPaths_to_load}")
 getEnsemble(df,experiment_name,dummyDict,options,percentSplit
 ,picaiLossArr_auroc_final,picaiLossArr_AP_final,picaiLossArr_score_final, dice_final
