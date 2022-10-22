@@ -210,7 +210,8 @@ def loadModel(checkPointPath,trials,options):
 class UNetToEnsemble(nn.Module):
     def __init__(self,
         modelPaths,
-        study
+        study,
+        options
     ) -> None:
         super().__init__()
         self.baseUnet= unets.UNet(
@@ -223,7 +224,8 @@ class UNetToEnsemble(nn.Module):
             act = (Act.PRELU, {"init": 0.2}),
             norm= (Norm.BATCH, {}))
         study.trials
-        self.loadedModels= list(map(LigtningModel.Model.load_from_checkpoint , modelPaths))
+        self.loadedModels= list(map(partial(loadModel,trials=study.trials,options=options), modelPaths))
+        
         
     def forward(self, x):
         stackedInput=torch.vcat(x,
@@ -237,8 +239,8 @@ class UNetToEnsemble(nn.Module):
 # model = LigtningModel.Model.load_from_checkpoint("/path/to/checkpoint.ckpt")
 
 
-def getUnetEnsemble(modelPaths,study):
-    return UNetToEnsemble(modelPaths)
+def getUnetEnsemble(modelPaths,study,options):
+    return UNetToEnsemble(modelPaths,study,options)
 
 
 
@@ -285,7 +287,7 @@ def getEnsemble(df,experiment_name,dummyDict,options,percentSplit
     out_channels=2
     batch_size=8
 
-    net=getUnetEnsemble(checkpointPaths_to_load,study)
+    net=getUnetEnsemble(checkpointPaths_to_load,study,options)
 
     label_name=f"label_{spacing_keyword}fi"
    
