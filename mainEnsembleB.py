@@ -163,7 +163,7 @@ def loadModel(checkPointPath,trials,options,train_transforms,train_transforms_no
     net = options["models"][netIndex]
     net=net(0.0,img_size,in_channels,out_channels)
     regr_chan_index=trialProp["regression_channels"]
-
+    print(f"tttttttt trialNum {trialNum} netIndex {netIndex} regr_chan_index {regr_chan_index}")
     return LigtningModel.Model.load_from_checkpoint(checkPointPath
         , net=net
         , criterion=monai.losses.FocalLoss(include_background=False, to_onehot_y=False)
