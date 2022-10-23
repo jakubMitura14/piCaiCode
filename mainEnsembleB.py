@@ -131,19 +131,20 @@ import model.LigtningModel as LigtningModel
 
 def getTrialNumberFromPath(checkpointPath):
     # fullDir=os.path.dirname(checkpointPath)
-    
-    res= int(Path(checkpointPath).stem)
-    print(f" getTrialNumberFromPath {res} {checkpointPath} ")
-    return res
+    stemm = Path(checkpointPath).stem
+    stemm.split("_")
+    # res= int(Path(checkpointPath).stem)
+    print(f" stemm {stemm} {checkpointPath} ")
+    return stemm
 def loadModel(checkPointPath,trials,options,train_transforms,train_transforms_noLabel,val_transforms):
-    trialNum=getTrialNumberFromPath(checkPointPath)
-    trial=trials[trialNum]
+    name,netIndex, regr_chan_index =getTrialNumberFromPath(checkPointPath)
+    trial=trials[0]
     trialProp=trial.params    
     picaiLossArr_auroc_final=[]
     picaiLossArr_AP_final=[]
     picaiLossArr_score_final=[]
     dice_final=[]
-    netIndex=trialProp["models"]
+    # netIndex=trialProp["models"]
     isVnet=(netIndex==0)
     in_channels=3
     out_channels=2
@@ -162,8 +163,8 @@ def loadModel(checkPointPath,trials,options,train_transforms,train_transforms_no
 
     net = options["models"][netIndex]
     net=net(0.0,img_size,in_channels,out_channels)
-    regr_chan_index=trialProp["regression_channels"]
-    print(f"tttttttt trialNum {trialNum} netIndex {netIndex} regr_chan_index {regr_chan_index}")
+    # regr_chan_index=trialProp["regression_channels"]
+    print(f"tttttttt name {name} netIndex {netIndex} regr_chan_index {regr_chan_index}")
     return LigtningModel.Model.load_from_checkpoint(checkPointPath
         , net=net
         , criterion=monai.losses.FocalLoss(include_background=False, to_onehot_y=False)
