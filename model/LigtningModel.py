@@ -615,14 +615,19 @@ class Model(pl.LightningModule):
                 ,experiment=experiment,golds=y_true,extracteds=extracteds 
                 ,t2ws=images,directory=directory ,patIds=patIds,epoch=epoch,numLesions=numLesions),range(lenn)))
             # y_true= list(map(lambda el: el.numpy()  ,y_true))                                              
-            valid_metrics = evaluate(y_det=extracteds,
-                                    y_true=list(map(lambda el: el.numpy()[1,:,:,:]  ,y_true)),
-                                    num_parallel_calls= os.cpu_count()
-                                    ,verbose=1)
-            meanPiecaiMetr_auroc=0.0 if math.isnan(valid_metrics.auroc) else valid_metrics.auroc
-            meanPiecaiMetr_AP=0.0 if math.isnan(valid_metrics.AP) else valid_metrics.AP
-            meanPiecaiMetr_score= 0.0 if math.isnan(valid_metrics.score) else  valid_metrics.score
-
+            meanPiecaiMetr_auroc=0.0
+            meanPiecaiMetr_AP=0.0
+            meanPiecaiMetr_score= 0.0
+            try:
+                valid_metrics = evaluate(y_det=extracteds,
+                                        y_true=list(map(lambda el: el.numpy()[1,:,:,:]  ,y_true)),
+                                        num_parallel_calls= os.cpu_count()
+                                        ,verbose=1)
+                meanPiecaiMetr_auroc=0.0 if math.isnan(valid_metrics.auroc) else valid_metrics.auroc
+                meanPiecaiMetr_AP=0.0 if math.isnan(valid_metrics.AP) else valid_metrics.AP
+                meanPiecaiMetr_score= 0.0 if math.isnan(valid_metrics.score) else  valid_metrics.score
+            except:
+                pass
             print("start dice")
             extracteds= list(map(lambda numpyEntry : self.postProcess(torch.from_numpy((numpyEntry>0).astype('int8'))) ,extracteds  ))
             extracteds= torch.stack(extracteds)
