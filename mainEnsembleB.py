@@ -460,7 +460,7 @@ options=options
 percentSplit=0.85
 checkPointPath_to_save=f"/home/sliceruser/locTemp/checkPoints/{experiment_name}"
 regression_channelsNum=1
-checkpointPaths_to_load= list_full_paths('/home/sliceruser/locTemp/checkPointsIn/checkpoints')
+checkpointPaths_to_load= list_full_paths('/home/sliceruser/locTemp/checkPointsInB')
 print(f"checkpointPaths_to_load {checkpointPaths_to_load}")
 studyNameToLoad="pic53"
 study = optuna.create_study(
