@@ -390,7 +390,7 @@ def getEnsemble(df,experiment_name,dummyDict,options,percentSplit
 
     toMonitor="score_my"
     checkpoint_callback = ModelCheckpoint(dirpath= checkPointPath_to_save,mode='max', save_top_k=1, monitor=toMonitor)
-    stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging(swa_lrs=1e-4)
+    stochasticAveraging=pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging(swa_lrs=1e-5)
 
     # early_stopping = pl.callbacks.early_stopping.EarlyStopping(
     #     monitor=toMonitor,
