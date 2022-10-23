@@ -132,7 +132,7 @@ import model.LigtningModel as LigtningModel
 def getTrialNumberFromPath(checkpointPath):
     # fullDir=os.path.dirname(checkpointPath)
     stemm = Path(checkpointPath).stem
-    stemm.split("_")
+    stemm=stemm.split("_")
     # res= int(Path(checkpointPath).stem)
     print(f" stemm {stemm} {checkpointPath} ")
     return stemm
