@@ -138,6 +138,8 @@ def getTrialNumberFromPath(checkpointPath):
     return stemm
 def loadModel(checkPointPath,trials,options,train_transforms,train_transforms_noLabel,val_transforms):
     name,netIndex, regr_chan_index =getTrialNumberFromPath(checkPointPath)
+    netIndex=int(netIndex)
+    regr_chan_index=int(regr_chan_index)
     trial=trials[0]
     trialProp=trial.params    
     picaiLossArr_auroc_final=[]
