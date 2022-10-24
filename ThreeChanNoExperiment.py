@@ -332,6 +332,9 @@ def getModel(trial,df,experiment_name,dummyDict,options,percentSplit
         ,netIndex=netIndex
         ,regr_chan_index=regr_chan_index
         ,isVnet=isVnet
+        ,train_transforms=" "
+        ,train_transforms_noLabel=" "
+        ,val_transforms=" "
     )
 
     toMonitor="score_my"

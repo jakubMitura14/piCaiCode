@@ -416,6 +416,38 @@ class Model(pl.LightningModule):
         noLabels=list(filter(lambda subj :  subj['isAnythingInAnnotated']==0 and subj['num_lesions_to_retain']==1 ,allSubjects))        
         print(f" onlyPositiveSubjects {len(onlyPositiveSubjects)} onlyNegative {len(onlyNegative)} noLabels but positive {len(noLabels)}  ")
 
+        if(self.train_transforms==" "):
+            self.train_transforms=transformsForMain.get_train_transforms(
+                self.RandAdjustContrastd_prob
+                ,self.RandGaussianSmoothd_prob
+                ,self.RandRicianNoised_prob
+                ,self.RandFlipd_prob
+                ,self.RandAffined_prob
+                ,self.RandomElasticDeformation_prob
+                ,self.RandomAnisotropy_prob
+                ,self.RandomMotion_prob
+                ,self.RandomGhosting_prob
+                ,self.RandomSpike_prob
+                ,self.RandomBiasField_prob
+                ,self.isVnet           
+                )
+            self.train_transforms_noLabel=transformsForMain.get_train_transforms_noLabel(
+                self.RandAdjustContrastd_prob
+                ,self.RandGaussianSmoothd_prob
+                ,self.RandRicianNoised_prob
+                ,self.RandFlipd_prob
+                ,self.RandAffined_prob
+                ,self.RandomElasticDeformation_prob
+                ,self.RandomAnisotropy_prob
+                ,self.RandomMotion_prob
+                ,self.RandomGhosting_prob
+                ,self.RandomSpike_prob
+                ,self.RandomBiasField_prob
+                ,self.isVnet          
+                )
+
+
+            self.val_transforms= transformsForMain.get_val_transforms(self.isVnet )
 
 
         # self.val_ds=     Dataset(data=onlyPositiveSubjects[0:25]+onlyNegative[0:10], transform=val_transforms)
